@@ -4,7 +4,7 @@
     Угадай число
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,9 +12,9 @@
             <li class="breadcrumb-item active">Угадай число</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Угадай число</h1>
-
+@section('content')
     <b>Введите число от 1 до 100</b><br><br>
 
     <div class="form">

@@ -56,7 +56,7 @@ class GuessNumberController extends \App\Controllers\BaseController
         $token       = check($request->input('token'));
         $guessNumber = int($request->input('guess'));
 
-        $validator->equal($token, $_SESSION['token'], 'Неверный идентификатор сессии, повторите действие!')
+        $validator->equal($token, $_SESSION['token'], trans('validator.token'))
             ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 

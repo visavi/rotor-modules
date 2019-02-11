@@ -4,7 +4,7 @@
     Кости
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,9 +12,9 @@
             <li class="breadcrumb-item active">Кости</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Кости</h1>
-
+@section('content')
     <img src="/assets/modules/games/dices/6.gif" alt="image"> и <img src="/assets/modules/games/dices/6.gif" alt="image"><br><br>
 
     <a class="btn btn-primary" href="/games/dices/go?rand={{ mt_rand(1000, 99999) }}">Играть</a><br><br>

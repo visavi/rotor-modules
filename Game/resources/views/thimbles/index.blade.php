@@ -4,7 +4,7 @@
     Наперстки
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,9 +12,9 @@
             <li class="breadcrumb-item active">Наперстки</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Наперстки</h1>
-
+@section('content')
     <img src="/assets/modules/games/thimbles/1.gif" alt="image"><br><br>
 
     <a class="btn btn-primary" href="/games/thimbles/choice">Играть</a><br><br>

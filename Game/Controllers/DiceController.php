@@ -64,7 +64,7 @@ class DiceController extends \App\Controllers\BaseController
         if ($sumUser > $sumBank) {
             $this->user->increment('money', 10);
             $result = $results['victory'];
-        } elseif($sumUser < $sumBank) {
+        } elseif ($sumUser < $sumBank) {
             $this->user->decrement('money', 5);
             $result = $results['lost'];
         } else {

@@ -4,7 +4,7 @@
     21 (Очко)
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,9 +12,9 @@
             <li class="breadcrumb-item active">21 (Очко)</li>
         </ol>
     </nav>
+@stop
 
-    <h1>21 (Очко)</h1>
-
+@section('content')
     <img src="/assets/modules/games/cards/44.png" alt="image">
     <img src="/assets/modules/games/cards/18.png" alt="image">
     <img src="/assets/modules/games/cards/27.png" alt="image">

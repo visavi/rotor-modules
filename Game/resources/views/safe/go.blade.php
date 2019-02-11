@@ -4,7 +4,7 @@
     Ваш ход
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -13,9 +13,9 @@
             <li class="breadcrumb-item active">Ваш ход</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Ваш ход</h1>
-
+@section('content')
     Комбинация сейфа:<br>
     <span class="badge badge-info">{{ $hack[0] }}</span>
     <span class="badge badge-info">{{ $hack[1] }}</span>
@@ -32,7 +32,7 @@
         <a href="/games/safe">Ещё взломать?</a><br><br>
     @else
         @if ($safe['try'])
-            {!! $user->getProfile(null, false) !!}, не торопись! Просто хорошо подумай<br>
+            {{ $user->getName() }}, не торопись! Просто хорошо подумай<br>
             Попыток осталось: {{ $safe['try'] }}<br>
 
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>

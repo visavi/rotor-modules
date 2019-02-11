@@ -4,7 +4,7 @@
     Игра
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -14,9 +14,9 @@
             <li class="breadcrumb-item active">Игра</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Игра</h1>
-
+@section('content')
     <a href="/games/thimbles/go?thimble=1&amp;rand={{ mt_rand(1000, 99999) }}"><img src="/assets/modules/games/thimbles/{{ $randThimble === 1 ? 3 : 2 }}.gif" alt="image"></a>
     <a href="/games/thimbles/go?thimble=2&amp;rand={{ mt_rand(1000, 99999) }}"><img src="/assets/modules/games/thimbles/{{ $randThimble === 2 ? 3 : 2 }}.gif" alt="image"></a>
     <a href="/games/thimbles/go?thimble=3&amp;rand={{ mt_rand(1000, 99999) }}"><img src="/assets/modules/games/thimbles/{{ $randThimble === 3 ? 3 : 2 }}.gif" alt="image"></a><br><br>

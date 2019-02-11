@@ -4,7 +4,7 @@
     Правила игры
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -13,9 +13,9 @@
             <li class="breadcrumb-item active">Правила игры</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Правила игры</h1>
-
+@section('content')
     Для участия в игре сделайте ставку и нажмите <b>Играть</b><br>
     Ваша ставка будет получена Банкиром и он начнет сдавать Вам карты.<br>
     В игре участвуют двое - Вы и Банкир, на кону - двойная ставка (Ваша ставка и ставка Банкира). Взяв карты, Вы подсчитываете суммарное количество их очков.<br><br>

@@ -4,7 +4,7 @@
     Ваш ход
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -13,9 +13,9 @@
             <li class="breadcrumb-item active">Ваш ход</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Ваш ход</h1>
-
+@section('content')
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
 
     <b>Ваши карты:</b><br>

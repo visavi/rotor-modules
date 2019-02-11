@@ -4,7 +4,7 @@
     Правила игры
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -13,9 +13,9 @@
             <li class="breadcrumb-item active">Правила игры</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Правила игры</h1>
-
+@section('content')
     Правила предельно просты. Нажимайте на кнопку Играть и выигрывайте деньги.<br>
     За каждое нажатие у вас со счета списывают {{ plural(5, setting('moneyname')) }}<br>
     Если у вам повезет и вы выиграете деньги, то то они сразу же будут перечислены вам на счет<br><br>

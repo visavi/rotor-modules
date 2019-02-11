@@ -53,7 +53,7 @@ class SafeController extends \App\Controllers\BaseController
         $code3 = int($request->input('code3'));
         $code4 = int($request->input('code4'));
 
-        $validator->equal($token, $_SESSION['token'], 'Неверный идентификатор сессии, повторите действие!')
+        $validator->equal($token, $_SESSION['token'], trans('validator.token'))
             ->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {

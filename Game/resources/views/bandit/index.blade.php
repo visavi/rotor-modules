@@ -4,7 +4,7 @@
     Однорукий бандит
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,9 +12,9 @@
             <li class="breadcrumb-item active">Однорукий бандит</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Однорукий бандит</h1>
-
+@section('content')
     Любишь азарт? А выигрывая, чувствуешь адреналин? Играй и получай призы<br><br>
 
     <img src="/assets/modules/games/bandit/1.gif" alt="image"> <img src="/assets/modules/games/bandit/2.gif" alt="image"> <img src="/assets/modules/games/bandit/3.gif" alt="image"><br>

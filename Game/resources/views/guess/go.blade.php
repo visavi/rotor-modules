@@ -4,7 +4,7 @@
     Ваш ход
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -13,10 +13,10 @@
             <li class="breadcrumb-item active">Ваш ход</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Ваш ход</h1>
-
-    @if($guessNumber !== $guess['number'])
+@section('content')
+    @if ($guessNumber !== $guess['number'])
 
         @if ($guess['count'] < 5)
             <span class="badge badge-info">{{ $guessNumber }}</span> — {!! $hint !!}<br><br>

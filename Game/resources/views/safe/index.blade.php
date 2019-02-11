@@ -4,7 +4,7 @@
     Взлом сейфа
 @stop
 
-@section('content')
+@section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
@@ -12,12 +12,12 @@
             <li class="breadcrumb-item active">Взлом сейфа</li>
         </ol>
     </nav>
+@stop
 
-    <h1>Взлом сейфа</h1>
-
+@section('content')
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
 
-    {!! $user->getProfile(null, false) !!}, не торопись! Просто хорошо подумай<br>
+    {{ $user->getName() }}, не торопись! Просто хорошо подумай<br>
     <br><img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 
     Всё готово для совершения взлома! Введите комбинацию цифр и нажмите ломать сейф!<br><br>
