@@ -21,6 +21,8 @@ class AppendToStickers extends AbstractMigration
                 $this->execute("INSERT INTO stickers (category_id, name, code) VALUES (" . $lastId . ", '/assets/modules/stickers/" . $categoryName . "/" . $stickerName . "', ':" . getBodyName($stickerName) . "');");
             }
         }
+
+        clearCache('stickers');
     }
 
     /**
@@ -39,5 +41,7 @@ class AppendToStickers extends AbstractMigration
                 $this->execute("DELETE FROM stickers WHERE category_id='" . $category['id'] . "';");
             }
         }
+
+        clearCache('stickers');
     }
 }
