@@ -55,8 +55,8 @@
 
         <div class="my-3">На кону: {{ plural($blackjack['bet'] * 2, setting('moneyname')) }}</div>
 
-        <b><a href="/games/blackjack/game?case=take&amp;rand={{ mt_rand(1000, 99999) }}">Взять карту</a></b> или
-        <b><a href="/games/blackjack/game?case=end&amp;rand={{ mt_rand(1000, 99999) }}">Открыться</a></b>
+        <b><a href="/games/blackjack/game?case=take&amp;rand={{ \mt_rand(1000, 99999) }}">Взять карту</a></b> или
+        <b><a href="/games/blackjack/game?case=end&amp;rand={{ \mt_rand(1000, 99999) }}">Открыться</a></b>
         <br><br>
     @endif
 @stop

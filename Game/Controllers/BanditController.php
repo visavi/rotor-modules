@@ -46,15 +46,15 @@ class BanditController extends \App\Controllers\BaseController
             abort('default', 'Вы не можете играть! У вас недостаточно средств!');
         }
 
-        $num[1] = mt_rand(1, 8);
-        $num[2] = mt_rand(1, 8);
-        $num[3] = mt_rand(1, 8);
-        $num[4] = mt_rand(1, 8);
-        $num[5] = mt_rand(1, mt_rand(7, 8));
-        $num[6] = mt_rand(1, 8);
-        $num[7] = mt_rand(1, 8);
-        $num[8] = mt_rand(1, 8);
-        $num[9] = mt_rand(1, 8);
+        $num[1] = \mt_rand(1, 8);
+        $num[2] = \mt_rand(1, 8);
+        $num[3] = \mt_rand(1, 8);
+        $num[4] = \mt_rand(1, 8);
+        $num[5] = \mt_rand(1, \mt_rand(7, 8));
+        $num[6] = \mt_rand(1, 8);
+        $num[7] = \mt_rand(1, 8);
+        $num[8] = \mt_rand(1, 8);
+        $num[9] = \mt_rand(1, 8);
 
         $sum     = 0;
         $results = [];

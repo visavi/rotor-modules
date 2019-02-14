@@ -64,7 +64,7 @@ class BlackjackController extends \App\Controllers\BaseController
             $this->user->decrement('money', $bet);
 
             setFlash('success', 'Ставка сделана!');
-            redirect('/games/blackjack/game?rand=' . mt_rand(1000, 99999));
+            redirect('/games/blackjack/game?rand=' . \mt_rand(1000, 99999));
         } else {
             setInput($request->all());
             setFlash('danger', $validator->getErrors());
@@ -200,7 +200,7 @@ class BlackjackController extends \App\Controllers\BaseController
      */
     private function takeCard($case): array
     {
-        $rand = mt_rand(16, 18);
+        $rand = \mt_rand(16, 18);
 
         if (empty($_SESSION['blackjack']['deck'])) {
             $_SESSION['blackjack']['deck'] = array_combine(range(1, 52), range(1, 52));

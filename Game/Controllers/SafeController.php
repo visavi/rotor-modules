@@ -63,7 +63,7 @@ class SafeController extends \App\Controllers\BaseController
         }
 
         if (empty($_SESSION['safe']['cipher'])) {
-            $_SESSION['safe']['cipher'] = [mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9)];
+            $_SESSION['safe']['cipher'] = [\mt_rand(0, 9), \mt_rand(0, 9), \mt_rand(0, 9), \mt_rand(0, 9), \mt_rand(0, 9)];
             $_SESSION['safe']['try'] = 5;
             $this->user->decrement('money', 100);
         }

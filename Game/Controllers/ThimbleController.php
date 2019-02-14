@@ -51,7 +51,6 @@ class ThimbleController extends \App\Controllers\BaseController
      *
      * @param Request $request
      * @return string
-     * @throws \Exception
      */
     public function go(Request $request): string
     {
@@ -71,7 +70,7 @@ class ThimbleController extends \App\Controllers\BaseController
             'lost'    => '<span class="text-danger">Вы проиграли</span>',
         ];
 
-        $randThimble = random_int(1, 3);
+        $randThimble = \mt_rand(1, 3);
 
         if ($thimble === $randThimble) {
             $this->user->increment('money', 10);

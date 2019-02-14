@@ -17,7 +17,7 @@
 @section('content')
     <img src="/assets/modules/games/dices/6.gif" alt="image"> и <img src="/assets/modules/games/dices/6.gif" alt="image"><br><br>
 
-    <a class="btn btn-primary" href="/games/dices/go?rand={{ mt_rand(1000, 99999) }}">Играть</a><br><br>
+    <a class="btn btn-primary" href="/games/dices/go?rand={{ \mt_rand(1000, 99999) }}">Играть</a><br><br>
 
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
 
