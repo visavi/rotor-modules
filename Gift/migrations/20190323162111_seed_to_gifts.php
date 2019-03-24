@@ -12,7 +12,6 @@ class SeedToGifts extends AbstractMigration
         $gifts = array_map('basename', glob(APP . '/Modules/Gift/assets/gifts/*.{gif,png,jpg,jpeg}', GLOB_BRACE));
 
         foreach ($gifts as $gift) {
-
             $this->execute("INSERT INTO gifts (path, price, created_at) VALUES ('/assets/modules/gifts/" . $gift . "', " . (mt_rand(1, 10) * 100) . ", " . SITETIME . ");");
         }
     }

@@ -107,7 +107,7 @@ class IndexController extends \App\Controllers\BaseController
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->with('gift')
+            ->with('gift', 'sendUser')
             ->get();
 
         return view('Gift::gifts', compact('gifts', 'user'));
