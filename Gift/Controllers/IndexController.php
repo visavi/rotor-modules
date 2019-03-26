@@ -75,7 +75,7 @@ class IndexController extends \App\Controllers\BaseController
                         'send_user_id' => getUser('id'),
                         'text'         => $msg,
                         'created_at'   => SITETIME,
-                        'deleted_at'   => SITETIME + 30 * 86400,
+                        'deleted_at'   => strtotime('+1 month', SITETIME)
                     ]);
                 });
 
