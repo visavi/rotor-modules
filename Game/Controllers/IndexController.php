@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Game\Controllers;
 
-class IndexController extends \App\Controllers\BaseController
+use App\Controllers\BaseController;
+
+class IndexController extends BaseController
 {
     /**
      * Главная страница

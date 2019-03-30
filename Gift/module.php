@@ -7,4 +7,5 @@ return [
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
+    'panel'       => '/admin/gifts',
 ];
