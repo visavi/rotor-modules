@@ -7,7 +7,4 @@ return [
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
-    'symlinks'    => [
-        'images' => HOME . '/assets/modules/games',
-    ],
 ];
