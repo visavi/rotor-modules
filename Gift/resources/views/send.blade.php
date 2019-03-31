@@ -8,7 +8,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active"><a href="/gifts">{{ trans('Gift::gifts.module') }}</a></li>
+            <li class="breadcrumb-item active"><a href="/gifts">{{ trans('Gift::gifts.title') }}</a></li>
             <li class="breadcrumb-item active">{{ trans('Gift::gifts.send_gift') }}</li>
         </ol>
     </nav>
@@ -20,12 +20,12 @@
             <input type="hidden" name="token" value="{{ $_SESSION['token'] }}">
 
             @if ($user)
-                <i class="fas fa-gift"></i> Подарок для <b>{{ $user->login }}</b>:<br><br>
+                <i class="fas fa-gift"></i> {{ trans('Gift::gifts.gift_for') }} <b>{{ $user->login }}</b>:<br><br>
                 <input type="hidden" name="user" value="{{ $user->login }}">
             @else
                 <div class="form-group{{ hasError('user') }}">
-                    <label for="user">{{ trans('transfers.user_login') }}:</label>
-                    <input name="user" class="form-control" id="user" maxlength="20" placeholder="{{ trans('transfers.user_login') }}" value="{{ getInput('user') }}" required>
+                    <label for="user">{{ trans('main.user_login') }}:</label>
+                    <input name="user" class="form-control" id="user" maxlength="20" placeholder="{{ trans('main.user_login') }}" value="{{ getInput('user') }}" required>
                     {!! textError('user') !!}
                 </div>
             @endif
@@ -39,10 +39,10 @@
 
             <div>
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                Цена: <span class="badge badge-primary">{{ $gift->price }}  {{ setting('currency') }}</span>
+                {{ trans('Gift::gifts.price') }}: <span class="badge badge-primary">{{ $gift->price }}  {{ setting('currency') }}</span>
             </div>
 
-            <button class="btn btn-primary">Отправить</button>
+            <button class="btn btn-primary">{{ trans('main.send') }}</button>
         </form>
     </div>
 @stop

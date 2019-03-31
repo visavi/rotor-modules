@@ -1,14 +1,14 @@
 @extends('layout')
 
 @section('title')
-    {{ trans('Gift::gifts.module') }}
+    {{ trans('Gift::gifts.title') }}
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ trans('Gift::gifts.module') }}</li>
+            <li class="breadcrumb-item active">{{ trans('Gift::gifts.title') }}</li>
         </ol>
     </nav>
 @stop

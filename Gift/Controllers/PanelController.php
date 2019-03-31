@@ -8,6 +8,8 @@ use App\Classes\Validator;
 use App\Controllers\Admin\AdminController;
 use App\Models\User;
 use App\Modules\Gift\Models\Gift;
+use App\Modules\Gift\Models\GiftsUser;
+use Exception;
 use Illuminate\Http\Request;
 
 class PanelController extends AdminController
@@ -20,12 +22,12 @@ class PanelController extends AdminController
         parent::__construct();
 
         if (! isAdmin(User::BOSS)) {
-            abort(403, 'Доступ запрещен!');
+            abort(403, trans('errors.forbidden'));
         }
     }
 
     /**
-     * Главная страница
+     * Main page
      *
      * @param Request   $request
      * @param Validator $validator
@@ -39,7 +41,7 @@ class PanelController extends AdminController
             $token = check($request->input('token'));
 
             $validator->equal($token, $_SESSION['token'], ['msg' => trans('validator.token')])
-                ->notEmpty($gifts, 'Ошибка! Не переданы цены на подарки!');
+                ->notEmpty($gifts, trans('Gift::gifts.prices_not_transferred'));
 
             if ($validator->isValid()) {
 
@@ -47,7 +49,7 @@ class PanelController extends AdminController
                     Gift::query()->where('id', $id)->update(['price' => $price]);
                 }
 
-                setFlash('success', 'Цены успешно сохранены!');
+                setFlash('success', trans('Gift::gifts.prices_saved'));
                 redirect('/admin/gifts');
             } else {
                 setInput($request->all());
@@ -67,8 +69,34 @@ class PanelController extends AdminController
         return view('Gift::panel_index', compact('gifts', 'page'));
     }
 
-    public function user(Request $request, Validator $validator): string
+    /**
+     * Removes gifts
+     *
+     * @param Request   $request
+     * @param Validator $validator
+     * @return string
+     * @throws Exception
+     */
+    public function delete(Request $request, Validator $validator): string
     {
-        return '';
+        $token = check($request->input('token'));
+        $id    = int($request->input('id'));
+        $login = check($request->input('user'));
+
+        $validator->equal($token, $_SESSION['token'], trans('validator.token'));
+
+        $gift = GiftsUser::query()->find($id);
+        $validator->notEmpty($gift, trans('Gift::gifts.gift_not_found'));
+
+        if ($validator->isValid()) {
+
+            $gift->delete();
+
+            setFlash('success', trans('Gift::gifts.gift_deleted'));
+        } else {
+            setFlash('danger', $validator->getErrors());
+        }
+
+        redirect('/gifts/' . $login);
     }
 }

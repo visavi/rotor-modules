@@ -10,11 +10,12 @@ use App\Modules\Gift\Models\Gift;
 use App\Modules\Gift\Models\GiftsUser;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Http\Request;
+use Throwable;
 
 class IndexController extends BaseController
 {
     /**
-     * Главная страница
+     * Main page
      *
      * @return string
      */
@@ -34,13 +35,13 @@ class IndexController extends BaseController
     }
 
     /**
-     * Отправка подарка
+     * Sends a gift
      *
      * @param int       $id
      * @param Request   $request
      * @param Validator $validator
      * @return string
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function send(int $id, Request $request, Validator $validator): string
     {
@@ -50,7 +51,7 @@ class IndexController extends BaseController
         $gift = Gift::query()->find($id);
 
         if (! $gift) {
-            abort(404, 'Данный подарок не найден!');
+            abort(404, trans('Gift::gifts.gift_not_found'));
         }
 
         $user = getUserByLogin($login);
@@ -61,13 +62,13 @@ class IndexController extends BaseController
 
             $validator->equal($token, $_SESSION['token'], ['msg' => trans('validator.token')])
                 ->notEmpty($user, ['user' => trans('validator.user')])
-                ->length($msg, 0, 1000, ['msg' => 'Слишком длинный текст!'])
-                ->gte(getUser('money'), $gift->price, 'У вас недостаточно денег для подарка!');
+                ->length($msg, 0, 1000, ['msg' => trans('validator.text_long')])
+                ->gte(getUser('money'), $gift->price, trans('Gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
                 $msg = antimat($msg);
 
-                DB::connection()->transaction(function () use ($gift, $user, $msg) {
+                DB::connection()->transaction(static function () use ($gift, $user, $msg) {
                     getUser()->decrement('money', $gift->price);
 
                     GiftsUser::query()->create([
@@ -80,7 +81,7 @@ class IndexController extends BaseController
                     ]);
                 });
 
-                setFlash('success', 'Подарок успешно отправлен!');
+                setFlash('success', trans('Gift::gifts.gift_sent'));
                 redirect('/gifts');
             } else {
                 setInput($request->all());
@@ -92,7 +93,7 @@ class IndexController extends BaseController
     }
 
     /**
-     * Просмотр подарков
+     * View gifts
      *
      * @param string $login
      * @return string
@@ -108,7 +109,7 @@ class IndexController extends BaseController
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->with('gift', 'sendUser')
+            ->with('gift', 'user', 'sendUser')
             ->get();
 
         return view('Gift::gifts', compact('gifts', 'user'));

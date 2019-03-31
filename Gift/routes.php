@@ -11,5 +11,5 @@ $r->addGroup('/gifts', static function (RouteCollector $r) {
 
 $r->addGroup('/admin', static function (RouteCollector $r) {
     $r->addRoute(['GET', 'POST'], '/gifts', [App\Modules\Gift\Controllers\PanelController::class, 'index']);
-    $r->addRoute(['GET', 'POST'], '/gifts/user', [App\Modules\Gift\Controllers\PanelController::class, 'user']);
+    $r->get('/gifts/delete', [App\Modules\Gift\Controllers\PanelController::class, 'delete']);
 });
