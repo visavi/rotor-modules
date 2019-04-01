@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Game\Controllers;
+namespace Modules\Game\Controllers;
 
 use App\Classes\Validator;
 use App\Controllers\BaseController;

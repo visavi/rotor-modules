@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Gift\Models;
+namespace Modules\Gift\Models;
+
+use App\Models\BaseModel;
 
 /**
  * Class Gift
@@ -13,7 +15,7 @@ namespace App\Modules\Gift\Models;
  * @property int price
  * @property int created_at
  */
-class Gift extends \App\Models\BaseModel
+class Gift extends BaseModel
 {
     /**
      * Indicates if the model should be timestamped.

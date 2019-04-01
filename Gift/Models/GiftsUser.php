@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Gift\Models;
+namespace Modules\Gift\Models;
 
+use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int created_at
  * @property int deleted_at
  */
-class GiftsUser extends \App\Models\BaseModel
+class GiftsUser extends BaseModel
 {
     /**
      * Indicates if the model should be timestamped.
