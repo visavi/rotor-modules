@@ -34,7 +34,7 @@
 #### Controllers
 Контроллеры с пространством имен namespace Modules\ИмяМодуля\Controllers;
 
-Контроллеры должны быть наследованы от \App\Controllers\BaseController или \App\Controllers\Admin\AdminController
+Контроллеры должны быть наследованы от \App\Controllers\ModuleController
 
 #### Models
 Модели с пространством имен namespace Modules\ИмяМодуля\Models;

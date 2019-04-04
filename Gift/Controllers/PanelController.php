@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\Admin\AdminController;
+use App\Controllers\ModuleController;
 use App\Models\User;
 use Exception;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 use Illuminate\Http\Request;
 
-class PanelController extends AdminController
+class PanelController extends ModuleController
 {
     /**
      * PanelController constructor.
@@ -74,10 +74,10 @@ class PanelController extends AdminController
      *
      * @param Request   $request
      * @param Validator $validator
-     * @return string
+     * @return void
      * @throws Exception
      */
-    public function delete(Request $request, Validator $validator): string
+    public function delete(Request $request, Validator $validator): void
     {
         $token = check($request->input('token'));
         $id    = int($request->input('id'));

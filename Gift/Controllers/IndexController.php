@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\BaseController;
+use App\Controllers\ModuleController;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Http\Request;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 use Throwable;
 
-class IndexController extends BaseController
+class IndexController extends ModuleController
 {
     /**
      * Main page
@@ -21,7 +21,6 @@ class IndexController extends BaseController
      */
     public function index(): string
     {
-
         $total = Gift::query()->count();
         $page  = paginate(100, $total);
 

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\Game\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\BaseController;
+use App\Controllers\ModuleController;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class BlackjackController extends BaseController
+class BlackjackController extends ModuleController
 {
     /**
      * @var User

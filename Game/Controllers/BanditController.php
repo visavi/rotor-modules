@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Game\Controllers;
 
-use App\Controllers\BaseController;
+use App\Controllers\ModuleController;
 use App\Models\User;
 
-class BanditController extends BaseController
+class BanditController extends ModuleController
 {
     /**
      * @var User
