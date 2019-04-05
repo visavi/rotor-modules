@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\ModuleController;
+use App\Controllers\BaseController;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Http\Request;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 use Throwable;
 
-class IndexController extends ModuleController
+class IndexController extends BaseController
 {
     /**
      * Main page

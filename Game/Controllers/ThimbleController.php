@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Game\Controllers;
 
-use App\Controllers\ModuleController;
+use App\Controllers\BaseController;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class ThimbleController extends ModuleController
+class ThimbleController extends BaseController
 {
     /**
      * @var User

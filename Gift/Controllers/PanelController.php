@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\ModuleController;
+use App\Controllers\Admin\AdminController;
 use App\Models\User;
 use Exception;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 use Illuminate\Http\Request;
 
-class PanelController extends ModuleController
+class PanelController extends AdminController
 {
     /**
      * PanelController constructor.

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Game\Controllers;
 
-use App\Controllers\ModuleController;
+use App\Controllers\BaseController;
 use App\Models\User;
 
-class DiceController extends ModuleController
+class DiceController extends BaseController
 {
     /**
      * @var User
