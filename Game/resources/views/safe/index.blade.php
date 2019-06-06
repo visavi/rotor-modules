@@ -31,7 +31,7 @@
 
     <div class="form">
         <form action="/games/safe/go" method="post">
-            <input type="hidden" name="token" value="{{ $_SESSION['token'] }}">
+            @csrf
             <div class="form-group row{{ hasError('code') }}">
                 <div class="col-1">
                     <input class="form-control" name="code0" maxlength="1" value="{{ getInput('code0') }}" required>

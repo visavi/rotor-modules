@@ -24,12 +24,11 @@
     @if (empty($_SESSION['blackjack']['bet']))
         <div class="form">
             <form action="/games/blackjack/bet" method="post">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] }}">
-
+                @csrf
                 <div class="form-group{{ hasError('bet') }}">
                     <label for="bet">Ваша ставка:</label>
                     <input class="form-control" name="bet" id="bet" value="{{ getInput('bet') }}" required>
-                    {!! textError('bet') !!}
+                    <div class="invalid-feedback">{{ textError('bet') }}</div>
                 </div>
 
                 <button class="btn btn-primary">Играть</button>

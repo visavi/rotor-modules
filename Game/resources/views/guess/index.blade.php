@@ -19,12 +19,11 @@
 
     <div class="form">
         <form action="/games/guess/go" method="post">
-            <input type="hidden" name="token" value="{{ $_SESSION['token'] }}">
-
+            @csrf
             <div class="form-group{{ hasError('guess') }}">
                 <label for="guess">Введите число:</label>
                 <input class="form-control" name="guess" id="guess" value="{{ getInput('guess') }}" required>
-                {!! textError('guess') !!}
+                <div class="invalid-feedback">{{ textError('guess') }}</div>
             </div>
 
             <button class="btn btn-primary">Угадать</button>

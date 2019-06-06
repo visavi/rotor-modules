@@ -8,7 +8,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/admin">{{ trans('main.panel') }}</a></li>
+            <li class="breadcrumb-item"><a href="/admin">{{ trans('index.panel') }}</a></li>
             <li class="breadcrumb-item active">{{ trans('Gift::gifts.title') }}</li>
         </ol>
     </nav>
@@ -18,8 +18,7 @@
     <div class="container">
         @if ($gifts->isNotEmpty())
             <form action="/admin/gifts" method="post">
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] }}">
-
+                @csrf
                 <div class="row">
                     @foreach($gifts as $gift)
                         <div class="col-md-2 col-sm-3">
