@@ -65,6 +65,8 @@ class IndexController extends BaseController
                 ->gte(getUser('money'), $gift->price, trans('Gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
+                GiftsUser::query()->where('deleted_at', '<', SITETIME)->delete();
+
                 $msg = antimat($msg);
 
                 DB::connection()->transaction(static function () use ($gift, $user, $msg) {
@@ -107,6 +109,7 @@ class IndexController extends BaseController
 
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)
+            ->where('deleted_at', '>', SITETIME)
             ->orderBy('created_at', 'desc')
             ->with('gift', 'user', 'sendUser')
             ->get();

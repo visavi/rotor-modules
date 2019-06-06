@@ -9,7 +9,7 @@ class AppendToStickers extends AbstractMigration
      */
     public function up(): void
     {
-        $categories = array_map('basename', glob(MODULES . '//Sticker/images/*', GLOB_ONLYDIR));
+        $categories = array_map('basename', glob(MODULES . '/Sticker/images/*', GLOB_ONLYDIR));
 
         foreach ($categories as $categoryName) {
             $this->execute("INSERT INTO stickers_categories (name, created_at) VALUES ('" . $categoryName . "', " . SITETIME .");");
