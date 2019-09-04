@@ -1,14 +1,14 @@
 @extends('layout')
 
 @section('title')
-    {{ trans('Gift::gifts.title') }}
+    {{ __('Gift::gifts.title') }}
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ trans('Gift::gifts.title') }}</li>
+            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }}</li>
         </ol>
     </nav>
 @stop
@@ -27,7 +27,7 @@
 
             {!! pagination($page) !!}
         @else
-            {!! showError(trans('Gift::gifts.empty_gifts')) !!}
+            {!! showError(__('Gift::gifts.empty_gifts')) !!}
         @endif
     </div>
 @stop

@@ -50,7 +50,7 @@ class IndexController extends BaseController
         $gift = Gift::query()->find($id);
 
         if (! $gift) {
-            abort(404, trans('Gift::gifts.gift_not_found'));
+            abort(404, __('Gift::gifts.gift_not_found'));
         }
 
         $user = getUserByLogin($login);
@@ -59,10 +59,10 @@ class IndexController extends BaseController
             $token = check($request->input('token'));
             $msg   = check($request->input('msg'));
 
-            $validator->equal($token, $_SESSION['token'], ['msg' => trans('validator.token')])
-                ->notEmpty($user, ['user' => trans('validator.user')])
-                ->length($msg, 0, 1000, ['msg' => trans('validator.text_long')])
-                ->gte(getUser('money'), $gift->price, trans('Gift::gifts.money_not_enough'));
+            $validator->equal($token, $_SESSION['token'], ['msg' => __('validator.token')])
+                ->notEmpty($user, ['user' => __('validator.user')])
+                ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
+                ->gte(getUser('money'), $gift->price, __('Gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
                 GiftsUser::query()->where('deleted_at', '<', SITETIME)->delete();
@@ -82,7 +82,7 @@ class IndexController extends BaseController
                     ]);
                 });
 
-                setFlash('success', trans('Gift::gifts.gift_sent'));
+                setFlash('success', __('Gift::gifts.gift_sent'));
                 redirect('/gifts');
             } else {
                 setInput($request->all());
@@ -104,7 +104,7 @@ class IndexController extends BaseController
         $user = getUserByLogin($login);
 
         if (! $user) {
-            abort(404, trans('validator.user'));
+            abort(404, __('validator.user'));
         }
 
         $gifts = GiftsUser::query()

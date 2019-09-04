@@ -24,7 +24,7 @@ class BlackjackController extends BaseController
         parent::__construct();
 
         if (! $this->user = getUser()) {
-            abort(403, 'Для игры необходимо авторизоваться!');
+            abort(403, __('main.not_authorized'));
         }
     }
 
@@ -54,7 +54,7 @@ class BlackjackController extends BaseController
             redirect('/games/blackjack/game');
         }
 
-        $validator->equal($token, $_SESSION['token'], trans('validator.token'))
+        $validator->equal($token, $_SESSION['token'], __('validator.token'))
             ->gt($bet, 0, ['bet' => 'Вы не указали ставку!'])
             ->gte($this->user->money, $bet, ['bet' => 'У вас недостаточно денег для игры!']);
 

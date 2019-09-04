@@ -24,7 +24,7 @@ class GuessNumberController extends BaseController
         parent::__construct();
 
         if (! $this->user = getUser()) {
-            abort(403, 'Для игры необходимо авторизоваться!');
+            abort(403, __('main.not_authorized'));
         }
     }
 
@@ -57,7 +57,7 @@ class GuessNumberController extends BaseController
         $token       = check($request->input('token'));
         $guessNumber = int($request->input('guess'));
 
-        $validator->equal($token, $_SESSION['token'], trans('validator.token'))
+        $validator->equal($token, $_SESSION['token'], __('validator.token'))
             ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 

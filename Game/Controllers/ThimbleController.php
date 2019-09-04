@@ -23,7 +23,7 @@ class ThimbleController extends BaseController
         parent::__construct();
 
         if (! $this->user = getUser()) {
-            abort(403, 'Для игры необходимо авторизоваться!');
+            abort(403, __('main.not_authorized'));
         }
     }
 
