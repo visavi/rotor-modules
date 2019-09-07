@@ -53,10 +53,10 @@ class DiceController extends BaseController
             'draw'    => 'Ничья',
         ];
 
-        $num[0] = \mt_rand(1, \mt_rand(5, 6));
-        $num[1] = \mt_rand(1, \mt_rand(5, 6));
-        $num[2] = \mt_rand(1, 6);
-        $num[3] = \mt_rand(1, 6);
+        $num[0] = mt_rand(1, mt_rand(5, 6));
+        $num[1] = mt_rand(1, mt_rand(5, 6));
+        $num[2] = mt_rand(1, 6);
+        $num[3] = mt_rand(1, 6);
 
         $sumUser = $num[0] + $num[1];
         $sumBank = $num[2] + $num[3];

@@ -69,7 +69,7 @@ class GuessNumberController extends BaseController
 
         if (empty($_SESSION['guess']['number'])) {
             $_SESSION['guess']['count']  = 0;
-            $_SESSION['guess']['number'] = \mt_rand(1, 100);
+            $_SESSION['guess']['number'] = mt_rand(1, 100);
         }
 
         $_SESSION['guess']['count']++;

@@ -71,7 +71,7 @@ class ThimbleController extends BaseController
             'lost'    => '<span class="text-danger">Вы проиграли</span>',
         ];
 
-        $randThimble = \mt_rand(1, 3);
+        $randThimble = mt_rand(1, 3);
 
         if ($thimble === $randThimble) {
             $this->user->increment('money', 10);

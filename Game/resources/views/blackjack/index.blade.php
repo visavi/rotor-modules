@@ -36,7 +36,7 @@
         </div><br>
     @else
         Ставки сделаны, на кону: {{ plural($_SESSION['blackjack']['bet'] * 2, setting('moneyname')) }}<br><br>
-        <b><a href="/games/blackjack/game?rand={{ \mt_rand(1000, 99999) }}'">Вернитесь в игру</a></b><br><br>
+        <b><a href="/games/blackjack/game?rand={{ mt_rand(1000, 99999) }}'">Вернитесь в игру</a></b><br><br>
     @endif
 
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
