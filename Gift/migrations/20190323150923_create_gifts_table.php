@@ -9,7 +9,7 @@ class CreateGiftsTable extends AbstractMigration
      */
     public function change(): void
     {
-        $table = $this->table('gifts', ['engine' => env('DB_ENGINE'), 'collation' => env('DB_COLLATION')]);
+        $table = $this->table('gifts', ['engine' => config('DB_ENGINE'), 'collation' => config('DB_COLLATION')]);
         $table
             ->addColumn('name', 'string', ['limit' => 50, 'null' => true])
             ->addColumn('path', 'string', ['limit' => 100])
