@@ -22,7 +22,7 @@ class AppendToStickers extends AbstractMigration
             }
         }
 
-        clearCache(['stickers']);
+        clearCache('stickers');
     }
 
     /**
@@ -42,6 +42,6 @@ class AppendToStickers extends AbstractMigration
             }
         }
 
-        clearCache(['stickers']);
+        clearCache('stickers');
     }
 }

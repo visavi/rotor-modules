@@ -21,16 +21,11 @@ class IndexController extends BaseController
      */
     public function index(): string
     {
-        $total = Gift::query()->count();
-        $page  = paginate(100, $total);
-
         $gifts = Gift::query()
             ->orderBy('price')
-            ->limit($page->limit)
-            ->offset($page->offset)
-            ->get();
+            ->paginate(100);
 
-        return view('Gift::index', compact('gifts', 'page'));
+        return view('Gift::index', compact('gifts'));
     }
 
     /**
@@ -113,7 +108,7 @@ class IndexController extends BaseController
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)
             ->where('deleted_at', '>', SITETIME)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->with('gift', 'user', 'sendUser')
             ->get();
 

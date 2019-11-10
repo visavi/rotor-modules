@@ -24,10 +24,10 @@
                     </div>
                 @endforeach
             </div>
-
-            {!! pagination($page) !!}
         @else
             {!! showError(__('Gift::gifts.empty_gifts')) !!}
         @endif
+
+        {{ $gifts->links('app/_paginator') }}
     </div>
 @stop

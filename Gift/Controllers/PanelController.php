@@ -57,16 +57,11 @@ class PanelController extends AdminController
             }
         }
 
-        $total = Gift::query()->count();
-        $page  = paginate(50, $total);
-
         $gifts = Gift::query()
             ->orderBy('price')
-            ->limit($page->limit)
-            ->offset($page->offset)
-            ->get();
+            ->paginate(50);
 
-        return view('Gift::panel_index', compact('gifts', 'page'));
+        return view('Gift::panel_index', compact('gifts'));
     }
 
     /**
