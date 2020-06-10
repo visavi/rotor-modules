@@ -22,7 +22,7 @@
     <br><br>
 
     @if (empty($_SESSION['blackjack']['bet']))
-        <div class="form">
+        <div class="section-form p-2 shadow">
             <form action="/games/blackjack/bet" method="post">
                 @csrf
                 <div class="form-group{{ hasError('bet') }}">
@@ -33,7 +33,7 @@
 
                 <button class="btn btn-primary">Играть</button>
             </form>
-        </div><br>
+        </div>
     @else
         Ставки сделаны, на кону: {{ plural($_SESSION['blackjack']['bet'] * 2, setting('moneyname')) }}<br><br>
         <b><a href="/games/blackjack/game?rand={{ mt_rand(1000, 99999) }}'">Вернитесь в игру</a></b><br><br>

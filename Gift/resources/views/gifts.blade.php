@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('title')
-    {{ __('Gift::gifts.title') }} {{ $user->login }}
+    {{ __('Gift::gifts.title') }} {{ $user->getName() }}
 @stop
 
 @section('breadcrumb')
@@ -9,7 +9,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/gifts">{{ __('Gift::gifts.title') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }} {{ $user->login }}</li>
+            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }} {{ $user->getName() }}</li>
         </ol>
     </nav>
 @stop
@@ -18,7 +18,7 @@
     <div class="container-fluid">
         @if ($gifts->isNotEmpty())
             <div class="row">
-                @foreach($gifts as $gift)
+                @foreach ($gifts as $gift)
 
                     <div class="col-md-4 col-sm-6">
                         @if (isAdmin())

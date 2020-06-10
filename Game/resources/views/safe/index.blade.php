@@ -29,7 +29,7 @@
     <span class="badge badge-info">-</span>
     <span class="badge badge-info">-</span>
 
-    <div class="form">
+    <div class="section-form p-2 shadow">
         <form action="/games/safe/go" method="post">
             @csrf
             <div class="form-group row{{ hasError('code') }}">
@@ -51,7 +51,7 @@
             </div>
             <button class="btn btn-primary">Ломать сейф</button>
         </form>
-    </div><br>
+    </div>
 
     Попробуй вскрыть наш сейф.<br>
     В сейфе тебя ждёт: {{ plural(1000, setting('moneyname')) }}<br>

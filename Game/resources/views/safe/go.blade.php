@@ -37,7 +37,7 @@
 
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 
-            <div class="form">
+            <div class="section-form p-2 shadow">
                 <form action="/games/safe/go" method="post">
                     @csrf
                     <div class="form-group row{{ hasError('bet') }}">
@@ -59,7 +59,7 @@
                     </div>
                     <button class="btn btn-primary">Ломать сейф</button>
                 </form>
-            </div><br>
+            </div>
         @else
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 

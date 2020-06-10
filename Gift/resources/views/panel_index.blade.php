@@ -20,7 +20,7 @@
             <form action="/admin/gifts" method="post">
                 @csrf
                 <div class="row">
-                    @foreach($gifts as $gift)
+                    @foreach ($gifts as $gift)
                         <div class="col-md-2 col-sm-3">
                             <img src="{{ $gift->path }}" alt="{{ $gift->name }}">
                         </div>
@@ -36,6 +36,6 @@
             {!! showError(__('Gift::gifts.empty_gifts')) !!}
         @endif
 
-        {{ $gifts->links('app/_paginator') }}
+        {{ $gifts->links() }}
     </div>
 @stop

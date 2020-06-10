@@ -20,7 +20,7 @@
 
     <b>Ваши карты:</b><br>
 
-    @foreach($blackjack['cards'] as $card)
+    @foreach ($blackjack['cards'] as $card)
         <img src="/assets/modules/games/cards/{{ $card }}.png" alt="image">
     @endforeach
 
@@ -29,7 +29,7 @@
     @if ($result)
         <b>Карты банкира:</b><br>
 
-        @foreach($blackjack['bankercards'] as $card)
+        @foreach ($blackjack['bankercards'] as $card)
             <img src="/assets/modules/games/cards/{{ $card }}.png" alt="image">
         @endforeach
 
@@ -48,7 +48,7 @@
         <i class="fa fa-coins"></i> <a href="/games/blackjack">Новая ставка</a><br>
     @else
         <b>Карты банкира:</b><br>
-        @foreach($blackjack['bankercards'] as $card)
+        @foreach ($blackjack['bankercards'] as $card)
             <img src="/assets/modules/games/cards/0.png" alt="image">
         @endforeach
 

@@ -36,7 +36,7 @@
     @endif
 
     <b>Введите число от 1 до 100</b><br>
-    <div class="form">
+    <div class="section-form p-2 shadow">
         <form action="/games/guess/go" method="post">
             @csrf
             <div class="form-group{{ hasError('guess') }}">
@@ -47,7 +47,7 @@
 
             <button class="btn btn-primary">Угадать</button>
         </form>
-    </div><br>
+    </div>
 
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br>
 
