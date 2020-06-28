@@ -52,8 +52,7 @@ class IndexController extends BaseController
      */
     public function buy(Request $request, Validator $validator): void
     {
-        $number      = check($request->input('number'));
-        $token       = check($request->input('token'));
+        $number      = int($request->input('number'));
         $ticketPrice = Lottery::getConfig('ticketPrice');
         $numberRange = Lottery::getConfig('numberRange');
 
@@ -74,7 +73,7 @@ class IndexController extends BaseController
             ->first();
 
         $validator
-            ->equal($token, $_SESSION['token'], ['number' => __('validator.token')])
+            ->equal($request->input('token'), $_SESSION['token'], ['number' => __('validator.token')])
             ->empty($lotteryUser, ['number' => __('Lottery::lottery.already_bought_ticket')])
             ->lte($ticketPrice, getUser('money'), ['number' => __('Lottery::lottery.no_money')])
             ->between($number, $numberRange[0], $numberRange[1], ['number' => __('Lottery::lottery.must_enter_number')]);

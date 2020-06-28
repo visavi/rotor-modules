@@ -47,14 +47,13 @@ class SafeController extends BaseController
      */
     public function go(Request $request, Validator $validator): string
     {
-        $token = check($request->input('token'));
         $code0 = int($request->input('code0'));
         $code1 = int($request->input('code1'));
         $code2 = int($request->input('code2'));
         $code3 = int($request->input('code3'));
         $code4 = int($request->input('code4'));
 
-        $validator->equal($token, $_SESSION['token'], __('validator.token'))
+        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'))
             ->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {

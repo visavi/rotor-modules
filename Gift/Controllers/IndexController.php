@@ -39,8 +39,6 @@ class IndexController extends BaseController
      */
     public function send(int $id, Request $request, Validator $validator): string
     {
-        $login = check($request->input('user'));
-
         /** @var Gift $gift */
         $gift = Gift::query()->find($id);
 
@@ -48,13 +46,13 @@ class IndexController extends BaseController
             abort(404, __('Gift::gifts.gift_not_found'));
         }
 
-        $user = getUserByLogin($login);
+        $user = getUserByLogin($request->input('user'));
 
         if ($request->isMethod('post')) {
-            $token = check($request->input('token'));
-            $msg   = check($request->input('msg'));
 
-            $validator->equal($token, $_SESSION['token'], ['msg' => __('validator.token')])
+            $msg = $request->input('msg');
+
+            $validator->equal($request->input('token'), $_SESSION['token'], ['msg' => __('validator.token')])
                 ->notEmpty($user, ['user' => __('validator.user')])
                 ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
                 ->gte(getUser('money'), $gift->price, __('Gift::gifts.money_not_enough'));

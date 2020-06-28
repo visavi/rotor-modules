@@ -54,10 +54,9 @@ class GuessNumberController extends BaseController
      */
     public function go(Request $request, Validator $validator): string
     {
-        $token       = check($request->input('token'));
         $guessNumber = int($request->input('guess'));
 
-        $validator->equal($token, $_SESSION['token'], __('validator.token'))
+        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'))
             ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 

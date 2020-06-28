@@ -38,9 +38,8 @@ class PanelController extends AdminController
         if ($request->isMethod('post')) {
 
             $gifts = intar($request->input('gifts'));
-            $token = check($request->input('token'));
 
-            $validator->equal($token, $_SESSION['token'], ['msg' => __('validator.token')])
+            $validator->equal($request->input('token'), $_SESSION['token'], ['msg' => __('validator.token')])
                 ->notEmpty($gifts, __('Gift::gifts.prices_not_transferred'));
 
             if ($validator->isValid()) {
@@ -74,11 +73,10 @@ class PanelController extends AdminController
      */
     public function delete(Request $request, Validator $validator): void
     {
-        $token = check($request->input('token'));
         $id    = int($request->input('id'));
-        $login = check($request->input('user'));
+        $login = $request->input('user');
 
-        $validator->equal($token, $_SESSION['token'], __('validator.token'));
+        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'));
 
         $gift = GiftsUser::query()->find($id);
         $validator->notEmpty($gift, __('Gift::gifts.gift_not_found'));

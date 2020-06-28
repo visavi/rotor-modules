@@ -48,13 +48,12 @@ class BlackjackController extends BaseController
     public function bet(Request $request, Validator $validator): void
     {
         $bet   = int($request->input('bet'));
-        $token = check($request->input('token'));
 
         if (! empty($_SESSION['blackjack']['bet'])) {
             redirect('/games/blackjack/game');
         }
 
-        $validator->equal($token, $_SESSION['token'], __('validator.token'))
+        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'))
             ->gt($bet, 0, ['bet' => 'Вы не указали ставку!'])
             ->gte($this->user->money, $bet, ['bet' => 'У вас недостаточно денег для игры!']);
 
@@ -82,7 +81,7 @@ class BlackjackController extends BaseController
      */
     public function game(Request $request): string
     {
-        $case = check($request->input('case'));
+        $case = $request->input('case');
 
         $results = [
             'victory' => '<span class="text-success">Вы выиграли</span>',
