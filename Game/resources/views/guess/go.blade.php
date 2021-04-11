@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Ваш ход
-@stop
+@section('title', 'Ваш ход')
 
 @section('breadcrumb')
     <nav>
@@ -36,7 +34,7 @@
     @endif
 
     <b>Введите число от 1 до 100</b><br>
-    <div class="section-form p-2 shadow">
+    <div class="section-form mb-3 shadow">
         <form action="/games/guess/go" method="post">
             @csrf
             <div class="form-group{{ hasError('guess') }}">

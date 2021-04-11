@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    {{ __('Gift::gifts.send_gift') }}
-@stop
+@section('title', __('Gift::gifts.send_gift'))
 
 @section('breadcrumb')
     <nav>
@@ -15,7 +13,7 @@
 @stop
 
 @section('content')
-    <div class="section-form p-2 shadow">
+    <div class="section-form mb-3 shadow">
         <form action="/gifts/send/{{ $gift->id }}" method="post">
             @csrf
             @if ($user)
@@ -36,7 +34,7 @@
                 <span class="js-textarea-counter"></span>
             </div>
 
-            <div>
+            <div class="mb-3">
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
                 {{ __('Gift::gifts.price') }}: <span class="badge badge-primary">{{ $gift->price }}  {{ setting('currency') }}</span>
             </div>

@@ -1,8 +1,11 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class SeedToGifts extends AbstractMigration
+use App\Migrations\Migration;
+use Modules\Gift\Models\Gift;
+
+final class SeedToGifts extends Migration
 {
     /**
      * Migrate Up.
@@ -11,9 +14,17 @@ class SeedToGifts extends AbstractMigration
     {
         $gifts = array_map('basename', glob(MODULES . '/Gift/resources/assets/*.{gif,png,jpg,jpeg}', GLOB_BRACE));
 
+        $data = [];
         foreach ($gifts as $gift) {
-            $this->execute("INSERT INTO gifts (path, price, created_at) VALUES ('/assets/modules/gifts/" . $gift . "', " . (mt_rand(1, 10) * 100) . ", " . SITETIME . ");");
+            $data[] = [
+                'name' => '',
+                'path'       => '/assets/modules/gifts/' . $gift,
+                'price'      => mt_rand(1, 10) * 100,
+                'created_at' => SITETIME,
+            ];
         }
+
+        Gift::query()->insert($data);
     }
 
     /**
@@ -21,6 +32,6 @@ class SeedToGifts extends AbstractMigration
      */
     public function down(): void
     {
-        $this->execute('TRUNCATE gifts');
+        Gift::query()->truncate();
     }
 }

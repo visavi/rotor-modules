@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    {{ __('Gift::gifts.title') }} {{ $user->getName() }}
-@stop
+@section('title', __('Gift::gifts.title') . ' ' . $user->getName())
 
 @section('breadcrumb')
     <nav>
@@ -28,7 +26,8 @@
                         @endif
 
                         <img src="{{ $gift->gift->path }}" alt="{{ $gift->gift->name }}"><br>
-                            {{ __('main.sent') }}: {!! $gift->sendUser->getProfile() !!} ({{ dateFixed($gift->created_at) }})<br>
+                            {{ __('main.sent') }}: {{ $gift->sendUser->getProfile() }}
+                            <small class="section-date text-muted font-italic">{{ dateFixed($gift->created_at) }}</small><br>
 
                         @if ($gift->text)
                             {{ $gift->text }}
@@ -37,7 +36,7 @@
                 @endforeach
             </div>
         @else
-            {!! showError(__('Gift::gifts.empty_gifts')) !!}
+            {{ showError(__('Gift::gifts.empty_gifts')) }}
         @endif
     </div>
 @stop

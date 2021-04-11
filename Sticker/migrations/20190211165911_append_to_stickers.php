@@ -1,8 +1,12 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class AppendToStickers extends AbstractMigration
+use App\Migrations\Migration;
+use App\Models\Sticker;
+use App\Models\StickersCategory;
+
+final class AppendToStickers extends Migration
 {
     /**
      * Migrate Up.
@@ -10,14 +14,21 @@ class AppendToStickers extends AbstractMigration
     public function up(): void
     {
         $categories = array_map('basename', glob(MODULES . '/Sticker/resources/assets/*', GLOB_ONLYDIR));
+
         foreach ($categories as $categoryName) {
-            $this->execute("INSERT INTO stickers_categories (name, created_at) VALUES ('" . $categoryName . "', " . SITETIME .");");
-            $lastId = $this->getAdapter()->getConnection()->lastInsertId();
+            $category = StickersCategory::query()->create([
+                'name'       => $categoryName,
+                'created_at' => SITETIME,
+            ]);
 
             $stickers = array_map('basename', glob(MODULES . '/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}', GLOB_BRACE));
 
             foreach ($stickers as $stickerName) {
-                $this->execute("INSERT INTO stickers (category_id, name, code) VALUES (" . $lastId . ", '/assets/modules/stickers/" . $categoryName . "/" . $stickerName . "', ':" . getBodyName($stickerName) . "');");
+                Sticker::query()->create([
+                    'category_id' => $category->id,
+                    'name' => '/assets/modules/stickers/' . $categoryName . '/' . $stickerName,
+                    'code' => ':' . getBodyName($stickerName),
+                ]);
             }
         }
 
@@ -32,11 +43,11 @@ class AppendToStickers extends AbstractMigration
         $categories = array_map('basename', glob(MODULES . '/Sticker/resources/assets/*', GLOB_ONLYDIR));
 
         foreach ($categories as $categoryName) {
-            $category = $this->fetchRow('SELECT id FROM stickers_categories WHERE name = "' . $categoryName . '" LIMIT 1;');
+            $category = StickersCategory::query()->where('name', $categoryName)->first();
 
             if ($category) {
-                $this->execute("DELETE FROM stickers_categories WHERE id='" . $category['id'] . "';");
-                $this->execute("DELETE FROM stickers WHERE category_id='" . $category['id'] . "';");
+                $category->delete();
+                Sticker::query()->where('category_id', $category->id)->delete();
             }
         }
 

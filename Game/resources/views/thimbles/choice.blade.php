@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Выбор наперстка
-@stop
+@section('title', 'Выбор наперстка')
 
 @section('breadcrumb')
     <nav>

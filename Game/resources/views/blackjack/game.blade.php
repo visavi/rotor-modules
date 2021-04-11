@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Ваш ход
-@stop
+@section('title', 'Ваш ход')
 
 @section('breadcrumb')
     <nav>

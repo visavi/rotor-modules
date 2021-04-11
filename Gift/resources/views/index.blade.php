@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    {{ __('Gift::gifts.title') }}
-@stop
+@section('title', __('Gift::gifts.title'))
 
 @section('breadcrumb')
     <nav>
@@ -16,7 +14,7 @@
 @section('content')
     <div class="container">
         @if ($gifts->isNotEmpty())
-            <div class="row">
+            <div class="row mb-3">
                 @foreach ($gifts as $gift)
                     <div class="col">
                         <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
@@ -25,7 +23,7 @@
                 @endforeach
             </div>
         @else
-            {!! showError(__('Gift::gifts.empty_gifts')) !!}
+            {{ showError(__('Gift::gifts.empty_gifts')) }}
         @endif
 
         {{ $gifts->links() }}

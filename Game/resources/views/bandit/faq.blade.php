@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Правила игры
-@stop
+@section('title', 'Правила игры')
 
 @section('breadcrumb')
     <nav>

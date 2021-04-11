@@ -1,9 +1,11 @@
 <?php
 
-use Modules\Lottery\Models\Lottery;
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class SeedToLottery extends AbstractMigration
+use App\Migrations\Migration;
+use Modules\Lottery\Models\Lottery;
+
+final class SeedToLottery extends Migration
 {
     /**
      * Migrate Up.
@@ -12,7 +14,11 @@ class SeedToLottery extends AbstractMigration
     {
         $config = Lottery::getConfig();
 
-        $this->execute("INSERT INTO lottery (day, amount, number) VALUES (NOW(), " . $config['jackpot'] . ", " . mt_rand($config['numberRange'][0], $config['numberRange'][1]) . ");");
+        Lottery::query()->create([
+            'day'    => date('Y-m-d'),
+            'amount' => $config['jackpot'],
+            'number' => mt_rand($config['numberRange'][0], $config['numberRange'][1]),
+        ]);
     }
 
     /**
@@ -20,6 +26,6 @@ class SeedToLottery extends AbstractMigration
      */
     public function down(): void
     {
-        $this->execute('TRUNCATE lottery');
+        Lottery::query()->truncate();
     }
 }

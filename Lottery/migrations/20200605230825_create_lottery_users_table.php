@@ -1,20 +1,33 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class CreateLotteryUsersTable extends AbstractMigration
+use App\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+
+final class CreateLotteryUsersTable extends Migration
 {
     /**
-     * Change Method.
+     * Migrate Up.
      */
-    public function change(): void
+    public function up(): void
     {
-        $table = $this->table('lottery_users', ['engine' => config('DB_ENGINE'), 'collation' => config('DB_COLLATION')]);
-        $table
-            ->addColumn('lottery_id', 'integer')
-            ->addColumn('user_id', 'integer')
-            ->addColumn('number', 'smallinteger', ['limit' => 3])
-            ->addColumn('created_at', 'integer')
-            ->create();
+        if (! $this->schema->hasTable('lottery_users')) {
+            $this->schema->create('lottery_users', function (Blueprint $table) {
+                $table->increments('id');
+                $table->integer('lottery_id');
+                $table->integer('user_id');
+                $table->smallInteger('number');
+                $table->integer('created_at');
+            });
+        }
+    }
+
+    /**
+     * Migrate Down.
+     */
+    public function down(): void
+    {
+        $this->schema->dropIfExists('lottery_users');
     }
 }

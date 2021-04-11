@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Кости
-@stop
+@section('title', 'Кости')
 
 @section('breadcrumb')
     <nav>

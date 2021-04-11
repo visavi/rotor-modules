@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Ваш ход
-@stop
+@section('title', 'Ваш ход')
 
 @section('breadcrumb')
     <nav>
@@ -37,7 +35,7 @@
 
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 
-            <div class="section-form p-2 shadow">
+            <div class="section-form mb-3 shadow">
                 <form action="/games/safe/go" method="post">
                     @csrf
                     <div class="form-group row{{ hasError('bet') }}">
@@ -63,7 +61,7 @@
         @else
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 
-            Шифр был:<br/>
+            Шифр был:<br>
             <span class="badge badge-info">{{ $safe['cipher'][0] }}</span>
             <span class="badge badge-info">{{ $safe['cipher'][1] }}</span>
             <span class="badge badge-info">{{ $safe['cipher'][2] }}</span>

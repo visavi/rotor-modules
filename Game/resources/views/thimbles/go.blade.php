@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Игра
-@stop
+@section('title', 'Игра')
 
 @section('breadcrumb')
     <nav>

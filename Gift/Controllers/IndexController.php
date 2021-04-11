@@ -49,7 +49,6 @@ class IndexController extends BaseController
         $user = getUserByLogin($request->input('user'));
 
         if ($request->isMethod('post')) {
-
             $msg = $request->input('msg');
 
             $validator->equal($request->input('token'), $_SESSION['token'], ['msg' => __('validator.token')])

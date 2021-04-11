@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    {{ __('Lottery::lottery.title') }}
-@stop
+@section('title', __('Lottery::lottery.title'))
 
 @section('breadcrumb')
     <nav>
@@ -29,7 +27,7 @@
                     <i class="fas fa-crown"></i> {{ __('Lottery::lottery.winners') }}:
                     @foreach ($yesterday->winners as $key => $winner)
                         <?php $comma = (empty($key)) ? '' : ', '; ?>
-                        {{ $comma }}{!! $winner->user->getProfile() !!}
+                        {{ $comma }}{{ $winner->user->getProfile() }}
                     @endforeach
                 @else
                     <div class="alert alert-info">
@@ -41,7 +39,7 @@
     </div>
 
     @if ($user = getUser())
-        <div class="section-form mb-3 p-3 shadow">
+        <div class="section-form mb-3 shadow">
             <form action="/lottery/buy" method="post">
                 @csrf
                 <div class="form-group{{ hasError('number') }}">
@@ -67,7 +65,7 @@
         <h5>{{ __('Lottery::lottery.participants') }}:</h5>
         @if ($today->lotteryUsers->isNotEmpty())
             @foreach ($today->lotteryUsers as $lotteryUser)
-                {!! $lotteryUser->user->getProfile() !!} Ставка: {!! $lotteryUser->number !!}<br>
+                {{ $lotteryUser->user->getProfile() }} Ставка: {!! $lotteryUser->number !!}<br>
             @endforeach
         @else
             <div class="alert alert-info">

@@ -81,15 +81,16 @@ class IndexController extends BaseController
         if ($validator->isValid()) {
             DB::connection()->transaction(
                 static function () use ($user, $number, $lottery, $ticketPrice) {
-                $user->decrement('money', $ticketPrice);
-                $lottery->increment('amount', $ticketPrice);
+                    $user->decrement('money', $ticketPrice);
+                    $lottery->increment('amount', $ticketPrice);
 
-                $lottery->lotteryUsers()->create([
-                    'user_id'    => $user->id,
-                    'number'     => $number,
-                    'created_at' => SITETIME
-                ]);
-            });
+                    $lottery->lotteryUsers()->create([
+                        'user_id'    => $user->id,
+                        'number'     => $number,
+                        'created_at' => SITETIME
+                    ]);
+                }
+            );
 
             setFlash('success', __('Lottery::lottery.ticket_success_purchased'));
         } else {

@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Однорукий бандит
-@stop
+@section('title', 'Однорукий бандит')
 
 @section('breadcrumb')
     <nav>

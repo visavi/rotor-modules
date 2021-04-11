@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    {{ __('Game::games.module') }}
-@stop
+@section('title', __('Game::games.module'))
 
 @section('breadcrumb')
     <nav>

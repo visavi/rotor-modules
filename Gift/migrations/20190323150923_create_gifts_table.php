@@ -1,20 +1,33 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+declare(strict_types=1);
 
-class CreateGiftsTable extends AbstractMigration
+use App\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+
+final class CreateGiftsTable extends Migration
 {
     /**
-     * Change Method.
+     * Migrate Up.
      */
-    public function change(): void
+    public function up(): void
     {
-        $table = $this->table('gifts', ['engine' => config('DB_ENGINE'), 'collation' => config('DB_COLLATION')]);
-        $table
-            ->addColumn('name', 'string', ['limit' => 50, 'null' => true])
-            ->addColumn('path', 'string', ['limit' => 100])
-            ->addColumn('price', 'integer', ['default' => 0])
-            ->addColumn('created_at', 'integer')
-            ->create();
+        if (! $this->schema->hasTable('gifts')) {
+            $this->schema->create('gifts', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('name', 50)->nullable();
+                $table->string('path', 100);
+                $table->integer('price')->default(0);
+                $table->integer('created_at');
+            });
+        }
+    }
+
+    /**
+     * Migrate Down.
+     */
+    public function down(): void
+    {
+        $this->schema->dropIfExists('gifts');
     }
 }

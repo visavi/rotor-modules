@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Взлом сейфа
-@stop
+@section('title', 'Взлом сейфа')
 
 @section('breadcrumb')
     <nav>
@@ -29,7 +27,7 @@
     <span class="badge badge-info">-</span>
     <span class="badge badge-info">-</span>
 
-    <div class="section-form p-2 shadow">
+    <div class="section-form mb-3 shadow">
         <form action="/games/safe/go" method="post">
             @csrf
             <div class="form-group row{{ hasError('code') }}">

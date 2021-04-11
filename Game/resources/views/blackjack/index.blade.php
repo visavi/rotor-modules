@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    21 (Очко)
-@stop
+@section('title', '21 (Очко)')
 
 @section('breadcrumb')
     <nav>
@@ -22,7 +20,7 @@
     <br><br>
 
     @if (empty($_SESSION['blackjack']['bet']))
-        <div class="section-form p-2 shadow">
+        <div class="section-form mb-3 shadow">
             <form action="/games/blackjack/bet" method="post">
                 @csrf
                 <div class="form-group{{ hasError('bet') }}">

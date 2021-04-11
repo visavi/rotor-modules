@@ -1,8 +1,6 @@
 @extends('layout')
 
-@section('title')
-    Наперстки
-@stop
+@section('title', 'Наперстки')
 
 @section('breadcrumb')
     <nav>
