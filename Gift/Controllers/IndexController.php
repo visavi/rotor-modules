@@ -19,13 +19,20 @@ class IndexController extends BaseController
      *
      * @return string
      */
-    public function index(): string
+    public function index(Request $request): string
     {
+        $user    = $request->input('user');
+        $perPage = Gift::getConfig('per_page');
+
         $gifts = Gift::query()
             ->orderBy('price')
-            ->paginate(100);
+            ->paginate($perPage);
 
-        return view('Gift::index', compact('gifts'));
+        if ($user) {
+            $gifts->appends(['user' => $user]);
+        }
+
+        return view('Gift::index', compact('gifts', 'user'));
     }
 
     /**

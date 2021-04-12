@@ -17,7 +17,7 @@
         <form action="/gifts/send/{{ $gift->id }}" method="post">
             @csrf
             @if ($user)
-                <i class="fas fa-gift"></i> {{ __('Gift::gifts.gift_for') }} <b>{{ $user->getName() }}</b>:<br><br>
+                <i class="fas fa-gift"></i> {{ __('Gift::gifts.gift_for') }} <b>{{ $user->getProfile() }}</b>:<br><br>
                 <input type="hidden" name="user" value="{{ $user->login }}">
             @else
                 <div class="form-group{{ hasError('user') }}">

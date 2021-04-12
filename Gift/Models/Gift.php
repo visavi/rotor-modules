@@ -30,4 +30,18 @@ class Gift extends BaseModel
      * @var array
      */
     protected $guarded = [];
+
+    /**
+     * Get config
+     *
+     * @param string $name
+     *
+     * @return mixed|null
+     */
+    public static function getConfig($name = null)
+    {
+        $config = include MODULES . '/Gift/module.php';
+
+        return $name ? $config[$name] ?? null : $config;
+    }
 }

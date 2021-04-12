@@ -17,7 +17,7 @@
             <div class="row mb-3">
                 @foreach ($gifts as $gift)
                     <div class="col">
-                        <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
+                        <a href="/gifts/send/{{ $gift->id }}?user={{ $user }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
                         {{ $gift->price }}  {{ setting('currency') }}
                     </div>
                 @endforeach

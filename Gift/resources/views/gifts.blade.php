@@ -30,7 +30,7 @@
                             <small class="section-date text-muted font-italic">{{ dateFixed($gift->created_at) }}</small><br>
 
                         @if ($gift->text)
-                            {{ $gift->text }}
+                            {{ bbCode($gift->text) }}
                         @endif
                     </div>
                 @endforeach
