@@ -3,7 +3,23 @@
 return [
     'name'        => 'Лотерея',
     'description' => 'Пользователи покупают билет и делают ставку от 1 до 100, на следующий день объявляются результаты, победитель получает весь выигрыш плюс все деньги со ставок проигравших. Если победителей более одного, выигрыш делится пропорционально',
-    'version'     => '1.0',
+    'info'        => <<<'INFO'
+Добавьте ссылку перехода на страницу подарков
+[code]
+<a href="/lottery">Лотерея</a>
+[/code]
+
+Размер текущего джэк-пота можно получить с помщью следующего кода
+[code]
+<?php
+$lottery = \Modules\Lottery\Models\Lottery::query()
+    ->orderByDesc('day')
+    ->first();
+?>
+{{ plural($lottery->amount, setting('moneyname')) }}
+[/code]
+INFO,
+    'version'     => '1.1',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

@@ -24,4 +24,5 @@ return [
     'must_enter_number'        => 'Необходимо ввести число!',
     'ticket_success_purchased' => 'Билет успешно приобретен!',
     'congratulations_winning'  => 'Поздравляем! Вы сорвали [url=/lottery]Джек-пот в лотерее[/url] и выиграли :jackpot',
+    'ticket_purchased'         => 'Билет куплен, ваша ставка: :number',
 ];

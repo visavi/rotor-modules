@@ -77,7 +77,7 @@ class IndexController extends BaseController
                         'send_user_id' => getUser('id'),
                         'text'         => $msg,
                         'created_at'   => SITETIME,
-                        'deleted_at'   => strtotime('+' . GiftsUser::GIFT_DAYS . 'days', SITETIME)
+                        'deleted_at'   => strtotime('+' . Gift::getConfig('gift_days') . 'days', SITETIME)
                     ]);
                 });
 

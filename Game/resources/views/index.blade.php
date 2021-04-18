@@ -12,10 +12,45 @@
 @stop
 
 @section('content')
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/blackjack">{{ __('Game::games.blackjack') }}</a><br>
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/dices">{{ __('Game::games.dices') }}</a><br>
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/thimbles">{{ __('Game::games.thimbles') }}</a><br>
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/bandit">{{ __('Game::games.bandit') }}</a><br>
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/guess">{{ __('Game::games.guess') }}</a><br>
-    <i class="far fa-circle fa-lg text-muted"></i> <a href="/games/safe">{{ __('Game::games.safe') }}</a><br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-coins fa-5x"></i>
+                    <a href="/games/blackjack" class="h5">{{ __('Game::games.blackjack') }}</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-dice fa-5x"></i>
+                    <a href="/games/dices" class="h5">{{ __('Game::games.dices') }}</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-beer fa-5x"></i>
+                    <a href="/games/thimbles" class="h5">{{ __('Game::games.thimbles') }}</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-sort-numeric-up-alt fa-5x"></i>
+                    <a href="/games/guess" class="h5">{{ __('Game::games.guess') }}</a>
+
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-dollar-sign fa-5x"></i>
+                    <a href="/games/bandit" class="h5">{{ __('Game::games.slot') }}</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-piggy-bank fa-5x"></i>
+                    <a href="/games/safe" class="h5">{{ __('Game::games.safe') }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop

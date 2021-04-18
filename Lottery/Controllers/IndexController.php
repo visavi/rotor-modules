@@ -39,7 +39,11 @@ class IndexController extends BaseController
 
         $config = Lottery::getConfig();
 
-        return view('Lottery::index', compact('today', 'yesterday', 'config'));
+        $ticket = $today->lotteryUsers()
+            ->where('user_id', getUser('id'))
+            ->first();
+
+        return view('Lottery::index', compact('today', 'yesterday', 'config', 'ticket'));
     }
 
     /**
@@ -68,13 +72,13 @@ class IndexController extends BaseController
             abort('default', __('Lottery::lottery.lottery_not_activated'));
         }
 
-        $lotteryUser = $lottery->lotteryUsers()
+        $ticketExist = $lottery->lotteryUsers()
             ->where('user_id', $user->id)
-            ->first();
+            ->exists();
 
         $validator
             ->equal($request->input('token'), $_SESSION['token'], ['number' => __('validator.token')])
-            ->empty($lotteryUser, ['number' => __('Lottery::lottery.already_bought_ticket')])
+            ->false($ticketExist, ['number' => __('Lottery::lottery.already_bought_ticket')])
             ->lte($ticketPrice, getUser('money'), ['number' => __('Lottery::lottery.no_money')])
             ->between($number, $numberRange[0], $numberRange[1], ['number' => __('Lottery::lottery.must_enter_number')]);
 

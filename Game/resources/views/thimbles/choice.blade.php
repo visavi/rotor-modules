@@ -6,8 +6,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/games">Игры / Развлечения</a></li>
-            <li class="breadcrumb-item"><a href="/games/thimbles">Наперстки</a></li>
+            <li class="breadcrumb-item"><a href="/games">{{ __('Game::games.module') }}</a></li>
+            <li class="breadcrumb-item"><a href="/games/thimbles">{{ __('Game::games.thimbles') }}</a></li>
             <li class="breadcrumb-item active">Выбор наперстка</li>
         </ol>
     </nav>

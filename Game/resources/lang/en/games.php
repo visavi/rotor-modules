@@ -6,7 +6,7 @@ return [
     'blackjack' => 'Blackjack',
     'dices'     => 'Dices',
     'thimbles'  => 'Thimbles',
-    'bandit'    => 'One armed bandit',
+    'bandit'    => 'Slot machine',
     'guess'     => 'Guess number',
     'safe'      => 'Hacking safe',
 ];

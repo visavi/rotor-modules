@@ -34,11 +34,11 @@ class Gift extends BaseModel
     /**
      * Get config
      *
-     * @param string $name
+     * @param string|null $name
      *
      * @return mixed|null
      */
-    public static function getConfig($name = null)
+    public static function getConfig(?string $name = null)
     {
         $config = include MODULES . '/Gift/module.php';
 

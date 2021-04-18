@@ -26,5 +26,6 @@ INFO,
     'homepage'    => 'https://visavi.net',
     'panel'       => '/admin/gifts',
 
-    'per_page'     => 100, // Кол. подарков на страницу
+    'per_page'    => 24, // Кол. подарков на страниц
+    'gift_days'   => 365, // На какой срок дарить подарок (дней)
 ];

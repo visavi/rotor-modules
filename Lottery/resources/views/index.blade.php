@@ -26,7 +26,7 @@
                 @if ($yesterday->winners->isNotEmpty())
                     <i class="fas fa-crown"></i> {{ __('Lottery::lottery.winners') }}:
                     @foreach ($yesterday->winners as $key => $winner)
-                        <?php $comma = (empty($key)) ? '' : ', '; ?>
+                        @php $comma = (empty($key)) ? '' : ', '; @endphp
                         {{ $comma }}{{ $winner->user->getProfile() }}
                     @endforeach
                 @else
@@ -40,18 +40,25 @@
 
     @if ($user = getUser())
         <div class="section-form mb-3 shadow">
-            <form action="/lottery/buy" method="post">
-                @csrf
-                <div class="form-group{{ hasError('number') }}">
-                    <label for="number">{{ __('Lottery::lottery.enter_number') }}:</label>
-                    <input type="text" class="form-control" id="number" name="number" maxlength="3" value="{{ getInput('number') }}" placeholder="{{ __('Lottery::lottery.enter_number_inclusive', ['min' => $config['numberRange'][0], 'max' => $config['numberRange'][1]]) }}" required>
-                    <div class="invalid-feedback">{{ textError('number') }}</div>
+
+            @if (! $ticket)
+                <form action="/lottery/buy" method="post" class="mb-3">
+                    @csrf
+                    <div class="form-group{{ hasError('number') }}">
+                        <label for="number">{{ __('Lottery::lottery.enter_number') }}:</label>
+                        <input type="text" class="form-control" id="number" name="number" maxlength="3" value="{{ getInput('number') }}" placeholder="{{ __('Lottery::lottery.enter_number_inclusive', ['min' => $config['numberRange'][0], 'max' => $config['numberRange'][1]]) }}" required>
+                        <div class="invalid-feedback">{{ textError('number') }}</div>
+                    </div>
+
+                    <button class="btn btn-primary">{{ __('Lottery::lottery.buy_ticket') }}</button>
+                </form>
+            @else
+                <div class="alert alert-success">
+                    {{ __('Lottery::lottery.ticket_purchased', ['number' => $ticket->number]) }}
                 </div>
+            @endif
 
-                <button class="btn btn-primary">{{ __('Lottery::lottery.buy_ticket') }}</button>
-            </form>
-
-            <div class="my-3">
+            <div class="mb-3">
                 {{ __('Lottery::lottery.participate') }}: {{ $today->lotteryUsers()->count() }}<br>
                 {{ __('Lottery::lottery.ticket_price') }}: {{ plural($config['ticketPrice'], setting('moneyname')) }}<br>
                 {{ __('Lottery::lottery.in_stock') }}: {{ plural($user->money, setting('moneyname')) }}

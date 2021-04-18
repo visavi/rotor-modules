@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', 'Угадай число')
+@section('title', __('Game::games.guess'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/games">Игры / Развлечения</a></li>
-            <li class="breadcrumb-item active">Угадай число</li>
+            <li class="breadcrumb-item"><a href="/games">{{ __('Game::games.module') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('Game::games.guess') }}</li>
         </ol>
     </nav>
 @stop

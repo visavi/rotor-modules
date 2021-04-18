@@ -22,13 +22,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class GiftsUser extends BaseModel
 {
     /**
-     * How many days to give a gift
-     *
-     * @var int
-     */
-    public const GIFT_DAYS = 365;
-
-    /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
