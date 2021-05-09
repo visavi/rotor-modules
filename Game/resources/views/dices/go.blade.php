@@ -20,7 +20,7 @@
     У банкира:<br>
     <img src="/assets/modules/games/dices/{{ $num[2] }}.gif" alt="image"> и <img src="/assets/modules/games/dices/{{ $num[3] }}.gif" alt="image"><br><br>
 
-    <div class="font-weight-bold">
+    <div class="fw-bold">
         <i class="fas fa-trophy"></i> {!! $result !!}
     </div>
 

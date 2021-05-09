@@ -21,16 +21,16 @@
     Всё готово для совершения взлома! Введите комбинацию цифр и нажмите ломать сейф!<br><br>
 
     Комбинация сейфа:<br>
-    <span class="badge badge-info">-</span>
-    <span class="badge badge-info">-</span>
-    <span class="badge badge-info">-</span>
-    <span class="badge badge-info">-</span>
-    <span class="badge badge-info">-</span>
+    <span class="badge bg-info">-</span>
+    <span class="badge bg-info">-</span>
+    <span class="badge bg-info">-</span>
+    <span class="badge bg-info">-</span>
+    <span class="badge bg-info">-</span>
 
     <div class="section-form mb-3 shadow">
         <form action="/games/safe/go" method="post">
             @csrf
-            <div class="form-group row{{ hasError('code') }}">
+            <div class="mb-3 row{{ hasError('code') }}">
                 <div class="col-1">
                     <input class="form-control" name="code0" maxlength="1" value="{{ getInput('code0') }}" required>
                 </div>

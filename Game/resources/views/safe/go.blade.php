@@ -15,11 +15,11 @@
 
 @section('content')
     Комбинация сейфа:<br>
-    <span class="badge badge-info">{{ $hack[0] }}</span>
-    <span class="badge badge-info">{{ $hack[1] }}</span>
-    <span class="badge badge-info">{{ $hack[2] }}</span>
-    <span class="badge badge-info">{{ $hack[3] }}</span>
-    <span class="badge badge-info">{{ $hack[4] }}</span>
+    <span class="badge bg-info">{{ $hack[0] }}</span>
+    <span class="badge bg-info">{{ $hack[1] }}</span>
+    <span class="badge bg-info">{{ $hack[2] }}</span>
+    <span class="badge bg-info">{{ $hack[3] }}</span>
+    <span class="badge bg-info">{{ $hack[4] }}</span>
     <br><br>
 
     @if (implode($safe['cipher']) === implode($hack))
@@ -38,7 +38,7 @@
             <div class="section-form mb-3 shadow">
                 <form action="/games/safe/go" method="post">
                     @csrf
-                    <div class="form-group row{{ hasError('bet') }}">
+                    <div class="mb-3 row{{ hasError('bet') }}">
                         <div class="col-1">
                             <input class="form-control" name="code0" maxlength="1" value="{{ getInput('code0', $hack[0] === $safe['cipher'][0] ? $safe['cipher'][0] : '') }}" required>
                         </div>
@@ -62,11 +62,11 @@
             <img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
 
             Шифр был:<br>
-            <span class="badge badge-info">{{ $safe['cipher'][0] }}</span>
-            <span class="badge badge-info">{{ $safe['cipher'][1] }}</span>
-            <span class="badge badge-info">{{ $safe['cipher'][2] }}</span>
-            <span class="badge badge-info">{{ $safe['cipher'][3] }}</span>
-            <span class="badge badge-info">{{ $safe['cipher'][4] }}</span>
+            <span class="badge bg-info">{{ $safe['cipher'][0] }}</span>
+            <span class="badge bg-info">{{ $safe['cipher'][1] }}</span>
+            <span class="badge bg-info">{{ $safe['cipher'][2] }}</span>
+            <span class="badge bg-info">{{ $safe['cipher'][3] }}</span>
+            <span class="badge bg-info">{{ $safe['cipher'][4] }}</span>
             <br><br>
             Попытки закончились. A взломать сейф так и не получилось...<br>
             Возможно, в другой раз тебе повезёт больше...<br><br>

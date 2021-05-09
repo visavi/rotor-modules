@@ -44,8 +44,8 @@
             @if (! $ticket)
                 <form action="/lottery/buy" method="post" class="mb-3">
                     @csrf
-                    <div class="form-group{{ hasError('number') }}">
-                        <label for="number">{{ __('Lottery::lottery.enter_number') }}:</label>
+                    <div class="mb-3{{ hasError('number') }}">
+                        <label for="number" class="form-label">{{ __('Lottery::lottery.enter_number') }}:</label>
                         <input type="text" class="form-control" id="number" name="number" maxlength="3" value="{{ getInput('number') }}" placeholder="{{ __('Lottery::lottery.enter_number_inclusive', ['min' => $config['numberRange'][0], 'max' => $config['numberRange'][1]]) }}" required>
                         <div class="invalid-feedback">{{ textError('number') }}</div>
                     </div>

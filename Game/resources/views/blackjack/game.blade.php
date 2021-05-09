@@ -33,7 +33,7 @@
 
         <br>{{ plural($scores['banker'], ['очко', 'очка', 'очков']) }}<br>
 
-        <div class="my-3 font-weight-bold">
+        <div class="my-3 fw-bold">
             @if ($text)
                 {{ $text }}<br>
             @endif

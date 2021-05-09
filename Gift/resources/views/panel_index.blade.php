@@ -25,7 +25,7 @@
                                 <img src="{{ $gift->path }}" alt="{{ $gift->name }}">
                             </div>
                             <div class="col-md-2 col-sm-3">
-                                <label for="gift_{{ $gift->id }}">{{ __('Gift::gifts.price') }} ({{ setting('currency') }}):</label>
+                                <label for="gift_{{ $gift->id }}" class="form-label">{{ __('Gift::gifts.price') }} ({{ setting('currency') }}):</label>
                                 <input class="form-control" name="gifts[{{ $gift->id }}]" id="gift_{{ $gift->id }}" maxlength="10" value="{{ $gift->price }}"><br>
                             </div>
                         @endforeach

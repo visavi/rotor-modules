@@ -18,8 +18,8 @@
     <div class="section-form mb-3 shadow">
         <form action="/games/guess/go" method="post">
             @csrf
-            <div class="form-group{{ hasError('guess') }}">
-                <label for="guess">Введите число:</label>
+            <div class="mb-3{{ hasError('guess') }}">
+                <label for="guess" class="form-label">Введите число:</label>
                 <input class="form-control" name="guess" id="guess" value="{{ getInput('guess') }}" required>
                 <div class="invalid-feedback">{{ textError('guess') }}</div>
             </div>

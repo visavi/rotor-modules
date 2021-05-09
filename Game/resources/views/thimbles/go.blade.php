@@ -21,7 +21,7 @@
 
     Выберите наперсток в котором может находится шарик<br><br>
 
-    <div class="font-weight-bold">
+    <div class="fw-bold">
         <i class="fas fa-trophy"></i> {!! $result !!}
     </div>
 
