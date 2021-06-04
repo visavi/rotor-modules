@@ -1,30 +1,32 @@
 <?php
 
-use FastRoute\RouteCollector;
+use Illuminate\Support\Facades\Route;
 
 /* Игры */
-$r->addGroup('/games', static function (RouteCollector $r) {
-    $r->get('', [Modules\Game\Controllers\IndexController::class, 'index']);
+Route::group(['prefix' => 'games'], function () {
+    Route::get('/', [\Modules\Game\Controllers\IndexController::class, 'index']);
 
-    $r->get('/dices', [Modules\Game\Controllers\DiceController::class, 'index']);
-    $r->get('/dices/go', [Modules\Game\Controllers\DiceController::class, 'go']);
+    Route::group(['middleware' => 'check.user'], function () {
+        Route::get('/dices', [\Modules\Game\Controllers\DiceController::class, 'index']);
+        Route::get('/dices/go', [\Modules\Game\Controllers\DiceController::class, 'go']);
 
-    $r->get('/thimbles', [Modules\Game\Controllers\ThimbleController::class, 'index']);
-    $r->get('/thimbles/choice', [Modules\Game\Controllers\ThimbleController::class, 'choice']);
-    $r->get('/thimbles/go', [Modules\Game\Controllers\ThimbleController::class, 'go']);
+        Route::get('/thimbles', [\Modules\Game\Controllers\ThimbleController::class, 'index']);
+        Route::get('/thimbles/choice', [\Modules\Game\Controllers\ThimbleController::class, 'choice']);
+        Route::get('/thimbles/go', [\Modules\Game\Controllers\ThimbleController::class, 'go']);
 
-    $r->get('/bandit', [Modules\Game\Controllers\BanditController::class, 'index']);
-    $r->get('/bandit/faq', [Modules\Game\Controllers\BanditController::class, 'faq']);
-    $r->get('/bandit/go', [Modules\Game\Controllers\BanditController::class, 'go']);
+        Route::get('/bandit', [\Modules\Game\Controllers\BanditController::class, 'index']);
+        Route::get('/bandit/faq', [\Modules\Game\Controllers\BanditController::class, 'faq']);
+        Route::get('/bandit/go', [\Modules\Game\Controllers\BanditController::class, 'go']);
 
-    $r->get('/blackjack', [Modules\Game\Controllers\BlackjackController::class, 'index']);
-    $r->get('/blackjack/rules', [Modules\Game\Controllers\BlackjackController::class, 'rules']);
-    $r->get('/blackjack/game', [Modules\Game\Controllers\BlackjackController::class, 'game']);
-    $r->addRoute(['GET', 'POST'], '/blackjack/bet', [Modules\Game\Controllers\BlackjackController::class, 'bet']);
+        Route::get('/blackjack', [\Modules\Game\Controllers\BlackjackController::class, 'index']);
+        Route::get('/blackjack/rules', [\Modules\Game\Controllers\BlackjackController::class, 'rules']);
+        Route::get('/blackjack/game', [\Modules\Game\Controllers\BlackjackController::class, 'game']);
+        Route::match(['get', 'post'], '/blackjack/bet', [\Modules\Game\Controllers\BlackjackController::class, 'bet']);
 
-    $r->get('/guess', [Modules\Game\Controllers\GuessNumberController::class, 'index']);
-    $r->addRoute(['GET', 'POST'], '/guess/go', [Modules\Game\Controllers\GuessNumberController::class, 'go']);
+        Route::get('/guess', [\Modules\Game\Controllers\GuessNumberController::class, 'index']);
+        Route::match(['get', 'post'], '/guess/go', [\Modules\Game\Controllers\GuessNumberController::class, 'go']);
 
-    $r->get('/safe', [Modules\Game\Controllers\SafeController::class, 'index']);
-    $r->addRoute(['GET', 'POST'], '/safe/go', [Modules\Game\Controllers\SafeController::class, 'go']);
+        Route::get('/safe', [\Modules\Game\Controllers\SafeController::class, 'index']);
+        Route::match(['get', 'post'], '/safe/go', [\Modules\Game\Controllers\SafeController::class, 'go']);
+    });
 });

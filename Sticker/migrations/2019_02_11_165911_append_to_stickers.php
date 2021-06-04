@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 use App\Models\Sticker;
 use App\Models\StickersCategory;
 
@@ -13,7 +13,7 @@ final class AppendToStickers extends Migration
      */
     public function up(): void
     {
-        $categories = array_map('basename', glob(MODULES . '/Sticker/resources/assets/*', GLOB_ONLYDIR));
+        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR));
 
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->create([
@@ -21,7 +21,7 @@ final class AppendToStickers extends Migration
                 'created_at' => SITETIME,
             ]);
 
-            $stickers = array_map('basename', glob(MODULES . '/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}', GLOB_BRACE));
+            $stickers = array_map('basename', glob(base_path('modules/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}'), GLOB_BRACE));
 
             foreach ($stickers as $stickerName) {
                 Sticker::query()->create([
@@ -40,7 +40,7 @@ final class AppendToStickers extends Migration
      */
     public function down(): void
     {
-        $categories = array_map('basename', glob(MODULES . '/Sticker/resources/assets/*', GLOB_ONLYDIR));
+        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*', GLOB_ONLYDIR)));
 
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->where('name', $categoryName)->first();

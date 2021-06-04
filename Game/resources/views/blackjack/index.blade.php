@@ -19,7 +19,7 @@
     <img src="/assets/modules/games/cards/45.png" alt="image">
     <br><br>
 
-    @if (empty($_SESSION['blackjack']['bet']))
+    @if (session()->missing('blackjack.bet'))
         <div class="section-form mb-3 shadow">
             <form action="/games/blackjack/bet" method="post">
                 @csrf
@@ -33,8 +33,8 @@
             </form>
         </div>
     @else
-        Ставки сделаны, на кону: {{ plural($_SESSION['blackjack']['bet'] * 2, setting('moneyname')) }}<br><br>
-        <b><a href="/games/blackjack/game?rand={{ mt_rand(1000, 99999) }}'">Вернитесь в игру</a></b><br><br>
+        Ставки сделаны, на кону: {{ plural(session()->get('blackjack.bet') * 2, setting('moneyname')) }}<br><br>
+        <b><a href="/games/blackjack/game?rand={{ mt_rand(1000, 9999) }}">Вернитесь в игру</a></b><br><br>
     @endif
 
     У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>

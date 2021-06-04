@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 final class CreateLotteryUsersTable extends Migration
 {
@@ -12,8 +13,8 @@ final class CreateLotteryUsersTable extends Migration
      */
     public function up(): void
     {
-        if (! $this->schema->hasTable('lottery_users')) {
-            $this->schema->create('lottery_users', function (Blueprint $table) {
+        if (! Schema::hasTable('lottery_users')) {
+            Schema::create('lottery_users', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('lottery_id');
                 $table->integer('user_id');
@@ -28,6 +29,6 @@ final class CreateLotteryUsersTable extends Migration
      */
     public function down(): void
     {
-        $this->schema->dropIfExists('lottery_users');
+        Schema::dropIfExists('lottery_users');
     }
 }

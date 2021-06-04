@@ -1,9 +1,9 @@
 <?php
 
-use FastRoute\RouteCollector;
+use Illuminate\Support\Facades\Route;
 
 /* Лотерея */
-$r->addGroup('/lottery', static function (RouteCollector $r) {
-    $r->get('', [Modules\Lottery\Controllers\IndexController::class, 'index']);
-    $r->post('/buy', [Modules\Lottery\Controllers\IndexController::class, 'buy']);
+Route::group(['prefix' => 'lottery'], function () {
+    Route::get('/', [\Modules\Lottery\Controllers\IndexController::class, 'index']);
+    Route::post('/buy', [\Modules\Lottery\Controllers\IndexController::class, 'buy']);
 });

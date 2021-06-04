@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 use Modules\Gift\Models\Gift;
 
 final class SeedToGifts extends Migration
@@ -12,7 +12,7 @@ final class SeedToGifts extends Migration
      */
     public function up(): void
     {
-        $gifts = array_map('basename', glob(MODULES . '/Gift/resources/assets/*.{gif,png,jpg,jpeg}', GLOB_BRACE));
+        $gifts = array_map('basename', glob(base_path('modules/Gift/resources/assets/*.{gif,png,jpg,jpeg}'), GLOB_BRACE));
 
         $data = [];
         foreach ($gifts as $gift) {

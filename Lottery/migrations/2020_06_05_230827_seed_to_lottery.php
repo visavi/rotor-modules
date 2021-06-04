@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 use Modules\Lottery\Models\Lottery;
 
 final class SeedToLottery extends Migration

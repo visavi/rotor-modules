@@ -51,13 +51,13 @@ class Lottery extends BaseModel
     /**
      * Get config
      *
-     * @param string $name
+     * @param string|null $name
      *
      * @return mixed|null
      */
-    public static function getConfig($name = null)
+    public static function getConfig(?string $name = null)
     {
-        $config = include MODULES . '/Lottery/module.php';
+        $config = include base_path('modules/Lottery/module.php');
 
         return $name ? $config[$name] ?? null : $config;
     }

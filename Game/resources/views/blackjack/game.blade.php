@@ -41,7 +41,7 @@
             {!! $result !!}
         </div>
 
-        <a class="btn btn-primary" href="/games/blackjack/bet?bet={{ $blackjack['bet'] }}&amp;token={{ $_SESSION['token'] }}">Повторить</a><br><br>
+        <a class="btn btn-primary" href="/games/blackjack/bet?bet={{ $blackjack['bet'] }}&amp;_token={{ csrf_token() }}">Повторить</a><br><br>
 
         <i class="fa fa-coins"></i> <a href="/games/blackjack">Новая ставка</a><br>
     @else

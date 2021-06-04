@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Modules\Game\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\BaseController;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
-class GuessNumberController extends BaseController
+class GuessNumberController extends Controller
 {
     /**
      * @var User
@@ -21,25 +23,26 @@ class GuessNumberController extends BaseController
      */
     public function __construct()
     {
-        parent::__construct();
+        $this->middleware(function ($request, $next) {
+            $this->user = getUser();
 
-        if (! $this->user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+            return $next($request);
+        });
     }
 
     /**
      * Угадай число
      *
      * @param Request $request
-     * @return string
+     *
+     * @return View
      */
-    public function index(Request $request): string
+    public function index(Request $request): View
     {
         $newGame = int($request->input('new'));
 
         if ($newGame) {
-            unset($_SESSION['guess']);
+            $request->session()->forget('guess');
         }
 
         return view('Game::guess/index', ['user' => $this->user]);
@@ -50,32 +53,34 @@ class GuessNumberController extends BaseController
      *
      * @param Request   $request
      * @param Validator $validator
-     * @return string
+     *
+     * @return View|RedirectResponse
      */
-    public function go(Request $request, Validator $validator): string
+    public function go(Request $request, Validator $validator)
     {
         $guessNumber = int($request->input('guess'));
 
-        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'))
+        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
             ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {
             setInput($request->all());
             setFlash('danger', $validator->getErrors());
-            redirect('/games/guess');
+
+            return redirect('games/guess');
         }
 
-        if (empty($_SESSION['guess']['number'])) {
-            $_SESSION['guess']['count']  = 0;
-            $_SESSION['guess']['number'] = mt_rand(1, 100);
+        if ($request->session()->missing('guess.number')) {
+            $request->session()->put('guess.count', 0);
+            $request->session()->put('guess.number', mt_rand(1, 100));
         }
 
-        $_SESSION['guess']['count']++;
+        $request->session()->increment('guess.count');
         $this->user->decrement('money', 3);
         $hint = null;
 
-        $guess = $_SESSION['guess'];
+        $guess = $request->session()->get('guess');
 
         if ($guessNumber !== $guess['number']) {
             if ($guess['count'] < 5) {
@@ -87,10 +92,10 @@ class GuessNumberController extends BaseController
                     $hint = 'маленькое число, введите больше!';
                 }
             } else {
-                unset($_SESSION['guess']);
+                $request->session()->forget('guess');
             }
         } else {
-            unset($_SESSION['guess']);
+            $request->session()->forget('guess');
             $this->user->increment('money', 100);
         }
 

@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Migrations\Migration;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 final class CreateGiftsTable extends Migration
 {
@@ -12,8 +13,8 @@ final class CreateGiftsTable extends Migration
      */
     public function up(): void
     {
-        if (! $this->schema->hasTable('gifts')) {
-            $this->schema->create('gifts', function (Blueprint $table) {
+        if (! Schema::hasTable('gifts')) {
+            Schema::create('gifts', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('name', 50)->nullable();
                 $table->string('path', 100);
@@ -28,6 +29,6 @@ final class CreateGiftsTable extends Migration
      */
     public function down(): void
     {
-        $this->schema->dropIfExists('gifts');
+        Schema::dropIfExists('gifts');
     }
 }

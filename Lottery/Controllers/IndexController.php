@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace Modules\Lottery\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\BaseController;
-use Illuminate\Database\Capsule\Manager as DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Modules\Lottery\Models\Lottery;
 use Throwable;
 
-class IndexController extends BaseController
+class IndexController extends Controller
 {
     /**
      * Main page
      *
-     * @return string
+     * @return View
      */
-    public function index(): string
+    public function index(): View
     {
         $this->rewardWinners();
 
@@ -49,12 +51,13 @@ class IndexController extends BaseController
     /**
      * Buy ticket
      *
-     * @param  Request  $request
-     * @param  Validator  $validator
+     * @param Request   $request
+     * @param Validator $validator
      *
+     * @return RedirectResponse
      * @throws Throwable
      */
-    public function buy(Request $request, Validator $validator): void
+    public function buy(Request $request, Validator $validator): RedirectResponse
     {
         $number      = int($request->input('number'));
         $ticketPrice = Lottery::getConfig('ticketPrice');
@@ -69,7 +72,7 @@ class IndexController extends BaseController
             ->first();
 
         if (!$lottery) {
-            abort('default', __('Lottery::lottery.lottery_not_activated'));
+            abort(200, __('Lottery::lottery.lottery_not_activated'));
         }
 
         $ticketExist = $lottery->lotteryUsers()
@@ -77,13 +80,13 @@ class IndexController extends BaseController
             ->exists();
 
         $validator
-            ->equal($request->input('token'), $_SESSION['token'], ['number' => __('validator.token')])
+            ->equal($request->input('_token'), csrf_token(), ['number' => __('validator.token')])
             ->false($ticketExist, ['number' => __('Lottery::lottery.already_bought_ticket')])
             ->lte($ticketPrice, getUser('money'), ['number' => __('Lottery::lottery.no_money')])
             ->between($number, $numberRange[0], $numberRange[1], ['number' => __('Lottery::lottery.must_enter_number')]);
 
         if ($validator->isValid()) {
-            DB::connection()->transaction(
+            DB::transaction(
                 static function () use ($user, $number, $lottery, $ticketPrice) {
                     $user->decrement('money', $ticketPrice);
                     $lottery->increment('amount', $ticketPrice);
@@ -102,7 +105,7 @@ class IndexController extends BaseController
             setFlash('danger', $validator->getErrors());
         }
 
-        redirect('/lottery');
+        return redirect('lottery');
     }
 
     /**

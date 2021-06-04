@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Game\Controllers;
 
-use App\Controllers\BaseController;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\View\View;
 
-class BanditController extends BaseController
+class BanditController extends Controller
 {
     /**
      * @var User
@@ -19,19 +20,19 @@ class BanditController extends BaseController
      */
     public function __construct()
     {
-        parent::__construct();
+        $this->middleware(function ($request, $next) {
+            $this->user = getUser();
 
-        if (! $this->user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+            return $next($request);
+        });
     }
 
     /**
      * Бандит
      *
-     * @return string
+     * @return View
      */
-    public function index(): string
+    public function index(): View
     {
         return view('Game::bandit/index', ['user' => $this->user]);
     }
@@ -39,12 +40,12 @@ class BanditController extends BaseController
     /**
      * Игра
      *
-     * @return string
+     * @return View
      */
-    public function go(): string
+    public function go(): View
     {
         if ($this->user->money < 5) {
-            abort('default', 'Вы не можете играть! У вас недостаточно средств!');
+            abort(200, 'Вы не можете играть! У вас недостаточно средств!');
         }
 
         $num[1] = mt_rand(1, 8);
@@ -284,9 +285,9 @@ class BanditController extends BaseController
     /**
      * Правила игры
      *
-     * @return string
+     * @return View
      */
-    public function faq(): string
+    public function faq(): View
     {
         return view('Game::bandit/faq');
     }

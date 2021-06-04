@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
 use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 use Illuminate\Http\Request;
@@ -19,11 +21,7 @@ class PanelController extends AdminController
      */
     public function __construct()
     {
-        parent::__construct();
-
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
+        $this->middleware('check.admin:boss');
     }
 
     /**
@@ -31,29 +29,29 @@ class PanelController extends AdminController
      *
      * @param Request   $request
      * @param Validator $validator
-     * @return string
+     *
+     * @return View|RedirectResponse
      */
-    public function index(Request $request, Validator $validator): string
+    public function index(Request $request, Validator $validator)
     {
         if ($request->isMethod('post')) {
-
             $gifts = intar($request->input('gifts'));
 
-            $validator->equal($request->input('token'), $_SESSION['token'], ['msg' => __('validator.token')])
+            $validator->equal($request->input('_token'), csrf_token(), ['msg' => __('validator.token')])
                 ->notEmpty($gifts, __('Gift::gifts.prices_not_transferred'));
 
             if ($validator->isValid()) {
-
                 foreach ($gifts as $id => $price) {
                     Gift::query()->where('id', $id)->update(['price' => $price]);
                 }
 
                 setFlash('success', __('Gift::gifts.prices_saved'));
-                redirect('/admin/gifts');
-            } else {
-                setInput($request->all());
-                setFlash('danger', $validator->getErrors());
+
+                return redirect('admin/gifts');
             }
+
+            setInput($request->all());
+            setFlash('danger', $validator->getErrors());
         }
 
         $gifts = Gift::query()
@@ -68,21 +66,20 @@ class PanelController extends AdminController
      *
      * @param Request   $request
      * @param Validator $validator
-     * @return void
-     * @throws Exception
+     *
+     * @return RedirectResponse
      */
-    public function delete(Request $request, Validator $validator): void
+    public function delete(Request $request, Validator $validator): RedirectResponse
     {
         $id    = int($request->input('id'));
         $login = $request->input('user');
 
-        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'));
+        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'));
 
         $gift = GiftsUser::query()->find($id);
         $validator->notEmpty($gift, __('Gift::gifts.gift_not_found'));
 
         if ($validator->isValid()) {
-
             $gift->delete();
 
             setFlash('success', __('Gift::gifts.gift_deleted'));
@@ -90,6 +87,6 @@ class PanelController extends AdminController
             setFlash('danger', $validator->getErrors());
         }
 
-        redirect('/gifts/' . $login);
+        return redirect('gifts/' . $login);
     }
 }

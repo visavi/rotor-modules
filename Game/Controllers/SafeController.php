@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Modules\Game\Controllers;
 
 use App\Classes\Validator;
-use App\Controllers\BaseController;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
-class SafeController extends BaseController
+class SafeController extends Controller
 {
     /**
      * @var User
@@ -21,19 +23,19 @@ class SafeController extends BaseController
      */
     public function __construct()
     {
-        parent::__construct();
+        $this->middleware(function ($request, $next) {
+            $this->user = getUser();
 
-        if (! $this->user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+            return $next($request);
+        });
     }
 
     /**
      * Взлом сейфа
      *
-     * @return string
+     * @return View
      */
-    public function index(): string
+    public function index(): View
     {
         return view('Game::safe/index', ['user' => $this->user]);
     }
@@ -43,9 +45,10 @@ class SafeController extends BaseController
      *
      * @param Request   $request
      * @param Validator $validator
-     * @return string
+     *
+     * @return View|RedirectResponse
      */
-    public function go(Request $request, Validator $validator): string
+    public function go(Request $request, Validator $validator)
     {
         $code0 = int($request->input('code0'));
         $code1 = int($request->input('code1'));
@@ -53,24 +56,26 @@ class SafeController extends BaseController
         $code3 = int($request->input('code3'));
         $code4 = int($request->input('code4'));
 
-        $validator->equal($request->input('token'), $_SESSION['token'], __('validator.token'))
+        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
             ->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {
             setInput($request->all());
             setFlash('danger', $validator->getErrors());
-            redirect('/games/safe');
+
+            return redirect('games/safe');
         }
 
-        if (empty($_SESSION['safe']['cipher'])) {
-            $_SESSION['safe']['cipher'] = [mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9)];
-            $_SESSION['safe']['try'] = 5;
+        if ($request->session()->missing('safe.cipher')) {
+            $request->session()->put('safe.cipher', [mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9)]);
+            $request->session()->put('safe.try', 5);
             $this->user->decrement('money', 100);
         }
 
-        $_SESSION['safe']['try']--;
+        $request->session()->decrement('safe.try');
 
-        $safe = $_SESSION['safe'];
+        $safe = $request->session()->get('safe');
+
         $hack = ['-', '-', '-', '-', '-'];
 
         if ($code0 === $safe['cipher'][1] || $code0 === $safe['cipher'][2] || $code0 === $safe['cipher'][3] || $code0 === $safe['cipher'][4]) {$hack[0] = '*';}
@@ -111,12 +116,12 @@ class SafeController extends BaseController
         if ($code4 === $safe['cipher'][4]) {$hack[4] = $safe['cipher'][4];}
 
         if (implode($safe['cipher']) === implode($hack)) {
-            unset($_SESSION['safe']);
+            $request->session()->forget('safe');
             $this->user->increment('money', 1000);
         }
 
-        if (empty($_SESSION['safe']['try'])) {
-            unset($_SESSION['safe']);
+        if (empty($request->session()->get('safe.try'))) {
+            $request->session()->forget('safe');
         }
 
         $user = $this->user;

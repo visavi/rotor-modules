@@ -21,7 +21,7 @@
                     <div class="col-md-4 col-sm-6">
                         @if (isAdmin())
                             <div class="float-end">
-                                <a href="/admin/gifts/delete?user={{ $gift->user->login }}&amp;id={{ $gift->id }}&amp;token={{ $_SESSION['token'] }}" onclick="return confirm('{{ __('Gift::gifts.confirm_delete_gift') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                                <a href="/admin/gifts/delete?user={{ $gift->user->login }}&amp;id={{ $gift->id }}&amp;_token={{ csrf_token() }}" onclick="return confirm('{{ __('Gift::gifts.confirm_delete_gift') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             </div>
                         @endif
 

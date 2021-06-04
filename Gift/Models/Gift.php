@@ -40,7 +40,7 @@ class Gift extends BaseModel
      */
     public static function getConfig(?string $name = null)
     {
-        $config = include MODULES . '/Gift/module.php';
+        $config = include base_path('modules/Gift/module.php');
 
         return $name ? $config[$name] ?? null : $config;
     }

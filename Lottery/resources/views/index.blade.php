@@ -15,13 +15,17 @@
     <div class="section mb-3 shadow">
         <div class="mb-3">
             {!! __('Lottery::lottery.lottery_info') !!}
+
+            <div class="my-3">
+                {{ __('Lottery::lottery.jackpot_amount', ['jackpot' => plural($today->amount, setting('moneyname'))]) }}
+            </div>
         </div>
-        <div>
-            {{ __('Lottery::lottery.jackpot_amount', ['jackpot' => plural($today->amount, setting('moneyname'))]) }}
-        </div>
+
         @if ($yesterday)
-            <div class="mt-3">
-                {{ __('Lottery::lottery.winning_number', ['number' => $yesterday->number]) }}<br>
+            <div>
+                <div class="mb-3">
+                    {{ __('Lottery::lottery.winning_number', ['number' => $yesterday->number]) }}
+                </div>
 
                 @if ($yesterday->winners->isNotEmpty())
                     <i class="fas fa-crown"></i> {{ __('Lottery::lottery.winners') }}:

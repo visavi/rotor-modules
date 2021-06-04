@@ -1,15 +1,15 @@
 <?php
 
-use FastRoute\RouteCollector;
+use Illuminate\Support\Facades\Route;
 
 /* Подарки */
-$r->addGroup('/gifts', static function (RouteCollector $r) {
-    $r->get('', [Modules\Gift\Controllers\IndexController::class, 'index']);
-    $r->addRoute(['GET', 'POST'], '/send/{id:\d+}', [Modules\Gift\Controllers\IndexController::class, 'send']);
-    $r->get('/{login:[\w\-]+}', [Modules\Gift\Controllers\IndexController::class, 'gifts']);
+Route::group(['prefix' => 'gifts'], function () {
+    Route::get('/', [\Modules\Gift\Controllers\IndexController::class, 'index']);
+    Route::match(['get', 'post'], '/send/{id:\d+}', [\Modules\Gift\Controllers\IndexController::class, 'send']);
+    Route::get('/{login:[\w\-]+}', [\Modules\Gift\Controllers\IndexController::class, 'gifts']);
 });
 
-$r->addGroup('/admin', static function (RouteCollector $r) {
-    $r->addRoute(['GET', 'POST'], '/gifts', [Modules\Gift\Controllers\PanelController::class, 'index']);
-    $r->get('/gifts/delete', [Modules\Gift\Controllers\PanelController::class, 'delete']);
+Route::group(['prefix' => 'admin'], function () {
+    Route::match(['get', 'post'], '/gifts', [\Modules\Gift\Controllers\PanelController::class, 'index']);
+    Route::get('/gifts/delete', [\Modules\Gift\Controllers\PanelController::class, 'delete']);
 });

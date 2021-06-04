@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Game\Controllers;
 
-use App\Controllers\BaseController;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
-class ThimbleController extends BaseController
+class ThimbleController extends Controller
 {
     /**
      * @var User
@@ -20,19 +22,19 @@ class ThimbleController extends BaseController
      */
     public function __construct()
     {
-        parent::__construct();
+        $this->middleware(function ($request, $next) {
+            $this->user = getUser();
 
-        if (! $this->user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+            return $next($request);
+        });
     }
 
     /**
      * Наперстки
      *
-     * @return string
+     * @return View
      */
-    public function index(): string
+    public function index(): View
     {
         return view('Game::thimbles/index', ['user' => $this->user]);
     }
@@ -40,9 +42,9 @@ class ThimbleController extends BaseController
     /**
      * Выбор наперстка
      *
-     * @return string
+     * @return View
      */
-    public function choice(): string
+    public function choice(): View
     {
         return view('Game::thimbles/choice', ['user' => $this->user]);
     }
@@ -51,19 +53,20 @@ class ThimbleController extends BaseController
      * Игра в наперстки
      *
      * @param Request $request
-     * @return string
+     *
+     * @return View|RedirectResponse
      */
-    public function go(Request $request): string
+    public function go(Request $request)
     {
         $thimble = int($request->input('thimble'));
 
         if ($this->user->money < 5) {
-            abort('default', 'Вы не можете играть! У вас недостаточно средств!');
+            abort(200, 'Вы не можете играть! У вас недостаточно средств!');
         }
 
         if (! $thimble) {
             setFlash('danger', 'Необходимо выбрать один из наперстков!');
-            redirect('/games/thimbles/choice');
+            return redirect('games/thimbles/choice');
         }
 
         $results = [
