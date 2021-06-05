@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 use Modules\Lottery\Models\Lottery;
 
 final class SeedToLottery extends Migration
@@ -26,6 +27,8 @@ final class SeedToLottery extends Migration
      */
     public function down(): void
     {
-        Lottery::query()->truncate();
+        if (Schema::hasTable('lottery')) {
+            Lottery::query()->truncate();
+        }
     }
 }

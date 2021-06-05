@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 use Modules\Gift\Models\Gift;
 
 final class SeedToGifts extends Migration
@@ -32,6 +33,8 @@ final class SeedToGifts extends Migration
      */
     public function down(): void
     {
-        Gift::query()->truncate();
+        if (Schema::hasTable('gifts')) {
+            Gift::query()->truncate();
+        }
     }
 }
