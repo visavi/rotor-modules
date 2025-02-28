@@ -9,8 +9,8 @@ return [
 <a href="/games">Игры и развлечения</a>
 [/code]
 INFO,
-    'version'     => '1.2',
-    'author'      => 'Vantuz',
-    'email'       => 'admin@visavi.net',
-    'homepage'    => 'https://visavi.net',
+    'version'  => '1.2',
+    'author'   => 'Vantuz',
+    'email'    => 'admin@visavi.net',
+    'homepage' => 'https://visavi.net',
 ];
