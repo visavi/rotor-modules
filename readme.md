@@ -73,15 +73,15 @@ resources/assets - директория для статических файло
 
 
 ```php
-use App\Classes\HookManager;
+use App\Classes\Hook;
 
 // Добавляет данные
-HookManager::addHook('header', function ($content) {
+Hook::add('header', function ($content) {
     return $content . '<link rel="stylesheet" href="style.css">' . PHP_EOL;
 });
 
 // Изменяет данные
-HookManager::addHook('price', function ($value) {
+Hook::add('price', function ($value) {
     return $value + 10;
 });
 ```
@@ -89,10 +89,10 @@ HookManager::addHook('price', function ($value) {
 В модулях тоже можно встраивать хуки
 ```php
 // Вызов хука
-echo HookManager::callHook('header');
+echo Hook::call('header');
 
-// Вызоы хука для изменения данных
-$result = HookManager::callHook('increment', 100);
+// Вызов хука для изменения данных
+$result = Hook::call('increment', 100);
 
 // Упрощенныхй вызов хука в шаблоне
 @hook('header')
