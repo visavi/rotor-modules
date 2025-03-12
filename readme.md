@@ -76,7 +76,7 @@ resources/assets - директория для статических файло
 use App\Classes\Hook;
 
 // Добавляет данные
-Hook::add('header', function ($content) {
+Hook::add('head', function ($content) {
     return $content . '<link rel="stylesheet" href="style.css">' . PHP_EOL;
 });
 
@@ -89,13 +89,13 @@ Hook::add('price', function ($value) {
 В модулях тоже можно встраивать хуки
 ```php
 // Вызов хука
-echo Hook::call('header');
+echo Hook::call('head');
 
 // Вызов хука для изменения данных
-$result = Hook::call('increment', 100);
+$result = Hook::call('price', 100);
 
 // Упрощенныхй вызов хука в шаблоне
-@hook('header')
+@hook('head')
 ```
 
 В модулях доступны все функции, классы и методы Rotor
