@@ -22,7 +22,7 @@ $giftsCount = \Modules\Gift\Models\GiftsUser::where('user_id', $user->id)->count
 <a href="/gifts?user={{ $user->login }}">Отправить подарок</a><br>
 [/code]
 INFO,
-    'version'     => '1.1',
+    'version'     => '1.2',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
