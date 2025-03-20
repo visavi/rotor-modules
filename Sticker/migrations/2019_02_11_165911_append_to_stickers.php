@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use App\Models\Sticker;
 use App\Models\StickersCategory;
 
-final class AppendToStickers extends Migration
-{
+return new class extends Migration {
     /**
      * Migrate Up.
      */
@@ -53,4 +52,4 @@ final class AppendToStickers extends Migration
 
         clearCache('stickers');
     }
-}
+};

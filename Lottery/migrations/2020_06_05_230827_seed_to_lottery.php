@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 use Modules\Lottery\Models\Lottery;
 
-final class SeedToLottery extends Migration
-{
+return new class extends Migration {
     /**
      * Migrate Up.
      */
@@ -31,4 +30,4 @@ final class SeedToLottery extends Migration
             Lottery::query()->truncate();
         }
     }
-}
+};

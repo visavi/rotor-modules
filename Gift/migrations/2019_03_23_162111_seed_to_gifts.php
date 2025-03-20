@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 use Modules\Gift\Models\Gift;
 
-final class SeedToGifts extends Migration
-{
+return new class extends Migration {
     /**
      * Migrate Up.
      */
@@ -37,4 +36,4 @@ final class SeedToGifts extends Migration
             Gift::query()->truncate();
         }
     }
-}
+};
