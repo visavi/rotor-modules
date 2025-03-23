@@ -14,13 +14,13 @@ Hook::add('sidebarMenuEnd', function ($content) {
 });
 
 // Добавляем ссылку на мои подарки в личный кабинет
-Hook::add('userPersonalEnd', function ($content) {
-    $giftsCount = GiftsUser::query()->where('user_id', getUser('id'))->count();
+Hook::add('userActionMiddle', function ($content, $user) {
+    $giftsCount = GiftsUser::query()->where('user_id', $user->id)->count();
 
-    return $content . '<i class="fas fa-gift"></i> <a href="/gifts/' . getUser('login') . '">Мои подарки</a> (' . $giftsCount . ')<br>' . PHP_EOL;
+    return $content . '<i class="fas fa-gift"></i> <a href="/gifts/' . $user->login . '">Подарки</a> (' . $giftsCount . ')<br>' . PHP_EOL;
 });
 
 // Добавляем ссылку на отправку подарка пользователю
-Hook::add('userNotPersonalEnd', function ($content, $user) {
+Hook::add('userNotPersonalStart', function ($content, $user) {
     return $content . '<i class="fas fa-gift"></i> <a href="/gifts?user=' . $user->login . '">Отправить подарок</a><br>' . PHP_EOL;
 });

@@ -18,14 +18,10 @@ class IndexController extends Controller
 {
     /**
      * Main page
-     *
-     * @param Request $request
-     *
-     * @return View
      */
     public function index(Request $request): View
     {
-        $user    = $request->input('user');
+        $user = $request->input('user');
         $perPage = Gift::getConfig('per_page');
 
         $gifts = Gift::query()
@@ -42,15 +38,14 @@ class IndexController extends Controller
     /**
      * Sends a gift
      *
-     * @param int       $id
-     * @param Request   $request
-     * @param Validator $validator
-     *
-     * @return View|RedirectResponse
      * @throws Throwable
      */
-    public function send(int $id, Request $request, Validator $validator)
+    public function send(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
+        if (! getUser()) {
+            abort(403, __('main.not_authorized'));
+        }
+
         /** @var Gift $gift */
         $gift = Gift::query()->find($id);
 
@@ -82,11 +77,11 @@ class IndexController extends Controller
                         'send_user_id' => getUser('id'),
                         'text'         => $msg,
                         'created_at'   => SITETIME,
-                        'deleted_at'   => strtotime('+' . Gift::getConfig('gift_days') . 'days', SITETIME)
+                        'deleted_at'   => strtotime('+' . Gift::getConfig('gift_days') . 'days', SITETIME),
                     ]);
                 });
 
-                $message = 'Пользователь @' . getUser('login') . ' отправил вам подарок!' . PHP_EOL . '[img]' . $gift->path  . '[/img] ' . $msg . PHP_EOL . '[url=/gifts/' . $user->login . ']Мои подарки[/url]';
+                $message = 'Пользователь @' . getUser('login') . ' отправил вам подарок!' . PHP_EOL . '[img]' . $gift->path . '[/img] ' . $msg . PHP_EOL . '[url=/gifts/' . $user->login . ']Мои подарки[/url]';
                 $user->sendMessage(null, $message);
 
                 setFlash('success', __('Gift::gifts.gift_sent'));
@@ -103,10 +98,6 @@ class IndexController extends Controller
 
     /**
      * View gifts
-     *
-     * @param string $login
-     *
-     * @return View
      */
     public function gifts(string $login): View
     {
