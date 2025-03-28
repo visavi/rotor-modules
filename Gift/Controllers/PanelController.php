@@ -6,13 +6,11 @@ namespace Modules\Gift\Controllers;
 
 use App\Classes\Validator;
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
-use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
-use Illuminate\Http\Request;
 
 class PanelController extends AdminController
 {
@@ -26,13 +24,8 @@ class PanelController extends AdminController
 
     /**
      * Main page
-     *
-     * @param Request   $request
-     * @param Validator $validator
-     *
-     * @return View|RedirectResponse
      */
-    public function index(Request $request, Validator $validator)
+    public function index(Request $request, Validator $validator): View|RedirectResponse
     {
         if ($request->isMethod('post')) {
             $gifts = intar($request->input('gifts'));
@@ -63,15 +56,10 @@ class PanelController extends AdminController
 
     /**
      * Removes gifts
-     *
-     * @param Request   $request
-     * @param Validator $validator
-     *
-     * @return RedirectResponse
      */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
-        $id    = int($request->input('id'));
+        $id = int($request->input('id'));
         $login = $request->input('user');
 
         $validator->equal($request->input('_token'), csrf_token(), __('validator.token'));
