@@ -26,7 +26,7 @@
                         <i class="fas fa-map-marker-alt text-muted me-2"></i>
                         {{ __('admin.paid_adverts.place') }}: {{ __('admin.paid_adverts.' . $advert['place']) }}
                     </div>
-                    <span class="text-primary fw-bold">{{ $advert['prices']['place'] }} ₽</span>
+                    <span class="text-primary fw-bold">{{ $advert['prices']['place'] }} {{ setting('currency') }}</span>
                 </div>
 
                 <!-- Адрес сайта -->
@@ -47,7 +47,7 @@
                             <i class="fas fa-heading text-muted me-2"></i>
                             {{ __('admin.paid_adverts.names') }} ({{ count($advert['names']) }})
                         </div>
-                        <span class="text-primary fw-bold">{{ $advert['prices']['names'] }} ₽</span>
+                        <span class="text-primary fw-bold">{{ $advert['prices']['names'] }} {{ setting('currency') }}</span>
                     </div>
                     <ul class="list-group list-group-flush">
                         @foreach ($advert['names'] as $name)
@@ -70,7 +70,7 @@
                             {{ __('main.not_specified') }}
                         @endif
                     </div>
-                    <span class="text-primary fw-bold">{{ $advert['prices']['color'] }} ₽</span>
+                    <span class="text-primary fw-bold">{{ $advert['prices']['color'] }} {{ setting('currency') }}</span>
                 </div>
 
                 <!-- Жирный текст -->
@@ -79,7 +79,7 @@
                         <i class="fas fa-bold text-muted me-2"></i>
                         {{ __('admin.paid_adverts.bold') }}: {{ $advert['bold'] ? 'Да' : 'Нет' }}
                     </div>
-                    <span class="text-primary fw-bold">{{ $advert['prices']['bold'] }} ₽</span>
+                    <span class="text-primary fw-bold">{{ $advert['prices']['bold'] }} {{ setting('currency') }}</span>
                 </div>
 
                 <!-- Срок -->
@@ -109,7 +109,7 @@
             <div class="total-block p-3 rounded mt-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="h5 mb-0">{{ __('Payment::payments.total_paid') }}:</div>
-                    <div class="h4 mb-0 text-primary">{{ number_format($advert['prices']['total'], 0, ',', ' ') }} ₽</div>
+                    <div class="h4 mb-0 text-primary">{{ number_format($advert['prices']['total'], 0, ',', ' ') }} {{ setting('currency') }}</div>
                 </div>
             </div>
         </div>

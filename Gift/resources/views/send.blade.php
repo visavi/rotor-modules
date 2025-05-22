@@ -36,7 +36,7 @@
 
             <div class="mb-3">
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                {{ __('Gift::gifts.price') }}: <span class="badge bg-primary">{{ $gift->price }}  {{ setting('currency') }}</span>
+                {{ __('Gift::gifts.price') }}: <span class="badge bg-primary">{{ $gift->price }} {{ setting('currency') }}</span>
             </div>
 
             <button class="btn btn-primary">{{ __('main.send') }}</button>

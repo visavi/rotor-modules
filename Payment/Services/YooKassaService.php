@@ -16,6 +16,7 @@ class YooKassaService
     private string $shopId;
     private string $secretKey;
     private string $apiUrl;
+    private string $currency;
 
     /** Ожидает оплаты покупателем */
     public const PENDING = 'pending';
@@ -46,6 +47,7 @@ class YooKassaService
         $this->apiUrl = config('Payment.yookassa_api_url');
         $this->shopId = config('Payment.yookassa_shop_id');
         $this->secretKey = config('Payment.yookassa_secret_key');
+        $this->currency = config('Payment.yookassa_currency');
     }
 
     /**
@@ -63,7 +65,7 @@ class YooKassaService
             $data = [
                 'amount' => [
                     'value'    => $amount,
-                    'currency' => 'RUB',
+                    'currency' => $this->currency,
                 ],
                 'confirmation' => [
                     'type'       => 'redirect',

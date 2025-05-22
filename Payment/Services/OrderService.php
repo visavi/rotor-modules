@@ -30,7 +30,7 @@ class OrderService
             'user_id'  => getUser('id'),
             'type'     => $data['type'],
             'amount'   => $data['prices']['total'],
-            'currency' => 'RUB',
+            'currency' => setting('currency'),
             'token'    => Str::random(32),
             'data'     => $data,
         ]);
