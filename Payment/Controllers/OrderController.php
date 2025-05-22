@@ -19,6 +19,6 @@ class OrderController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        return view('Payment::admin/orders', compact('orders'));
+        return view('payment::admin/orders', compact('orders'));
     }
 }

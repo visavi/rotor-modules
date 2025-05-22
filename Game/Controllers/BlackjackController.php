@@ -32,21 +32,14 @@ class BlackjackController extends Controller
 
     /**
      * Очко
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::blackjack/index', ['user' => $this->user]);
+        return view('game::blackjack/index', ['user' => $this->user]);
     }
 
     /**
      * Ставка
-     *
-     * @param Request   $request
-     * @param Validator $validator
-     *
-     * @return RedirectResponse
      */
     public function bet(Request $request, Validator $validator): RedirectResponse
     {
@@ -59,7 +52,6 @@ class BlackjackController extends Controller
         $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
             ->gt($bet, 0, ['bet' => 'Вы не указали ставку!'])
             ->gte($this->user->money, $bet, ['bet' => 'У вас недостаточно денег для игры!']);
-
 
         if ($validator->isValid()) {
             $request->session()->put('blackjack.bet', $bet);
@@ -80,7 +72,6 @@ class BlackjackController extends Controller
     /**
      * Игра
      *
-     * @param Request $request
      *
      * @return View|RedirectResponse
      */
@@ -96,12 +87,13 @@ class BlackjackController extends Controller
 
         if ($request->session()->missing('blackjack.bet')) {
             setFlash('danger', 'Необходимо сделать ставку!');
+
             return redirect('games/blackjack');
         }
 
         $scores = $this->takeCard($case);
 
-        $text   = false;
+        $text = false;
         $result = false;
 
         if ($case === 'end') {
@@ -157,24 +149,19 @@ class BlackjackController extends Controller
 
         $user = $this->user;
 
-        return view('Game::blackjack/game', compact('user', 'blackjack', 'scores', 'result', 'text'));
+        return view('game::blackjack/game', compact('user', 'blackjack', 'scores', 'result', 'text'));
     }
 
     /**
      * Правила игры
-     *
-     * @return View
      */
     public function rules(): View
     {
-        return view('Game::blackjack/rules');
+        return view('game::blackjack/rules');
     }
 
     /**
      * Подсчитывает очки карт
-     *
-     * @param array $cards
-     * @return int
      */
     private function cardsScore(array $cards): int
     {
@@ -182,7 +169,7 @@ class BlackjackController extends Controller
 
         foreach ($cards as $card) {
             if ($card > 48) {
-                $score[] =  11;
+                $score[] = 11;
                 continue;
             }
 
@@ -199,10 +186,6 @@ class BlackjackController extends Controller
 
     /**
      * Взятие карты
-     *
-     * @param string|null $case
-     *
-     * @return array
      */
     private function takeCard(?string $case): array
     {

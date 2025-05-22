@@ -72,7 +72,7 @@
         <div class="invalid-feedback">{{ textError('comment') }}</div>
     </div>
 
-    <button class="btn btn-primary">{{ $advert->id ? __('main.save') : __('Payment::payments.place_order') }}</button>
+    <button class="btn btn-primary">{{ $advert->id ? __('main.save') : __('payment::payments.place_order') }}</button>
 </form>
 
 @push('scripts')

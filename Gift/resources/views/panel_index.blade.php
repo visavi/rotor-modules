@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('Gift::gifts.title'))
+@section('title', __('gift::gifts.title'))
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/admin">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="/admin/modules">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }}</li>
+            <li class="breadcrumb-item active">{{ __('gift::gifts.title') }}</li>
         </ol>
     </nav>
 @stop
@@ -25,7 +25,7 @@
                                 <img src="{{ $gift->path }}" alt="{{ $gift->name }}">
                             </div>
                             <div class="col-md-2 col-sm-3">
-                                <label for="gift_{{ $gift->id }}" class="form-label">{{ __('Gift::gifts.price') }} ({{ setting('currency') }}):</label>
+                                <label for="gift_{{ $gift->id }}" class="form-label">{{ __('gift::gifts.price') }} ({{ setting('currency') }}):</label>
                                 <input class="form-control" name="gifts[{{ $gift->id }}]" id="gift_{{ $gift->id }}" maxlength="10" value="{{ $gift->price }}"><br>
                             </div>
                         @endforeach
@@ -34,7 +34,7 @@
                 </form>
             </div>
         @else
-            {{ showError(__('Gift::gifts.empty_gifts')) }}
+            {{ showError(__('gift::gifts.empty_gifts')) }}
         @endif
 
         {{ $gifts->links() }}

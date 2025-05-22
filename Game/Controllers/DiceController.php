@@ -29,18 +29,14 @@ class DiceController extends Controller
 
     /**
      * Кости
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::dices/index', ['user' => $this->user]);
+        return view('game::dices/index', ['user' => $this->user]);
     }
 
     /**
      * Игра в кости
-     *
-     * @return View
      */
     public function go(): View
     {
@@ -74,6 +70,6 @@ class DiceController extends Controller
 
         $user = $this->user;
 
-        return view('Game::dices/go', compact('num', 'result', 'user'));
+        return view('game::dices/go', compact('num', 'result', 'user'));
     }
 }

@@ -29,18 +29,14 @@ class BanditController extends Controller
 
     /**
      * Бандит
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::bandit/index', ['user' => $this->user]);
+        return view('game::bandit/index', ['user' => $this->user]);
     }
 
     /**
      * Игра
-     *
-     * @return View
      */
     public function go(): View
     {
@@ -58,7 +54,7 @@ class BanditController extends Controller
         $num[8] = mt_rand(1, 8);
         $num[9] = mt_rand(1, 8);
 
-        $sum     = 0;
+        $sum = 0;
         $results = [];
 
         // ряды
@@ -279,16 +275,14 @@ class BanditController extends Controller
 
         $user = $this->user;
 
-        return view('Game::bandit/go', compact('num', 'results', 'sum', 'user'));
+        return view('game::bandit/go', compact('num', 'results', 'sum', 'user'));
     }
 
     /**
      * Правила игры
-     *
-     * @return View
      */
     public function faq(): View
     {
-        return view('Game::bandit/faq');
+        return view('game::bandit/faq');
     }
 }

@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title',  __('Game::games.slot'))
+@section('title',  __('game::games.slot'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/games">{{ __('Game::games.module') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Game::games.slot') }}</li>
+            <li class="breadcrumb-item"><a href="/games">{{ __('game::games.module') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('game::games.slot') }}</li>
         </ol>
     </nav>
 @stop

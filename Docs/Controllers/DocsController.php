@@ -14,6 +14,6 @@ class DocsController extends Controller
      */
     public function index(): View
     {
-        return view('Docs::index');
+        return view('docs::index');
     }
 }

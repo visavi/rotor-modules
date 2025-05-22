@@ -13,6 +13,6 @@
 
 @section('content')
     <div class="section-form mb-3 shadow">
-        @include('Payment::advert/_form')
+        @include('payment::advert/_form')
     </div>
 @stop

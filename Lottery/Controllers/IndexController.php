@@ -17,8 +17,6 @@ class IndexController extends Controller
 {
     /**
      * Main page
-     *
-     * @return View
      */
     public function index(): View
     {
@@ -45,21 +43,18 @@ class IndexController extends Controller
             ->where('user_id', getUser('id'))
             ->first();
 
-        return view('Lottery::index', compact('today', 'yesterday', 'config', 'ticket'));
+        return view('lottery::index', compact('today', 'yesterday', 'config', 'ticket'));
     }
 
     /**
      * Buy ticket
      *
-     * @param Request   $request
-     * @param Validator $validator
      *
-     * @return RedirectResponse
      * @throws Throwable
      */
     public function buy(Request $request, Validator $validator): RedirectResponse
     {
-        $number      = int($request->input('number'));
+        $number = int($request->input('number'));
         $ticketPrice = Lottery::getConfig('ticketPrice');
         $numberRange = Lottery::getConfig('numberRange');
 
@@ -71,8 +66,8 @@ class IndexController extends Controller
             ->orderByDesc('day')
             ->first();
 
-        if (!$lottery) {
-            abort(200, __('Lottery::lottery.lottery_not_activated'));
+        if (! $lottery) {
+            abort(200, __('lottery::lottery.lottery_not_activated'));
         }
 
         $ticketExist = $lottery->lotteryUsers()
@@ -81,9 +76,9 @@ class IndexController extends Controller
 
         $validator
             ->equal($request->input('_token'), csrf_token(), ['number' => __('validator.token')])
-            ->false($ticketExist, ['number' => __('Lottery::lottery.already_bought_ticket')])
-            ->lte($ticketPrice, getUser('money'), ['number' => __('Lottery::lottery.no_money')])
-            ->between($number, $numberRange[0], $numberRange[1], ['number' => __('Lottery::lottery.must_enter_number')]);
+            ->false($ticketExist, ['number' => __('lottery::lottery.already_bought_ticket')])
+            ->lte($ticketPrice, getUser('money'), ['number' => __('lottery::lottery.no_money')])
+            ->between($number, $numberRange[0], $numberRange[1], ['number' => __('lottery::lottery.must_enter_number')]);
 
         if ($validator->isValid()) {
             DB::transaction(
@@ -94,12 +89,12 @@ class IndexController extends Controller
                     $lottery->lotteryUsers()->create([
                         'user_id'    => $user->id,
                         'number'     => $number,
-                        'created_at' => SITETIME
+                        'created_at' => SITETIME,
                     ]);
                 }
             );
 
-            setFlash('success', __('Lottery::lottery.ticket_success_purchased'));
+            setFlash('success', __('lottery::lottery.ticket_success_purchased'));
         } else {
             setInput($request->all());
             setFlash('danger', $validator->getErrors());
@@ -114,7 +109,7 @@ class IndexController extends Controller
     private function rewardWinners(): void
     {
         $amount = Lottery::getConfig('jackpot');
-        $range  = Lottery::getConfig('numberRange');
+        $range = Lottery::getConfig('numberRange');
 
         $lottery = Lottery::query()
             ->orderByDesc('day')
@@ -129,7 +124,7 @@ class IndexController extends Controller
             if ($winners->isNotEmpty()) {
                 $moneys = (int) ($lottery->amount / $winners->count());
 
-                $message = __('Lottery::lottery.congratulations_winning', ['jackpot' => plural($moneys, setting('moneyname'))]);
+                $message = __('lottery::lottery.congratulations_winning', ['jackpot' => plural($moneys, setting('moneyname'))]);
 
                 foreach ($winners as $winner) {
                     $winner->user->increment('money', $moneys);
@@ -143,9 +138,9 @@ class IndexController extends Controller
         if (! $lottery || $lottery->day !== date('Y-m-d', SITETIME)) {
             // Update lottery
             Lottery::query()->create([
-                'day'     => date('Y-m-d', SITETIME),
-                'amount'  => $amount,
-                'number'  => mt_rand($range[0], $range[1]),
+                'day'    => date('Y-m-d', SITETIME),
+                'amount' => $amount,
+                'number' => mt_rand($range[0], $range[1]),
             ]);
         }
     }

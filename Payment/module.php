@@ -25,7 +25,7 @@ https://адрес-сайта/payments/webhook
 
 Ссылки будут созданы автоматически с помощью хуков
 INFO,
-    'version'  => '1.1',
+    'version'  => '1.2',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

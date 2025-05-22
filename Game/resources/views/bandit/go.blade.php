@@ -6,8 +6,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/games">{{ __('Game::games.module') }}</a></li>
-            <li class="breadcrumb-item"><a href="/games/bandit">{{ __('Game::games.slot') }}</a></li>
+            <li class="breadcrumb-item"><a href="/games">{{ __('game::games.module') }}</a></li>
+            <li class="breadcrumb-item"><a href="/games/bandit">{{ __('game::games.slot') }}</a></li>
             <li class="breadcrumb-item active">Ваш ход</li>
         </ol>
     </nav>

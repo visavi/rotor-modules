@@ -58,19 +58,19 @@ class Order extends BaseModel
         return match ($this->status) {
             YooKassaService::SUCCEEDED => [
                 'style'   => 'text-success',
-                'title'   => __('Payment::payments.title_success'),
-                'message' => __('Payment::payments.message_success'),
+                'title'   => __('payment::payments.title_success'),
+                'message' => __('payment::payments.message_success'),
             ],
             YooKassaService::PENDING,
             YooKassaService::WAITING_FOR_CAPTURE => [
                 'style'   => 'text-warning',
-                'title'   => __('Payment::payments.title_pending'),
-                'message' => __('Payment::payments.message_pending'),
+                'title'   => __('payment::payments.title_pending'),
+                'message' => __('payment::payments.message_pending'),
             ],
             default => [
                 'style'   => 'text-danger',
-                'title'   => __('Payment::payments.title_error'),
-                'message' => __('Payment::payments.message_error'),
+                'title'   => __('payment::payments.title_error'),
+                'message' => __('payment::payments.message_error'),
             ],
         };
     }

@@ -32,10 +32,6 @@ class GuessNumberController extends Controller
 
     /**
      * Угадай число
-     *
-     * @param Request $request
-     *
-     * @return View
      */
     public function index(Request $request): View
     {
@@ -45,14 +41,12 @@ class GuessNumberController extends Controller
             $request->session()->forget('guess');
         }
 
-        return view('Game::guess/index', ['user' => $this->user]);
+        return view('game::guess/index', ['user' => $this->user]);
     }
 
     /**
      * Попытка
      *
-     * @param Request   $request
-     * @param Validator $validator
      *
      * @return View|RedirectResponse
      */
@@ -101,6 +95,6 @@ class GuessNumberController extends Controller
 
         $user = $this->user;
 
-        return view('Game::guess/go', compact('user', 'guess', 'hint', 'guessNumber'));
+        return view('game::guess/go', compact('user', 'guess', 'hint', 'guessNumber'));
     }
 }

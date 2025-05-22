@@ -11,11 +11,9 @@ class IndexController extends Controller
 {
     /**
      * Главная страница
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::index');
+        return view('game::index');
     }
 }

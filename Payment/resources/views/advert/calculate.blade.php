@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/payments/advert">{{ __('admin.paid_adverts.create_advert') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Payment::payments.order_cost') }}</li>
+            <li class="breadcrumb-item active">{{ __('payment::payments.order_cost') }}</li>
         </ol>
     </nav>
 @stop
@@ -15,7 +15,7 @@
 @section('content')
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h2 class="h5 mb-0">{{ __('Payment::payments.order_cost') }}</h2>
+            <h2 class="h5 mb-0">{{ __('payment::payments.order_cost') }}</h2>
         </div>
 
         <div class="card-body">
@@ -108,7 +108,7 @@
             <!-- Итого -->
             <div class="total-block p-3 rounded mt-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div class="h5 mb-0">{{ __('Payment::payments.total_paid') }}:</div>
+                    <div class="h5 mb-0">{{ __('payment::payments.total_paid') }}:</div>
                     <div class="h4 mb-0 text-primary">{{ number_format($advert['prices']['total'], 0, ',', ' ') }} {{ setting('currency') }}</div>
                 </div>
             </div>
@@ -121,7 +121,7 @@
             <input type="hidden" name="data" value="{{ $data }}">
             <button class="btn btn-primary btn-lg w-100 py-3">
                 <i class="fas fa-credit-card me-2"></i>
-                {{ __('Payment::payments.proceed_payment') }}
+                {{ __('payment::payments.proceed_payment') }}
             </button>
         </form>
     </div>

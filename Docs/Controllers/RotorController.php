@@ -27,7 +27,7 @@ class RotorController extends Controller
     {
         $release = $this->githubService->getLatestRelease();
 
-        return view('Docs::rotor', compact('release'));
+        return view('docs::rotor', compact('release'));
     }
 
     /**
@@ -37,7 +37,7 @@ class RotorController extends Controller
     {
         $releases = $this->githubService->getLatestReleases();
 
-        return view('Docs::releases', compact('releases'));
+        return view('docs::releases', compact('releases'));
     }
 
     /**
@@ -48,6 +48,6 @@ class RotorController extends Controller
         $commits = $this->githubService->getLatestCommits();
         $commits = paginate($commits, 10);
 
-        return view('Docs::commits', compact('commits'));
+        return view('docs::commits', compact('commits'));
     }
 }

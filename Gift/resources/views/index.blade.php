@@ -1,12 +1,12 @@
 @extends('layout')
 
-@section('title', __('Gift::gifts.title'))
+@section('title', __('gift::gifts.title'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }}</li>
+            <li class="breadcrumb-item active">{{ __('gift::gifts.title') }}</li>
         </ol>
     </nav>
 @stop
@@ -23,7 +23,7 @@
                 @endforeach
             </div>
         @else
-            {{ showError(__('Gift::gifts.empty_gifts')) }}
+            {{ showError(__('gift::gifts.empty_gifts')) }}
         @endif
 
         {{ $gifts->links() }}

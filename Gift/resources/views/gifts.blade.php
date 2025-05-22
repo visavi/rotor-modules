@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('Gift::gifts.title') . ' ' . $user->getName())
+@section('title', __('gift::gifts.title') . ' ' . $user->getName())
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/gifts">{{ __('Gift::gifts.title') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Gift::gifts.title') }} {{ $user->getName() }}</li>
+            <li class="breadcrumb-item"><a href="/gifts">{{ __('gift::gifts.title') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('gift::gifts.title') }} {{ $user->getName() }}</li>
         </ol>
     </nav>
 @stop
@@ -21,7 +21,7 @@
                     <div class="col-md-4 col-sm-6">
                         @if (isAdmin())
                             <div class="float-end">
-                                <a href="/admin/gifts/delete?user={{ $gift->user->login }}&amp;id={{ $gift->id }}&amp;_token={{ csrf_token() }}" onclick="return confirm('{{ __('Gift::gifts.confirm_delete_gift') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                                <a href="/admin/gifts/delete?user={{ $gift->user->login }}&amp;id={{ $gift->id }}&amp;_token={{ csrf_token() }}" onclick="return confirm('{{ __('gift::gifts.confirm_delete_gift') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             </div>
                         @endif
 
@@ -36,7 +36,7 @@
                 @endforeach
             </div>
         @else
-            {{ showError(__('Gift::gifts.empty_gifts')) }}
+            {{ showError(__('gift::gifts.empty_gifts')) }}
         @endif
     </div>
 @stop

@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('Gift::gifts.send_gift'))
+@section('title', __('gift::gifts.send_gift'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active"><a href="/gifts">{{ __('Gift::gifts.title') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Gift::gifts.send_gift') }}</li>
+            <li class="breadcrumb-item active"><a href="/gifts">{{ __('gift::gifts.title') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('gift::gifts.send_gift') }}</li>
         </ol>
     </nav>
 @stop
@@ -17,7 +17,7 @@
         <form action="/gifts/send/{{ $gift->id }}" method="post">
             @csrf
             @if ($user)
-                <i class="fas fa-gift"></i> {{ __('Gift::gifts.gift_for') }} <b>{{ $user->getProfile() }}</b>:<br><br>
+                <i class="fas fa-gift"></i> {{ __('gift::gifts.gift_for') }} <b>{{ $user->getProfile() }}</b>:<br><br>
                 <input type="hidden" name="user" value="{{ $user->login }}">
             @else
                 <div class="mb-3{{ hasError('user') }}">
@@ -36,7 +36,7 @@
 
             <div class="mb-3">
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                {{ __('Gift::gifts.price') }}: <span class="badge bg-primary">{{ $gift->price }} {{ setting('currency') }}</span>
+                {{ __('gift::gifts.price') }}: <span class="badge bg-primary">{{ $gift->price }} {{ setting('currency') }}</span>
             </div>
 
             <button class="btn btn-primary">{{ __('main.send') }}</button>

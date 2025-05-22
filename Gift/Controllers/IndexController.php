@@ -32,7 +32,7 @@ class IndexController extends Controller
             $gifts->appends(['user' => $user]);
         }
 
-        return view('Gift::index', compact('gifts', 'user'));
+        return view('gift::index', compact('gifts', 'user'));
     }
 
     /**
@@ -50,7 +50,7 @@ class IndexController extends Controller
         $gift = Gift::query()->find($id);
 
         if (! $gift) {
-            abort(404, __('Gift::gifts.gift_not_found'));
+            abort(404, __('gift::gifts.gift_not_found'));
         }
 
         $user = getUserByLogin($request->input('user'));
@@ -61,7 +61,7 @@ class IndexController extends Controller
             $validator->equal($request->input('_token'), csrf_token(), ['msg' => __('validator.token')])
                 ->notEmpty($user, ['user' => __('validator.user')])
                 ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
-                ->gte(getUser('money'), $gift->price, __('Gift::gifts.money_not_enough'));
+                ->gte(getUser('money'), $gift->price, __('gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
                 GiftsUser::query()->where('deleted_at', '<', SITETIME)->delete();
@@ -84,7 +84,7 @@ class IndexController extends Controller
                 $message = 'Пользователь @' . getUser('login') . ' отправил вам подарок!' . PHP_EOL . '[img]' . $gift->path . '[/img] ' . $msg . PHP_EOL . '[url=/gifts/' . $user->login . ']Мои подарки[/url]';
                 $user->sendMessage(null, $message);
 
-                setFlash('success', __('Gift::gifts.gift_sent'));
+                setFlash('success', __('gift::gifts.gift_sent'));
 
                 return redirect('gifts');
             }
@@ -93,7 +93,7 @@ class IndexController extends Controller
             setFlash('danger', $validator->getErrors());
         }
 
-        return view('Gift::send', compact('gift', 'user'));
+        return view('gift::send', compact('gift', 'user'));
     }
 
     /**
@@ -114,6 +114,6 @@ class IndexController extends Controller
             ->with('gift', 'user', 'sendUser')
             ->get();
 
-        return view('Gift::gifts', compact('gifts', 'user'));
+        return view('gift::gifts', compact('gifts', 'user'));
     }
 }

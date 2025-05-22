@@ -31,28 +31,23 @@ class ThimbleController extends Controller
 
     /**
      * Наперстки
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::thimbles/index', ['user' => $this->user]);
+        return view('game::thimbles/index', ['user' => $this->user]);
     }
 
     /**
      * Выбор наперстка
-     *
-     * @return View
      */
     public function choice(): View
     {
-        return view('Game::thimbles/choice', ['user' => $this->user]);
+        return view('game::thimbles/choice', ['user' => $this->user]);
     }
 
     /**
      * Игра в наперстки
      *
-     * @param Request $request
      *
      * @return View|RedirectResponse
      */
@@ -66,6 +61,7 @@ class ThimbleController extends Controller
 
         if (! $thimble) {
             setFlash('danger', 'Необходимо выбрать один из наперстков!');
+
             return redirect('games/thimbles/choice');
         }
 
@@ -86,6 +82,6 @@ class ThimbleController extends Controller
 
         $user = $this->user;
 
-        return view('Game::thimbles/go', compact('user', 'randThimble', 'thimble', 'result'));
+        return view('game::thimbles/go', compact('user', 'randThimble', 'thimble', 'result'));
     }
 }

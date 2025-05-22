@@ -31,14 +31,14 @@ class PanelController extends AdminController
             $gifts = intar($request->input('gifts'));
 
             $validator->equal($request->input('_token'), csrf_token(), ['msg' => __('validator.token')])
-                ->notEmpty($gifts, __('Gift::gifts.prices_not_transferred'));
+                ->notEmpty($gifts, __('gift::gifts.prices_not_transferred'));
 
             if ($validator->isValid()) {
                 foreach ($gifts as $id => $price) {
                     Gift::query()->where('id', $id)->update(['price' => $price]);
                 }
 
-                setFlash('success', __('Gift::gifts.prices_saved'));
+                setFlash('success', __('gift::gifts.prices_saved'));
 
                 return redirect('admin/gifts');
             }
@@ -51,7 +51,7 @@ class PanelController extends AdminController
             ->orderBy('price')
             ->paginate(50);
 
-        return view('Gift::panel_index', compact('gifts'));
+        return view('gift::panel_index', compact('gifts'));
     }
 
     /**
@@ -65,12 +65,12 @@ class PanelController extends AdminController
         $validator->equal($request->input('_token'), csrf_token(), __('validator.token'));
 
         $gift = GiftsUser::query()->find($id);
-        $validator->notEmpty($gift, __('Gift::gifts.gift_not_found'));
+        $validator->notEmpty($gift, __('gift::gifts.gift_not_found'));
 
         if ($validator->isValid()) {
             $gift->delete();
 
-            setFlash('success', __('Gift::gifts.gift_deleted'));
+            setFlash('success', __('gift::gifts.gift_deleted'));
         } else {
             setFlash('danger', $validator->getErrors());
         }

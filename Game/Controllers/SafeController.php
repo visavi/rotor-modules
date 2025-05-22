@@ -32,19 +32,15 @@ class SafeController extends Controller
 
     /**
      * Взлом сейфа
-     *
-     * @return View
      */
     public function index(): View
     {
-        return view('Game::safe/index', ['user' => $this->user]);
+        return view('game::safe/index', ['user' => $this->user]);
     }
 
     /**
      * Игра
      *
-     * @param Request   $request
-     * @param Validator $validator
      *
      * @return View|RedirectResponse
      */
@@ -78,42 +74,102 @@ class SafeController extends Controller
 
         $hack = ['-', '-', '-', '-', '-'];
 
-        if ($code0 === $safe['cipher'][1] || $code0 === $safe['cipher'][2] || $code0 === $safe['cipher'][3] || $code0 === $safe['cipher'][4]) {$hack[0] = '*';}
-        if ($code1 === $safe['cipher'][0] || $code1 === $safe['cipher'][2] || $code1 === $safe['cipher'][3] || $code1 === $safe['cipher'][4]) {$hack[1] = '*';}
-        if ($code2 === $safe['cipher'][0] || $code2 === $safe['cipher'][1] || $code2 === $safe['cipher'][3] || $code2 === $safe['cipher'][4]) {$hack[2] = '*';}
-        if ($code3 === $safe['cipher'][0] || $code3 === $safe['cipher'][1] || $code3 === $safe['cipher'][2] || $code3 === $safe['cipher'][4]) {$hack[3] = '*';}
-        if ($code4 === $safe['cipher'][0] || $code4 === $safe['cipher'][1] || $code4 === $safe['cipher'][2] || $code3 === $safe['cipher'][3]) {$hack[3] = '*';}
+        if ($code0 === $safe['cipher'][1] || $code0 === $safe['cipher'][2] || $code0 === $safe['cipher'][3] || $code0 === $safe['cipher'][4]) {
+            $hack[0] = '*';
+        }
+        if ($code1 === $safe['cipher'][0] || $code1 === $safe['cipher'][2] || $code1 === $safe['cipher'][3] || $code1 === $safe['cipher'][4]) {
+            $hack[1] = '*';
+        }
+        if ($code2 === $safe['cipher'][0] || $code2 === $safe['cipher'][1] || $code2 === $safe['cipher'][3] || $code2 === $safe['cipher'][4]) {
+            $hack[2] = '*';
+        }
+        if ($code3 === $safe['cipher'][0] || $code3 === $safe['cipher'][1] || $code3 === $safe['cipher'][2] || $code3 === $safe['cipher'][4]) {
+            $hack[3] = '*';
+        }
+        if ($code4 === $safe['cipher'][0] || $code4 === $safe['cipher'][1] || $code4 === $safe['cipher'][2] || $code3 === $safe['cipher'][3]) {
+            $hack[3] = '*';
+        }
 
-        if ($code0 === $safe['cipher'][1]) {$hack[1] = 'x';}
-        if ($code0 === $safe['cipher'][2]) {$hack[2] = 'x';}
-        if ($code0 === $safe['cipher'][3]) {$hack[3] = 'x';}
-        if ($code0 === $safe['cipher'][4]) {$hack[4] = 'x';}
+        if ($code0 === $safe['cipher'][1]) {
+            $hack[1] = 'x';
+        }
+        if ($code0 === $safe['cipher'][2]) {
+            $hack[2] = 'x';
+        }
+        if ($code0 === $safe['cipher'][3]) {
+            $hack[3] = 'x';
+        }
+        if ($code0 === $safe['cipher'][4]) {
+            $hack[4] = 'x';
+        }
 
-        if ($code1 === $safe['cipher'][0]) {$hack[0] = 'x';}
-        if ($code1 === $safe['cipher'][2]) {$hack[2] = 'x';}
-        if ($code1 === $safe['cipher'][3]) {$hack[3] = 'x';}
-        if ($code1 === $safe['cipher'][4]) {$hack[4] = 'x';}
+        if ($code1 === $safe['cipher'][0]) {
+            $hack[0] = 'x';
+        }
+        if ($code1 === $safe['cipher'][2]) {
+            $hack[2] = 'x';
+        }
+        if ($code1 === $safe['cipher'][3]) {
+            $hack[3] = 'x';
+        }
+        if ($code1 === $safe['cipher'][4]) {
+            $hack[4] = 'x';
+        }
 
-        if ($code2 === $safe['cipher'][0]) {$hack[0] = 'x';}
-        if ($code2 === $safe['cipher'][1]) {$hack[1] = 'x';}
-        if ($code2 === $safe['cipher'][3]) {$hack[3] = 'x';}
-        if ($code2 === $safe['cipher'][4]) {$hack[4] = 'x';}
+        if ($code2 === $safe['cipher'][0]) {
+            $hack[0] = 'x';
+        }
+        if ($code2 === $safe['cipher'][1]) {
+            $hack[1] = 'x';
+        }
+        if ($code2 === $safe['cipher'][3]) {
+            $hack[3] = 'x';
+        }
+        if ($code2 === $safe['cipher'][4]) {
+            $hack[4] = 'x';
+        }
 
-        if ($code3 === $safe['cipher'][0]) {$hack[0] = 'x';}
-        if ($code3 === $safe['cipher'][1]) {$hack[1] = 'x';}
-        if ($code3 === $safe['cipher'][2]) {$hack[2] = 'x';}
-        if ($code3 === $safe['cipher'][4]) {$hack[4] = 'x';}
+        if ($code3 === $safe['cipher'][0]) {
+            $hack[0] = 'x';
+        }
+        if ($code3 === $safe['cipher'][1]) {
+            $hack[1] = 'x';
+        }
+        if ($code3 === $safe['cipher'][2]) {
+            $hack[2] = 'x';
+        }
+        if ($code3 === $safe['cipher'][4]) {
+            $hack[4] = 'x';
+        }
 
-        if ($code4 === $safe['cipher'][0]) {$hack[0] = 'x';}
-        if ($code4 === $safe['cipher'][1]) {$hack[1] = 'x';}
-        if ($code4 === $safe['cipher'][2]) {$hack[2] = 'x';}
-        if ($code4 === $safe['cipher'][3]) {$hack[3] = 'x';}
+        if ($code4 === $safe['cipher'][0]) {
+            $hack[0] = 'x';
+        }
+        if ($code4 === $safe['cipher'][1]) {
+            $hack[1] = 'x';
+        }
+        if ($code4 === $safe['cipher'][2]) {
+            $hack[2] = 'x';
+        }
+        if ($code4 === $safe['cipher'][3]) {
+            $hack[3] = 'x';
+        }
 
-        if ($code0 === $safe['cipher'][0]) {$hack[0] = $safe['cipher'][0];}
-        if ($code1 === $safe['cipher'][1]) {$hack[1] = $safe['cipher'][1];}
-        if ($code2 === $safe['cipher'][2]) {$hack[2] = $safe['cipher'][2];}
-        if ($code3 === $safe['cipher'][3]) {$hack[3] = $safe['cipher'][3];}
-        if ($code4 === $safe['cipher'][4]) {$hack[4] = $safe['cipher'][4];}
+        if ($code0 === $safe['cipher'][0]) {
+            $hack[0] = $safe['cipher'][0];
+        }
+        if ($code1 === $safe['cipher'][1]) {
+            $hack[1] = $safe['cipher'][1];
+        }
+        if ($code2 === $safe['cipher'][2]) {
+            $hack[2] = $safe['cipher'][2];
+        }
+        if ($code3 === $safe['cipher'][3]) {
+            $hack[3] = $safe['cipher'][3];
+        }
+        if ($code4 === $safe['cipher'][4]) {
+            $hack[4] = $safe['cipher'][4];
+        }
 
         if (implode($safe['cipher']) === implode($hack)) {
             $request->session()->forget('safe');
@@ -126,7 +182,6 @@ class SafeController extends Controller
 
         $user = $this->user;
 
-        return view('Game::safe/go', compact('hack', 'safe', 'user'));
+        return view('game::safe/go', compact('hack', 'safe', 'user'));
     }
-
 }

@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('Payment::payments.orders'))
+@section('title', __('payment::payments.orders'))
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/admin">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="/admin/modules">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Payment::payments.orders') }}</li>
+            <li class="breadcrumb-item active">{{ __('payment::payments.orders') }}</li>
         </ol>
     </nav>
 @stop
@@ -32,7 +32,7 @@
                 @endforeach
             </div>
         @else
-            {{ showError(__('Payment::payments.admin.orders.empty_orders')) }}
+            {{ showError(__('payment::payments.admin.orders.empty_orders')) }}
         @endif
 
         {{ $orders->links() }}
