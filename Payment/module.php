@@ -8,13 +8,25 @@ return [
 Возможность продажи цифровых товаров
 Прием и обработка платежей
 
-Добавьте ссылку в админ-панель для просмотра заказов
+В панели управления yookassa необходимо добавить webhook для HTTP-уведомления
+[code]
+https://адрес-сайта/payments/webhook
+[/code]
+
+Ссылка на сайте для создания заказов
+[code]
+<a href="/payments/advert">Купить рекламу</a>
+[/code]
+
+Ссылка в админ-панель для просмотра заказов
 [code]
 <a href="/admin/orders">Заказы</a>
 [/code]
+
+Ссылки будут созданы автоматически с помощью хуков
 INFO,
-    'version'     => '1.0',
-    'author'      => 'Vantuz',
-    'email'       => 'admin@visavi.net',
-    'homepage'    => 'https://visavi.net',
+    'version'  => '1.1',
+    'author'   => 'Vantuz',
+    'email'    => 'admin@visavi.net',
+    'homepage' => 'https://visavi.net',
 ];

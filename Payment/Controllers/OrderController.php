@@ -19,14 +19,6 @@ class OrderController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
-        Order::query()->create([
-            'type' => 'advert',
-            'user_id' => rand(1,19999),
-            'amount' => rand(200, 1999),
-            'currency' => 'RUB',
-        ]);
-
-
         return view('Payment::admin/orders', compact('orders'));
     }
 }

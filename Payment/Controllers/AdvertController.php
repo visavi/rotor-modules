@@ -4,72 +4,129 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\PaidAdvert;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Modules\Payment\Models\Order;
+use Modules\Payment\Requests\CalculateRequest;
+use Modules\Payment\Requests\PayRequest;
+use Modules\Payment\Services\OrderService;
+use Modules\Payment\Services\PaymentService;
+use Modules\Payment\Services\YooKassaService;
+use RuntimeException;
 
 class AdvertController extends Controller
 {
+    public function __construct(
+        private readonly YooKassaService $yooKassaService,
+        private readonly PaymentService $paymentService,
+        private readonly OrderService $orderService,
+    ) {
+        //
+    }
+
     /**
      * Main page
      */
-    public function index(Request $request, Validator $validator): View|RedirectResponse
+    public function index(): View
     {
-        $places = PaidAdvert::PLACES;
-        //$days = PaidAdvert::DAYS;
         $advert = new PaidAdvert();
-        $place = $request->input('place');
+        $places = $advert->getPlaces();
 
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $names = (array) $request->input('names');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-            $term = (string) $request->input('term');
-            $comment = $request->input('comment');
+        return view('Payment::advert/create', compact('advert', 'places'));
+    }
 
-            $term = strtotime($term);
-            $names = array_unique(array_diff($names, ['']));
+    /**
+     * Calculate
+     */
+    public function calculate(CalculateRequest $request): View
+    {
+        $validated = $request->validated();
 
-            $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
-                ->in($place, $places, ['place' => __('admin.paid_adverts.place_invalid')])
-                ->url($site, ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, SITETIME, ['term' => __('admin.paid_adverts.term_invalid')])
-                ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
-                ->gte(count($names), 1, ['names' => __('admin.paid_adverts.names_count')]);
+        $advert = [
+            'type'    => Order::TYPE_ADVERT,
+            'place'   => $validated['place'],
+            'site'    => $validated['site'],
+            'names'   => $validated['names'],
+            'color'   => $validated['color'],
+            'bold'    => $validated['bold'],
+            'term'    => $validated['term'],
+            'comment' => $validated['comment'],
+        ];
 
-            foreach ($names as $name) {
-                $validator->length($name, 5, 35, ['names' => __('validator.text')]);
+        $prices = $this->paymentService->calculateAdvert($advert);
+        $advert = array_merge($advert, ['prices' => $prices]);
+
+        $data = Crypt::encrypt($advert);
+
+        return view('Payment::advert/calculate', compact('advert', 'data'));
+    }
+
+    /**
+     * Pay
+     */
+    public function pay(PayRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        try {
+            $data = Crypt::decrypt($validated['data']);
+            $order = $this->orderService->createOrder($data);
+
+            $payment = $this->yooKassaService->createPayment(
+                $order->amount,
+                asset('payments/status?token=' . $order->token),
+                __('Payment::payments.payment_order', ['id' => $order->id])
+            );
+
+            if (! $payment || ! $payment['id']) {
+                throw new RuntimeException(__('Payment::payments.payment_create_failed'));
             }
 
-            if ($validator->isValid()) {
-                PaidAdvert::query()->create([
-                    'user_id'    => getUser('id'),
-                    'place'      => $place,
-                    'site'       => $site,
-                    'names'      => array_values($names),
-                    'color'      => $color,
-                    'bold'       => $bold,
-                    'comment'    => $comment,
-                    'created_at' => SITETIME,
-                    'deleted_at' => $term,
-                ]);
-
-                clearCache('paidAdverts');
-
-                return redirect('admin/paid-adverts?place=' . $place)
-                    ->with('success', __('main.record_added_success'));
+            if ($payment['status'] === YooKassaService::CANCELED) {
+                throw new RuntimeException(__('Payment::payments.payment_creation_cancelled'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            // Проверяем ссылку для редиректа
+            $confirmationUrl = $payment['confirmation']['confirmation_url'] ?? null;
+            if (! $confirmationUrl) {
+                throw new RuntimeException(__('Payment::payments.payment_link_failed'));
+            }
+
+            $order->update([
+                'status'      => $payment['status'],
+                'payment_id'  => $payment['id'],
+                'payment_url' => $confirmationUrl,
+            ]);
+
+            return redirect()->away($confirmationUrl);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+
+            return redirect('/payments/advert')
+                ->withErrors($e->getMessage());
+        }
+    }
+
+    /**
+     * Status
+     */
+    public function status(Request $request): View
+    {
+        $order = $this->orderService->getOrderByField('token', $request->input('token'));
+
+        if (! $order) {
+            abort(404, __('Payment::payments.payment_not_found'));
         }
 
-        return view('Payment::advert/create', compact('advert', 'places', /*'days', */'place'));
+        return view('Payment::advert.status', [
+            'order'    => $order,
+            'retryUrl' => '/payments/result?token=' . $order->token,
+        ]);
     }
 }

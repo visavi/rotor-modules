@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('Payment::payments.admin.orders.title'))
+@section('title', __('Payment::payments.orders'))
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/admin">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="/admin/modules">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Payment::payments.admin.orders.title') }}</li>
+            <li class="breadcrumb-item active">{{ __('Payment::payments.orders') }}</li>
         </ol>
     </nav>
 @stop

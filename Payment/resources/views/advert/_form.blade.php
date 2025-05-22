@@ -1,87 +1,78 @@
-<form method="post">
+<form action="/payments/calculate" method="post">
     @csrf
-    <div class="mb-3{{ hasError('place') }}">
+    <div class="mb-3">
         <label for="place" class="form-label">{{ __('admin.paid_adverts.place') }}:</label>
 
-        <?php $inputPlace = getInput('place', $place ?? $advert->place); ?>
-        <select class="form-select" name="place" id="place">
-            @foreach ($places as $place)
-                <?php $selected = ($place === $inputPlace) ? ' selected' : ''; ?>
-                <option value="{{ $place }}"{{ $selected }}>{{ __('admin.paid_adverts.' . $place) }}</option>
+        @php $inputPlace = old('place', $advert->place ?? null); @endphp
+        <select class="form-select{{ hasError('place') }}" name="place" id="place">
+            @foreach ($places as $place => $name)
+                @php $selected = ($place === $inputPlace) ? ' selected' : ''; @endphp
+                <option value="{{ $place }}"{{ $selected }}>{{ $name }}</option>
             @endforeach
         </select>
         <div class="invalid-feedback">{{ textError('place') }}</div>
     </div>
 
-    <div class="mb-3{{ hasError('site') }}">
+    <div class="mb-3">
         <label for="site" class="form-label">{{ __('admin.paid_adverts.link') }}:</label>
-        <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('admin.paid_adverts.link') }}" value="{{ getInput('site', $advert->site) }}" required>
+        <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="100" required>
         <div class="invalid-feedback">{{ textError('site') }}</div>
     </div>
 
-    <div class="mb-3{{ hasError('names') }}">
+    <div class="mb-3">
         <div class="js-advert-list">
-            <?php $names = array_values(array_diff((array) getInput('names', $advert->names), [''])) ?>
+            @php $names = (array) old('names', $advert->names) @endphp
 
             @for ($i = 0; $i < max(1, count($names)); $i++)
                 @if ($i === 0)
                     <label for="names{{ $i }}">{{ __('admin.paid_adverts.names') }}:</label>
                     <a class="js-advert-add" href="#" data-bs-toggle="tooltip" title="{{ __('main.add') }}"><i class="fas fa-plus-square"></i></a>
-                    <input type="text" name="names[]" class="form-control" id="names{{ $i }}" value="{{ $names[$i] ?? '' }}" maxlength="35" placeholder="{{ __('admin.paid_adverts.name') }}">
+                    <input type="text" name="names[]" class="form-control{{ hasError('names.' . $i) }}" id="names{{ $i }}" value="{{ $names[$i] ?? '' }}" maxlength="35" placeholder="{{ __('admin.paid_adverts.name') }}" required>
+                    <div class="invalid-feedback">{{ textError('names.' . $i) }}</div>
                 @else
                     <div class="input-group mt-1 js-advert-append">
-                        <input class="form-control" name="names[]" type="text" value="{{ $names[$i] ?? '' }}" maxlength="35" placeholder="{{ __('admin.paid_adverts.name') }}">
+                        <input class="form-control{{ hasError('names.'. $i) }}" name="names[]" type="text" value="{{ $names[$i] ?? '' }}" maxlength="35" placeholder="{{ __('admin.paid_adverts.name') }}">
                         <span class="input-group-text">
                             <a class="js-advert-remove" href="#"><i class="fa fa-times"></i></a>
                         </span>
+                        <div class="invalid-feedback">{{ textError('names.' . $i) }}</div>
                     </div>
                 @endif
             @endfor
         </div>
-        <div class="invalid-feedback">{{ textError('names') }}</div>
     </div>
 
-    <?php $color = getInput('color', $advert->color); ?>
-    <div class="col-sm-4 mb-3{{ hasError('color') }}">
+    @php $color = old('color', $advert->color); @endphp
+    <div class="col-sm-4 mb-3">
         <label for="color" class="form-label">{{ __('admin.paid_adverts.color') }}:</label>
         <div class="input-group">
-            <input type="text" name="color" class="form-control colorpicker" id="color" maxlength="7" value="{{ $color }}">
-            <input type="color" class="form-control form-control-color colorpicker-addon" id="color-picker" value="{{ $color }}">
+            <input type="text" name="color" class="form-control{{ hasError('color') }} colorpicker" id="color" maxlength="7" value="{{ $color }}">
+            <input type="color" class="form-control form-control-color colorpicker-addon" value="{{ $color }}">
+            <div class="invalid-feedback">{{ textError('color') }}</div>
         </div>
-        <div class="invalid-feedback">{{ textError('color') }}</div>
     </div>
 
-    <div class="form-check">
+    <div class="form-check form-switch">
         <input type="hidden" value="0" name="bold">
-        <input type="checkbox" class="form-check-input js-bold" value="1" name="bold" id="bold"{{ getInput('bold', $advert->bold) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="bold" id="bold"{{ old('bold', $advert->bold) ? ' checked' : '' }}>
         <label class="form-check-label" for="bold">{{ __('admin.paid_adverts.bold') }}</label>
     </div>
 
-
-   {{-- <?php $inputDay = getInput('day', $advert->day); ?>
-    <div class="col-sm-4 mb-3{{ hasError('period') }}">
-        <label for="period" class="form-label">Срок:</label>
-        <select class="form-select" id="period" name="period">
-            @foreach ($days as $day)
-                <?php $selected = ($day === $inputDay) ? ' selected' : ''; ?>
-                <option value="{{ $day }}"{{ $selected }}>
-                    {{ formatTime($day * 86400) }}
-                </option>
-            @endforeach
-        </select>
-        <div class="invalid-feedback">{{ textError('period') }}</div>
-    </div>--}}
-
     @if (! $advert->id)
-        <div class="col-sm-4 mb-3{{ hasError('term') }}">
+        <div class="col-sm-4 mb-3">
             <label for="term" class="form-label">{{ __('admin.paid_adverts.term') }}:</label>
-            <input class="form-control" type="date" name="term" id="term" value="{{ getInput('term', dateFixed($advert->deleted_at, 'Y-m-d')) }}" min="{{ dateFixed(SITETIME + 86400, 'Y-m-d') }}" required>
+            <input class="form-control{{ hasError('term') }}" type="number" name="term" id="term" value="{{ old('term', 10) }}" min="1" required>
             <div class="invalid-feedback">{{ textError('term') }}</div>
-            {{ getInput('term', dateFixed($advert->deleted_at, 'Y-m-d')) }}
         </div>
     @endif
 
-    <button class="btn btn-primary">{{ $advert->id ? __('main.save') : 'Купить' }}</button>
+    <div class="mb-3">
+        <label for="message" class="form-label">{{ __('main.comment') }}:</label>
+        <textarea class="form-control{{ hasError('comment') }} markItUp" id="comment" rows="5" name="comment">{{ old('comment', $advert->comment) }}</textarea>
+        <div class="invalid-feedback">{{ textError('comment') }}</div>
+    </div>
+
+    <button class="btn btn-primary">{{ $advert->id ? __('main.save') : __('Payment::payments.place_order') }}</button>
 </form>
 
 @push('scripts')
