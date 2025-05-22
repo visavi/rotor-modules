@@ -23,7 +23,7 @@
                 <!-- Место размещения -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
-                        <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                        <i class="fa-solid fa-map-marker-alt text-muted me-2"></i>
                         {{ __('admin.paid_adverts.place') }}: {{ __('admin.paid_adverts.' . $advert['place']) }}
                     </div>
                     <span class="text-primary fw-bold">{{ $advert['prices']['place'] }} {{ setting('currency') }}</span>
@@ -32,11 +32,11 @@
                 <!-- Адрес сайта -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
-                        <i class="fas fa-link text-muted me-2"></i>
+                        <i class="fa-solid fa-link text-muted me-2"></i>
                         {{ $advert['site'] }}
                     </div>
                     <a href="{{ $advert['site'] }}" target="_blank" class="text-decoration-none">
-                        <i class="fas fa-external-link-alt"></i>
+                        <i class="fa-solid fa-external-link-alt"></i>
                     </a>
                 </div>
 
@@ -44,7 +44,7 @@
                 <div class="py-2 border-bottom">
                     <div class="d-flex justify-content-between mb-2">
                         <div>
-                            <i class="fas fa-heading text-muted me-2"></i>
+                            <i class="fa-solid fa-heading text-muted me-2"></i>
                             {{ __('admin.paid_adverts.names') }} ({{ count($advert['names']) }})
                         </div>
                         <span class="text-primary fw-bold">{{ $advert['prices']['names'] }} {{ setting('currency') }}</span>
@@ -59,7 +59,7 @@
                 <!-- Цвет -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
-                        <i class="fas fa-palette text-muted me-2"></i>
+                        <i class="fa-solid fa-palette text-muted me-2"></i>
                         {{ __('admin.paid_adverts.color') }}:
 
                         @if ($advert['color'])
@@ -76,7 +76,7 @@
                 <!-- Жирный текст -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
-                        <i class="fas fa-bold text-muted me-2"></i>
+                        <i class="fa-solid fa-bold text-muted me-2"></i>
                         {{ __('admin.paid_adverts.bold') }}: {{ $advert['bold'] ? 'Да' : 'Нет' }}
                     </div>
                     <span class="text-primary fw-bold">{{ $advert['prices']['bold'] }} {{ setting('currency') }}</span>
@@ -85,17 +85,25 @@
                 <!-- Срок -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
-                        <i class="far fa-calendar-alt text-muted me-2"></i>
+                        <i class="fa-regular fa-calendar-alt text-muted me-2"></i>
                         {{ __('admin.paid_adverts.term') }}
                     </div>
                     <span>{{ plural($advert['term'], __('main.plural_days')) }}</span>
+                </div>
+
+                <!-- Email -->
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <div>
+                        <i class="fa-regular fa-envelope text-muted me-2"></i>
+                        {{ $advert['email'] }}
+                    </div>
                 </div>
 
                 <!-- Комментарий -->
                 @if ($advert['comment'])
                     <div class="py-2 border-bottom">
                         <div class="d-flex align-items-center text-muted mb-1">
-                            <i class="far fa-comment me-2"></i>
+                            <i class="fa-regular fa-comment me-2"></i>
                             {{ __('main.comment') }}
                         </div>
                         <div class="p-2 rounded small">

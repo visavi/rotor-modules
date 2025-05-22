@@ -21,7 +21,7 @@ class PaymentService
             'names'      => $order->data['names'],
             'color'      => $order->data['color'],
             'bold'       => $order->data['bold'],
-            'comment'    => 'Заказ №' . $order->id . ' ' . $order->data['comment'],
+            'comment'    => $order->data['description'] . ' #' . $order->id . ' ' . $order->data['comment'],
             'created_at' => SITETIME,
             'deleted_at' => strtotime('+' . $order->data['term'] . ' days', SITETIME),
         ]);

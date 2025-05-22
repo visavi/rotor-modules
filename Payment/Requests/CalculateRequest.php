@@ -3,6 +3,7 @@
 namespace Modules\Payment\Requests;
 
 use App\Models\PaidAdvert;
+use App\Rules\EmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CalculateRequest extends FormRequest
@@ -22,6 +23,7 @@ class CalculateRequest extends FormRequest
             'bold'    => ['sometimes', 'boolean'],
             'term'    => ['required', 'integer', 'min:1', 'max:365'],
             'comment' => ['nullable', 'string', 'max:255'],
+            'email'   => ['required', new EmailRule(), 'max:100'],
         ];
     }
 

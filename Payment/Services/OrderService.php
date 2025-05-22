@@ -27,12 +27,14 @@ class OrderService
     public function createOrder(array $data): Order
     {
         return Order::query()->create([
-            'user_id'  => getUser('id'),
-            'type'     => $data['type'],
-            'amount'   => $data['prices']['total'],
-            'currency' => setting('currency'),
-            'token'    => Str::random(32),
-            'data'     => $data,
+            'user_id'     => getUser('id'),
+            'type'        => $data['type'],
+            'amount'      => $data['prices']['total'],
+            'currency'    => setting('currency'),
+            'token'       => Str::random(32),
+            'email'       => $data['email'],
+            'description' => $data['description'],
+            'data'        => $data,
         ]);
     }
 }

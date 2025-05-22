@@ -11,6 +11,7 @@ return new class extends Migration {
             Schema::create('orders', function (Blueprint $table) {
                 $table->increments('id');
                 $table->integer('user_id')->nullable();
+                $table->string('email', 100);
                 $table->string('type', 20);
                 $table->integer('amount');
                 $table->string('currency');
@@ -18,6 +19,7 @@ return new class extends Migration {
                 $table->string('payment_id', 36)->nullable();
                 $table->string('payment_url')->nullable();
                 $table->string('status', 20)->nullable();
+                $table->string('description')->nullable();
                 $table->json('data')->nullable();
                 $table->timestamps();
 

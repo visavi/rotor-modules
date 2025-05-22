@@ -15,7 +15,7 @@
 
     <div class="mb-3">
         <label for="site" class="form-label">{{ __('admin.paid_adverts.link') }}:</label>
-        <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="100" required>
+        <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="100" placeholder="https://" required>
         <div class="invalid-feedback">{{ textError('site') }}</div>
     </div>
 
@@ -65,6 +65,12 @@
             <div class="invalid-feedback">{{ textError('term') }}</div>
         </div>
     @endif
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email:</label>
+        <input class="form-control{{ hasError('email') }}" id="email" name="email" type="text" value="{{ old('email', $advert->email ?? getUser('email')) }}" maxlength="100" required>
+        <div class="invalid-feedback">{{ textError('email') }}</div>
+    </div>
 
     <div class="mb-3">
         <label for="message" class="form-label">{{ __('main.comment') }}:</label>

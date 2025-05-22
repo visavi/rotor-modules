@@ -49,14 +49,16 @@ class AdvertController extends Controller
         $validated = $request->validated();
 
         $advert = [
-            'type'    => Order::TYPE_ADVERT,
-            'place'   => $validated['place'],
-            'site'    => $validated['site'],
-            'names'   => $validated['names'],
-            'color'   => $validated['color'],
-            'bold'    => $validated['bold'],
-            'term'    => $validated['term'],
-            'comment' => $validated['comment'],
+            'type'        => Order::TYPE_ADVERT,
+            'place'       => $validated['place'],
+            'site'        => $validated['site'],
+            'names'       => $validated['names'],
+            'color'       => $validated['color'],
+            'bold'        => $validated['bold'],
+            'term'        => $validated['term'],
+            'comment'     => $validated['comment'],
+            'email'       => $validated['email'],
+            'description' => __('payment::payments.payment_order'),
         ];
 
         $prices = $this->paymentService->calculateAdvert($advert);
@@ -77,12 +79,7 @@ class AdvertController extends Controller
         try {
             $data = Crypt::decrypt($validated['data']);
             $order = $this->orderService->createOrder($data);
-
-            $payment = $this->yooKassaService->createPayment(
-                $order->amount,
-                asset('payments/status?token=' . $order->token),
-                __('payment::payments.payment_order', ['id' => $order->id])
-            );
+            $payment = $this->yooKassaService->createPayment($order);
 
             if (! $payment || ! $payment['id']) {
                 throw new RuntimeException(__('payment::payments.payment_create_failed'));

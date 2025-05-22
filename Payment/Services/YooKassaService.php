@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Services;
 
-use Exception;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Modules\Payment\Models\Order;
 use RuntimeException;
 
 class YooKassaService
@@ -53,26 +54,41 @@ class YooKassaService
     /**
      * Создание платежа
      */
-    public function createPayment(
-        int|float $amount,
-        string $returnUrl,
-        string $description
-    ): array {
+    public function createPayment(Order $order): array
+    {
         $url = $this->apiUrl . '/payments';
         $idempotenceKey = uniqid('', true);
 
         try {
             $data = [
                 'amount' => [
-                    'value'    => $amount,
+                    'value'    => $order->amount,
                     'currency' => $this->currency,
                 ],
                 'confirmation' => [
                     'type'       => 'redirect',
-                    'return_url' => $returnUrl,
+                    'return_url' => asset('payments/status?token=' . $order->token),
                 ],
                 'capture'     => true,
-                'description' => $description,
+                'description' => $order->description . ' #' . $order->id,
+                'receipt'     => [
+                    'customer' => [
+                        'email' => $order->email,
+                    ],
+                    'items' => [
+                        [
+                            'description' => $order->description,
+                            'amount'      => [
+                                'value'    => $order->amount,
+                                'currency' => $this->currency,
+                            ],
+                            'quantity'        => 1,
+                            'vat_code'        => 1, // НДС 0% (для самозанятых)
+                            'payment_mode'    => 'full_payment', // Полная предоплата
+                            'payment_subject' => 'service', // Услуга
+                        ],
+                    ],
+                ],
             ];
 
             $response = Http::withBasicAuth($this->shopId, $this->secretKey)
@@ -81,7 +97,8 @@ class YooKassaService
                     'Idempotence-Key' => $idempotenceKey,
                     'Content-Type'    => 'application/json',
                 ])
-                ->post($url, $data);
+                ->post($url, $data)
+                ->throw();
 
             return $this->handleResponse($response);
         } catch (ConnectionException $e) {
@@ -90,9 +107,10 @@ class YooKassaService
                 'url'   => $url,
             ]);
             throw new RuntimeException('Не удалось подключиться к YooKassa');
-        } catch (Exception $e) {
+        } catch (RequestException $e) {
+            $error = $e->response?->json() ?? $e->getMessage();
             Log::critical('YooKassa API error', [
-                'error' => $e->getMessage(),
+                'error' => $error,
             ]);
             throw new RuntimeException('Ошибка API YooKassa');
         }
@@ -111,7 +129,8 @@ class YooKassaService
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                 ])
-                ->get($url);
+                ->get($url)
+                ->throw();
 
             return $this->handleResponse($response);
         } catch (ConnectionException $e) {
@@ -121,10 +140,11 @@ class YooKassaService
                 'url'        => $url,
             ]);
             throw new RuntimeException('Не удалось подключиться к API YooKassa');
-        } catch (Exception $e) {
+        } catch (RequestException $e) {
+            $error = $e->response?->json() ?? $e->getMessage();
             Log::critical('YooKassa API error', [
                 'payment_id' => $paymentId,
-                'error'      => $e->getMessage(),
+                'error'      => $error,
             ]);
             throw new RuntimeException('Ошибка API YooKassa');
         }
