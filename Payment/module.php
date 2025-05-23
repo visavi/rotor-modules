@@ -8,7 +8,13 @@ return [
 Возможность продажи цифровых товаров
 Прием и обработка платежей
 
-В панели управления yookassa необходимо добавить webhook для HTTP-уведомления
+Получите shop_id и secret_key в панели управления yookassa
+
+Пропишите эти данные в файле .env
+YOOKASSA_SHOP_ID=
+YOOKASSA_SECRET_KEY=
+
+Добавьте URL webhook для HTTP-уведомления в панели управления yookassa
 [code]
 https://адрес-сайта/payments/webhook
 [/code]

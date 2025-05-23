@@ -1,7 +1,7 @@
 <?php
 
 use App\Classes\Hook;
-use Modules\Docs\Services\GithubService;
+use App\Services\GithubService;
 
 // Добавляем ссылку в меню сайта
 Hook::add('sidebarMenuEnd', function ($content) {
