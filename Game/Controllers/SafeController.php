@@ -13,10 +13,7 @@ use Illuminate\View\View;
 
 class SafeController extends Controller
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     /**
      * Controller constructor.
@@ -40,11 +37,8 @@ class SafeController extends Controller
 
     /**
      * Игра
-     *
-     *
-     * @return View|RedirectResponse
      */
-    public function go(Request $request, Validator $validator)
+    public function go(Request $request, Validator $validator): View|RedirectResponse
     {
         $code0 = int($request->input('code0'));
         $code1 = int($request->input('code1'));

@@ -37,8 +37,6 @@ class GiftsUser extends BaseModel
 
     /**
      * Возвращает связанный подарок
-     *
-     * @return BelongsTo
      */
     public function gift(): BelongsTo
     {
@@ -47,8 +45,6 @@ class GiftsUser extends BaseModel
 
     /**
      * Возвращает связь пользователей
-     *
-     * @return BelongsTo
      */
     public function sendUser(): BelongsTo
     {

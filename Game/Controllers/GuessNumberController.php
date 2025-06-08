@@ -13,10 +13,7 @@ use Illuminate\View\View;
 
 class GuessNumberController extends Controller
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     /**
      * DiceController constructor.
@@ -46,11 +43,8 @@ class GuessNumberController extends Controller
 
     /**
      * Попытка
-     *
-     *
-     * @return View|RedirectResponse
      */
-    public function go(Request $request, Validator $validator)
+    public function go(Request $request, Validator $validator): View|RedirectResponse
     {
         $guessNumber = int($request->input('guess'));
 

@@ -12,10 +12,7 @@ use Illuminate\View\View;
 
 class ThimbleController extends Controller
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     /**
      * Controller constructor.
@@ -47,11 +44,8 @@ class ThimbleController extends Controller
 
     /**
      * Игра в наперстки
-     *
-     *
-     * @return View|RedirectResponse
      */
-    public function go(Request $request)
+    public function go(Request $request): View|RedirectResponse
     {
         $thimble = int($request->input('thimble'));
 

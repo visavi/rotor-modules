@@ -46,7 +46,6 @@ class IndexController extends Controller
             abort(403, __('main.not_authorized'));
         }
 
-        /** @var Gift $gift */
         $gift = Gift::query()->find($id);
 
         if (! $gift) {

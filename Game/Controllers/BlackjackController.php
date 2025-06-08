@@ -13,10 +13,7 @@ use Illuminate\View\View;
 
 class BlackjackController extends Controller
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     /**
      * Controller constructor.
@@ -71,11 +68,8 @@ class BlackjackController extends Controller
 
     /**
      * Игра
-     *
-     *
-     * @return View|RedirectResponse
      */
-    public function game(Request $request)
+    public function game(Request $request): View|RedirectResponse
     {
         $case = $request->input('case');
 

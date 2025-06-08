@@ -33,12 +33,8 @@ class Gift extends BaseModel
 
     /**
      * Get config
-     *
-     * @param string|null $name
-     *
-     * @return mixed|null
      */
-    public static function getConfig(?string $name = null)
+    public static function getConfig(?string $name = null): mixed
     {
         $config = include base_path('modules/Gift/module.php');
 

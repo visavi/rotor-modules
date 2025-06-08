@@ -10,10 +10,7 @@ use Illuminate\View\View;
 
 class BanditController extends Controller
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     /**
      * Controller constructor.

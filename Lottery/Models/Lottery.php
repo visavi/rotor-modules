@@ -39,9 +39,7 @@ class Lottery extends BaseModel
     protected $guarded = [];
 
     /**
-     * Возвращает связь c участниками
-     *
-     * @return HasMany
+     * Возвращает связь с участниками
      */
     public function lotteryUsers(): HasMany
     {
@@ -50,12 +48,8 @@ class Lottery extends BaseModel
 
     /**
      * Get config
-     *
-     * @param string|null $name
-     *
-     * @return mixed|null
      */
-    public static function getConfig(?string $name = null)
+    public static function getConfig(?string $name = null): mixed
     {
         $config = include base_path('modules/Lottery/module.php');
 
