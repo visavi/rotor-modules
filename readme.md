@@ -124,7 +124,7 @@ $result = Hook::call('price', 100);
 ### Middleware
 Промежуточное ПО
 
-Внутри middleware.php можно добавлять свои middleware
+Внутри middleware.php можно добавлять свои классы промежуточного ПО
 
 Alias - Название класса
 ```php
