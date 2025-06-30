@@ -14,7 +14,7 @@ return [
 Как вывести подарки текущего пользователя в анкету
 [code]
 $giftsCount = \Modules\Gift\Models\GiftsUser::where('user_id', $user->id)->count(); ?>
-<a href="/gifts/{{ $user->login }}">Подарки</a> ({{ $giftsCount }})<br>
+<a href="/gifts/{{ $user->login }}">Подарки</a> <span class="badge bg-adaptive">{{ $giftsCount }}</span><br>
 [/code]
 
 Как сделать ссылку на отправку подарка
@@ -22,12 +22,12 @@ $giftsCount = \Modules\Gift\Models\GiftsUser::where('user_id', $user->id)->count
 <a href="/gifts?user={{ $user->login }}">Отправить подарок</a><br>
 [/code]
 INFO,
-    'version'     => '1.3',
-    'author'      => 'Vantuz',
-    'email'       => 'admin@visavi.net',
-    'homepage'    => 'https://visavi.net',
-    'panel'       => '/admin/gifts',
+    'version'  => '1.3',
+    'author'   => 'Vantuz',
+    'email'    => 'admin@visavi.net',
+    'homepage' => 'https://visavi.net',
+    'panel'    => '/admin/gifts',
 
-    'per_page'    => 24, // Кол. подарков на страниц
-    'gift_days'   => 365, // На какой срок дарить подарок (дней)
+    'per_page'  => 24, // Кол. подарков на страниц
+    'gift_days' => 365, // На какой срок дарить подарок (дней)
 ];

@@ -45,7 +45,7 @@
                     <div class="d-flex justify-content-between mb-2">
                         <div>
                             <i class="fa-solid fa-heading text-muted me-2"></i>
-                            {{ __('admin.paid_adverts.names') }} ({{ count($advert['names']) }})
+                            {{ __('admin.paid_adverts.names') }} <span class="badge bg-adaptive">{{ count($advert['names']) }}</span>
                         </div>
                         <span class="text-primary fw-bold">{{ $advert['prices']['names'] }} {{ setting('currency') }}</span>
                     </div>

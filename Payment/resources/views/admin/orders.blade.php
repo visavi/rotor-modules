@@ -14,27 +14,46 @@
 @stop
 
 @section('content')
-    <div class="container">
-        @if ($orders->isNotEmpty())
-            <div class="mb-3">
-                @foreach ($orders as $order)
-                    <div class="row mb-3">
-                        {{ $order->type }}<br>
-                        {{ $order->amount }} {{ $order->currency}}
+    @if ($orders->isNotEmpty())
+        @foreach ($orders as $order)
+        <div class="section mb-3 shadow">
 
-                        @if ($order->user_id)
-                            {{ $order->user->getProfile() }}
-                        @else
-                            <span class="section-author fw-bold" data-login="{{ setting('guestsuser') }}">{{ setting('guestsuser') }}</span>
-                        @endif
-                        <small class="section-date text-muted fst-italic">{{ dateFixed($order->created_at) }}</small><br>
-                    </div>
-                @endforeach
+            <div class="section-title">
+                <h3>#{{ $order->id }} {{ $order->statusName() }}</h3>
             </div>
-        @else
-            {{ showError(__('payment::payments.admin.orders.empty_orders')) }}
-        @endif
 
-        {{ $orders->links() }}
-    </div>
+            Техническая информация:
+            {{ bbCode('[spoiler][code]' . var_export($order->data, true) . '[/code][/spoiler]') }}
+
+
+            <div class="section-content">
+                <div class="section-message">
+                    {{ __('main.comment') }}:
+                    {{ bbCode($order->description) }}
+                </div>
+
+                <div>{{ $order->statusName() }}</div>
+                <div>{{ __('payment::payments.order_number') }}: {{ $order->id }}</div>
+                <div>{{ __('payment::payments.order_status') }}: {{ $order->statusName() }}</div>
+                <div>{{ __('payment::payments.order_amount') }}: <strong>{{ $order->amount }} {{ $order->currency }}</strong></div>
+
+                <div>{{ $order->email }}</div>
+                <div>{{ $order->type }}</div>
+            </div>
+
+            <div class="section-body">
+
+
+
+                <span class="avatar-micro">{{ $order->user->getAvatarImage() }}</span> {{ $order->user->exists ? $order->user->getProfile() : setting('guestsuser') }}
+                <small class="section-date text-muted fst-italic">{{ dateFixed($order->created_at) }}</small>
+            </div>
+        </div>
+
+        @endforeach
+    @else
+        {{ showError(__('payment::payments.admin.orders.empty_orders')) }}
+    @endif
+
+    {{ $orders->links() }}
 @stop

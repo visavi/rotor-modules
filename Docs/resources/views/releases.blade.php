@@ -47,7 +47,7 @@
             @endforeach
         </div>
     @else
-        <div class="alert alert-danger">
+        <div class="alert alert-warning">
             <i class="bi bi-exclamation-circle-fill text-danger"></i>
             Не удалось получить последние версии!
         </div>

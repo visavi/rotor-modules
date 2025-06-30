@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Docs\Controllers\DocsController;
 use Modules\Docs\Controllers\RotorController;
 
-Route::controller(RotorController::class)
+Route::middleware('web')
+    ->controller(RotorController::class)
     ->prefix('rotor')
     ->group(function () {
         Route::get('/', 'index');
@@ -12,7 +13,8 @@ Route::controller(RotorController::class)
         Route::get('/commits', 'commits');
     });
 
-Route::controller(DocsController::class)
+Route::middleware('web')
+    ->controller(DocsController::class)
     ->prefix('docs')
     ->group(function () {
         Route::get('/', 'index');
