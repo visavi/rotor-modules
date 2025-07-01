@@ -6,5 +6,5 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('web')
     ->prefix('locations')
     ->group(function () {
-        Route::get('/', [\Modules\UserLocation\Controllers\UserLocationController::class, 'index']);
+        Route::get('/', [\Modules\UserLocation\Controllers\UserLocationController::class, 'index'])->name('locations.index');
     });

@@ -6,7 +6,6 @@ namespace Modules\UserLocation\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Facades\Date;
-use Modules\Payment\Services\YooKassaService;
 
 /**
  * Class UserLocation
