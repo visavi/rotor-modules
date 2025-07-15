@@ -4,12 +4,14 @@ return [
     'name'        => 'Лотерея',
     'description' => 'Пользователи покупают билет и делают ставку от 1 до 100, на следующий день объявляются результаты, победитель получает весь выигрыш плюс все деньги со ставок проигравших. Если победителей более одного, выигрыш делится пропорционально',
     'info'        => <<<'INFO'
-Добавьте ссылку перехода на страницу подарков
+Ссылка на лотерею будет автоматически добавлена на страницу игр через хуки
+
+Или добавьте ссылку перехода на страницу лотереи самостоятельно
 [code]
 <a href="/lottery">Лотерея</a>
 [/code]
 
-Размер текущего джэк-пота можно получить с помщью следующего кода
+Размер текущего джек-пота можно получить с помощью следующего кода
 [code]
 <?php
 $lottery = \Modules\Lottery\Models\Lottery::query()
@@ -19,10 +21,10 @@ $lottery = \Modules\Lottery\Models\Lottery::query()
 {{ plural($lottery->amount, setting('moneyname')) }}
 [/code]
 INFO,
-    'version'     => '1.4',
-    'author'      => 'Vantuz',
-    'email'       => 'admin@visavi.net',
-    'homepage'    => 'https://visavi.net',
+    'version'  => '1.5',
+    'author'   => 'Vantuz',
+    'email'    => 'admin@visavi.net',
+    'homepage' => 'https://visavi.net',
 
     'jackpot'     => 1000000,  // Сумма выигрыша
     'ticketPrice' => 50,       // Цена билета

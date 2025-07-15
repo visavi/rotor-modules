@@ -14,6 +14,7 @@
 @section('content')
     <div class="container">
         <div class="row">
+            @hook('gamesStart')
             <div class="col-md-4 col-sm-6">
                 <div class="section my-3 shadow">
                     <i class="fas fa-coins fa-5x"></i>
@@ -51,6 +52,8 @@
                     <a href="/games/safe" class="h5">{{ __('game::games.safe') }}</a>
                 </div>
             </div>
+            @hook('gamesEnd')
         </div>
+
     </div>
 @stop
