@@ -87,7 +87,7 @@
 @stop
 
 @push('scripts')
-    <script>
+    <script type="module">
         function showLotteryUsers() {
             $('.js-lottery-users').slideToggle();
             return false;
