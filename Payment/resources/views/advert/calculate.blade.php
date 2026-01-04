@@ -102,7 +102,7 @@
                 <!-- Комментарий -->
                 @if ($advert['comment'])
                     <div class="py-2 border-bottom">
-                        <div class="d-flex align-items-center text-muted mb-1">
+                        <div class="d-flex align-items-start text-muted mb-1">
                             <i class="fa-regular fa-comment me-2"></i>
                             {{ __('main.comment') }}
                         </div>
@@ -115,7 +115,7 @@
 
             <!-- Итого -->
             <div class="total-block p-3 rounded mt-3">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-start">
                     <div class="h5 mb-0">{{ __('payment::payments.total_paid') }}:</div>
                     <div class="h4 mb-0 text-primary">{{ number_format($advert['prices']['total'], 0, ',', ' ') }} {{ setting('currency') }}</div>
                 </div>

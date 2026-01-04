@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Migrations\Migration;
 use App\Models\Sticker;
 use App\Models\StickersCategory;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration {
     /**
@@ -25,8 +25,8 @@ return new class extends Migration {
             foreach ($stickers as $stickerName) {
                 Sticker::query()->create([
                     'category_id' => $category->id,
-                    'name' => '/assets/modules/stickers/' . $categoryName . '/' . $stickerName,
-                    'code' => ':' . getBodyName($stickerName),
+                    'name'        => '/assets/modules/stickers/' . $categoryName . '/' . $stickerName,
+                    'code'        => ':' . getBodyName($stickerName),
                 ]);
             }
         }
