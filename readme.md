@@ -26,12 +26,13 @@
 
 Состоит из массива
 - name - Имя модуля
-- description - Описание модуля
+- description - Короткое описание модуля
+- info - Подробное описание модуля (Поддерживает BB-коды)
 - version - Версия модуля
 - author  - Автор модуля
 - email - Email автора
 - homepage - Сайт автора
-- panel - Ссылка на админку модуля
+- panel - Ссылка или массив ссылок на страницы модуля
 
 #### Controllers
 Контроллеры с пространством имен namespace Modules\ИмяМодуля\Controllers;
@@ -100,7 +101,11 @@ use App\Classes\Hook;
 
 // Добавляет данные
 Hook::add('head', function ($content) {
-    return $content . '<link rel="stylesheet" href="style.css">' . PHP_EOL;
+    return $content . '<link rel="stylesheet" href="/assets/modules/moduleName/style.css">' . PHP_EOL;
+});
+
+Hook::add('footer', function ($content) {
+    return $content . '<script type="module" src="/assets/modules/moduleName/scripts.js"></script>' . PHP_EOL;
 });
 
 // Изменяет данные
