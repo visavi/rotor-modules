@@ -35,4 +35,8 @@ INFO,
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',
+    'panel'    => [
+        '/admin/orders'           => 'Заказы',
+        '/admin/payment-settings' => 'Настройки',
+    ],
 ];

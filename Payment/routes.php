@@ -14,9 +14,11 @@ Route::middleware('web')
         Route::get('/status', [\Modules\Payment\Controllers\AdvertController::class, 'status']);
     });
 
-/* Заказы */
+/* Админка */
 Route::middleware('web')
     ->prefix('admin')
     ->group(function () {
         Route::get('/orders', [\Modules\Payment\Controllers\OrderController::class, 'index']);
+        Route::get('/payment-settings', [\Modules\Payment\Controllers\PaymentSettingController::class, 'index']);
+        Route::post('/payment-settings', [\Modules\Payment\Controllers\PaymentSettingController::class, 'save']);
     });
