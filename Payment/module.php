@@ -11,8 +11,8 @@ return [
 Получите shop_id и secret_key в панели управления yookassa
 
 Пропишите эти данные в файле .env
-YOOKASSA_SHOP_ID=
-YOOKASSA_SECRET_KEY=
+YOOKASSA_SHOP_ID=Ваш shop_id
+YOOKASSA_SECRET_KEY=Ваш secret_key
 
 Добавьте URL webhook для HTTP-уведомления в панели управления yookassa
 [code]
@@ -31,12 +31,12 @@ https://адрес-сайта/payments/webhook
 
 Ссылки будут созданы автоматически с помощью хуков
 INFO,
-    'version'  => '1.4',
+    'version'  => '1.5',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',
     'panel'    => [
-        '/admin/orders'           => 'Заказы',
-        '/admin/payment-settings' => 'Настройки',
+        '/admin/orders'           => __('payment::payments.orders'),
+        '/admin/payment-settings' => __('payment::payments.settings'),
     ],
 ];
