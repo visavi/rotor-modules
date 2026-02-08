@@ -4,36 +4,59 @@ declare(strict_types=1);
 
 namespace Modules\Gift\Models;
 
-use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Gift
  *
- * @property int id
- * @property int gift_id
- * @property int user_id
- * @property int send_user_id
- * @property string text
- * @property int created_at
- * @property int deleted_at
+ * @property int    $id
+ * @property int    $gift_id
+ * @property int    $user_id
+ * @property int    $send_user_id
+ * @property string $text
+ * @property int    $created_at
+ * @property int    $deleted_at
  */
-class GiftsUser extends BaseModel
+class GiftsUser extends Model
 {
     /**
      * Indicates if the model should be timestamped.
-     *
-     * @var bool
      */
     public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.
-     *
-     * @var array
      */
     protected $guarded = [];
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'user_id'      => 'int',
+            'send_user_id' => 'int',
+        ];
+    }
+
+    /**
+     * Возвращает связь пользователя
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id')->withDefault();
+    }
+
+    /**
+     * Возвращает связь пользователя
+     */
+    public function sendUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'send_user_id')->withDefault();
+    }
 
     /**
      * Возвращает связанный подарок
@@ -41,13 +64,5 @@ class GiftsUser extends BaseModel
     public function gift(): BelongsTo
     {
         return $this->belongsTo(Gift::class)->withDefault();
-    }
-
-    /**
-     * Возвращает связь пользователей
-     */
-    public function sendUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'send_user_id')->withDefault();
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\UserLocation\Models;
 
-use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Date;
 
 /**
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Date;
  * @property string $title
  * @property Date   $created_at
  */
-class UserLocation extends BaseModel
+class UserLocation extends Model
 {
     /**
      * Indicates if the model should be timestamped.
@@ -34,7 +36,16 @@ class UserLocation extends BaseModel
     protected function casts(): array
     {
         return [
+            'user_id'    => 'int',
             'created_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Возвращает связь пользователя
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 }

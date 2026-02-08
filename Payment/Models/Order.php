@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Models;
 
-use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Date;
 use Modules\Payment\Services\YooKassaService;
 
@@ -23,7 +25,7 @@ use Modules\Payment\Services\YooKassaService;
  * @property Date   $created_at
  * @property Date   $updated_at
  */
-class Order extends BaseModel
+class Order extends Model
 {
     public const TYPE_ADVERT = 'advert';
 
@@ -38,8 +40,17 @@ class Order extends BaseModel
     protected function casts(): array
     {
         return [
-            'data' => 'array',
+            'user_id' => 'int',
+            'data'    => 'array',
         ];
+    }
+
+    /**
+     * Возвращает связь пользователя
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
     /**
