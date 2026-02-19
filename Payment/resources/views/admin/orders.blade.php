@@ -53,7 +53,7 @@
 
         @endforeach
     @else
-        {{ showError(__('payment::payments.admin.orders.empty_orders')) }}
+        {{ showError(__('payment::payments.empty_orders')) }}
     @endif
 
     {{ $orders->links() }}
