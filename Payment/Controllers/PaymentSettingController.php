@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Module;
 use App\Models\PaidAdvert;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use Modules\Payment\Requests\SettingRequest;
 
@@ -31,11 +30,9 @@ class PaymentSettingController extends Controller
      */
     public function save(SettingRequest $request): RedirectResponse
     {
-        $validated = Arr::except($request->validated(), '_token');
-
         Module::query()
             ->where('name', 'Payment')
-            ->update(['settings' => $validated]);
+            ->update(['settings' => $request->validated()]);
 
         clearCache('modules');
 

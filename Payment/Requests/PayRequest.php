@@ -9,11 +9,10 @@ class PayRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            '_token' => ['required', 'in:' . csrf_token()],
-            'data'   => ['required', 'string'],
+            'data' => ['required', 'string'],
         ];
     }
 

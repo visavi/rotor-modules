@@ -1,12 +1,14 @@
 <?php
 
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 /*  Платежи */
 Route::middleware('web')
     ->prefix('payments')
     ->group(function () {
-        Route::post('/webhook', [\Modules\Payment\Controllers\PaymentController::class, 'webhook']);
+        Route::post('/webhook', [\Modules\Payment\Controllers\PaymentController::class, 'webhook'])
+            ->withoutMiddleware(VerifyCsrfToken::class);
 
         Route::get('/advert', [\Modules\Payment\Controllers\AdvertController::class, 'index']);
         Route::post('/calculate', [\Modules\Payment\Controllers\AdvertController::class, 'calculate']);

@@ -11,10 +11,9 @@ class CalculateRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            '_token'  => ['required', 'in:' . csrf_token()],
             'place'   => ['required', 'in:' . implode(',', PaidAdvert::PLACES)],
             'site'    => ['required', 'url', 'max:100'],
             'names'   => ['required', 'array', 'min:1'],
