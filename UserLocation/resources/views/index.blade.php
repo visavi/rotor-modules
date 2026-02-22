@@ -26,7 +26,7 @@
 
         @endforeach
     @else
-        {{ showError(__('user_location::locations.admin.empty_locations')) }}
+        {{ showError(__('user_location::locations.empty_locations')) }}
     @endif
 
     {{ $locations->links() }}

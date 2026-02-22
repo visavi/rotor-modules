@@ -2,8 +2,8 @@
 
 return [
     'yookassa_api_url'    => 'https://api.yookassa.ru/v3',
-    'yookassa_shop_id'    => env('YOOKASSA_SHOP_ID'),
-    'yookassa_secret_key' => env('YOOKASSA_SECRET_KEY'),
+    'yookassa_shop_id'    => env('YOOKASSA_SHOP_ID', ''),
+    'yookassa_secret_key' => env('YOOKASSA_SECRET_KEY', ''),
     'yookassa_currency'   => 'RUB',
 
     // Цены за сутки
