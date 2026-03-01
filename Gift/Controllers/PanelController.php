@@ -30,8 +30,7 @@ class PanelController extends AdminController
         if ($request->isMethod('post')) {
             $gifts = intar($request->input('gifts'));
 
-            $validator->equal($request->input('_token'), csrf_token(), ['msg' => __('validator.token')])
-                ->notEmpty($gifts, __('gift::gifts.prices_not_transferred'));
+            $validator->notEmpty($gifts, __('gift::gifts.prices_not_transferred'));
 
             if ($validator->isValid()) {
                 foreach ($gifts as $id => $price) {

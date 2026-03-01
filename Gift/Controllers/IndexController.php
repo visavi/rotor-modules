@@ -57,7 +57,7 @@ class IndexController extends Controller
         if ($request->isMethod('post')) {
             $msg = $request->input('msg');
 
-            $validator->equal($request->input('_token'), csrf_token(), ['msg' => __('validator.token')])
+            $validator
                 ->notEmpty($user, ['user' => __('validator.user')])
                 ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
                 ->gte(getUser('money'), $gift->price, __('gift::gifts.money_not_enough'));
