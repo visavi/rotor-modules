@@ -38,10 +38,21 @@
                 {{ $text }}<br>
             @endif
 
-            {!! $result !!}
+            @if ($result === 'victory')
+                <span class="text-success">Вы выиграли</span>
+            @elseif ($result === 'lost')
+                <span class="text-danger">Вы проиграли</span>
+            @else
+                Ничья
+            @endif
         </div>
 
-        <a class="btn btn-primary" href="/games/blackjack/bet?bet={{ $blackjack['bet'] }}&amp;_token={{ csrf_token() }}">Повторить</a><br><br>
+        <form action="/games/blackjack/bet" method="post" class="d-inline">
+            @csrf
+            <input type="hidden" name="bet" value="{{ $blackjack['bet'] }}">
+            <button type="submit" class="btn btn-primary">Повторить</button>
+        </form>
+        <br><br>
 
         <i class="fa fa-coins"></i> <a href="/games/blackjack">Новая ставка</a><br>
     @else

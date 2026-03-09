@@ -20,6 +20,8 @@ class BlackjackController extends Controller
      */
     public function __construct()
     {
+        $this->middleware('check.user');
+
         $this->middleware(function ($request, $next) {
             $this->user = getUser();
 
@@ -46,7 +48,7 @@ class BlackjackController extends Controller
             return redirect('games/blackjack/game');
         }
 
-        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
+        $validator
             ->gt($bet, 0, ['bet' => 'Вы не указали ставку!'])
             ->gte($this->user->money, $bet, ['bet' => 'У вас недостаточно денег для игры!']);
 
@@ -57,7 +59,7 @@ class BlackjackController extends Controller
 
             setFlash('success', 'Ставка сделана!');
 
-            return redirect('games/blackjack/game?rand=' . mt_rand(1000, 9999));
+            return redirect('games/blackjack/game');
         }
 
         setInput($request->all());
@@ -71,13 +73,8 @@ class BlackjackController extends Controller
      */
     public function game(Request $request): View|RedirectResponse
     {
-        $case = $request->input('case');
-
-        $results = [
-            'victory' => '<span class="text-success">Вы выиграли</span>',
-            'lost'    => '<span class="text-danger">Вы проиграли</span>',
-            'draw'    => 'Ничья',
-        ];
+        $input = $request->input('case');
+        $case = in_array($input, ['take', 'end'], true) ? $input : null;
 
         if ($request->session()->missing('blackjack.bet')) {
             setFlash('danger', 'Необходимо сделать ставку!');
@@ -87,54 +84,51 @@ class BlackjackController extends Controller
 
         $scores = $this->takeCard($case);
 
-        $text = false;
-        $result = false;
+        $text = null;
+        $result = null;
 
         if ($case === 'end') {
-            if ($scores['user'] > $scores['banker']) {
-                $result = $results['victory'];
-            }
-            if ($scores['user'] < $scores['banker']) {
-                $result = $results['lost'];
-            }
-            if ($scores['user'] === $scores['banker']) {
-                $result = $results['draw'];
-            }
+            $result = match(true) {
+                $scores['user'] > $scores['banker'] => 'victory',
+                $scores['user'] < $scores['banker'] => 'lost',
+                default                             => 'draw',
+            };
+
             if ($scores['banker'] > 21) {
-                $result = $results['victory'];
+                $result = 'victory';
             }
         }
 
         if ($scores['user'] > 21 && $scores['userCards'] !== 2) {
             $text = 'У вас перебор!';
-            $result = $results['lost'];
+            $result = 'lost';
         }
         if ($scores['user'] === 22 && $scores['userCards'] === 2) {
             $text = 'У вас 2 туза!';
-            $result = $results['victory'];
+            $result = 'victory';
         }
         if ($scores['banker'] === 22 && $scores['bankerCards'] === 2) {
             $text = 'У банкира 2 туза!';
-            $result = $results['lost'];
+            $result = 'lost';
         }
         if ($scores['user'] === 21) {
             $text = 'У вас очко!';
-            $result = $results['victory'];
+            $result = 'victory';
         }
         if ($scores['banker'] === 21) {
             $text = 'У банкира очко!';
-            $result = $results['lost'];
+            $result = 'lost';
         }
         if (($scores['user'] === 21 && $scores['banker'] === 21) || ($scores['user'] === 22 && $scores['banker'] === 22)) {
-            $result = $results['draw'];
+            $result = 'draw';
         }
 
         $blackjack = $request->session()->get('blackjack');
 
-        if ($result) {
-            if ($result === $results['victory']) {
+        if ($result !== null) {
+            if ($result === 'victory') {
                 $this->user->increment('money', $blackjack['bet'] * 2);
-            } elseif ($result === $results['draw']) {
+            } elseif ($result === 'draw') {
                 $this->user->increment('money', $blackjack['bet']);
             }
 
@@ -183,7 +177,7 @@ class BlackjackController extends Controller
      */
     private function takeCard(?string $case): array
     {
-        $rand = mt_rand(16, 18);
+        $rand = random_int(16, 18);
 
         if (session()->missing('blackjack.deck')) {
             session()->put('blackjack.deck', array_combine(range(1, 52), range(1, 52)));
