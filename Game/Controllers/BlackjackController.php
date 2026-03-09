@@ -7,6 +7,7 @@ namespace Modules\Game\Controllers;
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -82,13 +83,13 @@ class BlackjackController extends Controller
             return redirect('games/blackjack');
         }
 
-        $scores = $this->takeCard($case);
+        $scores = $this->takeCard($request->session(), $case);
 
         $text = null;
         $result = null;
 
         if ($case === 'end') {
-            $result = match(true) {
+            $result = match (true) {
                 $scores['user'] > $scores['banker'] => 'victory',
                 $scores['user'] < $scores['banker'] => 'lost',
                 default                             => 'draw',
@@ -175,48 +176,47 @@ class BlackjackController extends Controller
     /**
      * Взятие карты
      */
-    private function takeCard(?string $case): array
+    private function takeCard(Session $session, ?string $case): array
     {
         $rand = random_int(16, 18);
+        $isNewGame = $session->missing('blackjack.cards');
+        $deck = $session->get('blackjack.deck', array_combine(range(1, 52), range(1, 52)));
+        $cards = $session->get('blackjack.cards', []);
+        $bankerCards = $session->get('blackjack.bankercards', []);
 
-        if (session()->missing('blackjack.deck')) {
-            session()->put('blackjack.deck', array_combine(range(1, 52), range(1, 52)));
-        }
-
-        if (session()->missing('blackjack.cards')) {
-            session()->put('blackjack.cards', []);
+        if ($isNewGame) {
             $case = 'take';
         }
 
-        if (session()->missing('blackjack.bankercards')) {
-            session()->put('blackjack.bankercards', []);
-        }
-
         if ($case === 'take') {
-            $card = array_rand(session()->get('blackjack.deck'));
-            session()->push('blackjack.cards', $card);
-            session()->forget('blackjack.deck.' . $card);
+            $card = array_rand($deck);
+            $cards[] = $card;
+            unset($deck[$card]);
 
-            if ($this->cardsScore(session()->get('blackjack.bankercards')) < $rand) {
-                $card2 = array_rand(session()->get('blackjack.deck'));
-                session()->push('blackjack.bankercards', $card2);
-                session()->forget('blackjack.deck.' . $card2);
+            if ($this->cardsScore($bankerCards) < $rand) {
+                $card2 = array_rand($deck);
+                $bankerCards[] = $card2;
+                unset($deck[$card2]);
             }
         }
 
         if ($case === 'end') {
-            while ($this->cardsScore(session()->get('blackjack.bankercards')) < $rand) {
-                $card2 = array_rand(session()->get('blackjack.deck'));
-                session()->push('blackjack.bankercards', $card2);
-                session()->forget('blackjack.deck.' . $card2);
+            while ($this->cardsScore($bankerCards) < $rand) {
+                $card2 = array_rand($deck);
+                $bankerCards[] = $card2;
+                unset($deck[$card2]);
             }
         }
 
+        $session->put('blackjack.deck', $deck);
+        $session->put('blackjack.cards', $cards);
+        $session->put('blackjack.bankercards', $bankerCards);
+
         return [
-            'user'        => $this->cardsScore(session()->get('blackjack.cards')),
-            'userCards'   => count(session()->get('blackjack.cards')),
-            'banker'      => $this->cardsScore(session()->get('blackjack.bankercards')),
-            'bankerCards' => count(session()->get('blackjack.bankercards')),
+            'user'        => $this->cardsScore($cards),
+            'userCards'   => count($cards),
+            'banker'      => $this->cardsScore($bankerCards),
+            'bankerCards' => count($bankerCards),
         ];
     }
 }
