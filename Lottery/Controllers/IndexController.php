@@ -75,7 +75,6 @@ class IndexController extends Controller
             ->exists();
 
         $validator
-            ->equal($request->input('_token'), csrf_token(), ['number' => __('validator.token')])
             ->false($ticketExist, ['number' => __('lottery::lottery.already_bought_ticket')])
             ->lte($ticketPrice, getUser('money'), ['number' => __('lottery::lottery.no_money')])
             ->between($number, $numberRange[0], $numberRange[1], ['number' => __('lottery::lottery.must_enter_number')]);
