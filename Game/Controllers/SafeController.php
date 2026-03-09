@@ -46,8 +46,7 @@ class SafeController extends Controller
         $code3 = int($request->input('code3'));
         $code4 = int($request->input('code4'));
 
-        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
-            ->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
+        $validator->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {
             setInput($request->all());

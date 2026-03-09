@@ -21,7 +21,12 @@
                     <div class="col-md-4 col-sm-6">
                         @if (isAdmin())
                             <div class="float-end">
-                                <a href="/admin/gifts/delete?user={{ $gift->user->login }}&amp;id={{ $gift->id }}&amp;_token={{ csrf_token() }}" onclick="return confirm('{{ __('gift::gifts.confirm_delete_gift') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                                <form action="/admin/gifts/{{ $gift->id }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('gift::gifts.confirm_delete_gift') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="user" value="{{ $gift->user->login }}">
+                                    <button type="submit" class="btn btn-link p-0" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></button>
+                                </form>
                             </div>
                         @endif
 

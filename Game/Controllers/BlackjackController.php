@@ -21,8 +21,6 @@ class BlackjackController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('check.user');
-
         $this->middleware(function ($request, $next) {
             $this->user = getUser();
 

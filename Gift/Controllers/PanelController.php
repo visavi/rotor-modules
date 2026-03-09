@@ -56,12 +56,9 @@ class PanelController extends AdminController
     /**
      * Removes gifts
      */
-    public function delete(Request $request, Validator $validator): RedirectResponse
+    public function delete(Request $request, Validator $validator, int $id): RedirectResponse
     {
-        $id = int($request->input('id'));
         $login = $request->input('user');
-
-        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'));
 
         $gift = GiftsUser::query()->find($id);
         $validator->notEmpty($gift, __('gift::gifts.gift_not_found'));

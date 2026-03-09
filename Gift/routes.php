@@ -15,5 +15,5 @@ Route::middleware('web')
     ->prefix('admin')
     ->group(function () {
         Route::match(['get', 'post'], '/gifts', [\Modules\Gift\Controllers\PanelController::class, 'index']);
-        Route::get('/gifts/delete', [\Modules\Gift\Controllers\PanelController::class, 'delete']);
+        Route::delete('/gifts/{id}', [\Modules\Gift\Controllers\PanelController::class, 'delete']);
     });

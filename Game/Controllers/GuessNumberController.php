@@ -48,7 +48,7 @@ class GuessNumberController extends Controller
     {
         $guessNumber = int($request->input('guess'));
 
-        $validator->equal($request->input('_token'), csrf_token(), __('validator.token'))
+        $validator
             ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 
