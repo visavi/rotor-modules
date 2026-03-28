@@ -6,9 +6,9 @@ use Modules\Gift\Models\GiftsUser;
 // Добавляем ссылку на подарки в меню сайта
 Hook::add('sidebarMenuEnd', function ($content) {
     return $content . '<li>
-        <a class="app-menu__item' . (request()->is('gifts*') ? ' active' : '') . '" href="/gifts">
-            <i class="app-menu__icon fas fa-gift"></i>
-            <span class="app-menu__label">Подарки</span>
+        <a class="menu-item' . (request()->is('gifts*') ? ' active' : '') . '" href="/gifts">
+            <i class="menu-icon fas fa-gift"></i>
+            <span class="menu-label">Подарки</span>
         </a>
     </li>' . PHP_EOL;
 });
