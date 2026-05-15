@@ -27,7 +27,7 @@ use Modules\Payment\Services\YooKassaService;
  */
 class Order extends Model
 {
-    public const TYPE_ADVERT = 'advert';
+    public const string TYPE_ADVERT = 'advert';
 
     /**
      * The attributes that aren't mass assignable.

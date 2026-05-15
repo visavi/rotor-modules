@@ -20,22 +20,22 @@ class YooKassaService
     private string $currency;
 
     /** Ожидает оплаты покупателем */
-    public const PENDING = 'pending';
+    public const string PENDING = 'pending';
 
     /** Ожидает подтверждения магазином */
-    public const WAITING_FOR_CAPTURE = 'waiting_for_capture';
+    public const string WAITING_FOR_CAPTURE = 'waiting_for_capture';
 
     /** Успешно оплачен и подтвержден магазином */
-    public const SUCCEEDED = 'succeeded';
+    public const string SUCCEEDED = 'succeeded';
 
     /** Неуспех оплаты или отменен магазином */
-    public const CANCELED = 'canceled';
+    public const string CANCELED = 'canceled';
 
     /** Ошибка */
-    public const ERROR = 'error';
+    public const string ERROR = 'error';
 
     /** Статусы платежа */
-    public const STATUSES = [
+    public const array STATUSES = [
         self::PENDING             => 'Платеж создан',
         self::WAITING_FOR_CAPTURE => 'Платеж оплачен и ожидает списание',
         self::SUCCEEDED           => 'Платеж успешно завершен',

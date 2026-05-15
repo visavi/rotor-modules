@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Gift\Models;
 
+use App\Casts\HtmlCast;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +40,7 @@ class GiftsUser extends Model
         return [
             'user_id'      => 'int',
             'send_user_id' => 'int',
+            'text'         => HtmlCast::class,
         ];
     }
 

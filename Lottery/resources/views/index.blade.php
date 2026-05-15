@@ -89,7 +89,9 @@
 @push('scripts')
     <script type="module">
         window.showLotteryUsers = function() {
-            $('.js-lottery-users').slideToggle();
+            const el = document.querySelector('.js-lottery-users');
+            if (!el) return false;
+            el.style.display = getComputedStyle(el).display === 'none' ? '' : 'none';
             return false;
         };
     </script>

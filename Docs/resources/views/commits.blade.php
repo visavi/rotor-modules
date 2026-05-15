@@ -18,13 +18,13 @@
             @foreach ($commits as $commit)
                 <div class="post mb-3">
                     <div class="post-message fw-bold">
-                        <a href="{{ $commit['html_url'] }}">{{ $commit['commit']['message'] }}</a>
+                        <a href="{{ $commit['html_url'] }}">{{ mb_strimwidth($commit['commit']['message'], 0, 70, '...') }}</a>
                     </div>
 
                     <div class="post-author fw-light">
-                            <span class="avatar-micro">
-                                <img class="avatar-default rounded-circle" src="{{ $commit['author']['avatar_url'] }}" alt="Аватар">
-                            </span>
+                        <span class="avatar-micro">
+                            <img class="avatar-default rounded-circle" src="{{ $commit['author']['avatar_url'] }}" alt="Аватар">
+                        </span>
 
                         <span><a href="{{ $commit['author']['html_url'] }}">{{ $commit['author']['login'] }}</a></span>
                         <small class="post-date text-body-secondary fst-italic">{{ dateFixed(strtotime($commit['commit']['author']['date'])) }}</small>

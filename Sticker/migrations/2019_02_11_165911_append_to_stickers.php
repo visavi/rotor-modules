@@ -26,12 +26,12 @@ return new class extends Migration {
                 Sticker::query()->create([
                     'category_id' => $category->id,
                     'name'        => '/assets/modules/stickers/' . $categoryName . '/' . $stickerName,
-                    'code'        => ':' . getBodyName($stickerName),
+                    'code'        => getBodyName($stickerName),
                 ]);
             }
         }
 
-        clearCache('stickers');
+        clearCache(['stickers']);
     }
 
     /**
@@ -50,6 +50,6 @@ return new class extends Migration {
             }
         }
 
-        clearCache('stickers');
+        clearCache(['stickers']);
     }
 };

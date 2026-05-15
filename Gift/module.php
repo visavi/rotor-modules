@@ -4,25 +4,19 @@ return [
     'name'        => 'Подарки',
     'description' => 'Подарки для пользователей, бесплатные или за игровую валюту, подарки отображаются в профиле пользователя',
     'info'        => <<<'INFO'
-С помощью хуков ссылки будут добавлены автоматически
+<p>С помощью хуков ссылки будут добавлены автоматически</p>
 
-Добавьте ссылку перехода на страницу подарков
-[code]
-<a href="/gifts">Подарки</a>
-[/code]
+<p>Добавьте ссылку перехода на страницу подарков</p>
+<pre class="code"><code>&lt;a href="/gifts"&gt;Подарки&lt;/a&gt;</code></pre>
 
-Как вывести подарки текущего пользователя в анкету
-[code]
-$giftsCount = \Modules\Gift\Models\GiftsUser::where('user_id', $user->id)->count(); ?>
-<a href="/gifts/{{ $user->login }}">Подарки</a> <span class="badge bg-adaptive">{{ $giftsCount }}</span><br>
-[/code]
+<p>Как вывести подарки текущего пользователя в анкету</p>
+<pre class="code"><code>$giftsCount = \Modules\Gift\Models\GiftsUser::where('user_id', $user-&gt;id)-&gt;count();
+&lt;a href="/gifts/{{ $user-&gt;login }}"&gt;Подарки&lt;/a&gt; &lt;span class="badge bg-adaptive"&gt;{{ $giftsCount }}&lt;/span&gt;</code></pre>
 
-Как сделать ссылку на отправку подарка
-[code]
-<a href="/gifts?user={{ $user->login }}">Отправить подарок</a><br>
-[/code]
+<p>Как сделать ссылку на отправку подарка</p>
+<pre class="code"><code>&lt;a href="/gifts?user={{ $user-&gt;login }}"&gt;Отправить подарок&lt;/a&gt;</code></pre>
 INFO,
-    'version'  => '1.4',
+    'version'  => '13.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

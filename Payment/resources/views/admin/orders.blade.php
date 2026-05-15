@@ -24,13 +24,15 @@
             </div>
 
             Техническая информация:
-            {{ bbCode('[spoiler][code]' . var_export($order->data, true) . '[/code][/spoiler]') }}
-
+            <details class="spoiler">
+                <summary>{{ __('main.expand_view') }}</summary>
+                <pre class="code"><code>{{ var_export($order->data, true) }}</code></pre>
+            </details>
 
             <div class="section-content">
                 <div class="section-message">
                     {{ __('main.comment') }}:
-                    {{ bbCode($order->description) }}
+                    {{ renderText($order->description) }}
                 </div>
 
                 <div>{{ $order->statusName() }}</div>
@@ -43,9 +45,6 @@
             </div>
 
             <div class="section-body">
-
-
-
                 <span class="avatar-micro">{{ $order->user->getAvatarImage() }}</span> {{ $order->user->exists ? $order->user->getProfile() : setting('guestsuser') }}
                 <small class="section-date text-muted fst-italic">{{ dateFixed($order->created_at) }}</small>
             </div>

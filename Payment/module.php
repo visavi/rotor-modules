@@ -4,34 +4,28 @@ return [
     'name'        => 'Платежи',
     'description' => 'Организация платежей на сайте',
     'info'        => <<<'INFO'
-Организация платежей через YooKassa
-Возможность продажи цифровых товаров
-Прием и обработка платежей
+<p>Организация платежей через YooKassa<br>
+Возможность продажи цифровых товаров<br>
+Прием и обработка платежей</p>
 
-Получите shop_id и secret_key в панели управления yookassa
+<p>Получите shop_id и secret_key в панели управления yookassa</p>
 
-Пропишите эти данные в файле .env
-YOOKASSA_SHOP_ID=Ваш shop_id
-YOOKASSA_SECRET_KEY=Ваш secret_key
+<p>Пропишите эти данные в файле .env</p>
+<pre class="code"><code>YOOKASSA_SHOP_ID=Ваш shop_id
+YOOKASSA_SECRET_KEY=Ваш secret_key</code></pre>
 
-Добавьте URL webhook для HTTP-уведомления в панели управления yookassa
-[code]
-https://адрес-сайта/payments/webhook
-[/code]
+<p>Добавьте URL webhook для HTTP-уведомления в панели управления yookassa</p>
+<pre class="code"><code>https://адрес-сайта/payments/webhook</code></pre>
 
-Ссылка на сайте для создания заказов
-[code]
-<a href="/payments/advert">Купить рекламу</a>
-[/code]
+<p>Ссылка на сайте для создания заказов</p>
+<pre class="code"><code>&lt;a href="/payments/advert"&gt;Купить рекламу&lt;/a&gt;</code></pre>
 
-Ссылка в админ-панель для просмотра заказов
-[code]
-<a href="/admin/orders">Заказы</a>
-[/code]
+<p>Ссылка в админ-панель для просмотра заказов</p>
+<pre class="code"><code>&lt;a href="/admin/orders"&gt;Заказы&lt;/a&gt;</code></pre>
 
-Ссылки будут созданы автоматически с помощью хуков
+<p>Ссылки будут созданы автоматически с помощью хуков</p>
 INFO,
-    'version'  => '1.5',
+    'version'  => '13.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

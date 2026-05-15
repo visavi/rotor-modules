@@ -107,7 +107,7 @@
                             {{ __('main.comment') }}
                         </div>
                         <div class="p-2 rounded small">
-                            {{ bbCode($advert['comment']) }}
+                            {{ renderText($advert['comment']) }}
                         </div>
                     </div>
                 @endif

@@ -23,7 +23,10 @@
 
                     @if ($release['body'])
                         <div class="post-message">
-                            {{ bbCode('[spoiler=Описание]' . $release['body'] . '[/spoiler]') }}
+                            <details class="spoiler">
+                                <summary>{{ __('main.description') }}</summary>
+                                <div>{{ renderText($release['body']) }}</div>
+                            </details>
                         </div>
                     @endif
 
