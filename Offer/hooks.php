@@ -8,6 +8,15 @@ Restatement::register('offers', function () {
     DB::update('update offers set count_comments = (select count(*) from comments where relate_type = "offers" and offers.id = comments.relate_id)');
 });
 
+// Ссылка в секции «Общение» на классической главной
+Hook::add('classicWidgetLinks', function (string $content) {
+    $url   = route('offers.index');
+    $label = __('index.offers');
+    $stats = statsOffers();
+
+    return $content . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+});
+
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', function (string $content) {
     $url = route('offers.index');

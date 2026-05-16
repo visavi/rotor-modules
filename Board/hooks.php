@@ -4,8 +4,25 @@ use App\Classes\Hook;
 use App\Classes\Restatement;
 use Illuminate\Support\Facades\DB;
 
-('boards', function () {
+Restatement::register('boards', function () {
     DB::update('update boards set count_items = (select count(*) from items where boards.id = items.board_id and items.active = true and items.expires_at >= ?)', [SITETIME]);
+});
+
+// Секция на классической главной
+Hook::add('classicSections', function (string $content) {
+    $url   = route('boards.index');
+    $label = __('index.boards');
+    $stats = statsBoard();
+    $items = recentBoards();
+
+    return $content . '<div class="section mb-3 shadow">
+    <div class="section-title">
+        <i class="fa fa-list-alt fa-lg text-muted"></i>
+        <a href="' . $url . '">' . $label . '</a>
+        <span class="badge bg-adaptive">' . $stats . '</span>
+    </div>
+    ' . $items . '
+</div>' . PHP_EOL;
 });
 
 // Ссылка в боковом меню

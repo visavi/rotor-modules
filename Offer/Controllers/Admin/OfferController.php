@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Offer\Controllers\Admin;
 
+use App\Classes\Restatement;
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -145,7 +146,7 @@ class OfferController extends Controller
             abort(403, __('errors.forbidden'));
         }
 
-        restatement('offers');
+        Restatement::run('offers');
 
         return redirect()
             ->route('admin.offers.index')

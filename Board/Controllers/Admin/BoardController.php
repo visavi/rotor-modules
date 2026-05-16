@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Board\Controllers\Admin;
 
+use App\Classes\Restatement;
 use App\Classes\Validator;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
@@ -275,7 +276,7 @@ class BoardController extends AdminController
             abort(403, __('errors.forbidden'));
         }
 
-        restatement('boards');
+        Restatement::run('boards');
 
         return redirect()
             ->route('admin.boards.index')
