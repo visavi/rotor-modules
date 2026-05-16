@@ -1,6 +1,12 @@
 <?php
 
 use App\Classes\Hook;
+use App\Classes\Restatement;
+use Illuminate\Support\Facades\DB;
+
+('boards', function () {
+    DB::update('update boards set count_items = (select count(*) from items where boards.id = items.board_id and items.active = true and items.expires_at >= ?)', [SITETIME]);
+});
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', function (string $content) {

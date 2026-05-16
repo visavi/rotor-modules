@@ -1,6 +1,12 @@
 <?php
 
 use App\Classes\Hook;
+use App\Classes\Restatement;
+use Illuminate\Support\Facades\DB;
+
+Restatement::register('offers', function () {
+    DB::update('update offers set count_comments = (select count(*) from comments where relate_type = "offers" and offers.id = comments.relate_id)');
+});
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', function (string $content) {

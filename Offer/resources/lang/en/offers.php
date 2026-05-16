@@ -26,6 +26,12 @@ return [
     'status_invalid'       => 'Invalid offer or problem status!',
     'answer_success_added' => 'Answer successfully added!',
 
+    'offers_per_page'    => 'Suggestions per page',
+    'offers_points'      => 'Asset to create a proposal or problem',
+    'offer_title_length' => 'Offer title length',
+    'offer_text_length'  => 'Offer text length',
+    'offer_reply_length' => 'Offer reply length',
+
     'settings'               => 'Offer settings',
     'settings_empty'         => 'No settings provided!',
     'settings_success_saved' => 'Settings saved successfully!',
