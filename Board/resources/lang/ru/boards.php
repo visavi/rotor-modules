@@ -53,5 +53,5 @@ return [
     'settings_board_text_length'     => 'Длина текста объявления',
     'settings_board_category_length' => 'Длина категории объявления',
 
-    'feed_items_show' => 'Показывать объявления',
+    'feed_items_show' => 'Показывать объявления в ленте',
 ];

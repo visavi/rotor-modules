@@ -53,5 +53,5 @@ return [
     'settings_board_text_length'     => 'Ad text length',
     'settings_board_category_length' => 'Ad category length',
 
-    'feed_items_show' => 'Show boards',
+    'feed_items_show' => 'Show boards in feed',
 ];

@@ -26,11 +26,6 @@ Hook::add('adminSettingsNav', function (string $content) {
     return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
 });
 
-// Настройка показа объявлений в ленте
-Hook::add('adminSettingsFeeds', function (string $content, array $settings) {
-    return $content . view('board::admin/settings/_feeds', compact('settings'))->render();
-});
-
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', function (string $content) {
     $url = route('admin.boards.index');

@@ -7,6 +7,8 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Board']) }}">{{ __('board::boards.boards_section') }}</a></li>
             <li class="breadcrumb-item active">{{ __('board::boards.settings') }}</li>
         </ol>
     </nav>
@@ -71,6 +73,12 @@
             <div>{{ textError('sets[board_category_min]') }}</div>
             <div>{{ textError('sets[board_category_max]') }}</div>
         </div>
+    </div>
+
+    <div class="form-check mb-3">
+        <input type="hidden" value="0" name="sets[feed_items_show]">
+        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_items_show]" id="feed_items_show"{{ ! empty($settings['feed_items_show']) ? ' checked' : '' }}>
+        <label class="form-check-label" for="feed_items_show">{{ __('board::boards.feed_items_show') }}</label>
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>

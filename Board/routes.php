@@ -5,8 +5,6 @@ use Modules\Board\Controllers\Admin\BoardController as AdminBoardController;
 use Modules\Board\Controllers\Admin\BoardSettingController;
 use Modules\Board\Controllers\BoardController;
 
-Route::pattern('id', '\d+');
-
 /* Категории объявлений */
 Route::middleware('web')
     ->controller(BoardController::class)
