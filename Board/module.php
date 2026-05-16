@@ -11,27 +11,14 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [
-        Item::class,
-    ],
-
-    'searchable' => [
-        Item::class => __('board::boards.boards_section'),
-    ],
-
-    'feedTypes' => [
-        Item::$morphName => [
-            'class' => Item::class,
-            'withs' => ['user', 'files', 'category.parent'],
+    'models' => [
+        Item::class => [
+            'searchable' => __('board::boards.boards_section'),
+            'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
+            'feedView'   => 'board::feeds/_items',
+            'searchView' => 'board::search/_items',
+            'uploadType' => 'media',
         ],
-    ],
-
-    'feedViews' => [
-        Item::$morphName => 'board::feeds/_items',
-    ],
-
-    'searchViews' => [
-        Item::$morphName => 'board::search/_items',
     ],
 
     'schedule' => function (Schedule $schedule) {
