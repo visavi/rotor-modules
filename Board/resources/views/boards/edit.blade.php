@@ -1,0 +1,92 @@
+@extends('layout')
+
+@section('title', __('board::boards.edit_item'))
+
+@section('breadcrumb')
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{{ route('boards.index') }}">{{ __('index.boards') }}</a></li>
+
+            @foreach ($item->category->getParents() as $parent)
+                <li class="breadcrumb-item"><a href="{{ route('boards.index', ['id' => $parent->id]) }}">{{ $parent->name }}</a></li>
+            @endforeach
+
+            <li class="breadcrumb-item"><a href="{{ route('items.view', ['id' => $item->id]) }}">{{ $item->title }}</a></li>
+            <li class="breadcrumb-item active">{{ __('board::boards.edit_item') }}</li>
+        </ol>
+    </nav>
+@stop
+
+@section('content')
+    @if ($item->expires_at > SITETIME)
+        <div class="alert alert-info">{{ __('board::boards.expires') }}: {{ dateFixed($item->expires_at) }}</div>
+    @else
+        <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
+    @endif
+
+    @if ($item->expires_at > SITETIME)
+        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('board::boards.confirm_unpublish_item') }}')">
+            @csrf
+            <button class="btn btn-link p-0">{{ __('main.unpublish') }}</button>
+        </form> /
+    @else
+        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline">
+            @csrf
+            <button class="btn btn-link p-0">{{ __('main.publish') }}</button>
+        </form> /
+    @endif
+
+    <form action="{{ route('items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('board::boards.confirm_delete_item') }}')">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-link p-0">{{ __('main.delete') }}</button>
+    </form>
+
+    <div class="section-form mb-3 shadow">
+        <form action="{{ route('items.edit', ['id' => $item->id]) }}" method="post">
+            @csrf
+            <div class="mb-3{{ hasError('bid') }}">
+                <label for="inputCategory" class="form-label">{{ __('board::boards.category') }}</label>
+
+                <?php $inputCategory = (int) getInput('bid', $item->board_id); ?>
+                <select class="form-select" id="inputCategory" name="bid">
+                    @foreach ($boards as $data)
+                        <option value="{{ $data->id }}"{{ ($inputCategory === $data->id && ! $data->closed) ? ' selected' : '' }}{{ $data->closed ? ' disabled' : '' }}>
+                            {{ str_repeat('–', $data->depth) }} {{ $data->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="invalid-feedback">{{ textError('bid') }}</div>
+            </div>
+
+            <div class="mb-3{{ hasError('title') }}">
+                <label for="inputTitle" class="form-label">{{ __('board::boards.name') }}:</label>
+                <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('board_title_max') }}" value="{{ getInput('title', $item->title) }}" required>
+                <div class="invalid-feedback">{{ textError('title') }}</div>
+            </div>
+
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('board::boards.text') }}:</label>
+                <textarea class="form-control tiptap" data-relate-type="{{ $item->getMorphClass() }}" data-relate-id="{{ $item->id }}" maxlength="{{ setting('board_text_max') }}" id="text" rows="5" name="text" required>{{ getInput('text', $item->text) }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
+            </div>
+
+            <div class="mb-3{{ hasError('price') }}">
+                <label for="inputPrice" class="form-label">{{ __('board::boards.price') }}:</label>
+                <input type="text" class="form-control" id="inputPrice" name="price" value="{{ getInput('price', $item->price) }}" required>
+                <div class="invalid-feedback">{{ textError('price') }}</div>
+            </div>
+
+            <div class="mb-3{{ hasError('phone') }}">
+                <label for="inputPhone" class="form-label">{{ __('board::boards.phone') }}:</label>
+                <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ getInput('phone', $item->phone) }}">
+                <div class="invalid-feedback">{{ textError('phone') }}</div>
+            </div>
+
+            @include('app/_upload_media', ['model' => $item])
+
+            <button class="btn btn-primary">{{ __('main.change') }}</button>
+        </form>
+    </div>
+@stop

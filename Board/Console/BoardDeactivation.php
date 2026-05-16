@@ -1,0 +1,40 @@
+<?php
+
+namespace Modules\Board\Console;
+
+use Illuminate\Console\Command;
+use Modules\Board\Models\Item;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
+
+class BoardDeactivation extends Command
+{
+    /**
+     * The name and signature of the console command.
+     */
+    protected $signature = 'board:deactivation';
+
+    /**
+     * The console command description.
+     */
+    protected $description = 'Board deactivation';
+
+    /**
+     * Пересчитывает счетчик объявлений
+     */
+    public function handle(): int
+    {
+        Item::query()
+            ->active()
+            ->where('expires_at', '<', SITETIME)
+            ->each(function ($item) {
+                $item->category->decrement('count_items');
+                $item->update([
+                    'active' => false,
+                ]);
+            });
+
+        $this->info('Boards successfully deactivated.');
+
+        return SymfonyCommand::SUCCESS;
+    }
+}
