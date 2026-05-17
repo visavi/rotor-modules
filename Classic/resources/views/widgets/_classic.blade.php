@@ -77,7 +77,7 @@
 <div class="section mb-3 shadow">
     <div class="section-title">
         <i class="fa fa-users fa-lg text-muted"></i>
-        {{ __('main.who_online') }}
+        {{ __('classic::classic.who_online') }}
     </div>
     <div class="section-body">
         {{ onlineWidget() }}

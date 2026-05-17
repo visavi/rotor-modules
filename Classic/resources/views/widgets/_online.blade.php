@@ -1,4 +1,4 @@
-{{ __('main.guests_online', ['count' => $online[1]]) }}
+{{ __('classic::classic.guests_online', ['count' => $online[1]]) }}
 
 @if ($online[3]->isNotEmpty())
     {{ __('main.and') }}

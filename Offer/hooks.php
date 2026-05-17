@@ -10,7 +10,7 @@ Restatement::register('offers', function () {
 
 // Ссылка в секции «Общение» на классической главной
 Hook::add('classicWidgetLinks', function (string $content) {
-    $url   = route('offers.index');
+    $url = route('offers.index');
     $label = __('index.offers');
     $stats = statsOffers();
 

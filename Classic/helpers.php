@@ -1,5 +1,6 @@
 <?php
 
+use App\Classes\Calendar;
 use App\Models\Article;
 use App\Models\Down;
 use App\Models\News;
@@ -119,5 +120,14 @@ if (! function_exists('getCourses')) {
         });
 
         return new HtmlString(view('app/_courses', compact('courses')));
+    }
+}
+
+if (! function_exists('getCalendar')) {
+    function getCalendar(int $time = SITETIME): HtmlString
+    {
+        $calendar = new Calendar();
+
+        return new HtmlString($calendar->getCalendar($time));
     }
 }
