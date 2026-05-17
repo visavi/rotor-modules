@@ -14,7 +14,7 @@
     </div>
     <div class="section-body">
         <i class="far fa-circle text-muted"></i> <a href="{{ route('guestbook.index') }}">{{ __('index.guestbook') }}</a> <span class="badge bg-adaptive">{{ statsGuestbook() }}</span><br>
-        <i class="far fa-circle text-muted"></i> <a href="{{ route('photos.index') }}">{{ __('index.photos') }}</a> <span class="badge bg-adaptive">{{ statsPhotos() }}</span><br>
+        @if(Route::has('photos.index'))<i class="far fa-circle text-muted"></i> <a href="{{ route('photos.index') }}">{{ __('index.photos') }}</a> <span class="badge bg-adaptive">{{ statsPhotos() }}</span><br>@endif
         <i class="far fa-circle text-muted"></i> <a href="{{ route('votes.index') }}">{{ __('index.votes') }}</a> <span class="badge bg-adaptive">{{ statVotes() }}</span><br>
         @hook('classicWidgetLinks')
     </div>
