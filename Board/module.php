@@ -21,11 +21,11 @@ return [
         ],
     ],
 
-    'schedule' => function (Schedule $schedule) {
-        $schedule->command('board:deactivation')->hourly();
-    },
-
     'panel' => [
         '/admin/board-settings' => __('board::boards.settings'),
     ],
+
+    'schedule' => function (Schedule $schedule) {
+        $schedule->command('board:deactivation')->hourly();
+    },
 ];

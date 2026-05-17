@@ -22,6 +22,10 @@ return [
         ],
     ],
 
+    'panel' => [
+        '/admin/blog-settings' => __('blog::blogs.settings'),
+    ],
+
     'schedule' => function (Schedule $schedule) {
         $schedule->command('blog:activation')->everyMinute();
     },

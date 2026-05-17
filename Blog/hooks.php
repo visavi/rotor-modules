@@ -52,8 +52,8 @@ Hook::add('adminBlockEditor', function (string $content) {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', function (string $content) {
-    $url = '/admin/settings?act=blogs';
-    $label = __('settings.blogs');
+    $url = route('blog.settings');
+    $label = __('blog::blogs.settings');
 
-    return $content . '<a class="nav-link" href="' . $url . '" id="blogs">' . $label . '</a>' . PHP_EOL;
+    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
 });

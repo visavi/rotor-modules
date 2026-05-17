@@ -20,7 +20,9 @@ INFO,
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',
-    'panel'    => '/admin/gifts',
+    'panel'    => [
+        '/admin/gifts' => __('gift::gifts.title'),
+    ],
 
     'per_page'  => 24, // Кол. подарков на страниц
     'gift_days' => 365, // На какой срок дарить подарок (дней)

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Blog\Controllers\Admin\ArticleController as AdminArticleController;
+use Modules\Blog\Controllers\Admin\BlogSettingController;
 use Modules\Blog\Controllers\ArticleController;
 
 /* Категория блогов */
@@ -62,5 +63,12 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::delete('/{id}/delete', 'deleteArticle')->name('delete');
                 Route::post('/{id}/publish', 'publish')->name('publish');
                 Route::get('/new', 'new')->name('new');
+            });
+
+        Route::controller(BlogSettingController::class)
+            ->name('blog.')
+            ->group(function () {
+                Route::get('/blog-settings', 'index')->name('settings');
+                Route::post('/blog-settings', 'update')->name('settings.update');
             });
     });
