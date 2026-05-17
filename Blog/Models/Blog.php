@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Blog\Models;
+
+use App\Traits\CategoryTreeTrait;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+/**
+ * Class Blog
+ *
+ * @property int    $id
+ * @property int    $sort
+ * @property int    $parent_id
+ * @property string $name
+ * @property int    $count_articles
+ * @property int    $closed
+ * @property-read Blog             $parent
+ * @property-read Collection<Blog> $children
+ */
+class Blog extends Model
+{
+    use CategoryTreeTrait;
+
+    public $timestamps = false;
+
+    protected $guarded = [];
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id')->withDefault();
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id')->orderBy('sort');
+    }
+
+    public function new(): hasOne
+    {
+        return $this->hasOne(Article::class, 'category_id')
+            ->active()
+            ->selectRaw('category_id, count(*) as count_articles')
+            ->where('created_at', '>', strtotime('-3 day', SITETIME))
+            ->groupBy('category_id');
+    }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class, 'category_id');
+    }
+
+    public function lastArticle(): hasOne
+    {
+        return $this->hasOne(Article::class, 'category_id')
+            ->active()
+            ->latest('created_at')
+            ->limit(1);
+    }
+
+    public function restatement(): void
+    {
+        $this->update([
+            'count_articles' => $this->articles()->active()->count(),
+        ]);
+    }
+}

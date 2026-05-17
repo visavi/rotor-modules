@@ -1,0 +1,36 @@
+@extends('layout')
+
+@section('title', __('blog::blogs.authors'))
+
+@section('breadcrumb')
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{{ route('blogs.index') }}">{{ __('index.blogs') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('blog::blogs.authors') }}</li>
+        </ol>
+    </nav>
+@stop
+
+@section('content')
+    @if ($articles->isNotEmpty())
+        @foreach ($articles as $article)
+            <div class="section mb-3 shadow">
+                <div class="section-title">
+                    <i class="fa fa-pencil-alt"></i>
+                    <a href="{{ route('articles.user-articles', ['user' => $article->user->login]) }}">{{ $article->user->getName() }}</a>
+                </div>
+
+                {{ $article->cnt }} {{ __('blog::blogs.all_articles') }} / {{ $article->count_comments }} {{ __('main.comments') }}
+            </div>
+        @endforeach
+
+        {{ $articles->links() }}
+
+        <div class="mb-3">
+            {{ __('blog::blogs.total_authors') }}: <b>{{ $articles->total() }}</b>
+        </div>
+    @else
+        {{ showError(__('blog::blogs.empty_articles')) }}
+    @endif
+@stop
