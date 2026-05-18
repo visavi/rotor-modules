@@ -11,15 +11,19 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'models' => [
-        Item::class => [
-            'searchable' => __('board::boards.boards_section'),
-            'searchView' => 'board::search/_items',
-            'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
-            'feedView'   => 'board::feeds/_items',
-            'uploadType' => 'media',
-        ],
+    'morph' => Item::class,
+
+    'search' => [
+        'label' => __('board::boards.boards_section'),
+        'view'  => 'board::search/_items',
     ],
+
+    'feed' => [
+        'withs' => ['user', 'files', 'category.parent'],
+        'view'  => 'board::feeds/_items',
+    ],
+
+    'upload' => 'media',
 
     'panel' => [
         '/admin/board-settings' => __('board::boards.settings'),

@@ -10,16 +10,18 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'models' => [
-        Photo::class => [
-            'searchable' => __('photo::photos.photos_section'),
-            'searchView' => 'photo::search/_photos',
-            'feedType'   => ['withs' => ['user', 'files']],
-            'feedView'   => 'photo::feeds/_photos',
-            'uploadType' => 'media',
-            'ratingType' => true,
-        ],
+    'morph' => Photo::class,
+
+    'search' => [
+        'label' => __('photo::photos.photos_section'),
+        'view'  => 'photo::search/_photos',
     ],
+    'feed' => [
+        'withs' => ['user', 'files'],
+        'view'  => 'photo::feeds/_photos',
+    ],
+    'upload' => 'media',
+    'rating' => true,
 
     'panel' => [
         '/admin/photo-settings' => __('photo::photos.settings'),

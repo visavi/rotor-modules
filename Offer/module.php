@@ -10,15 +10,17 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'models' => [
-        Offer::class => [
-            'searchable' => __('index.offers'),
-            'searchView' => 'offer::search/_offers',
-            'feedType'   => ['withs' => ['user']],
-            'feedView'   => 'offer::feeds/_offers',
-            'ratingType' => true,
-        ],
+    'morph' => Offer::class,
+
+    'search' => [
+        'label' => __('index.offers'),
+        'view'  => 'offer::search/_offers',
     ],
+    'feed' => [
+        'withs' => ['user'],
+        'view'  => 'offer::feeds/_offers',
+    ],
+    'rating' => true,
 
     'panel' => [
         '/admin/offer-settings' => __('offer::offers.settings'),

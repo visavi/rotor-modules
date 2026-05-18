@@ -10,16 +10,18 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'models' => [
-        Down::class => [
-            'searchable' => __('load::loads.downs'),
-            'searchView' => 'load::search/_downs',
-            'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
-            'feedView'   => 'load::feeds/_downs',
-            'uploadType' => 'file',
-            'ratingType' => true,
-        ],
+    'morph' => Down::class,
+
+    'search' => [
+        'label' => __('load::loads.downs'),
+        'view'  => 'load::search/_downs',
     ],
+    'feed' => [
+        'withs' => ['user', 'files', 'category.parent'],
+        'view'  => 'load::feeds/_downs',
+    ],
+    'upload' => 'file',
+    'rating' => true,
 
     'panel' => [
         '/admin/load-settings' => __('load::loads.settings'),
