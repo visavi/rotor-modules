@@ -13,9 +13,9 @@ return [
     'models' => [
         Down::class => [
             'searchable' => __('load::loads.downs'),
+            'searchView' => 'load::search/_downs',
             'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
             'feedView'   => 'load::feeds/_downs',
-            'searchView' => 'load::search/_downs',
             'uploadType' => 'file',
             'ratingType' => true,
         ],

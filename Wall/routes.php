@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\Wall\Controllers\WallController;
+use Modules\Wall\Controllers\Admin\SettingController;
+
+Route::controller(WallController::class)
+    ->prefix('walls')
+    ->name('walls.')
+    ->group(function () {
+        Route::get('/{login}', 'index')->name('index');
+        Route::post('/{login}/create', 'create')->name('create');
+        Route::post('/{login}/delete', 'delete')->name('delete');
+    });
+
+Route::middleware('check.admin')
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/wall-settings', [SettingController::class, 'index'])->name('wall.settings');
+        Route::post('/wall-settings', [SettingController::class, 'update'])->name('wall.settings.update');
+    });

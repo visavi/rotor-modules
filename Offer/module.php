@@ -13,9 +13,9 @@ return [
     'models' => [
         Offer::class => [
             'searchable' => __('index.offers'),
+            'searchView' => 'offer::search/_offers',
             'feedType'   => ['withs' => ['user']],
             'feedView'   => 'offer::feeds/_offers',
-            'searchView' => 'offer::search/_offers',
             'ratingType' => true,
         ],
     ],

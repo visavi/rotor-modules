@@ -14,9 +14,9 @@ return [
     'models' => [
         Article::class => [
             'searchable' => __('blog::blogs.blogs_section'),
+            'searchView' => 'blog::search/_articles',
             'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
             'feedView'   => 'blog::feeds/_articles',
-            'searchView' => 'blog::search/_articles',
             'uploadType' => 'media',
             'ratingType' => true,
         ],

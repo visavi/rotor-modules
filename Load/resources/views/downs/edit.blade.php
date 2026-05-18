@@ -25,6 +25,6 @@
     </div>
 
     <div class="section-form mb-3 shadow">
-        @include('downs/_form')
+        @include('load::downs/_form')
     </div>
 @stop

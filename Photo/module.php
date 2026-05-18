@@ -13,9 +13,9 @@ return [
     'models' => [
         Photo::class => [
             'searchable' => __('photo::photos.photos_section'),
+            'searchView' => 'photo::search/_photos',
             'feedType'   => ['withs' => ['user', 'files']],
             'feedView'   => 'photo::feeds/_photos',
-            'searchView' => 'photo::search/_photos',
             'uploadType' => 'media',
             'ratingType' => true,
         ],

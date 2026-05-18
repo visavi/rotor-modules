@@ -14,9 +14,9 @@ return [
     'models' => [
         Item::class => [
             'searchable' => __('board::boards.boards_section'),
+            'searchView' => 'board::search/_items',
             'feedType'   => ['withs' => ['user', 'files', 'category.parent']],
             'feedView'   => 'board::feeds/_items',
-            'searchView' => 'board::search/_items',
             'uploadType' => 'media',
         ],
     ],
