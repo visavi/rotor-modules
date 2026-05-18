@@ -1,0 +1,45 @@
+<?php
+
+use App\Classes\Hook;
+use App\Http\Controllers\Admin\SpamController;
+use App\Http\Controllers\AjaxController;
+use Modules\Guestbook\Models\Guestbook;
+
+// Жалобы на сообщения гостевой
+AjaxController::$extraComplaintTypes[Guestbook::$morphName] = function (int $id, mixed $page): array {
+    $model = Guestbook::query()->find($id);
+    $path  = route('guestbook.index', ['page' => $page], false);
+
+    return compact('model', 'path');
+};
+
+// Гостевая в типах жалоб (SpamController)
+SpamController::$extraTypes[Guestbook::$morphName] = __('index.guestbook');
+
+// Ссылка в боковом меню (default, nordic, newspaper темы)
+Hook::add('sidebarMenuEnd', function (string $content) {
+    $active = request()->is('guestbook*') ? ' active' : '';
+    $label  = __('index.guestbook');
+    $stats  = statsGuestbook();
+
+    return $content . '<li>
+        <a class="menu-item' . $active . '" href="' . route('guestbook.index') . '">
+            <i class="menu-icon far fa-comment"></i>
+            <span class="menu-label">' . $label . '</span>
+            <span class="badge menu-badge">' . $stats . '</span>
+        </a>
+    </li>' . PHP_EOL;
+}, 5);
+
+// Ссылка в блоке редактора в админке
+Hook::add('adminBlockEditor', function (string $content) {
+    $label = __('index.guestbook');
+    $stats = statsGuestbook();
+
+    return '<i class="far fa-circle text-muted"></i> <a href="' . route('admin.guestbook.index') . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL . $content;
+});
+
+// Вкладка в настройках администратора
+Hook::add('adminSettingsNav', function (string $content) {
+    return $content . '<a class="nav-link" href="' . route('guestbook.settings') . '">' . __('guestbook::guestbook.settings') . '</a>' . PHP_EOL;
+});

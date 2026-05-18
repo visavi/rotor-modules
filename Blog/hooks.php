@@ -36,6 +36,27 @@ SitemapController::$extraPages['articles'] = static function () {
     });
 };
 
+// Ссылка в боковом меню и горизонтальной навигации
+Hook::add('sidebarMenuEnd', function (string $content) {
+    $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
+    $url    = route('blogs.index');
+    $label  = __('index.blogs');
+
+    return $content . '<li class="treeview' . $active . '">
+        <a class="menu-item" href="#" data-bs-toggle="treeview">
+            <i class="menu-icon far fa-sticky-note"></i>
+            <span class="menu-label">' . $label . '</span>
+            <i class="treeview-indicator fa fa-angle-down"></i>
+        </a>
+        <ul class="treeview-menu">
+            <li><a class="treeview-item' . (request()->routeIs('blogs.index') ? ' active' : '') . '" href="' . $url . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.blogs_list') . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('blogs.main') ? ' active' : '') . '" href="' . route('blogs.main') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.articles_all') . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('articles.index') ? ' active' : '') . '" href="' . route('articles.index') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.new_articles') . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('articles.new-comments') ? ' active' : '') . '" href="' . route('articles.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.new_comments') . '</a></li>
+        </ul>
+    </li>' . PHP_EOL;
+}, 20);
+
 // Ссылка блоги в блоке редактора в админке
 Hook::add('adminBlockEditor', function (string $content) {
     $urlBlogs = route('admin.blogs.index');
