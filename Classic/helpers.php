@@ -2,7 +2,7 @@
 
 use App\Classes\Calendar;
 use App\Models\Article;
-use App\Models\Down;
+use Modules\Load\Models\Down;
 use App\Models\News;
 use App\Models\Photo;
 use App\Models\Topic;
