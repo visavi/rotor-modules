@@ -6,6 +6,7 @@ return [
     'name'        => 'Загрузки',
     'description' => 'Загрузки и файлы',
     'version'     => '1.0.0',
+    'requires'    => '>=14.0.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

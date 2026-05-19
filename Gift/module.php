@@ -16,14 +16,15 @@ return [
 <p>Как сделать ссылку на отправку подарка</p>
 <pre class="code"><code>&lt;a href="/gifts?user={{ $user-&gt;login }}"&gt;Отправить подарок&lt;/a&gt;</code></pre>
 INFO,
-    'version'  => '13.0.0',
+    'version'  => '1.0.0',
+    'requires' => '>=13.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
-    'homepage' => 'https://visavi.net',
     'panel'    => [
         '/admin/gifts' => __('gift::gifts.title'),
     ],
 
     'per_page'  => 24, // Кол. подарков на страниц
     'gift_days' => 365, // На какой срок дарить подарок (дней)
+    'homepage'  => 'https://visavi.net',
 ];

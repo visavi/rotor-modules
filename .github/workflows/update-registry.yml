@@ -1,0 +1,114 @@
+name: Update Registry
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'registry.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed modules
+        id: changed
+        run: |
+          CHANGED=$(git diff HEAD~1 HEAD --name-only 2>/dev/null | grep '^[^/]*/module\.php$' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release changed modules
+        if: steps.changed.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            MODULE=$(dirname "$file")
+
+            OLD_VERSION=$(git show HEAD~1:"$file" 2>/dev/null | grep -oP "'version'\s*=>\s*'\K[^']+" || echo "")
+            NEW_VERSION=$(grep -oP "'version'\s*=>\s*'\K[^']+" "$file" || echo "")
+
+            if [ -z "$NEW_VERSION" ]; then
+              echo "[$MODULE] No version found, skipping"
+              continue
+            fi
+
+            if [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
+              echo "[$MODULE] Version unchanged ($NEW_VERSION), skipping"
+              continue
+            fi
+
+            echo "[$MODULE] $OLD_VERSION -> $NEW_VERSION"
+
+            TAG="$MODULE-$NEW_VERSION"
+
+            if gh release view "$TAG" &>/dev/null; then
+              echo "[$MODULE] Release $TAG already exists, skipping"
+              continue
+            fi
+
+            zip -r "/tmp/$MODULE.zip" "$MODULE"
+
+            gh release create "$TAG" \
+              "/tmp/$MODULE.zip#$MODULE.zip" \
+              --title "$MODULE $NEW_VERSION" \
+              --notes "Module: **$MODULE**, Version: **$NEW_VERSION**"
+
+            echo "[$MODULE] Released $TAG"
+          done <<< "${{ steps.changed.outputs.files }}"
+
+      - name: Build registry.json
+        run: |
+          REPO="${{ github.repository }}"
+          MODULES="[]"
+
+          for file in $(find . -maxdepth 2 -name 'module.php' | sort); do
+            MODULE=$(basename $(dirname "$file"))
+            CONTENT=$(cat "$file")
+
+            get() { echo "$CONTENT" | grep -oP "'$1'\s*=>\s*'\K[^']+"; }
+
+            VERSION=$(get version)
+            [ -z "$VERSION" ] && continue
+
+            ENTRY=$(jq -n \
+              --arg module   "$MODULE" \
+              --arg name     "$(get name)" \
+              --arg desc     "$(get description)" \
+              --arg version  "$VERSION" \
+              --arg author   "$(get author)" \
+              --arg email    "$(get email)" \
+              --arg homepage "$(get homepage)" \
+              --arg requires "$(get requires)" \
+              --arg url      "https://github.com/$REPO/releases/download/$MODULE-$VERSION/$MODULE.zip" \
+              '{module:$module,name:$name,description:$desc,version:$version,
+                author:$author,email:$email,homepage:$homepage,requires:$requires,download_url:$url}')
+
+            MODULES=$(echo "$MODULES" | jq ". + [$ENTRY]")
+          done
+
+          echo '{"name":"Official Rotor Modules","modules":[]}' \
+            | jq --argjson m "$MODULES" '.modules = $m' > registry.json
+
+          echo "Generated registry.json with $(echo "$MODULES" | jq length) modules"
+
+      - name: Commit registry.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add registry.json
+          git diff --staged --quiet || (git commit -m "chore: update registry.json [skip ci]" && git push)

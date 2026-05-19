@@ -16,12 +16,13 @@ $lottery = \Modules\Lottery\Models\Lottery::query()
 ?&gt;
 {{ plural($lottery-&gt;amount, setting('moneyname')) }}</code></pre>
 INFO,
-    'version'  => '13.0.0',
+    'version'  => '1.0.0',
+    'requires' => '>=14.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
-    'homepage' => 'https://visavi.net',
 
     'jackpot'     => 1000000,  // Сумма выигрыша
     'ticketPrice' => 50,       // Цена билета
     'numberRange' => [1, 100], // Диапазон номеров
+    'homepage'    => 'https://visavi.net',
 ];

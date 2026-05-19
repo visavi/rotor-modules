@@ -25,7 +25,8 @@ YOOKASSA_SECRET_KEY=Ваш secret_key</code></pre>
 
 <p>Ссылки будут созданы автоматически с помощью хуков</p>
 INFO,
-    'version'  => '13.0.0',
+    'version'  => '1.0.0',
+    'requires' => '>=14.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

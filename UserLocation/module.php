@@ -10,7 +10,8 @@ return [
 Или добавьте ссылку в любом месте на вашем сайте самостоятельно</p>
 <pre class="code"><code>&lt;a href="/locations"&gt;Кто-где&lt;/a&gt;</code></pre>
 INFO,
-    'version'  => '13.0.0',
+    'version'  => '1.0.0',
+    'requires' => '>=14.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',
