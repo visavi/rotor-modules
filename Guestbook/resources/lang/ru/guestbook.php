@@ -11,5 +11,5 @@ return [
     'messages_success_cleared' => 'Сообщения успешно очищены!',
     'require_publish'          => 'Требуют публикации',
     'not_publish'              => 'Не опубликовано',
-    'settings'                 => 'Гостевая',
+    'settings'                 => 'Настройки гостевой',
 ];

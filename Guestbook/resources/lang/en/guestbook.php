@@ -11,5 +11,5 @@ return [
     'messages_success_cleared' => 'Messages cleared successfully!',
     'require_publish'          => 'Require publish',
     'not_publish'              => 'Not publish',
-    'settings'                 => 'Guestbook',
+    'settings'                 => 'Guestbook settings',
 ];
