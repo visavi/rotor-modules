@@ -2,7 +2,7 @@ name: Update Registry
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths-ignore:
       - 'registry.json'
 
