@@ -3,10 +3,23 @@
 use App\Classes\Hook;
 use App\Classes\Restatement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Modules\Photo\Models\Photo;
 
 Restatement::register('photos', function () {
     DB::update('update photos set count_comments = (select count(*) from comments where relate_type = "' . Photo::$morphName . '" and photos.id = comments.relate_id)');
+});
+
+// Ссылки на фото пользователя в анкете
+Hook::add('userProfileLinks', function (string $content, $user) {
+    if (! Route::has('photos.index')) {
+        return $content;
+    }
+
+    $link = ' / <b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('index.photos') . '</a></b>'
+        . ' (<a href="' . route('photos.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
+
+    return $content . $link;
 });
 
 // Ссылка в боковом меню

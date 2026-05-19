@@ -10,6 +10,14 @@ Restatement::register('loads', function () {
     DB::update('update downs set count_comments = (select count(*) from comments where relate_type = "' . Down::$morphName . '" and downs.id = comments.relate_id)');
 });
 
+// Ссылки на файлы пользователя в анкете
+Hook::add('userProfileLinks', function (string $content, $user) {
+    $link = ' / <b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
+        . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
+
+    return $content . $link;
+});
+
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', function (string $content) {
     $expanded = request()->is('loads*', 'downs*') ? ' is-expanded' : '';
@@ -22,7 +30,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
     $activeComments = request()->routeIs('downs.new-comments') ? ' active' : '';
 
     return $content . '<li class="treeview' . $expanded . '">
-        <a class="menu-item" href="#" data-bs-toggle="treeview">
+        <a class="menu-item" href="' . route('loads.index') . '" data-bs-toggle="treeview">
             <i class="menu-icon fas fa-download"></i>
             <span class="menu-label">' . $label . '</span>
             <i class="treeview-indicator fa fa-angle-down"></i>

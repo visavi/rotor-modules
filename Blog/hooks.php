@@ -1,6 +1,7 @@
 <?php
 
 use App\Classes\Hook;
+use Illuminate\Support\Facades\Route;
 use App\Classes\Restatement;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Cache;
@@ -36,6 +37,18 @@ SitemapController::$extraPages['articles'] = static function () {
     });
 };
 
+// Ссылки на публикации пользователя в анкете
+Hook::add('userProfileLinks', function (string $content, $user) {
+    if (! Route::has('articles.user-articles')) {
+        return $content;
+    }
+
+    $link = ' / <b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
+        . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
+
+    return $content . $link;
+});
+
 // Ссылка в боковом меню и горизонтальной навигации
 Hook::add('sidebarMenuEnd', function (string $content) {
     $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
@@ -43,7 +56,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
     $label  = __('index.blogs');
 
     return $content . '<li class="treeview' . $active . '">
-        <a class="menu-item" href="#" data-bs-toggle="treeview">
+        <a class="menu-item" href="' . $url . '" data-bs-toggle="treeview">
             <i class="menu-icon far fa-sticky-note"></i>
             <span class="menu-label">' . $label . '</span>
             <i class="treeview-indicator fa fa-angle-down"></i>
