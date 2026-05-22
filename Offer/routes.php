@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Offer\Controllers\Admin\OfferController as AdminOfferController;
-use Modules\Offer\Controllers\Admin\OfferSettingController;
-use Modules\Offer\Controllers\OfferController;
+use Modules\Offer\Http\Controllers\Admin\OfferController as AdminOfferController;
+use Modules\Offer\Http\Controllers\Admin\OfferSettingController;
+use Modules\Offer\Http\Controllers\OfferController;
 
 /* Предложения и проблемы */
 Route::middleware('web')

@@ -76,6 +76,16 @@ class Post extends Model
     }
 
     /**
+     * Первый пост темы не индексируется — тема покрывает его содержимое
+     */
+    public function shouldBeSearchable(): bool
+    {
+        $firstPostId = static::query()->where('topic_id', $this->topic_id)->min('id');
+
+        return $this->id !== $firstPostId;
+    }
+
+    /**
      * Возвращает список сортируемых полей
      */
     protected static function sortableFields(): array

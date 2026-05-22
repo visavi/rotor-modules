@@ -32,7 +32,7 @@
                     @if (isAdmin('boss'))
                         <div class="float-end">
                             <a href="{{ route('admin.forums.edit', ['id' => $forum->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.forums.delete', ['id' => $forum->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_forum') }}')">
+                            <form action="{{ route('admin.forums.delete', ['id' => $forum->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
@@ -53,7 +53,7 @@
 
                             @if (isAdmin('boss'))
                                 <a href="{{ route('admin.forums.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                                <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_forum') }}')">
+                                <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
@@ -64,17 +64,17 @@
                     @endif
 
                     @if ($forum->lastTopic->lastPost->id)
-                            {{ __('forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
+                            {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
                         <br>
-                            {{ __('forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
+                            {{ __('forum::forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
                     @else
-                        {{ __('forums.empty_posts') }}
+                        {{ __('forum::forums.empty_posts') }}
                     @endif
                 </div>
             </div>
         @endforeach
     @else
-        {{ showError(__('forums.empty_forums')) }}
+        {{ showError(__('forum::forums.empty_forums')) }}
     @endif
 
     @if (isAdmin('boss'))
@@ -82,8 +82,8 @@
             <form action="{{ route('admin.forums.create') }}" method="post">
                 @csrf
                 <div class="input-group{{ hasError('title') }}">
-                    <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('forum_category_max') }}" value="{{ getInput('title') }}" placeholder="{{ __('forums.forum') }}" required>
-                    <button class="btn btn-primary">{{ __('forums.create_forum') }}</button>
+                    <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('forum_category_max') }}" value="{{ getInput('title') }}" placeholder="{{ __('forum::forums.forum') }}" required>
+                    <button class="btn btn-primary">{{ __('forum::forums.create_forum') }}</button>
                 </div>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </form>

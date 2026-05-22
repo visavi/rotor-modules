@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\News\Controllers\Admin\NewsController as AdminNewsController;
-use Modules\News\Controllers\Admin\NewsSettingController;
-use Modules\News\Controllers\NewsController;
+use Modules\News\Http\Controllers\Admin\NewsController as AdminNewsController;
+use Modules\News\Http\Controllers\Admin\NewsSettingController;
+use Modules\News\Http\Controllers\NewsController;
 
 /* Новости */
 Route::middleware('web')

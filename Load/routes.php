@@ -1,12 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Load\Controllers\Admin\LoadController as AdminLoadController;
-use Modules\Load\Controllers\Admin\LoadSettingController;
-use Modules\Load\Controllers\Load\ActiveController;
-use Modules\Load\Controllers\Load\DownController;
-use Modules\Load\Controllers\Load\LoadController;
-use Modules\Load\Controllers\Load\NewController;
+use Modules\Load\Http\Controllers\Admin\LoadController as AdminLoadController;
+use Modules\Load\Http\Controllers\Admin\LoadSettingController;
+use Modules\Load\Http\Controllers\Load\ActiveController;
+use Modules\Load\Http\Controllers\Load\DownController;
+use Modules\Load\Http\Controllers\Load\LoadController;
+use Modules\Load\Http\Controllers\Load\NewController;
 
 /* Категории загрузок */
 Route::prefix('loads')

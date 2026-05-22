@@ -14,7 +14,7 @@
                     <button class="btn btn-link dropdown-item">{{ __('main.open') }}</button>
                 </form>
             @else
-                <form action="{{ route('admin.topics.action', ['id' => $topic->id, 'type' => 'closed', 'page' => $posts->currentPage()]) }}" method="post" onsubmit="return confirm('{{ __('forums.confirm_close_topic') }}')">
+                <form action="{{ route('admin.topics.action', ['id' => $topic->id, 'type' => 'closed', 'page' => $posts->currentPage()]) }}" method="post" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
                     @csrf
                     <button class="btn btn-link dropdown-item">{{ __('main.close') }}</button>
                 </form>
@@ -34,7 +34,7 @@
 
             <a class="dropdown-item" href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}">{{ __('main.change') }}</a>
             <a class="dropdown-item" href="{{ route('admin.topics.move', ['id' => $topic->id]) }}">{{ __('main.move') }}</a>
-            <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_topic') }}')">
+            <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_topic') }}')">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>
@@ -66,7 +66,7 @@
     @if ($topic->curators)
        <div>
             <span class="badge bg-adaptive">
-                <i class="fa fa-wrench"></i> {{ __('forums.topic_curators') }}:
+                <i class="fa fa-wrench"></i> {{ __('forum::forums.topic_curators') }}:
                 @foreach ($topic->curators as $key => $curator)
                     @php
                         $comma = (empty($key)) ? '' : ', ';
@@ -92,7 +92,7 @@
                         $maxproc = round(($data * 100) / $vote->max);
                     @endphp
 
-                    <b>{{ $key }}</b> ({{ __('forums.votes') }}: {{ $data }})<br>
+                    <b>{{ $key }}</b> ({{ __('forum::forums.votes') }}: {{ $data }})<br>
                     {{ progressBar($maxproc, $proc . '%') }}
                 @endforeach
             @else
@@ -101,11 +101,11 @@
                     @foreach ($vote->answers as $answer)
                         <label><input name="poll" type="radio" value="{{ $answer->id }}"> {{ $answer->answer }}</label><br>
                     @endforeach
-                    <button class="btn btn-sm btn-primary mt-3">{{ __('forums.vote') }}</button>
+                    <button class="btn btn-sm btn-primary mt-3">{{ __('forum::forums.vote') }}</button>
                 </form>
             @endif
 
-            {{ __('forums.total_votes') }}: {{ $vote->count }}
+            {{ __('forum::forums.total_votes') }}: {{ $vote->count }}
         </div>
     @endif
 
@@ -182,7 +182,7 @@
                 <button class="btn btn-sm btn-danger float-end">{{ __('main.delete_selected') }}</button>
             </div>
         @else
-            {{ showError(__('forums.empty_posts')) }}
+            {{ showError(__('forum::forums.empty_posts')) }}
         @endif
     </form>
 
@@ -193,14 +193,14 @@
             <form action="{{ route('topics.create', ['id' => $topic->id]) }}" method="post">
                 @csrf
                 <div class="mb-3{{ hasError('msg') }}">
-                    <label for="msg" class="form-label">{{ __('forums.post') }}:</label>
-                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \App\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forums.post') }}" required>{{ getInput('msg') }}</textarea>
+                    <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
+                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ getInput('msg') }}</textarea>
                     <div class="invalid-feedback">{{ textError('msg') }}</div>
                     <span class="js-textarea-counter"></span>
                 </div>
 
                 @include('app/_upload_file', [
-                    'model' => App\Models\Post::getModel(),
+                    'model' => Modules\Forum\Models\Post::getModel(),
                     'files' => $files,
                 ])
 

@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('forums.title_edit_post'))
+@section('title', __('forum::forums.title_edit_post'))
 
 @section('breadcrumb')
     <nav>
@@ -13,7 +13,7 @@
             @endforeach
 
             <li class="breadcrumb-item"><a href="{{ route('topics.topic', ['id' => $post->topic->id]) }}">{{ $post->topic->title }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_edit_post') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_edit_post') }}</li>
         </ol>
     </nav>
 @stop
@@ -26,7 +26,7 @@
         <form action="{{ route('posts.edit', ['id' => $post->id, 'page' => $page]) }}" method="post">
             @csrf
             <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('forums.post') }}:</label>
+                <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
                 <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ getInput('msg', $post->text) }}</textarea>
                 <div class="invalid-feedback">{{ textError('msg') }}</div>
                 <span class="js-textarea-counter"></span>

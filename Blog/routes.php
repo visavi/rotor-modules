@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Blog\Controllers\Admin\ArticleController as AdminArticleController;
-use Modules\Blog\Controllers\Admin\BlogSettingController;
-use Modules\Blog\Controllers\ArticleController;
+use Modules\Blog\Http\Controllers\Admin\ArticleController as AdminArticleController;
+use Modules\Blog\Http\Controllers\Admin\BlogSettingController;
+use Modules\Blog\Http\Controllers\ArticleController;
 
 /* Категория блогов */
 Route::middleware('web')

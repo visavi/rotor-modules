@@ -6,7 +6,7 @@
     <div class="float-end">
         @if (getUser())
             @if (! $forum->closed)
-                <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forums.create_topic') }}</a>
+                <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forum::forums.create_topic') }}</a>
             @endif
 
             @if (isAdmin())
@@ -59,13 +59,13 @@
 
                 @if ($child->lastTopic->id)
                     <div class="section-content">
-                        {{ __('forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $child->lastTopic->id]) }}">{{ $child->lastTopic->title }}</a><br>
+                        {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $child->lastTopic->id]) }}">{{ $child->lastTopic->title }}</a><br>
                         @if ($child->lastTopic->lastPost->id)
-                            {{ __('forums.post') }}: {{ $child->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($child->lastTopic->lastPost->created_at) }}</small>
+                            {{ __('forum::forums.post') }}: {{ $child->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($child->lastTopic->lastPost->created_at) }}</small>
                         @endif
                     </div>
                 @else
-                    <div>{{ __('forums.empty_topics') }}</div>
+                    <div>{{ __('forum::forums.empty_topics') }}</div>
                 @endif
             </div>
         @endforeach
@@ -90,17 +90,17 @@
                 <div class="section-content">
                     @if ($topic->lastPost->exists)
                         {{ $topic->pagination() }}
-                        {{ __('forums.post') }}: {{ $topic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($topic->lastPost->created_at) }}</small>
+                        {{ __('forum::forums.post') }}: {{ $topic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($topic->lastPost->created_at) }}</small>
                     @else
-                        {{ __('forums.empty_posts') }}
+                        {{ __('forum::forums.empty_posts') }}
                     @endif
                 </div>
             </div>
         @endforeach
     @elseif ($forum->closed)
-        {{ showError(__('forums.closed_forum')) }}
+        {{ showError(__('forum::forums.closed_forum')) }}
     @else
-        {{ showError(__('forums.empty_topics')) }}
+        {{ showError(__('forum::forums.empty_topics')) }}
     @endif
 
     {{ $topics->links() }}

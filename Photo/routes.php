@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Photo\Controllers\Admin\PhotoController as AdminPhotoController;
-use Modules\Photo\Controllers\Admin\PhotoSettingController;
-use Modules\Photo\Controllers\PhotoController;
+use Modules\Photo\Http\Controllers\Admin\PhotoController as AdminPhotoController;
+use Modules\Photo\Http\Controllers\Admin\PhotoSettingController;
+use Modules\Photo\Http\Controllers\PhotoController;
 
 /* Галерея */
 Route::middleware('web')

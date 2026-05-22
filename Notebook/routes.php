@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Notebook\Controllers\NotebookController;
+use Modules\Notebook\Http\Controllers\NotebookController;
 
 /* Блокнот */
 Route::middleware('web')

@@ -37,7 +37,7 @@
 
                 <a class="dropdown-item" href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}">{{ __('main.change') }}</a>
                 <a class="dropdown-item" href="{{ route('admin.topics.move', ['id' => $topic->id]) }}">{{ __('main.move') }}</a>
-                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_topic') }}')">
+                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_topic') }}')">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>
@@ -72,7 +72,7 @@
     @if (getUser())
         @if (! $topic->closed && getUser('id') === $topic->user->id && getUser('point') >= setting('editforumpoint'))
             <i class="fas fa-lock"></i>
-            <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_close_topic') }}')">
+            <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
                 @csrf
                 <button class="btn btn-link p-0 me-3">{{ __('main.close') }}</button>
             </form>
@@ -87,8 +87,8 @@
             </form>
         @endif
 
-        <?php $bookmark = $topic->bookmark_posts ? __('forums.from_bookmarks') : __('forums.to_bookmarks'); ?>
-        <i class="fas fa-bookmark"></i> <a class="me-3" href="#" onclick="return bookmark(this)" data-tid="{{ $topic->id }}" data-from="{{ __('forums.from_bookmarks') }}"  data-to="{{ __('forums.to_bookmarks') }}">{{ $bookmark }}</a>
+        <?php $bookmark = $topic->bookmark_posts ? __('forum::forums.from_bookmarks') : __('forum::forums.to_bookmarks'); ?>
+        <i class="fas fa-bookmark"></i> <a class="me-3" href="#" onclick="return bookmark(this)" data-tid="{{ $topic->id }}" data-from="{{ __('forum::forums.from_bookmarks') }}"  data-to="{{ __('forum::forums.to_bookmarks') }}">{{ $bookmark }}</a>
     @endif
 
     <div class="float-end" data-bs-toggle="tooltip" title="{{ __('main.views') }}">
@@ -98,7 +98,7 @@
     @if ($topic->curators)
        <div class="mt-3">
             <span class="badge bg-adaptive">
-                <i class="fa fa-wrench"></i> {{ __('forums.topic_curators') }}:
+                <i class="fa fa-wrench"></i> {{ __('forum::forums.topic_curators') }}:
                 @foreach ($topic->curators as $key => $curator)
                     <?php $comma = (empty($key)) ? '' : ', '; ?>
                     {{ $comma }}{{ $curator->getProfile() }}
@@ -121,7 +121,7 @@
                     <?php $proc = round(($value * 100) / $vote->sum, 1); ?>
                     <?php $maxproc = round(($value * 100) / $vote->max); ?>
 
-                    <b>{{ $key }}</b> ({{ __('forums.votes') }}: {{ $value }})<br>
+                    <b>{{ $key }}</b> ({{ __('forum::forums.votes') }}: {{ $value }})<br>
                     {{ progressBar($maxproc, $proc . '%') }}
                 @endforeach
             @else
@@ -130,11 +130,11 @@
                     @foreach ($vote->answers as $answer)
                         <label><input name="poll" type="radio" value="{{ $answer->id }}"> {{ $answer->answer }}</label><br>
                     @endforeach
-                    <button class="btn btn-sm btn-primary mt-3">{{ __('forums.vote') }}</button>
+                    <button class="btn btn-sm btn-primary mt-3">{{ __('forum::forums.vote') }}</button>
                 </form>
             @endif
 
-            {{ __('forums.total_votes') }}: {{ $vote->count }}
+            {{ __('forum::forums.total_votes') }}: {{ $vote->count }}
         </div>
     @endif
 
@@ -214,7 +214,7 @@
             </div>
         @endforeach
     @else
-        {{ showError(__('forums.empty_posts')) }}
+        {{ showError(__('forum::forums.empty_posts')) }}
     @endif
 
     @if ($topic->isModer)
@@ -232,14 +232,14 @@
                 <form action="{{ route('topics.create', ['id' => $topic->id]) }}" method="post">
                     @csrf
                     <div class="mb-3{{ hasError('msg') }}">
-                        <label for="msg" class="form-label">{{ __('forums.post') }}:</label>
-                        <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \App\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forums.post') }}" required>{{ getInput('msg') }}</textarea>
+                        <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
+                        <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ getInput('msg') }}</textarea>
                         <div class="invalid-feedback">{{ textError('msg') }}</div>
                         <span class="js-textarea-counter"></span>
                     </div>
 
                     @include('app/_upload_file', [
-                        'model' => App\Models\Post::getModel(),
+                        'model' => Modules\Forum\Models\Post::getModel(),
                         'files' => $files,
                     ])
 

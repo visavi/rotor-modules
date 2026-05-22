@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Lottery\Controllers\IndexController;
+use Modules\Lottery\Http\Controllers\IndexController;
 
 /* Лотерея */
 Route::middleware('web')

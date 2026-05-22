@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Gift\Controllers\IndexController;
-use Modules\Gift\Controllers\PanelController;
+use Modules\Gift\Http\Controllers\IndexController;
+use Modules\Gift\Http\Controllers\PanelController;
 
 /* Подарки */
 Route::middleware('web')

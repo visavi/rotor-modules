@@ -1,13 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Forum\Controllers\ActiveController;
-use Modules\Forum\Controllers\Admin\ForumController as AdminForumController;
-use Modules\Forum\Controllers\Admin\ForumSettingController;
-use Modules\Forum\Controllers\BookmarkController;
-use Modules\Forum\Controllers\ForumController;
-use Modules\Forum\Controllers\NewController;
-use Modules\Forum\Controllers\TopicController;
+use Modules\Forum\Http\Controllers\ActiveController;
+use Modules\Forum\Http\Controllers\Admin\ForumController as AdminForumController;
+use Modules\Forum\Http\Controllers\Admin\ForumSettingController;
+use Modules\Forum\Http\Controllers\Api\ForumApiController;
+use Modules\Forum\Http\Controllers\BookmarkController;
+use Modules\Forum\Http\Controllers\ForumController;
+use Modules\Forum\Http\Controllers\NewController;
+use Modules\Forum\Http\Controllers\TopicController;
 
 /* ---- Публичные роуты ---- */
 Route::prefix('forums')
@@ -101,9 +102,9 @@ Route::middleware(['web', 'check.admin'])
 Route::middleware(['api', 'check.token'])
     ->prefix('api')
     ->group(function () {
-        Route::get('/forums', [\Modules\Forum\Controllers\Api\ForumApiController::class, 'categoryForums']);
-        Route::get('/forums/{id}', [\Modules\Forum\Controllers\Api\ForumApiController::class, 'forums']);
-        Route::post('/forums/{id}', [\Modules\Forum\Controllers\Api\ForumApiController::class, 'createTopic']);
-        Route::get('/topics/{id}', [\Modules\Forum\Controllers\Api\ForumApiController::class, 'topics']);
-        Route::post('/topics/{id}', [\Modules\Forum\Controllers\Api\ForumApiController::class, 'createPost']);
+        Route::get('/forums', [ForumApiController::class, 'categoryForums']);
+        Route::get('/forums/{id}', [ForumApiController::class, 'forums']);
+        Route::post('/forums/{id}', [ForumApiController::class, 'createTopic']);
+        Route::get('/topics/{id}', [ForumApiController::class, 'topics']);
+        Route::post('/topics/{id}', [ForumApiController::class, 'createPost']);
     });

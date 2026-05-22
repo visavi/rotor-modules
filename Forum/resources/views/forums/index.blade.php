@@ -5,7 +5,7 @@
 @section('header')
     <div class="float-end">
         @if (getUser())
-            <a class="btn btn-success" href="{{ route('forums.create') }}">{{ __('forums.create_topic') }}</a>
+            <a class="btn btn-success" href="{{ route('forums.create') }}">{{ __('forum::forums.create_topic') }}</a>
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.forums.index') }}"><i class="fas fa-wrench"></i></a>
@@ -31,14 +31,14 @@
     <div class="my-3 py-2 border-bottom">
         @if (getUser())
             {{ __('main.my') }}:
-            <a href="{{ route('forums.active-topics') }}" class="badge bg-adaptive">{{ __('forums.topics') }}</a>
-            <a href="{{ route('forums.active-posts') }}" class="badge bg-adaptive">{{ __('forums.posts') }}</a>
-            <a href="{{ route('forums.bookmarks') }}" class="badge bg-adaptive">{{ __('forums.bookmarks') }}</a>
+            <a href="{{ route('forums.active-topics') }}" class="badge bg-adaptive">{{ __('forum::forums.topics') }}</a>
+            <a href="{{ route('forums.active-posts') }}" class="badge bg-adaptive">{{ __('forum::forums.posts') }}</a>
+            <a href="{{ route('forums.bookmarks') }}" class="badge bg-adaptive">{{ __('forum::forums.bookmarks') }}</a>
         @endif
 
         {{ __('main.new') }}:
-        <a href="{{ route('topics.index') }}" class="badge bg-adaptive">{{ __('forums.topics') }}</a>
-        <a href="{{ route('posts.index') }}" class="badge bg-adaptive">{{ __('forums.posts') }}</a>
+        <a href="{{ route('topics.index') }}" class="badge bg-adaptive">{{ __('forum::forums.topics') }}</a>
+        <a href="{{ route('posts.index') }}" class="badge bg-adaptive">{{ __('forum::forums.posts') }}</a>
     </div>
 
     @if ($forums->isNotEmpty())
@@ -81,17 +81,17 @@
 
                 <div class="section-body border-top">
                     @if ($forum->lastTopic->lastPost->id)
-                        {{ __('forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
+                        {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
                         <br>
-                        {{ __('forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
+                        {{ __('forum::forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
                     @else
-                        {{ __('forums.empty_topics') }}
+                        {{ __('forum::forums.empty_topics') }}
                     @endif
                 </div>
             </div>
         @endforeach
     @else
-        {{ showError(__('forums.empty_forums')) }}
+        {{ showError(__('forum::forums.empty_forums')) }}
     @endif
 
     <a href="/rules">{{ __('main.rules') }}</a> /

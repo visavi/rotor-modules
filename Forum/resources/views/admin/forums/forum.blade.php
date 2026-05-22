@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forums.create_topic') }}</a>
+        <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forum::forums.create_topic') }}</a>
         <a class="btn btn-adaptive" href="{{ route('forums.forum', ['id' => $forum->id, 'page' => $topics->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
     </div>
 
@@ -45,7 +45,7 @@
                     @if (isAdmin('boss'))
                         <div class="float-end">
                             <a href="{{ route('admin.forums.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_forum') }}')">
+                            <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
@@ -60,13 +60,13 @@
 
                 @if ($child->lastTopic->id)
                     <div class="section-content">
-                        {{ __('forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $child->lastTopic->id]) }}">{{ $child->lastTopic->title }}</a><br>
+                        {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $child->lastTopic->id]) }}">{{ $child->lastTopic->title }}</a><br>
                         @if ($child->lastTopic->lastPost->id)
-                            {{ __('forums.post') }}: {{ $child->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($child->lastTopic->lastPost->created_at) }}</small>
+                            {{ __('forum::forums.post') }}: {{ $child->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($child->lastTopic->lastPost->created_at) }}</small>
                         @endif
                     </div>
                 @else
-                    <div>{{ __('forums.empty_topics') }}</div>
+                    <div>{{ __('forum::forums.empty_topics') }}</div>
                 @endif
             </div>
         @endforeach
@@ -86,7 +86,7 @@
                     <div class="text-end">
                         <a href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                         <a href="{{ route('admin.topics.move', ['id' => $topic->id]) }}" title="{{ __('main.move') }}"><i class="fa fa-arrows-alt text-muted"></i></a>
-                        <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forums.confirm_delete_topic') }}')" title="{{ __('main.delete') }}">
+                        <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_topic') }}')" title="{{ __('main.delete') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link p-0"><i class="fa fa-times text-muted"></i></button>
@@ -96,17 +96,17 @@
                 <div class="section-content">
                     @if ($topic->lastPost->exists)
                         {{ $topic->pagination('/admin/topics') }}
-                        {{ __('forums.post') }}: {{ $topic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($topic->lastPost->created_at) }}</small>
+                        {{ __('forum::forums.post') }}: {{ $topic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($topic->lastPost->created_at) }}</small>
                     @else
-                        {{ __('forums.empty_posts') }}
+                        {{ __('forum::forums.empty_posts') }}
                     @endif
                 </div>
             </div>
         @endforeach
     @elseif ($forum->closed)
-        {{ showError(__('forums.closed_forum')) }}
+        {{ showError(__('forum::forums.closed_forum')) }}
     @else
-        {{ showError(__('forums.empty_topics')) }}
+        {{ showError(__('forum::forums.empty_topics')) }}
     @endif
 
     {{ $topics->links() }}

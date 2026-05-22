@@ -27,6 +27,6 @@ if (! function_exists('recentBoards')) {
                 ->get();
         });
 
-        return new HtmlString(view('widgets/_boards', compact('items')));
+        return new HtmlString(view('board::widgets/_boards', compact('items')));
     }
 }

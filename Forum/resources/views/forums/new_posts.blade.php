@@ -1,9 +1,9 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.forums'), __('forums.title_new_posts'), __('main.page_num', ['page' => $posts->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('index.forums'), __('forum::forums.title_new_posts'), __('main.page_num', ['page' => $posts->currentPage()])))
 
 @section('header')
-    <h1>{{ __('forums.title_new_posts') }}</h1>
+    <h1>{{ __('forum::forums.title_new_posts') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -11,7 +11,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('index.forums') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_new_posts') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_new_posts') }}</li>
         </ol>
     </nav>
 @stop
@@ -62,7 +62,7 @@
             </div>
         @endforeach
     @else
-        {{ showError(__('forums.posts_not_created')) }}
+        {{ showError(__('forum::forums.posts_not_created')) }}
     @endif
 
     {{ $posts->links() }}

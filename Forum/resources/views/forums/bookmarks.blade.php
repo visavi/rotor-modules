@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('forums.title_bookmarks'))
+@section('title', __('forum::forums.title_bookmarks'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('index.forums') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_bookmarks') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_bookmarks') }}</li>
         </ol>
     </nav>
 @stop
@@ -26,7 +26,7 @@
 
                     {{ $topic->topic->pagination() }}
                     {{ __('main.author') }}: {{ $topic->topic->user->getName() }} /
-                    {{ __('forums.latest') }}: {{ $topic->topic->lastPost->user->getName() }}
+                    {{ __('forum::forums.latest') }}: {{ $topic->topic->lastPost->user->getName() }}
                     <small class="section-date text-muted fst-italic">{{ dateFixed($topic->topic->lastPost->created_at) }}</small>
                 </div>
             @endforeach
@@ -34,7 +34,7 @@
             <button class="btn btn-sm btn-danger">{{ __('main.delete_selected') }}</button>
         </form>
     @else
-        {{ showError(__('forums.empty_bookmarks')) }}
+        {{ showError(__('forum::forums.empty_bookmarks')) }}
     @endif
 
     {{ $topics->links() }}

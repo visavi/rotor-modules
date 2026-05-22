@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('forums.title_edit_topic'))
+@section('title', __('forum::forums.title_edit_topic'))
 
 @section('breadcrumb')
     <nav>
@@ -13,7 +13,7 @@
             @endforeach
 
             <li class="breadcrumb-item"><a href="{{ route('topics.topic', ['id' => $topic->id]) }}">{{ $topic->title }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_edit_topic') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_edit_topic') }}</li>
         </ol>
     </nav>
 @stop
@@ -26,14 +26,14 @@
         <form action="{{ route('topics.edit', ['id' => $topic->id]) }}" method="post">
             @csrf
             <div class="mb-3{{ hasError('title') }}">
-                <label for="inputTitle" class="form-label">{{ __('forums.topic') }}:</label>
-                <input name="title" type="text" class="form-control" id="inputTitle"  maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forums.topic') }}" value="{{ getInput('title', $topic->title) }}" required>
+                <label for="inputTitle" class="form-label">{{ __('forum::forums.topic') }}:</label>
+                <input name="title" type="text" class="form-control" id="inputTitle"  maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forum::forums.topic') }}" value="{{ getInput('title', $topic->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             @if ($post)
                 <div class="mb-3{{ hasError('msg') }}">
-                    <label for="msg" class="form-label">{{ __('forums.post') }}:</label>
+                    <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
                     <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ getInput('msg', $post->text) }}</textarea>
                     <div class="invalid-feedback">{{ textError('msg') }}</div>
                     <span class="js-textarea-counter"></span>
@@ -42,13 +42,13 @@
 
             @if ($vote)
                 <div class="mb-3{{ hasError('question') }}">
-                    <label for="question" class="form-label">{{ __('forums.question') }}:</label>
+                    <label for="question" class="form-label">{{ __('forum::forums.question') }}:</label>
                     <input class="form-control" name="question" id="question" maxlength="100" value="{{ getInput('question', $vote->title) }}" required>
                     <div class="invalid-feedback">{{ textError('question') }}</div>
                 </div>
 
                 @if (! $vote->count)
-                    @include('forums/_vote_answers')
+                    @include('forum::forums/_vote_answers')
                 @endif
             @endif
 

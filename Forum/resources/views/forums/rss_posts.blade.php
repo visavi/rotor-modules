@@ -14,7 +14,7 @@
             <description>{{ $topic->title }} </description>
             <dc:creator>{{ $data->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $data->created_at) }}</pubDate>
-            <category>{{ __('forums.posts') }}</category>
+            <category>{{ __('forum::forums.posts') }}</category>
             <guid>{{ route('topics.topic', ['id' => $topic->id, 'pid' => $data->id]) }}</guid>
         </item>
     @endforeach

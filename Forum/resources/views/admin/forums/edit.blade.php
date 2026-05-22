@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('forums.title_edit_forum') . ' ' . $forum->title)
+@section('title', __('forum::forums.title_edit_forum') . ' ' . $forum->title)
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.forums.index') }}">{{ __('index.forums') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_edit_forum') }} {{ $forum->title }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_edit_forum') }} {{ $forum->title }}</li>
         </ol>
     </nav>
 @stop
@@ -18,7 +18,7 @@
         <form action="{{ route('admin.forums.edit', ['id' => $forum->id]) }}" method="post">
             @csrf
             <div class="mb-3{{ hasError('parent') }}">
-                <label for="parent" class="form-label">{{ __('forums.parent_forum') }}</label>
+                <label for="parent" class="form-label">{{ __('forum::forums.parent_forum') }}</label>
 
                 <?php $inputParent = (int) getInput('parent', $forum->parent_id); ?>
 
@@ -35,7 +35,7 @@
             </div>
 
             <div class="mb-3{{ hasError('title') }}">
-                <label for="title" class="form-label">{{ __('forums.forum') }}:</label>
+                <label for="title" class="form-label">{{ __('forum::forums.forum') }}:</label>
                 <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_category_max') }}" value="{{ getInput('title', $forum->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>

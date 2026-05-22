@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Guestbook\Controllers\Admin\GuestbookController as AdminGuestbookController;
-use Modules\Guestbook\Controllers\Admin\GuestbookSettingController;
-use Modules\Guestbook\Controllers\GuestbookController;
+use Modules\Guestbook\Http\Controllers\Admin\GuestbookController as AdminGuestbookController;
+use Modules\Guestbook\Http\Controllers\Admin\GuestbookSettingController;
+use Modules\Guestbook\Http\Controllers\GuestbookController;
 
 Route::middleware('web')
     ->controller(GuestbookController::class)

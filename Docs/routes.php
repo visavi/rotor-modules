@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Docs\Controllers\DocsController;
-use Modules\Docs\Controllers\RotorController;
+use Modules\Docs\Http\Controllers\DocsController;
+use Modules\Docs\Http\Controllers\RotorController;
 
 Route::middleware('web')
     ->controller(RotorController::class)

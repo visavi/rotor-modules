@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Wall\Controllers\Admin\SettingController;
-use Modules\Wall\Controllers\WallController;
+use Modules\Wall\Http\Controllers\Admin\SettingController;
+use Modules\Wall\Http\Controllers\WallController;
 
 Route::controller(WallController::class)
     ->prefix('walls')

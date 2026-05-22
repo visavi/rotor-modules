@@ -1,0 +1,161 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Guestbook\Http\Controllers\Admin;
+
+use App\Classes\Validator;
+use App\Http\Controllers\Admin\AdminController;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Modules\Guestbook\Models\Guestbook;
+
+class GuestbookController extends AdminController
+{
+    public function index(): View
+    {
+        $posts = Guestbook::query()
+            ->orderByDesc('created_at')
+            ->with('user', 'editUser', 'files')
+            ->paginate(setting('bookpost'));
+
+        $unpublished = Guestbook::query()->active(false)->count();
+
+        return view('guestbook::admin/guestbook/index', compact('posts', 'unpublished'));
+    }
+
+    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    {
+        $page = int($request->input('page'));
+        $post = Guestbook::with('user')->find($id);
+
+        if (! $post) {
+            abort(404, __('main.message_not_found'));
+        }
+
+        if ($request->isMethod('post')) {
+            $msg = $request->input('msg');
+
+            $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')]);
+
+            if ($validator->isValid()) {
+                $post->update([
+                    'text'         => antimat($msg),
+                    'edit_user_id' => getUser('id'),
+                    'updated_at'   => SITETIME,
+                ]);
+
+                return redirect()
+                    ->route('admin.guestbook.index', ['page' => $page])
+                    ->with('success', __('main.message_edited_success'));
+            }
+
+            return back()->withErrors($validator->getErrors())->withInput();
+        }
+
+        return view('guestbook::admin/guestbook/edit', compact('post', 'page'));
+    }
+
+    public function reply(int $id, Request $request, Validator $validator): View|RedirectResponse
+    {
+        $page = int($request->input('page'));
+        $post = Guestbook::with('user')->find($id);
+
+        if (! $post) {
+            abort(404, __('main.message_not_found'));
+        }
+
+        if ($request->isMethod('post')) {
+            $reply = $request->input('reply');
+
+            $validator->length($reply, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')]);
+
+            if ($validator->isValid()) {
+                $post->update([
+                    'reply' => $reply,
+                ]);
+
+                return redirect()
+                    ->route('admin.guestbook.index', ['page' => $page])
+                    ->with('success', __('guestbook::guestbook.answer_success_added'));
+            }
+
+            return back()->withErrors($validator->getErrors())->withInput();
+        }
+
+        return view('guestbook::admin/guestbook/reply', compact('post', 'page'));
+    }
+
+    public function delete(Request $request, Validator $validator): RedirectResponse
+    {
+        $page = int($request->input('page', 1));
+        $del = intar($request->input('chosen'));
+
+        $validator->true($del, __('validator.deletion'));
+
+        if ($validator->isValid()) {
+            $posts = Guestbook::query()->whereIn('id', $del)->get();
+
+            $posts->each(static function (Guestbook $post) {
+                $post->delete();
+            });
+
+            clearCache('statGuestbook');
+
+            return redirect()
+                ->route('admin.guestbook.index', ['page' => $page])
+                ->with('success', __('main.messages_deleted_success'));
+        }
+
+        return redirect()
+            ->route('admin.guestbook.index', ['page' => $page])
+            ->withErrors($validator->getErrors());
+    }
+
+    public function publish(Request $request, Validator $validator): RedirectResponse
+    {
+        $page = int($request->input('page', 1));
+        $active = intar($request->input('chosen'));
+
+        $validator->true($active, __('validator.published'));
+
+        if ($validator->isValid()) {
+            $posts = Guestbook::query()->whereIn('id', $active)->get();
+
+            $posts->each(static function (Guestbook $post) {
+                $post->update([
+                    'active' => true,
+                ]);
+            });
+
+            clearCache('statGuestbook');
+
+            return redirect()
+                ->route('admin.guestbook.index', ['page' => $page])
+                ->with('success', __('main.messages_published_success'));
+        }
+
+        return redirect()->route('admin.guestbook.index', ['page' => $page])
+            ->withErrors($validator->getErrors());
+    }
+
+    public function clear(Validator $validator): RedirectResponse
+    {
+        $validator->true(isAdmin(User::BOSS), __('main.page_only_owner'));
+
+        if ($validator->isValid()) {
+            Guestbook::query()->truncate();
+            clearCache('statGuestbook');
+
+            return redirect()
+                ->route('admin.guestbook.index')
+                ->with('success', __('guestbook::guestbook.messages_success_cleared'));
+        }
+
+        return redirect()
+            ->route('admin.guestbook.index')
+            ->withErrors($validator->getErrors());
+    }
+}

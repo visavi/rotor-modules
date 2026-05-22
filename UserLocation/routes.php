@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\UserLocation\Controllers\UserLocationController;
+use Modules\UserLocation\Http\Controllers\UserLocationController;
 
 /*  Кто-где */
 Route::middleware('web')

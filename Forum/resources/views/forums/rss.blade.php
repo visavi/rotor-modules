@@ -1,6 +1,6 @@
 @extends('layout_rss')
 
-@section('title', __('forums.title_rss'))
+@section('title', __('forum::forums.title_rss'))
 
 @section('content')
     @foreach ($topics as $topic)
@@ -15,7 +15,7 @@
                 <description>{{ $postText }}</description>
                 <dc:creator>{{ $topic->lastPost->user->getName() }}</dc:creator>
                 <pubDate>{{ date('r', $topic->updated_at) }}</pubDate>
-                <category>{{ __('forums.topics') }}</category>
+                <category>{{ __('forum::forums.topics') }}</category>
                 <guid>{{ route('topics.topic', ['id' => $topic->id]) }}</guid>
             </item>
         @endif

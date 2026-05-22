@@ -2,10 +2,10 @@
 
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
-use Modules\Payment\Controllers\AdvertController;
-use Modules\Payment\Controllers\OrderController;
-use Modules\Payment\Controllers\PaymentController;
-use Modules\Payment\Controllers\PaymentSettingController;
+use Modules\Payment\Http\Controllers\AdvertController;
+use Modules\Payment\Http\Controllers\OrderController;
+use Modules\Payment\Http\Controllers\PaymentController;
+use Modules\Payment\Http\Controllers\PaymentSettingController;
 
 /*  Платежи */
 Route::middleware('web')

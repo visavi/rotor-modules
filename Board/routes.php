@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Board\Controllers\Admin\BoardController as AdminBoardController;
-use Modules\Board\Controllers\Admin\BoardSettingController;
-use Modules\Board\Controllers\BoardController;
+use Modules\Board\Http\Controllers\Admin\BoardController as AdminBoardController;
+use Modules\Board\Http\Controllers\Admin\BoardSettingController;
+use Modules\Board\Http\Controllers\BoardController;
 
 /* Категории объявлений */
 Route::middleware('web')

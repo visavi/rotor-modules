@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('forums.title_edit_topic') . ' ' . $topic->title)
+@section('title', __('forum::forums.title_edit_topic') . ' ' . $topic->title)
 
 @section('breadcrumb')
     <nav>
@@ -14,7 +14,7 @@
             @endforeach
 
             <li class="breadcrumb-item"><a href="{{ route('admin.topics.topic', ['id' => $topic->id]) }}">{{ $topic->title }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_edit_topic') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_edit_topic') }}</li>
         </ol>
     </nav>
 @stop
@@ -24,21 +24,21 @@
         <form action="{{ route('admin.topics.edit', ['id' => $topic->id]) }}" method="post">
             @csrf
             <div class="mb-3{{ hasError('title') }}">
-                <label for="title" class="form-label">{{ __('forums.topic') }}:</label>
+                <label for="title" class="form-label">{{ __('forum::forums.topic') }}:</label>
                 <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_title_max') }}" value="{{ getInput('title', $topic->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('note') }}">
-                <label for="note" class="form-label">{{ __('forums.note') }}:</label>
+                <label for="note" class="form-label">{{ __('forum::forums.note') }}:</label>
                 <textarea class="form-control" id="note" maxlength="{{ setting('forum_note_max') }}" name="note" rows="3">{{ getInput('note', $topic->note) }}</textarea>
                 <div class="invalid-feedback">{{ textError('note') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('moderators') }}">
-                <label for="moderators" class="form-label">{{ __('forums.topic_curators') }}:</label>
+                <label for="moderators" class="form-label">{{ __('forum::forums.topic_curators') }}:</label>
                 <input class="form-control" name="moderators" id="moderators" maxlength="100" value="{{ getInput('moderators', $topic->moderators) }}">
-                <span class="text-muted fst-italic">{{ __('forums.curators_note') }}</span>
+                <span class="text-muted fst-italic">{{ __('forum::forums.curators_note') }}</span>
                 <div class="invalid-feedback">{{ textError('moderators') }}</div>
             </div>
 

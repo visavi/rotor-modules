@@ -1,9 +1,9 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.forums'), __('forums.title_new_topics'), __('main.page_num', ['page' => $topics->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('index.forums'), __('forum::forums.title_new_topics'), __('main.page_num', ['page' => $topics->currentPage()])))
 
 @section('header')
-    <h1>{{ __('forums.title_new_topics') }}</h1>
+    <h1>{{ __('forum::forums.title_new_topics') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -11,7 +11,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('index.forums') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('forums.title_new_topics') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.title_new_topics') }}</li>
         </ol>
     </nav>
 @stop
@@ -34,12 +34,12 @@
 
                 {{ $data->pagination() }}
                 {{ __('main.views') }}: <span class="badge bg-adaptive">{{ $data->visits }}</span><br>
-                {{ __('forums.forum') }}: <a href="{{ route('forums.forum', ['id' => $data->forum->id ]) }}">{{ $data->forum->title }}</a><br>
+                {{ __('forum::forums.forum') }}: <a href="{{ route('forums.forum', ['id' => $data->forum->id ]) }}">{{ $data->forum->title }}</a><br>
                 {{ __('main.author') }}: {{ $data->user->getName() }} / Посл.: {{ $data->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($data->lastPost->created_at) }}</small>
             </div>
         @endforeach
     @else
-        {{ showError(__('forums.topics_not_created')) }}
+        {{ showError(__('forum::forums.topics_not_created')) }}
     @endif
 
     {{ $topics->links() }}

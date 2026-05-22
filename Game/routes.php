@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Game\Controllers\BanditController;
-use Modules\Game\Controllers\BlackjackController;
-use Modules\Game\Controllers\DiceController;
-use Modules\Game\Controllers\GuessNumberController;
-use Modules\Game\Controllers\IndexController;
-use Modules\Game\Controllers\SafeController;
-use Modules\Game\Controllers\ThimbleController;
+use Modules\Game\Http\Controllers\BanditController;
+use Modules\Game\Http\Controllers\BlackjackController;
+use Modules\Game\Http\Controllers\DiceController;
+use Modules\Game\Http\Controllers\GuessNumberController;
+use Modules\Game\Http\Controllers\IndexController;
+use Modules\Game\Http\Controllers\SafeController;
+use Modules\Game\Http\Controllers\ThimbleController;
 
 /* Игры */
 Route::middleware('web')
