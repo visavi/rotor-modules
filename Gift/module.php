@@ -17,7 +17,7 @@ return [
 <pre class="code"><code>&lt;a href="/gifts?user={{ $user-&gt;login }}"&gt;Отправить подарок&lt;/a&gt;</code></pre>
 INFO,
     'version'  => '1.0.0',
-    'requires' => '>=13.0.0',
+    'requires' => '14.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'panel'    => [

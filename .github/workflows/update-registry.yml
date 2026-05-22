@@ -18,7 +18,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
+          # Load existing registry to preserve version history
           MODULES="[]"
+          if gh release view registry &>/dev/null; then
+            gh release download registry -p "registry.json" -D /tmp/ 2>/dev/null || true
+            if [ -f /tmp/registry.json ]; then
+              MODULES=$(cat /tmp/registry.json | jq '.modules // []')
+            fi
+          fi
 
           for file in $(find . -maxdepth 2 -name 'module.php' | sort); do
             MODULE=$(basename $(dirname "$file"))
@@ -43,20 +50,44 @@ jobs:
               echo "[$MODULE] Release $TAG already exists"
             fi
 
-            ENTRY=$(jq -n \
-              --arg module   "$MODULE" \
+            VERSION_ENTRY=$(jq -n \
+              --arg version  "$VERSION" \
+              --arg requires "$(get requires)" \
+              --arg url      "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
+              '{version:$version,requires:$requires,download_url:$url}')
+
+            # Add or update module entry preserving all versions
+            MODULES=$(echo "$MODULES" | jq \
+              --arg mod      "$MODULE" \
               --arg name     "$(get name)" \
               --arg desc     "$(get description)" \
-              --arg version  "$VERSION" \
               --arg author   "$(get author)" \
               --arg email    "$(get email)" \
               --arg homepage "$(get homepage)" \
-              --arg requires "$(get requires)" \
-              --arg url      "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
-              '{module:$module,name:$name,description:$desc,version:$version,
-                author:$author,email:$email,homepage:$homepage,requires:$requires,download_url:$url}')
-
-            MODULES=$(echo "$MODULES" | jq ". + [$ENTRY]")
+              --argjson ver  "$VERSION_ENTRY" \
+              '
+              if any(.[]; .module == $mod) then
+                map(
+                  if .module == $mod then
+                    .versions = (
+                      [(.versions // [])[] | select(.version != $ver.version)] + [$ver]
+                      | sort_by(.version)
+                      | reverse
+                    )
+                  else . end
+                )
+              else
+                . + [{
+                  module:      $mod,
+                  name:        $name,
+                  description: $desc,
+                  author:      $author,
+                  email:       $email,
+                  homepage:    $homepage,
+                  versions:    [$ver]
+                }]
+              end
+              ')
           done
 
           echo '{"name":"Official Rotor Modules","modules":[]}' \
