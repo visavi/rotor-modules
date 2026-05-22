@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Modules\Load\Models\Down;
 
 return [
@@ -11,11 +12,12 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Down::class,
+    'morphs' => [Down::class],
 
     'search' => [
         'label' => __('load::loads.downs'),
         'view'  => 'load::search/_downs',
+        'with'  => ['category'],
     ],
     'feed' => [
         'withs' => ['user', 'files', 'category.parent'],
@@ -26,5 +28,12 @@ return [
 
     'panel' => [
         '/admin/load-settings' => __('load::loads.settings'),
+    ],
+
+    'restatement' => [
+        'loads' => function () {
+            DB::update('update loads set count_downs = (select count(*) from downs where loads.id = downs.category_id and active = true)');
+            DB::update('update downs set count_comments = (select count(*) from comments where relate_type = "' . Down::$morphName . '" and downs.id = comments.relate_id)');
+        },
     ],
 ];

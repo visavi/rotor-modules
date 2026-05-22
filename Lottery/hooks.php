@@ -12,9 +12,10 @@ Hook::add('gamesEnd', function ($content) {
         <div class="section my-3 shadow">
             <i class="fa-solid fa-gamepad fa-5x"></i>
             <a href="/lottery" class="h5">' . __('lottery::lottery.title') . '</a>
-            <div class="text-muted">' . __('lottery::lottery.jackpot_amount',
-                ['jackpot' => plural($lottery->amount, setting('moneyname'))]
-        ) . '</div>
+            <div class="text-muted">' . __(
+        'lottery::lottery.jackpot_amount',
+        ['jackpot' => plural($lottery->amount, setting('moneyname'))]
+    ) . '</div>
         </div>
     </div>' . PHP_EOL;
 });

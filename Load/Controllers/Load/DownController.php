@@ -24,6 +24,8 @@ class DownController extends Controller
 {
     use CommentableTrait;
 
+    protected string $commentableModelClass = Down::class;
+
     public function view(int $id): View
     {
         $down = Down::query()

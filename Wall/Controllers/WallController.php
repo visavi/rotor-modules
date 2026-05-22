@@ -7,11 +7,11 @@ namespace Modules\Wall\Controllers;
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
-use Modules\Wall\Models\Wall;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Wall\Models\Wall;
 
 class WallController extends Controller
 {

@@ -50,7 +50,11 @@ class ArticleObserver
         clearCache(['statArticles', 'recentArticles']);
     }
 
-    public function restored(Article $article): void {}
+    public function restored(Article $article): void
+    {
+    }
 
-    public function forceDeleted(Article $article): void {}
+    public function forceDeleted(Article $article): void
+    {
+    }
 }

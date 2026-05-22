@@ -18,6 +18,8 @@ class OfferController extends Controller
 {
     use CommentableTrait;
 
+    protected string $commentableModelClass = Offer::class;
+
     public function index(Request $request, string $type = 'offer'): View
     {
         $offerCount = Offer::query()->where('type', Offer::OFFER)->count();

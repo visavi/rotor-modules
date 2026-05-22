@@ -11,12 +11,14 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Guestbook::class,
+    'morphs' => [Guestbook::class],
 
     'search' => [
         'label' => __('index.guestbook'),
         'view'  => 'guestbook::search/_guestbooks',
     ],
+
+    'spam' => __('index.guestbook'),
 
     'upload' => 'media',
 

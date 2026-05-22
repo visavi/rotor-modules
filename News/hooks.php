@@ -1,16 +1,13 @@
 <?php
 
 use App\Classes\Hook;
-use App\Classes\Restatement;
-use App\Http\Controllers\AjaxController;
-use App\Http\Controllers\SitemapController;
+use App\Classes\Registry;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Modules\News\Models\News;
 
-AjaxController::$extraComplaintTypes[News::$morphName] = static function (int $id) {
+Registry::complaint(News::$morphName, static function (int $id) {
     $model = Comment::query()->find($id);
 
     return [
@@ -18,9 +15,9 @@ AjaxController::$extraComplaintTypes[News::$morphName] = static function (int $i
         'path'  => $model?->getViewUrl(false),
         'type'  => 'comments',
     ];
-};
+});
 
-SitemapController::$extraPages['news'] = static function () {
+Registry::sitemap('news', static function () {
     return Cache::remember('NewsSitemap', 600, static function () {
         $newses = News::query()
             ->orderByDesc('created_at')
@@ -37,10 +34,6 @@ SitemapController::$extraPages['news'] = static function () {
 
         return $locs;
     });
-};
-
-Restatement::register('news', function () {
-    DB::update('update news set count_comments = (select count(*) from comments where relate_type = "news" and news.id = comments.relate_id)');
 });
 
 // RSS-ссылка в <head>
@@ -54,10 +47,10 @@ Hook::add('head', function (string $content) {
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', function (string $content) {
-    $url    = route('news.index');
+    $url = route('news.index');
     $active = request()->is('news*') ? ' active' : '';
-    $label  = __('index.news');
-    $stats  = statsNews();
+    $label = __('index.news');
+    $stats = statsNews();
 
     return $content . '<li>
         <a class="menu-item' . $active . '" href="' . $url . '">
@@ -70,7 +63,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
 
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', function (string $content) {
-    $url   = route('news.index');
+    $url = route('news.index');
     $label = __('index.news');
     $stats = statsNews();
 
@@ -79,7 +72,7 @@ Hook::add('footerColumnMiddle', function (string $content) {
 
 // Ссылка в блоке «Администрирование» в админке
 Hook::add('adminBlockAdmin', function (string $content) {
-    $url   = route('admin.news.index');
+    $url = route('admin.news.index');
     $label = __('index.news');
     $stats = statsNews();
 
@@ -88,7 +81,7 @@ Hook::add('adminBlockAdmin', function (string $content) {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', function (string $content) {
-    $url   = route('news.settings');
+    $url = route('news.settings');
     $label = __('news::news.settings');
 
     return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;

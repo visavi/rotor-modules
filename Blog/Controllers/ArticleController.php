@@ -28,6 +28,8 @@ class ArticleController extends Controller
 {
     use CommentableTrait;
 
+    protected string $commentableModelClass = Article::class;
+
     protected function commentableViewRoute(Model $model): array
     {
         return ['articles.view', ['slug' => $model->getAttribute('slug')]];
@@ -78,7 +80,7 @@ class ArticleController extends Controller
 
         $article = Article::query()
             ->where('id', $id)
-            ->with('category.parent', 'tags', 'poll')
+            ->with('category.parent', 'tags', 'poll', 'files')
             ->first();
 
         if (! $article) {

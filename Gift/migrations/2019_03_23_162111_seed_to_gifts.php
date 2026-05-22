@@ -17,7 +17,7 @@ return new class extends Migration {
         $data = [];
         foreach ($gifts as $gift) {
             $data[] = [
-                'name' => '',
+                'name'       => '',
                 'path'       => '/assets/modules/gifts/' . $gift,
                 'price'      => mt_rand(1, 10) * 100,
                 'created_at' => SITETIME,

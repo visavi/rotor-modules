@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Modules\Board\Models\Item;
 
 return [
@@ -12,7 +13,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Item::class,
+    'morphs' => [Item::class],
 
     'search' => [
         'label' => __('board::boards.boards_section'),
@@ -33,4 +34,10 @@ return [
     'schedule' => function (Schedule $schedule) {
         $schedule->command('board:deactivation')->hourly();
     },
+
+    'restatement' => [
+        'boards' => function () {
+            DB::update('update boards set count_items = (select count(*) from items where boards.id = items.board_id and items.active = true and items.expires_at >= ?)', [SITETIME]);
+        },
+    ],
 ];

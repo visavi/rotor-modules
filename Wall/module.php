@@ -1,6 +1,7 @@
 <?php
 
 use Modules\Wall\Models\Wall;
+use Modules\Wall\Observers\WallObserver;
 
 return [
     'name'        => 'Стена сообщений',
@@ -11,5 +12,11 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Wall::class,
+    'morphs' => [Wall::class],
+
+    'observers' => [
+        Wall::class => WallObserver::class,
+    ],
+
+    'spam' => __('wall::walls.wall_posts'),
 ];

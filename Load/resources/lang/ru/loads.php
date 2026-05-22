@@ -67,7 +67,7 @@ return [
     'down_success_published'   => 'Загрузка успешно опубликована!',
     'down_success_unpublished' => 'Загрузка успешно снята с публикации!',
 
-    'settings'              => 'Настройки загрузок',
-    'settings_empty'        => 'Настройки не переданы!',
+    'settings'               => 'Настройки загрузок',
+    'settings_empty'         => 'Настройки не переданы!',
     'settings_success_saved' => 'Настройки успешно сохранены!',
 ];

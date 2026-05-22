@@ -1,14 +1,7 @@
 <?php
 
 use App\Classes\Hook;
-use App\Classes\Restatement;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Modules\Photo\Models\Photo;
-
-Restatement::register('photos', function () {
-    DB::update('update photos set count_comments = (select count(*) from comments where relate_type = "' . Photo::$morphName . '" and photos.id = comments.relate_id)');
-});
 
 // Ссылки на фото пользователя в анкете
 Hook::add('userProfileLinks', function (string $content, $user) {

@@ -1,13 +1,11 @@
 <?php
 
 use App\Classes\Hook;
-use App\Classes\Restatement;
-use App\Http\Controllers\SitemapController;
+use App\Classes\Registry;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Modules\Load\Models\Down;
 
-SitemapController::$extraPages['downs'] = static function () {
+Registry::sitemap('downs', static function () {
     return Cache::remember('DownsSitemap', 600, static function () {
         $downs = Down::query()
             ->active()
@@ -25,11 +23,6 @@ SitemapController::$extraPages['downs'] = static function () {
 
         return $locs;
     });
-};
-
-Restatement::register('loads', function () {
-    DB::update('update loads set count_downs = (select count(*) from downs where loads.id = downs.category_id and active = true)');
-    DB::update('update downs set count_comments = (select count(*) from comments where relate_type = "' . Down::$morphName . '" and downs.id = comments.relate_id)');
 });
 
 // Ссылки на файлы пользователя в анкете

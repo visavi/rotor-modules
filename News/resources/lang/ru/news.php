@@ -18,7 +18,7 @@ return [
     'news_success_added'   => 'Новость успешно добавлена!',
     'news_success_deleted' => 'Новость успешно удалена!',
 
-    'settings'              => 'Настройки новостей',
-    'settings_empty'        => 'Настройки не переданы!',
+    'settings'               => 'Настройки новостей',
+    'settings_empty'         => 'Настройки не переданы!',
     'settings_success_saved' => 'Настройки успешно сохранены!',
 ];

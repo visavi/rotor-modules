@@ -20,6 +20,8 @@ class PhotoController extends Controller
 {
     use CommentableTrait;
 
+    protected string $commentableModelClass = Photo::class;
+
     public function index(Request $request): View
     {
         $sort = $request->input('sort', 'date');

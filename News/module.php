@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Modules\News\Models\News;
 
 return [
@@ -11,7 +12,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => News::class,
+    'morphs' => [News::class],
 
     'search' => [
         'label' => __('index.news'),
@@ -27,5 +28,11 @@ return [
     'panel' => [
         '/admin/news'          => __('index.news'),
         '/admin/news-settings' => __('news::news.settings'),
+    ],
+
+    'restatement' => [
+        'news' => function () {
+            DB::update('update news set count_comments = (select count(*) from comments where relate_type = "news" and news.id = comments.relate_id)');
+        },
     ],
 ];

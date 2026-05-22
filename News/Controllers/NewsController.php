@@ -16,6 +16,8 @@ class NewsController extends Controller
 {
     use CommentableTrait;
 
+    protected string $commentableModelClass = News::class;
+
     public function index(): View
     {
         $news = News::query()

@@ -1,23 +1,13 @@
 <?php
 
 use App\Classes\Hook;
-use Illuminate\Support\Facades\Route;
-use App\Classes\Restatement;
-use App\Http\Controllers\SitemapController;
+use App\Classes\Registry;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Modules\Blog\Models\Article;
-use Modules\Blog\Observers\ArticleObserver;
-
-Article::observe(ArticleObserver::class);
-
-Restatement::register('blogs', function () {
-    DB::update('update blogs set count_articles = (select count(*) from articles where blogs.id = articles.category_id and active = true)');
-    DB::update('update articles set count_comments = (select count(*) from comments where relate_type = "' . Article::$morphName . '" and articles.id = comments.relate_id)');
-});
 
 // Регистрация страницы sitemap для статей
-SitemapController::$extraPages['articles'] = static function () {
+Registry::sitemap('articles', static function () {
     return Cache::remember('ArticlesSitemap', 600, static function () {
         $articles = Article::query()
             ->active()
@@ -35,7 +25,7 @@ SitemapController::$extraPages['articles'] = static function () {
 
         return $locs;
     });
-};
+});
 
 // Ссылки на публикации пользователя в анкете
 Hook::add('userProfileLinks', function (string $content, $user) {
@@ -52,8 +42,8 @@ Hook::add('userProfileLinks', function (string $content, $user) {
 // Ссылка в боковом меню и горизонтальной навигации
 Hook::add('sidebarMenuEnd', function (string $content) {
     $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
-    $url    = route('blogs.index');
-    $label  = __('index.blogs');
+    $url = route('blogs.index');
+    $label = __('index.blogs');
 
     return $content . '<li class="treeview' . $active . '">
         <a class="menu-item" href="' . $url . '" data-bs-toggle="treeview">

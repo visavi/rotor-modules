@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Modules\Photo\Models\Photo;
 
 return [
@@ -11,7 +12,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Photo::class,
+    'morphs' => [Photo::class],
 
     'search' => [
         'label' => __('photo::photos.photos_section'),
@@ -26,5 +27,11 @@ return [
 
     'panel' => [
         '/admin/photo-settings' => __('photo::photos.settings'),
+    ],
+
+    'restatement' => [
+        'photos' => function () {
+            DB::update('update photos set count_comments = (select count(*) from comments where relate_type = "' . Photo::$morphName . '" and photos.id = comments.relate_id)');
+        },
     ],
 ];

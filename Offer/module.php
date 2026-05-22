@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Modules\Offer\Models\Offer;
 
 return [
@@ -11,7 +12,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Offer::class,
+    'morphs' => [Offer::class],
 
     'search' => [
         'label' => __('index.offers'),
@@ -25,5 +26,11 @@ return [
 
     'panel' => [
         '/admin/offer-settings' => __('offer::offers.settings'),
+    ],
+
+    'restatement' => [
+        'offers' => function () {
+            DB::update('update offers set count_comments = (select count(*) from comments where relate_type = "offers" and offers.id = comments.relate_id)');
+        },
     ],
 ];

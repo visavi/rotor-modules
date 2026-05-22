@@ -36,10 +36,10 @@ class NewsController extends AdminController
         }
 
         if ($request->isMethod('post')) {
-            $title  = $request->input('title');
-            $text   = $request->input('text');
+            $title = $request->input('title');
+            $text = $request->input('text');
             $closed = empty($request->input('closed')) ? 0 : 1;
-            $top    = empty($request->input('top')) ? 0 : 1;
+            $top = empty($request->input('top')) ? 0 : 1;
 
             $validator
                 ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])
@@ -75,10 +75,10 @@ class NewsController extends AdminController
             ->orderBy('created_at');
 
         if ($request->isMethod('post')) {
-            $title  = $request->input('title');
-            $text   = $request->input('text');
+            $title = $request->input('title');
+            $text = $request->input('text');
             $closed = empty($request->input('closed')) ? 0 : 1;
-            $top    = empty($request->input('top')) ? 0 : 1;
+            $top = empty($request->input('top')) ? 0 : 1;
 
             $validator
                 ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])

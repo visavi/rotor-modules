@@ -1,26 +1,22 @@
 <?php
 
 use App\Classes\Hook;
-use App\Http\Controllers\Admin\SpamController;
-use App\Http\Controllers\AjaxController;
+use App\Classes\Registry;
 use Modules\Guestbook\Models\Guestbook;
 
 // Жалобы на сообщения гостевой
-AjaxController::$extraComplaintTypes[Guestbook::$morphName] = function (int $id, mixed $page): array {
+Registry::complaint(Guestbook::$morphName, function (int $id, mixed $page): array {
     $model = Guestbook::query()->find($id);
-    $path  = route('guestbook.index', ['page' => $page], false);
+    $path = route('guestbook.index', ['page' => $page], false);
 
     return compact('model', 'path');
-};
-
-// Гостевая в типах жалоб (SpamController)
-SpamController::$extraTypes[Guestbook::$morphName] = __('index.guestbook');
+});
 
 // Ссылка в боковом меню (default, nordic, newspaper темы)
 Hook::add('sidebarMenuEnd', function (string $content) {
     $active = request()->is('guestbook*') ? ' active' : '';
-    $label  = __('index.guestbook');
-    $stats  = statsGuestbook();
+    $label = __('index.guestbook');
+    $stats = statsGuestbook();
 
     return $content . '<li>
         <a class="menu-item' . $active . '" href="' . route('guestbook.index') . '">

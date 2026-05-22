@@ -72,6 +72,10 @@
     <hr>
 
     <div class="section mb-3 shadow">
+        @if ($article->getDetachedMedia()->isNotEmpty())
+            @include('app/_media_slider', ['model' => $article, 'files' => $article->getDetachedMedia()])
+        @endif
+
         <div class="section-message">
             {{ $article->getText() }}
         </div>

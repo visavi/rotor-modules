@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
 use Modules\Blog\Models\Article;
+use Modules\Blog\Observers\ArticleObserver;
 
 return [
     'name'        => 'Блоги',
@@ -12,11 +14,16 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morph' => Article::class,
+    'morphs' => [Article::class],
+
+    'observers' => [
+        Article::class => ArticleObserver::class,
+    ],
 
     'search' => [
         'label' => __('blog::blogs.blogs_section'),
         'view'  => 'blog::search/_articles',
+        'with'  => ['category'],
     ],
     'feed' => [
         'withs' => ['user', 'files', 'category.parent'],
@@ -32,4 +39,11 @@ return [
     'schedule' => function (Schedule $schedule) {
         $schedule->command('blog:activation')->everyMinute();
     },
+
+    'restatement' => [
+        'blogs' => function () {
+            DB::update('update blogs set count_articles = (select count(*) from articles where blogs.id = articles.category_id and active = true)');
+            DB::update('update articles set count_comments = (select count(*) from comments where relate_type = "' . Article::$morphName . '" and articles.id = comments.relate_id)');
+        },
+    ],
 ];

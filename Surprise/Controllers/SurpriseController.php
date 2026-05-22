@@ -12,10 +12,10 @@ class SurpriseController extends Controller
 {
     public function index(): RedirectResponse
     {
-        $money  = mt_rand(10000, 50000);
-        $point  = mt_rand(150, 250);
+        $money = mt_rand(10000, 50000);
+        $point = mt_rand(150, 250);
         $rating = mt_rand(3, 10);
-        $year   = date('Y', strtotime('+3 days', SITETIME));
+        $year = date('Y', strtotime('+3 days', SITETIME));
 
         if (! $user = getUser()) {
             abort(403, __('main.not_authorized'));

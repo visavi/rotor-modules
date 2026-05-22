@@ -2,13 +2,13 @@
 
 use App\Classes\Calendar;
 use App\Models\Article;
-use Modules\Load\Models\Down;
 use App\Models\News;
 use App\Models\Photo;
 use App\Models\Topic;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;
+use Modules\Load\Models\Down;
 
 if (! function_exists('onlineWidget')) {
     function onlineWidget(): HtmlString
