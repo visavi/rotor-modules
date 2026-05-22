@@ -69,11 +69,19 @@ jobs:
               if any(.[]; .module == $mod) then
                 map(
                   if .module == $mod then
-                    .versions = (
-                      [(.versions // [])[] | select(.version != $ver.version)] + [$ver]
-                      | sort_by(.version)
-                      | reverse
-                    )
+                    {
+                      module:      $mod,
+                      name:        $name,
+                      description: $desc,
+                      author:      $author,
+                      email:       $email,
+                      homepage:    $homepage,
+                      versions: (
+                        [(.versions // [])[] | select(.version != $ver.version)] + [$ver]
+                        | sort_by(.version)
+                        | reverse
+                      )
+                    }
                   else . end
                 )
               else
