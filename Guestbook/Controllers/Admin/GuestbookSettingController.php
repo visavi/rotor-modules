@@ -31,7 +31,7 @@ class GuestbookSettingController extends AdminController
                 Setting::query()->updateOrCreate(['name' => $name], ['value' => $value]);
             }
 
-            Setting::clearCache();
+            clearCache('settings');
 
             return redirect()
                 ->route('guestbook.settings')

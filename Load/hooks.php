@@ -2,8 +2,30 @@
 
 use App\Classes\Hook;
 use App\Classes\Restatement;
+use App\Http\Controllers\SitemapController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Modules\Load\Models\Down;
+
+SitemapController::$extraPages['downs'] = static function () {
+    return Cache::remember('DownsSitemap', 600, static function () {
+        $downs = Down::query()
+            ->active()
+            ->orderByDesc('created_at')
+            ->limit(10000)
+            ->get();
+
+        $locs = [];
+        foreach ($downs as $down) {
+            $locs[] = [
+                'loc'     => route('downs.view', ['id' => $down->id]),
+                'lastmod' => gmdate('c', $down->created_at),
+            ];
+        }
+
+        return $locs;
+    });
+};
 
 Restatement::register('loads', function () {
     DB::update('update loads set count_downs = (select count(*) from downs where loads.id = downs.category_id and active = true)');
