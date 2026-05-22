@@ -59,7 +59,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
     </li>' . PHP_EOL;
-}, 5);
+}, 20);
 
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', function (string $content) {

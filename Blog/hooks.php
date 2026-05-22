@@ -58,7 +58,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
             <li><a class="treeview-item' . (request()->routeIs('articles.new-comments') ? ' active' : '') . '" href="' . route('articles.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.new_comments') . '</a></li>
         </ul>
     </li>' . PHP_EOL;
-}, 20);
+}, 15);
 
 // Ссылка блоги в блоке редактора в админке
 Hook::add('adminBlockEditor', function (string $content) {
