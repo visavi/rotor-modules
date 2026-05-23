@@ -19,26 +19,24 @@ Route::middleware('web')
     });
 
 /* Админ */
-Route::middleware(['web', 'check.admin', 'admin.logger'])
-    ->prefix('admin')
+Route::admin()
+    ->controller(AdminOfferController::class)
+    ->prefix('offers')
+    ->name('admin.offers.')
     ->group(function () {
-        Route::controller(AdminOfferController::class)
-            ->prefix('offers')
-            ->name('admin.offers.')
-            ->group(function () {
-                Route::get('/{type?}', 'index')->where('type', 'offer|issue')->name('index');
-                Route::get('/{id}', 'view')->name('view');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
-                Route::match(['get', 'post'], '/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
-            });
+        Route::get('/{type?}', 'index')->where('type', 'offer|issue')->name('index');
+        Route::get('/{id}', 'view')->name('view');
+        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
+        Route::match(['get', 'post'], '/delete', 'delete')->name('delete');
+        Route::post('/restatement', 'restatement')->name('restatement');
+    });
 
-        /* Настройки */
-        Route::controller(OfferSettingController::class)
-            ->name('offer.')
-            ->group(function () {
-                Route::get('/offer-settings', 'index')->name('settings');
-                Route::post('/offer-settings', 'update')->name('settings.update');
-            });
+/* Настройки */
+Route::admin()
+    ->controller(OfferSettingController::class)
+    ->name('offer.')
+    ->group(function () {
+        Route::get('/offer-settings', 'index')->name('settings');
+        Route::post('/offer-settings', 'update')->name('settings.update');
     });

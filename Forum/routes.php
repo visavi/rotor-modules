@@ -54,9 +54,9 @@ Route::prefix('posts')
     });
 
 /* ---- Админ роуты ---- */
-Route::middleware(['web', 'check.admin'])
+Route::admin()
     ->controller(AdminForumController::class)
-    ->prefix('admin/forums')
+    ->prefix('forums')
     ->name('admin.forums.')
     ->group(function () {
         Route::get('/', 'index')->name('index');
@@ -67,9 +67,9 @@ Route::middleware(['web', 'check.admin'])
         Route::post('/restatement', 'restatement')->name('restatement');
     });
 
-Route::middleware(['web', 'check.admin'])
+Route::admin()
     ->controller(AdminForumController::class)
-    ->prefix('admin/topics')
+    ->prefix('topics')
     ->name('admin.topics.')
     ->group(function () {
         Route::get('/{id}', 'topic')->name('topic');
@@ -79,9 +79,9 @@ Route::middleware(['web', 'check.admin'])
         Route::delete('/{id}/delete', 'deleteTopic')->name('delete');
     });
 
-Route::middleware(['web', 'check.admin'])
+Route::admin()
     ->controller(AdminForumController::class)
-    ->prefix('admin/posts')
+    ->prefix('posts')
     ->name('admin.posts.')
     ->group(function () {
         Route::match(['get', 'post'], '/{id}/edit', 'editPost')->name('edit');
@@ -89,9 +89,9 @@ Route::middleware(['web', 'check.admin'])
     });
 
 /* ---- Настройки форума ---- */
-Route::middleware(['web', 'check.admin'])
+Route::admin()
     ->controller(ForumSettingController::class)
-    ->prefix('admin/forum-settings')
+    ->prefix('forum-settings')
     ->name('forum.')
     ->group(function () {
         Route::get('/', 'index')->name('settings');

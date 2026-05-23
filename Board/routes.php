@@ -29,34 +29,33 @@ Route::middleware('web')
     });
 
 /* Админ — категории и объявления */
-Route::middleware(['web', 'check.admin', 'admin.logger'])
-    ->prefix('admin')
+Route::admin()
+    ->controller(AdminBoardController::class)
+    ->prefix('boards')
+    ->name('admin.boards.')
     ->group(function () {
-        Route::controller(AdminBoardController::class)
-            ->prefix('boards')
-            ->name('admin.boards.')
-            ->group(function () {
-                Route::get('/{id?}', 'index')->name('index');
-                Route::get('/categories', 'categories')->name('categories');
-                Route::post('/create', 'create')->name('create');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
-            });
+        Route::get('/{id?}', 'index')->name('index');
+        Route::get('/categories', 'categories')->name('categories');
+        Route::post('/create', 'create')->name('create');
+        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::delete('/{id}/delete', 'delete')->name('delete');
+        Route::post('/restatement', 'restatement')->name('restatement');
+    });
 
-        Route::controller(AdminBoardController::class)
-            ->prefix('items')
-            ->name('admin.items.')
-            ->group(function () {
-                Route::match(['get', 'post'], '/{id}/edit', 'editItem')->name('edit');
-                Route::delete('/{id}/delete', 'deleteItem')->name('delete');
-            });
+Route::admin()
+    ->controller(AdminBoardController::class)
+    ->prefix('items')
+    ->name('admin.items.')
+    ->group(function () {
+        Route::match(['get', 'post'], '/{id}/edit', 'editItem')->name('edit');
+        Route::delete('/{id}/delete', 'deleteItem')->name('delete');
+    });
 
-        /* Настройки */
-        Route::controller(BoardSettingController::class)
-            ->name('board.')
-            ->group(function () {
-                Route::get('/board-settings', 'index')->name('settings');
-                Route::post('/board-settings', 'update')->name('settings.update');
-            });
+/* Настройки */
+Route::admin()
+    ->controller(BoardSettingController::class)
+    ->name('board.')
+    ->group(function () {
+        Route::get('/board-settings', 'index')->name('settings');
+        Route::post('/board-settings', 'update')->name('settings.update');
     });

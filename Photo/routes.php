@@ -24,23 +24,21 @@ Route::middleware('web')
     });
 
 /* Админ — галерея */
-Route::middleware(['web', 'check.admin', 'admin.logger'])
-    ->prefix('admin')
+Route::admin()
+    ->controller(AdminPhotoController::class)
+    ->prefix('photos')
+    ->name('admin.photos.')
     ->group(function () {
-        Route::controller(AdminPhotoController::class)
-            ->prefix('photos')
-            ->name('admin.photos.')
-            ->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
-            });
+        Route::get('/', 'index')->name('index');
+        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::delete('/{id}/delete', 'delete')->name('delete');
+        Route::post('/restatement', 'restatement')->name('restatement');
+    });
 
-        Route::controller(PhotoSettingController::class)
-            ->name('photo.')
-            ->group(function () {
-                Route::get('/photo-settings', 'index')->name('settings');
-                Route::post('/photo-settings', 'update')->name('settings.update');
-            });
+Route::admin()
+    ->controller(PhotoSettingController::class)
+    ->name('photo.')
+    ->group(function () {
+        Route::get('/photo-settings', 'index')->name('settings');
+        Route::post('/photo-settings', 'update')->name('settings.update');
     });

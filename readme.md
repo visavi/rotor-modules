@@ -182,11 +182,14 @@ Route::middleware('web')
         Route::get('/{id}', 'view')->name('view');
     });
 
-// Админка
-Route::middleware(['web', 'check.admin', 'admin.logger'])
-    ->prefix('admin')
+// Админка — макрос Route::admin() = middleware ['web', 'check.admin', 'admin.logger'] + prefix 'admin'
+Route::admin()
+    ->controller(AdminMyController::class)
+    ->prefix('my-module')
+    ->name('admin.my-module.')
     ->group(function () {
-        // ...
+        Route::get('/', 'index')->name('index');
+        Route::delete('/{id}', 'delete')->name('delete');
     });
 ```
 
