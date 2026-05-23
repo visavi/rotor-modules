@@ -1,5 +1,12 @@
 <?php
 
+use Modules\UserLocation\Middleware\TrackUserLocation;
+
 return [
-    'track.location' => \Modules\UserLocation\Middleware\TrackUserLocation::class,
+    'aliases' => [
+        'track.location' => TrackUserLocation::class,
+    ],
+    'web' => [
+        TrackUserLocation::class,
+    ],
 ];
