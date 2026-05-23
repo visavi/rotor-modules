@@ -3,26 +3,26 @@
 use App\Classes\Hook;
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', function (string $content) {
+Hook::add('sidebarMenuEnd', static function () {
     $url = route('template.index');
     $active = request()->is('template*') ? ' active' : '';
     $label = __('template::template.template');
     $stats = statsTemplate();
 
-    return $content . '<li>
+    return '<li>
         <a class="menu-item' . $active . '" href="' . $url . '">
             <i class="menu-icon far fa-file"></i>
             <span class="menu-label">' . $label . '</span>
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
-    </li>' . PHP_EOL;
+    </li>';
 }, 10);
 
 // Ссылка в блоке администрирования
-Hook::add('adminBlockAdmin', function (string $content) {
+Hook::add('adminBlockAdmin', static function () {
     $url = route('admin.template.index');
     $label = __('template::template.template');
     $stats = statsTemplate();
 
-    return $content . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });

@@ -68,33 +68,29 @@ Registry::onAdminDeleteUser(function (User $user, Request $request): void {
 });
 
 // Добавление чекбоксов удаления на страницу удаления пользователя
-Hook::add('adminUserDeleteFields', function (string $content, $user): string {
-    return $content . '<div class="form-check">
+Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
         <input type="checkbox" class="form-check-input" value="1" name="deltopics" id="deltopics">
         <label class="form-check-label" for="deltopics">' . __('users.forum_topics') . '</label>
     </div>
     <div class="form-check">
         <input type="checkbox" class="form-check-input" value="1" name="delposts" id="delposts">
         <label class="form-check-label" for="delposts">' . __('users.forum_posts') . '</label>
-    </div>' . PHP_EOL;
-});
+    </div>');
 
 // Ссылки на форум в анкете пользователя
-Hook::add('userProfileLinks', function (string $content, $user) {
+Hook::add('userProfileLinks', static function ($user) {
     if (! Route::has('forums.active-topics')) {
-        return $content;
+        return null;
     }
 
-    $link = ' / <b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('index.forums') . '</a></b>'
+    return ' / <b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('index.forums') . '</a></b>'
         . ' (<a href="' . route('forums.active-posts', ['user' => $user->login]) . '">' . __('main.messages') . '</a>)';
-
-    return $content . $link;
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuStart', function (string $content) {
+Hook::add('sidebarMenuStart', static function () {
     if (! Route::has('forums.index')) {
-        return $content;
+        return null;
     }
 
     $url = route('forums.index');
@@ -108,31 +104,27 @@ Hook::add('sidebarMenuStart', function (string $content) {
             <span class="menu-label">' . $label . '</span>
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
-    </li>' . PHP_EOL . $content;
+    </li>';
 }, 5);
 
 // Блок форума в панели администратора
-Hook::add('adminBlockEditor', function (string $content) {
+Hook::add('adminBlockEditor', static function () {
     if (! Route::has('admin.forums.index')) {
-        return $content;
+        return null;
     }
 
     $url = route('admin.forums.index');
     $label = __('index.forums');
     $stats = statsForum();
 
-    return $content
-        . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });
 
 // Ссылка на настройки в навигации настроек
-Hook::add('adminSettingsNav', function (string $content) {
+Hook::add('adminSettingsNav', static function () {
     if (! Route::has('forum.settings')) {
-        return $content;
+        return null;
     }
 
-    $url = route('forum.settings');
-    $label = __('forum::forums.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
+    return '<a class="nav-link" href="' . route('forum.settings') . '">' . __('forum::forums.settings') . '</a>';
 });

@@ -37,52 +37,47 @@ Registry::sitemap('news', static function () {
 });
 
 // RSS-ссылка в <head>
-Hook::add('head', function (string $content) {
+Hook::add('head', static function () {
     if (! Route::has('news.rss')) {
-        return $content;
+        return null;
     }
 
-    return $content . '<link href="' . route('news.rss') . '" title="RSS News" type="application/rss+xml" rel="alternate">' . PHP_EOL;
+    return '<link href="' . route('news.rss') . '" title="RSS News" type="application/rss+xml" rel="alternate">';
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', function (string $content) {
+Hook::add('sidebarMenuEnd', static function () {
     $url = route('news.index');
     $active = request()->is('news*') ? ' active' : '';
     $label = __('index.news');
     $stats = statsNews();
 
-    return $content . '<li>
+    return '<li>
         <a class="menu-item' . $active . '" href="' . $url . '">
             <i class="menu-icon far fa-newspaper"></i>
             <span class="menu-label">' . $label . '</span>
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
-    </li>' . PHP_EOL;
+    </li>';
 }, 20);
 
 // Ссылка в колонке footer
-Hook::add('footerColumnMiddle', function (string $content) {
+Hook::add('footerColumnMiddle', static function () {
     $url = route('news.index');
     $label = __('index.news');
     $stats = statsNews();
 
-    return $content . '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>' . PHP_EOL;
+    return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
 });
 
 // Ссылка в блоке «Администрирование» в админке
-Hook::add('adminBlockAdmin', function (string $content) {
+Hook::add('adminBlockAdmin', static function () {
     $url = route('admin.news.index');
     $label = __('index.news');
     $stats = statsNews();
 
-    return $content . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });
 
 // Ссылка в навигации настроек админки
-Hook::add('adminSettingsNav', function (string $content) {
-    $url = route('news.settings');
-    $label = __('news::news.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
-});
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('news.settings') . '">' . __('news::news.settings') . '</a>');

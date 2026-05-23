@@ -235,28 +235,32 @@ class MyModel extends \Illuminate\Database\Eloquent\Model
 
 ### Hook::add
 
+Хук может быть строкой или callable. Callable получает аргументы из `@hook(...)` и возвращает свой HTML-фрагмент (или `null`/`''` если ничего не добавлять). Все фрагменты склеиваются в порядке убывания `priority`.
+
 ```php
 use App\Classes\Hook;
 
-// Добавить CSS в <head>
-Hook::add('head', function (string $content) {
-    return $content . '<link rel="stylesheet" href="/assets/modules/my-module/style.css">' . PHP_EOL;
+// Статичная строка
+Hook::add('sidebarMenuEnd', '<li><a href="/page">Текст</a></li>');
+
+// Динамический фрагмент
+Hook::add('head', static function () {
+    return '<link rel="stylesheet" href="/assets/modules/my-module/style.css">';
 });
 
-// Изменить значение
-Hook::add('price', function (int $value) {
-    return $value + 10;
+// С аргументом из @hook('userProfileLinks', $user)
+Hook::add('userProfileLinks', static function ($user) {
+    return ' / <a href="/my-module/' . $user->login . '">Мои записи</a>';
 });
+
+// Третий аргумент — приоритет (выше → раньше). По умолчанию 0
+Hook::add('sidebarMenuEnd', static fn () => '<li>...</li>', 10);
 ```
 
 Вызов в шаблоне:
 ```blade
 @hook('head')
-```
-
-Вызов с изменением данных:
-```php
-$price = Hook::call('price', 100);
+@hook('userProfileLinks', $user)
 ```
 
 ### Registry

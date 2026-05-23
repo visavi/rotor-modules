@@ -28,24 +28,22 @@ Registry::sitemap('articles', static function () {
 });
 
 // Ссылки на публикации пользователя в анкете
-Hook::add('userProfileLinks', function (string $content, $user) {
+Hook::add('userProfileLinks', static function ($user) {
     if (! Route::has('articles.user-articles')) {
-        return $content;
+        return null;
     }
 
-    $link = ' / <b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
+    return ' / <b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
         . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
-
-    return $content . $link;
 });
 
 // Ссылка в боковом меню и горизонтальной навигации
-Hook::add('sidebarMenuEnd', function (string $content) {
+Hook::add('sidebarMenuEnd', static function () {
     $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
     $url = route('blogs.index');
     $label = __('index.blogs');
 
-    return $content . '<li class="treeview' . $active . '">
+    return '<li class="treeview' . $active . '">
         <a class="menu-item" href="' . $url . '" data-bs-toggle="treeview">
             <i class="menu-icon far fa-sticky-note"></i>
             <span class="menu-label">' . $label . '</span>
@@ -57,11 +55,11 @@ Hook::add('sidebarMenuEnd', function (string $content) {
             <li><a class="treeview-item' . (request()->routeIs('articles.index') ? ' active' : '') . '" href="' . route('articles.index') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.new_articles') . '</a></li>
             <li><a class="treeview-item' . (request()->routeIs('articles.new-comments') ? ' active' : '') . '" href="' . route('articles.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('blog::blogs.new_comments') . '</a></li>
         </ul>
-    </li>' . PHP_EOL;
+    </li>';
 }, 15);
 
 // Ссылка блоги в блоке редактора в админке
-Hook::add('adminBlockEditor', function (string $content) {
+Hook::add('adminBlockEditor', static function () {
     $urlBlogs = route('admin.blogs.index');
     $urlNew = route('admin.articles.new');
     $labelBlogs = __('index.blogs');
@@ -69,15 +67,9 @@ Hook::add('adminBlockEditor', function (string $content) {
     $statsBlogs = statsBlog();
     $statsNew = statsNewArticles();
 
-    return $content
-        . '<i class="far fa-circle text-muted"></i> <a href="' . $urlBlogs . '">' . $labelBlogs . '</a> <span class="badge bg-adaptive">' . $statsBlogs . '</span><br>' . PHP_EOL
-        . '<i class="far fa-circle text-muted"></i> <a href="' . $urlNew . '">' . $labelNew . '</a> <span class="badge bg-adaptive">' . $statsNew . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $urlBlogs . '">' . $labelBlogs . '</a> <span class="badge bg-adaptive">' . $statsBlogs . '</span><br>' . PHP_EOL
+        . '<i class="far fa-circle text-muted"></i> <a href="' . $urlNew . '">' . $labelNew . '</a> <span class="badge bg-adaptive">' . $statsNew . '</span><br>';
 });
 
 // Ссылка в навигации настроек админки
-Hook::add('adminSettingsNav', function (string $content) {
-    $url = route('blog.settings');
-    $label = __('blog::blogs.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
-});
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('blog.settings') . '">' . __('blog::blogs.settings') . '</a>');

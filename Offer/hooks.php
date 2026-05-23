@@ -3,52 +3,49 @@
 use App\Classes\Hook;
 
 // Ссылка в секции «Общение» на классической главной
-Hook::add('classicWidgetLinks', function (string $content) {
+Hook::add('classicWidgetLinks', static function () {
     $url = route('offers.index');
     $label = __('index.offers');
     $stats = statsOffers();
 
-    return $content . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', function (string $content) {
+Hook::add('sidebarMenuEnd', static function () {
     $url = route('offers.index');
     $active = request()->is('offers*') ? ' active' : '';
     $label = __('index.offers');
     $stats = statsOffers();
 
-    return $content . '<li>
+    return '<li>
         <a class="menu-item' . $active . '" href="' . $url . '">
             <i class="menu-icon fa-regular fa-circle-question"></i>
             <span class="menu-label">' . $label . '</span>
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
-    </li>' . PHP_EOL;
+    </li>';
 }, 10);
 
 // Ссылка в колонке footer
-Hook::add('footerColumnMiddle', function (string $content) {
+Hook::add('footerColumnMiddle', static function () {
     $url = route('offers.index');
     $label = __('index.offers');
     $stats = statsOffers();
 
-    return $content . '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>' . PHP_EOL;
+    return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
 });
 
 // Ссылка в блоке редактора в админке
-Hook::add('adminBlockAdmin', function (string $content) {
+Hook::add('adminBlockAdmin', static function () {
     $url = route('admin.offers.index');
     $label = __('index.offers');
     $stats = statsOffers();
 
-    return $content . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });
 
 // Ссылка в навигации настроек админки
-Hook::add('adminSettingsNav', function (string $content) {
-    $url = route('offer.settings');
-    $label = __('offer::offers.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
+Hook::add('adminSettingsNav', static function () {
+    return '<a class="nav-link" href="' . route('offer.settings') . '">' . __('offer::offers.settings') . '</a>';
 });

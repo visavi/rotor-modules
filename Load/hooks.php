@@ -26,15 +26,11 @@ Registry::sitemap('downs', static function () {
 });
 
 // Ссылки на файлы пользователя в анкете
-Hook::add('userProfileLinks', function (string $content, $user) {
-    $link = ' / <b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
-        . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
-
-    return $content . $link;
-});
+Hook::add('userProfileLinks', static fn ($user) => ' / <b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
+    . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)');
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', function (string $content) {
+Hook::add('sidebarMenuEnd', static function () {
     $expanded = request()->is('loads*', 'downs*') ? ' is-expanded' : '';
     $label = __('index.loads');
     $labelList = __('load::loads.loads_list');
@@ -44,7 +40,7 @@ Hook::add('sidebarMenuEnd', function (string $content) {
     $activeNew = request()->routeIs('downs.new-files') ? ' active' : '';
     $activeComments = request()->routeIs('downs.new-comments') ? ' active' : '';
 
-    return $content . '<li class="treeview' . $expanded . '">
+    return '<li class="treeview' . $expanded . '">
         <a class="menu-item" href="' . route('loads.index') . '" data-bs-toggle="treeview">
             <i class="menu-icon fas fa-download"></i>
             <span class="menu-label">' . $label . '</span>
@@ -55,23 +51,17 @@ Hook::add('sidebarMenuEnd', function (string $content) {
             <li><a class="treeview-item' . $activeNew . '" href="' . route('downs.new-files') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelNew . '</a></li>
             <li><a class="treeview-item' . $activeComments . '" href="' . route('downs.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelComments . '</a></li>
         </ul>
-    </li>' . PHP_EOL;
+    </li>';
 }, 10);
 
 // Ссылка в блоке редактора в админке
-Hook::add('adminBlockEditor', function (string $content) {
+Hook::add('adminBlockEditor', static function () {
     $url = route('admin.loads.index');
     $label = __('index.loads');
     $stats = statsLoad();
 
-    return $content
-        . '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>' . PHP_EOL;
+    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
 });
 
 // Ссылка в навигации настроек админки
-Hook::add('adminSettingsNav', function (string $content) {
-    $url = route('load.settings');
-    $label = __('load::loads.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
-});
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('load.settings') . '">' . __('load::loads.settings') . '</a>');

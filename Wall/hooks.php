@@ -21,18 +21,15 @@ Registry::complaint('walls', function (int $id, $page) {
 });
 
 // User profile action link
-Hook::add('userActionStart', function (string $content, $user) {
+Hook::add('userActionStart', static function ($user) {
     $url = '/walls/' . $user->login;
     $label = __('wall::walls.wall_posts');
-    $count = Cache::remember('wall_count_' . $user->id, 300, fn () => Wall::query()->where('user_id', $user->id)->count());
+    $count = Cache::remember('wall_count_' . $user->id, 300, static fn () => Wall::query()->where('user_id', $user->id)->count());
 
-    return '<i class="fa fa-sticky-note"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $count . '</span><br>' . PHP_EOL . $content;
-});
+    return '<i class="fa fa-sticky-note"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $count . '</span><br>';
+}, 10);
 
 // Admin settings nav link
-Hook::add('adminSettingsNav', function (string $content) {
-    $url = route('wall.settings');
-    $label = __('wall::walls.settings');
-
-    return $content . '<a class="nav-link" href="' . $url . '">' . $label . '</a>' . PHP_EOL;
+Hook::add('adminSettingsNav', static function () {
+    return '<a class="nav-link" href="' . route('wall.settings') . '">' . __('wall::walls.settings') . '</a>';
 });
