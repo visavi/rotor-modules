@@ -12,11 +12,13 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [Wall::class],
+    'models' => [
+        Wall::class => [
+            'spam' => __('wall::walls.wall_posts'),
+        ],
+    ],
 
     'observers' => [
         Wall::class => WallObserver::class,
     ],
-
-    'spam' => __('wall::walls.wall_posts'),
 ];

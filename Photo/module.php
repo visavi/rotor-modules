@@ -12,18 +12,14 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [Photo::class],
-
-    'search' => [
-        'label' => __('photo::photos.photos_section'),
-        'view'  => 'photo::search/_photos',
+    'models' => [
+        Photo::class => [
+            'search' => ['label' => __('photo::photos.photos_section'), 'view' => 'photo::search/_photos'],
+            'feed'   => ['withs' => ['user', 'files'], 'view' => 'photo::feeds/_photos'],
+            'upload' => 'media',
+            'rating' => true,
+        ],
     ],
-    'feed' => [
-        'withs' => ['user', 'files'],
-        'view'  => 'photo::feeds/_photos',
-    ],
-    'upload' => 'media',
-    'rating' => true,
 
     'panel' => [
         '/admin/photo-settings' => __('photo::photos.settings'),

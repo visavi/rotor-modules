@@ -12,17 +12,13 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [Offer::class],
-
-    'search' => [
-        'label' => __('index.offers'),
-        'view'  => 'offer::search/_offers',
+    'models' => [
+        Offer::class => [
+            'search' => ['label' => __('index.offers'), 'view' => 'offer::search/_offers'],
+            'feed'   => ['withs' => ['user'], 'view' => 'offer::feeds/_offers'],
+            'rating' => true,
+        ],
     ],
-    'feed' => [
-        'withs' => ['user'],
-        'view'  => 'offer::feeds/_offers',
-    ],
-    'rating' => true,
 
     'panel' => [
         '/admin/offer-settings' => __('offer::offers.settings'),

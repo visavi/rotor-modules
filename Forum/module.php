@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\DB;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
-use Modules\Forum\Models\Vote;
 use Modules\Forum\Observers\PostObserver;
 use Modules\Forum\Observers\TopicObserver;
 
@@ -16,31 +15,22 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [
-        Topic::class,
-        Post::class,
-        Vote::class,
+    'models' => [
+        Topic::class => [
+            'search' => ['label' => __('forum::forums.topics'), 'view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
+            'feed'   => ['withs' => ['lastPost.user', 'lastPost.files', 'forum.parent'], 'view' => 'forum::feeds/_topics'],
+        ],
+        Post::class => [
+            'search' => ['label' => __('index.posts'), 'view' => 'forum::search/_posts', 'with' => ['topic']],
+            'upload' => 'file',
+            'rating' => true,
+        ],
     ],
 
     'observers' => [
         Topic::class => TopicObserver::class,
         Post::class  => PostObserver::class,
     ],
-
-    'search' => [
-        'label' => __('forum::forums.topics'),
-        'view'  => 'forum::search/_topics',
-        'with'  => ['forum', 'lastPost'],
-    ],
-
-    'feed' => [
-        'withs' => ['lastPost.user', 'lastPost.files', 'forum.parent'],
-        'view'  => 'forum::feeds/_topics',
-    ],
-
-    'upload' => 'file',
-
-    'rating' => true,
 
     'panel' => [
         '/admin/forums'         => __('index.forums'),

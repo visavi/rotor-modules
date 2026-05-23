@@ -12,18 +12,14 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [News::class],
-
-    'search' => [
-        'label' => __('index.news'),
-        'view'  => 'news::search/_news',
+    'models' => [
+        News::class => [
+            'search' => ['label' => __('index.news'), 'view' => 'news::search/_news'],
+            'feed'   => ['withs' => ['user', 'files'], 'view' => 'news::feeds/_news'],
+            'upload' => 'media',
+            'rating' => true,
+        ],
     ],
-    'feed' => [
-        'withs' => ['user', 'files'],
-        'view'  => 'news::feeds/_news',
-    ],
-    'upload' => 'media',
-    'rating' => true,
 
     'panel' => [
         '/admin/news'          => __('index.news'),

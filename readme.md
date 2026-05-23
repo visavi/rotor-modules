@@ -30,7 +30,7 @@
 
 ## Реестры модулей
 
-Reestry — источники, из которых каталог берёт список доступных модулей. В **Модули → Реестры** можно добавить свой или сторонний реестр в формате JSON.
+Реестры — источники, из которых каталог берёт список доступных модулей. В **Модули → Реестры** можно добавить свой или сторонний реестр в формате JSON.
 
 Официальный реестр этого репозитория:
 ```
@@ -45,87 +45,150 @@ https://github.com/visavi/rotor-modules/releases/download/registry/registry.json
 
 ```
 MyModule/
-├── module.php          # обязательный — описание и настройки модуля
+├── module.php          # обязательный — метаданные и возможности модуля
 ├── routes.php          # маршруты веб и API
-├── hooks.php           # хуки — встраивание в шаблоны движка
+├── hooks.php           # вставки в шаблоны через Hook::add и регистрации Registry/Restatement
 ├── helpers.php         # глобальные вспомогательные функции
-├── middleware.php      # промежуточное ПО (регистрация алиасов)
-├── config.php          # конфигурация модуля
+├── middleware.php      # регистрация middleware (алиасы и/или группа web)
+├── config.php          # конфигурация модуля (config('MyModule.key'))
 ├── Http/
-│   ├── Controllers/    # контроллеры (namespace Modules\MyModule\Http\Controllers)
-│   └── Resources/      # API-ресурсы (namespace Modules\MyModule\Http\Resources)
-├── Models/             # модели Eloquent (namespace Modules\MyModule\Models)
+│   ├── Controllers/    # контроллеры (Modules\MyModule\Http\Controllers)
+│   ├── Requests/       # FormRequest классы
+│   └── Resources/      # API-ресурсы
+├── Models/             # модели Eloquent (Modules\MyModule\Models)
+├── Observers/          # наблюдатели моделей
+├── Middleware/         # классы middleware
+├── Services/           # сервисные классы
+├── Console/            # консольные команды — автоматически регистрируются
 ├── database/
-│   └── migrations/     # миграции БД: выполняются при установке, обновлении и откатываются при удалении модуля
+│   └── migrations/     # миграции БД — выполняются при установке/обновлении,
+│                       # откатываются при удалении
 ├── resources/
-│   ├── views/          # Blade-шаблоны, вызов: view('MyModule::dir/file')
-│   ├── lang/           # переводы по языкам (ru, en, ua...), вызов: __('MyModule::file.key')
-│   └── assets/         # статические файлы (css, js, img); при установке создаётся симлинк,
-│                       # файлы доступны по адресу /assets/modules/my-module/
-└── screenshots/        # скриншоты модуля — отображаются на странице модуля в админке
+│   ├── views/          # Blade-шаблоны: view('MyModule::dir/file')
+│   ├── lang/           # переводы по языкам: __('MyModule::file.key')
+│   └── assets/         # статические файлы (css, js, img);
+│                       # симлинк создаётся на /assets/modules/my-module/
+└── screenshots/        # скриншоты модуля для карточки в админке
 ```
+
+Все поддиректории необязательные — создавай только нужные.
 
 ---
 
 ## Файл module.php
 
-Обязательный файл. Возвращает массив с метаданными и настройками модуля:
+Обязательный файл. Возвращает массив с метаданными и возможностями модуля:
 
 ```php
+use Modules\MyModule\Models\MyModel;
+use Modules\MyModule\Observers\MyObserver;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\DB;
+
 return [
     'name'        => 'Название модуля',
     'description' => 'Краткое описание',
+    'info'        => '<p>Длинное описание с HTML, показывается на странице модуля в админке</p>',
     'version'     => '1.0.0',
+    'requires'    => '14.0.0',
     'author'      => 'Автор',
     'email'       => 'author@example.com',
     'homepage'    => 'https://example.com',
-    'requires'    => '>=13.0.0',   // минимальная версия движка
 
-    // Регистрация полиморфной связи
-    'morph'   => MyModel::class,
-
-    // Интеграция с поиском
-    'search'  => [
-        'label' => 'Метка в поиске',
-        'view'  => 'MyModule::search/_results',
+    // Возможности моделей модуля
+    'models' => [
+        MyModel::class => [
+            'search' => ['label' => 'Метка', 'view' => 'MyModule::search/_results', 'with' => ['user']],
+            'feed'   => ['withs' => ['user', 'files'], 'view' => 'MyModule::feeds/_feed'],
+            'upload' => 'media',
+            'rating' => true,
+            'spam'   => 'Метка спама',
+        ],
     ],
 
-    // Интеграция с лентой
-    'feed'    => [
-        'withs' => ['user', 'files'],
-        'view'  => 'MyModule::feeds/_feed',
+    // Наблюдатели моделей
+    'observers' => [
+        MyModel::class => MyObserver::class,
     ],
 
-    // Тип загружаемых файлов: 'media', 'image', 'file'
-    'upload'  => 'media',
+    // Планировщик задач
+    'schedule' => function (Schedule $schedule) {
+        $schedule->command('my-module:cleanup')->daily();
+    },
 
-    // Включить рейтинг
-    'rating'  => true,
+    // Пересчёты — вызываются из админки кнопкой «Пересчёт»
+    'restatement' => [
+        'mymodel' => function () {
+            DB::update('update ...');
+        },
+    ],
 
-    // Ссылки в панели администратора
-    'panel'   => [
+    // Ссылки в админ-панели
+    'panel' => [
         '/admin/my-module' => 'Мой модуль',
     ],
 ];
 ```
 
-### Описание интеграционных полей
+### Описание полей
 
-**`requires`** — минимальная версия движка Rotor. Если версия не совместима, в каталоге модуль помечается как «Несовместим» и кнопки установки/обновления скрываются.
+**`name`, `description`, `author`, `email`, `homepage`** — отображаются в карточке модуля.
 
-**`morph`** — регистрирует модель в полиморфной карте Laravel (`morphMap`). Нужно если модель участвует в полиморфных связях — например, хранит комментарии, лайки, жалобы или файлы через общие таблицы движка.
+**`info`** — длинное описание с HTML, видно на странице модуля в админке. Сюда удобно класть инструкции по подключению.
 
-**`search`** — подключает модуль к глобальному поиску. `label` — название раздела в результатах поиска, `view` — шаблон для отображения одного результата.
+**`version`** — текущая версия модуля. Если в `module.php` версия выше установленной, в админке появляется кнопка «Обновить».
 
-**`feed`** — подключает записи модуля к общей ленте активности. `withs` — список отношений для жадной загрузки (eager load), `view` — шаблон для отображения одной записи в ленте.
+**`requires`** — минимальная версия движка Rotor. При несовместимости модуль помечается в каталоге как «Несовместим».
 
-**`upload`** — разрешает загрузку файлов к записям модуля. Значения:
-- `media` — изображения и видео
-- `file` — любые файлы
+**`models`** — массив `Class::class => [возможности]`. Каждая модель автоматически регистрируется в `morphMap` Laravel. Доступные возможности:
 
-**`rating`** — включает систему лайков/дизлайков для записей модуля.
+| Ключ | Описание |
+|---|---|
+| `search` | Подключает модель к глобальному поиску. `label` — название раздела в результатах, `view` — шаблон одного результата, `with` (опц.) — отношения для eager-load. |
+| `feed` | Подключает к общей ленте активности. `withs` — отношения для eager-load, `view` — шаблон записи. |
+| `upload` | Разрешает прикреплять файлы. `media` — изображения и видео, `file` — любые файлы. |
+| `rating` | `true` — включает лайки/дизлайки. |
+| `spam` | Метка раздела на странице «Спам» в админке. Записи можно помечать как спам. |
 
-**`panel`** — массив ссылок, которые добавляются в навигацию панели администратора. Ключ — URL, значение — название пункта меню.
+Если модель нужна только для `morphMap` (например, для полиморфных связей), но не имеет возможностей — оставь пустой массив:
+```php
+'models' => [
+    Vote::class => [],
+],
+```
+
+**`observers`** — массив `Class::class => Observer::class`. Регистрирует Eloquent-наблюдателей.
+
+**`schedule`** — замыкание, получающее `Schedule` Laravel. Регистрирует периодические задачи.
+
+**`restatement`** — массив `'ключ' => callable`. Пересчёты счётчиков, запускаются из админки или вручную через `Restatement::run('ключ')`.
+
+**`panel`** — массив `URL => 'Название'`. Ссылки добавляются в навигацию админ-панели.
+
+---
+
+## Маршруты (routes.php)
+
+```php
+use Illuminate\Support\Facades\Route;
+use Modules\MyModule\Http\Controllers\MyController;
+
+Route::middleware('web')
+    ->controller(MyController::class)
+    ->prefix('my-module')
+    ->name('my-module.')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{id}', 'view')->name('view');
+    });
+
+// Админка
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->prefix('admin')
+    ->group(function () {
+        // ...
+    });
+```
 
 ---
 
@@ -153,25 +216,24 @@ class MyController extends \App\Http\Controllers\Controller
 ```php
 namespace Modules\MyModule\Models;
 
-class MyModel extends \Illuminate\Database\Eloquent\Model { }
+class MyModel extends \Illuminate\Database\Eloquent\Model
+{
+    public static string $morphName = 'mymodels';
+}
 ```
 
----
-
-## Маршруты (routes.php)
-
-```php
-use Illuminate\Support\Facades\Route;
-use Modules\MyModule\Http\Controllers\MyController;
-
-Route::get('/my-module', [MyController::class, 'index'])->name('my-module.index');
-```
+`$morphName` обязательно у моделей, заявленных в `models` (используется ядром для регистрации возможностей).
 
 ---
 
 ## Хуки (hooks.php)
 
-Хуки позволяют встраивать контент в шаблоны движка без изменения его кода:
+Файл `hooks.php` содержит:
+- вставки в шаблоны через `Hook::add` (UI-расширения);
+- регистрации в `Registry` для возможностей, которые не привязаны к одной модели (sitemap, complaint, pollResolver, onDeleteUser, onAdminDeleteUser);
+- регистрации `Restatement::register` (если не объявлено в `module.php`).
+
+### Hook::add
 
 ```php
 use App\Classes\Hook;
@@ -181,18 +243,13 @@ Hook::add('head', function (string $content) {
     return $content . '<link rel="stylesheet" href="/assets/modules/my-module/style.css">' . PHP_EOL;
 });
 
-// Добавить скрипт в footer
-Hook::add('footer', function (string $content) {
-    return $content . '<script type="module" src="/assets/modules/my-module/app.js"></script>' . PHP_EOL;
-});
-
 // Изменить значение
 Hook::add('price', function (int $value) {
     return $value + 10;
 });
 ```
 
-Вызов хука в шаблоне:
+Вызов в шаблоне:
 ```blade
 @hook('head')
 ```
@@ -200,6 +257,29 @@ Hook::add('price', function (int $value) {
 Вызов с изменением данных:
 ```php
 $price = Hook::call('price', 100);
+```
+
+### Registry
+
+```php
+use App\Classes\Registry;
+use Modules\MyModule\Models\MyModel;
+
+// Жалобы — обработчик клика на «пожаловаться»
+Registry::complaint(MyModel::$morphName, function (int $id) {
+    $model = MyModel::query()->find($id);
+    return ['model' => $model, 'path' => $model?->getViewUrl(false)];
+});
+
+// Sitemap
+Registry::sitemap('mymodels', function () {
+    return [['loc' => route('my-module.index'), 'lastmod' => gmdate('c')]];
+});
+
+// Удаление пользователя — что подчистить
+Registry::onDeleteUser(function (\App\Models\User $user) {
+    MyModel::query()->where('user_id', $user->id)->delete();
+});
 ```
 
 ---
@@ -239,6 +319,63 @@ return [
 config('MyModule.api_key');
 ```
 
+Значения из админки записываются в поле `settings` модуля и сливаются поверх `config.php` при загрузке.
+
+---
+
+## Helpers (helpers.php)
+
+Глобальные функции, доступные везде:
+
+```php
+if (! function_exists('statsMyModule')) {
+    function statsMyModule(): string
+    {
+        return (string) MyModel::query()->count();
+    }
+}
+```
+
+---
+
+## Middleware (middleware.php)
+
+```php
+use Modules\MyModule\Middleware\MyMiddleware;
+
+return [
+    // Алиасы для применения в routes.php через ->middleware('alias')
+    'aliases' => [
+        'my-alias' => MyMiddleware::class,
+    ],
+
+    // Middleware, добавляемые в группу web автоматически
+    'web' => [
+        MyMiddleware::class,
+    ],
+];
+```
+
+---
+
+## Консольные команды
+
+Файлы в `Console/` подхватываются автоматически. Имя класса = имя файла:
+
+```php
+// Console/Cleanup.php
+namespace Modules\MyModule\Console;
+
+use Illuminate\Console\Command;
+
+class Cleanup extends Command
+{
+    protected $signature = 'my-module:cleanup';
+
+    public function handle(): void { /* ... */ }
+}
+```
+
 ---
 
 ## Статические файлы
@@ -249,18 +386,6 @@ config('MyModule.api_key');
 ```
 
 Симлинк создаётся автоматически при установке модуля.
-
----
-
-## Middleware (middleware.php)
-
-```php
-return [
-    'my-alias' => \Modules\MyModule\Middleware\MyMiddleware::class,
-];
-```
-
-Middleware автоматически регистрируется в группе `web`.
 
 ---
 
@@ -280,6 +405,8 @@ MyModule/module.php, database/migrations/
 ```
 MyModule/module.php, hooks.php
 ```
+
+См. модуль `Template` — минимальный шаблон для старта.
 
 ---
 

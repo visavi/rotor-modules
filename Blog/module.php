@@ -14,23 +14,18 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [Article::class],
+    'models' => [
+        Article::class => [
+            'search' => ['label' => __('blog::blogs.blogs_section'), 'view' => 'blog::search/_articles', 'with' => ['category']],
+            'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
+            'upload' => 'media',
+            'rating' => true,
+        ],
+    ],
 
     'observers' => [
         Article::class => ArticleObserver::class,
     ],
-
-    'search' => [
-        'label' => __('blog::blogs.blogs_section'),
-        'view'  => 'blog::search/_articles',
-        'with'  => ['category'],
-    ],
-    'feed' => [
-        'withs' => ['user', 'files', 'category.parent'],
-        'view'  => 'blog::feeds/_articles',
-    ],
-    'upload' => 'media',
-    'rating' => true,
 
     'panel' => [
         '/admin/blog-settings' => __('blog::blogs.settings'),

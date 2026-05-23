@@ -12,19 +12,14 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'morphs' => [Down::class],
-
-    'search' => [
-        'label' => __('load::loads.downs'),
-        'view'  => 'load::search/_downs',
-        'with'  => ['category'],
+    'models' => [
+        Down::class => [
+            'search' => ['label' => __('load::loads.downs'), 'view' => 'load::search/_downs', 'with' => ['category']],
+            'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
+            'upload' => 'file',
+            'rating' => true,
+        ],
     ],
-    'feed' => [
-        'withs' => ['user', 'files', 'category.parent'],
-        'view'  => 'load::feeds/_downs',
-    ],
-    'upload' => 'file',
-    'rating' => true,
 
     'panel' => [
         '/admin/load-settings' => __('load::loads.settings'),

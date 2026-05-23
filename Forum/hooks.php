@@ -18,14 +18,9 @@ Registry::complaint(Post::$morphName, function (int $id, mixed $page): array {
     return ['model' => $model, 'path' => $path];
 });
 
-Registry::fileType(Post::$morphName);
-Registry::ratingType(Post::$morphName);
-
 Registry::onDeleteUser(function (User $user): void {
     Bookmark::query()->where('user_id', $user->id)->delete();
 });
-
-Registry::search(Post::class, __('index.posts'), 'forum::search/_posts', ['topic']);
 
 Registry::sitemap('topics', function (): array {
     return Cache::remember('TopicsSitemap', 600, static function () {
