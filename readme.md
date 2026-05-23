@@ -51,7 +51,9 @@ MyModule/
 ├── helpers.php         # глобальные вспомогательные функции
 ├── middleware.php      # промежуточное ПО (регистрация алиасов)
 ├── config.php          # конфигурация модуля
-├── Controllers/        # контроллеры (namespace Modules\MyModule\Controllers)
+├── Http/
+│   ├── Controllers/    # контроллеры (namespace Modules\MyModule\Http\Controllers)
+│   └── Resources/      # API-ресурсы (namespace Modules\MyModule\Http\Resources)
 ├── Models/             # модели Eloquent (namespace Modules\MyModule\Models)
 ├── database/
 │   └── migrations/     # миграции БД: выполняются при установке, обновлении и откатываются при удалении модуля
@@ -129,10 +131,10 @@ return [
 
 ## Контроллеры
 
-Пространство имён: `Modules\MyModule\Controllers`
+Пространство имён: `Modules\MyModule\Http\Controllers`
 
 ```php
-namespace Modules\MyModule\Controllers;
+namespace Modules\MyModule\Http\Controllers;
 
 class MyController extends \App\Http\Controllers\Controller
 {
@@ -140,7 +142,7 @@ class MyController extends \App\Http\Controllers\Controller
 }
 ```
 
-Для административных контроллеров наследуйтесь от `\App\Http\Controllers\Admin\AdminController`.
+Административные контроллеры размещаются в `Http/Controllers/Admin/` и наследуются от `\App\Http\Controllers\Admin\AdminController`.
 
 ---
 
@@ -160,8 +162,9 @@ class MyModel extends \Illuminate\Database\Eloquent\Model { }
 
 ```php
 use Illuminate\Support\Facades\Route;
+use Modules\MyModule\Http\Controllers\MyController;
 
-Route::get('/my-module', 'MyModule\Controllers\MyController@index')->name('my-module.index');
+Route::get('/my-module', [MyController::class, 'index'])->name('my-module.index');
 ```
 
 ---
@@ -265,7 +268,7 @@ Middleware автоматически регистрируется в групп
 
 **Только маршруты и контроллер:**
 ```
-MyModule/module.php, routes.php, Controllers/MyController.php
+MyModule/module.php, routes.php, Http/Controllers/MyController.php
 ```
 
 **Только миграции (изменение БД):**
