@@ -2,15 +2,6 @@
 
 use App\Classes\Hook;
 
-// Ссылка в секции «Общение» на классической главной
-Hook::add('classicWidgetLinks', static function () {
-    $url = route('offers.index');
-    $label = __('index.offers');
-    $stats = statsOffers();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
-});
-
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', static function () {
     $url = route('offers.index');

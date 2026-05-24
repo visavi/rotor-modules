@@ -22,7 +22,7 @@
 
 @section('content')
     @if ($new)
-        <a href="{{ route('admin.articles.new') }}" class="btn btn-success btn-sm">{{ __('loads.pending') }} <span class="badge bg-adaptive">{{ $new }}</span></a>
+        <a href="{{ route('admin.articles.new') }}" class="btn btn-success btn-sm">{{ __('blog::blogs.pending_articles') }} <span class="badge bg-adaptive">{{ $new }}</span></a>
         <hr>
     @endif
 

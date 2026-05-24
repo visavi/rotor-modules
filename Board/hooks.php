@@ -2,23 +2,6 @@
 
 use App\Classes\Hook;
 
-// Секция на классической главной
-Hook::add('classicSections', static function () {
-    $url = route('boards.index');
-    $label = __('index.boards');
-    $stats = statsBoard();
-    $items = recentBoards();
-
-    return '<div class="section mb-3 shadow">
-    <div class="section-title">
-        <i class="fa fa-list-alt fa-lg text-muted"></i>
-        <a href="' . $url . '">' . $label . '</a>
-        <span class="badge bg-adaptive">' . $stats . '</span>
-    </div>
-    ' . $items . '
-</div>';
-});
-
 // Ссылка в боковом меню
 Hook::add('sidebarMenuEnd', static function () {
     $url = route('boards.index');

@@ -13,11 +13,14 @@ Route::middleware('web')
         Route::post('/create', 'store')->middleware('auth')->name('store');
     });
 
-Route::admin()
-    ->controller(AdminTemplateController::class)
-    ->prefix('template')
-    ->name('admin.template.')
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/delete', 'delete')->name('delete');
+        Route::controller(AdminTemplateController::class)
+            ->prefix('template')
+            ->name('admin.template.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/delete', 'delete')->name('delete');
+            });
     });

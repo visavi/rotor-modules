@@ -15,23 +15,25 @@ Route::middleware('web')
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
     });
 
-Route::admin()
-    ->controller(AdminGuestbookController::class)
-    ->prefix('guestbook')
-    ->name('admin.guestbook.')
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-        Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
-        Route::post('/delete', 'delete')->name('delete');
-        Route::post('/publish', 'publish')->name('publish');
-        Route::post('/clear', 'clear')->name('clear');
-    });
+        Route::controller(AdminGuestbookController::class)
+            ->prefix('guestbook')
+            ->name('admin.guestbook.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
+                Route::post('/delete', 'delete')->name('delete');
+                Route::post('/publish', 'publish')->name('publish');
+                Route::post('/clear', 'clear')->name('clear');
+            });
 
-Route::admin()
-    ->controller(GuestbookSettingController::class)
-    ->name('guestbook.')
-    ->group(function () {
-        Route::get('/guestbook-settings', 'index')->name('settings');
-        Route::post('/guestbook-settings', 'update')->name('settings.update');
+        Route::controller(GuestbookSettingController::class)
+            ->name('guestbook.')
+            ->group(function () {
+                Route::get('/guestbook-settings', 'index')->name('settings');
+                Route::post('/guestbook-settings', 'update')->name('settings.update');
+            });
     });

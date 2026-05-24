@@ -18,24 +18,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          # Load existing registry to preserve version history
           MODULES="[]"
           if gh release view registry &>/dev/null; then
             gh release download registry -p "registry.json" -D /tmp/ 2>/dev/null || true
             if [ -f /tmp/registry.json ]; then
-              MODULES=$(cat /tmp/registry.json | jq '.modules // []')
+              MODULES=$(jq '.modules // []' /tmp/registry.json)
             fi
           fi
 
+          CHANGED=0
+          FOUND=()
+
           for file in $(find . -maxdepth 2 -name 'module.php' | sort); do
+            get() { grep -oP "'$1'\s*=>\s*'\K[^']+'" "$file"; }
+
             MODULE=$(basename $(dirname "$file"))
-            CONTENT=$(cat "$file")
-
-            get() { echo "$CONTENT" | grep -oP "'$1'\s*=>\s*'\K[^']+"; }
-
             VERSION=$(get version)
             [ -z "$VERSION" ] && continue
 
+            FOUND+=("$MODULE")
             TAG="$MODULE-$VERSION"
             ASSET="$MODULE.zip"
 
@@ -46,6 +47,7 @@ jobs:
                 "/tmp/$ASSET#$ASSET" \
                 --title "$MODULE $VERSION" \
                 --notes "Module: **$MODULE**, Version: **$VERSION**"
+              CHANGED=1
             else
               echo "[$MODULE] Release $TAG already exists"
             fi
@@ -56,8 +58,7 @@ jobs:
               --arg url      "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
               '{version:$version,requires:$requires,download_url:$url}')
 
-            # Add or update module entry preserving all versions
-            MODULES=$(echo "$MODULES" | jq \
+            MODULES=$(jq \
               --arg mod      "$MODULE" \
               --arg name     "$(get name)" \
               --arg desc     "$(get description)" \
@@ -95,18 +96,25 @@ jobs:
                   versions:    [$ver]
                 }]
               end
-              ')
+              ' <<< "$MODULES")
           done
 
-          echo '{"name":"Official Rotor Modules","modules":[]}' \
-            | jq --argjson m "$MODULES" '.modules = $m' > registry.json
+          FOUND_JSON=$(printf '%s\n' "${FOUND[@]}" | jq -R . | jq -s .)
+          PRUNED=$(jq --argjson found "$FOUND_JSON" 'map(select(.module as $m | $found | index($m) != null))' <<< "$MODULES")
+          if [ "$PRUNED" != "$MODULES" ]; then
+            echo "Deleted modules removed from registry"
+            MODULES="$PRUNED"
+            CHANGED=1
+          fi
 
-          echo "Generated registry.json with $(echo "$MODULES" | jq length) modules"
+          if [ "$CHANGED" = "0" ]; then
+            echo "No new module versions — skipping registry update"
+            exit 0
+          fi
 
-      - name: Publish registry.json as release asset
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
+          jq --argjson m "$MODULES" '.modules = $m' <<< '{"name":"Official Rotor Modules","modules":[]}' > registry.json
+          echo "Generated registry.json with $(jq length <<< "$MODULES") modules"
+
           gh release delete registry --yes 2>/dev/null || true
           gh release create registry registry.json \
             --title "Registry" \

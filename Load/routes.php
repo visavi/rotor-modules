@@ -42,32 +42,33 @@ Route::prefix('downs')
     });
 
 /* Административная панель */
-Route::admin()
-    ->controller(AdminLoadController::class)
-    ->prefix('loads')
-    ->name('admin.loads.')
+Route::middleware(['check.admin'])
+    ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/create', 'create')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-        Route::delete('/{id}/delete', 'delete')->name('delete');
-        Route::get('/{id}', 'load')->name('load');
-        Route::post('/restatement', 'restatement')->name('restatement');
-    });
+        /* Загрузки */
+        Route::controller(AdminLoadController::class)
+            ->prefix('loads')
+            ->name('admin.loads.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/create', 'create')->name('create');
+                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::delete('/{id}/delete', 'delete')->name('delete');
+                Route::get('/{id}', 'load')->name('load');
+                Route::post('/restatement', 'restatement')->name('restatement');
+            });
 
-Route::admin()
-    ->controller(AdminLoadController::class)
-    ->prefix('downs')
-    ->name('admin.downs.')
-    ->group(function () {
-        Route::match(['get', 'post'], '/{id}/edit', 'editDown')->name('edit');
-        Route::get('/new', 'new')->name('new');
-        Route::post('/{id}/publish', 'publish')->name('publish');
-        Route::delete('/delete/{id}', 'deleteDown')->name('delete');
-    });
+        Route::controller(AdminLoadController::class)
+            ->prefix('downs')
+            ->name('admin.downs.')
+            ->group(function () {
+                Route::match(['get', 'post'], '/{id}/edit', 'editDown')->name('edit');
+                Route::get('/new', 'new')->name('new');
+                Route::post('/{id}/publish', 'publish')->name('publish');
+                Route::delete('/delete/{id}', 'deleteDown')->name('delete');
+            });
 
-/* Настройки */
-Route::admin()->group(function () {
-    Route::get('/load-settings', [LoadSettingController::class, 'index'])->name('load.settings');
-    Route::post('/load-settings', [LoadSettingController::class, 'update'])->name('load.settings.update');
-});
+        /* Настройки */
+        Route::get('/load-settings', [LoadSettingController::class, 'index'])->name('load.settings');
+        Route::post('/load-settings', [LoadSettingController::class, 'update'])->name('load.settings.update');
+    });

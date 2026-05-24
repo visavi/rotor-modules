@@ -19,23 +19,25 @@ Route::middleware('web')
     });
 
 /* Админ */
-Route::admin()
-    ->controller(AdminNewsController::class)
-    ->prefix('news')
-    ->name('admin.news.')
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::match(['get', 'post'], '/create', 'create')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-        Route::delete('/{id}/delete', 'delete')->name('delete');
-        Route::post('/restatement', 'restatement')->name('restatement');
-    });
+        Route::controller(AdminNewsController::class)
+            ->prefix('news')
+            ->name('admin.news.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::match(['get', 'post'], '/create', 'create')->name('create');
+                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::delete('/{id}/delete', 'delete')->name('delete');
+                Route::post('/restatement', 'restatement')->name('restatement');
+            });
 
-/* Настройки */
-Route::admin()
-    ->controller(NewsSettingController::class)
-    ->name('news.')
-    ->group(function () {
-        Route::get('/news-settings', 'index')->name('settings');
-        Route::post('/news-settings', 'update')->name('settings.update');
+        /* Настройки */
+        Route::controller(NewsSettingController::class)
+            ->name('news.')
+            ->group(function () {
+                Route::get('/news-settings', 'index')->name('settings');
+                Route::post('/news-settings', 'update')->name('settings.update');
+            });
     });

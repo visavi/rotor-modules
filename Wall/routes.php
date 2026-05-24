@@ -13,7 +13,9 @@ Route::controller(WallController::class)
         Route::post('/{login}/delete', 'delete')->name('delete');
     });
 
-Route::admin()->group(function () {
-    Route::get('/wall-settings', [SettingController::class, 'index'])->name('wall.settings');
-    Route::post('/wall-settings', [SettingController::class, 'update'])->name('wall.settings.update');
-});
+Route::middleware('check.admin')
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/wall-settings', [SettingController::class, 'index'])->name('wall.settings');
+        Route::post('/wall-settings', [SettingController::class, 'update'])->name('wall.settings.update');
+    });

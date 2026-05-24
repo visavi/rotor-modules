@@ -40,34 +40,35 @@ Route::middleware('web')
     });
 
 /* Админ — блоги и статьи */
-Route::admin()
-    ->controller(AdminArticleController::class)
-    ->prefix('blogs')
-    ->name('admin.blogs.')
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->prefix('admin')
     ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/{id}', 'blog')->name('blog');
-        Route::post('/create', 'create')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-        Route::delete('/{id}/delete', 'delete')->name('delete');
-        Route::post('/restatement', 'restatement')->name('restatement');
-    });
+        Route::controller(AdminArticleController::class)
+            ->prefix('blogs')
+            ->name('admin.blogs.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/{id}', 'blog')->name('blog');
+                Route::post('/create', 'create')->name('create');
+                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::delete('/{id}/delete', 'delete')->name('delete');
+                Route::post('/restatement', 'restatement')->name('restatement');
+            });
 
-Route::admin()
-    ->controller(AdminArticleController::class)
-    ->prefix('articles')
-    ->name('admin.articles.')
-    ->group(function () {
-        Route::match(['get', 'post'], '/{id}/edit', 'editArticle')->name('edit');
-        Route::delete('/{id}/delete', 'deleteArticle')->name('delete');
-        Route::post('/{id}/publish', 'publish')->name('publish');
-        Route::get('/new', 'new')->name('new');
-    });
+        Route::controller(AdminArticleController::class)
+            ->prefix('articles')
+            ->name('admin.articles.')
+            ->group(function () {
+                Route::match(['get', 'post'], '/{id}/edit', 'editArticle')->name('edit');
+                Route::delete('/{id}/delete', 'deleteArticle')->name('delete');
+                Route::post('/{id}/publish', 'publish')->name('publish');
+                Route::get('/new', 'new')->name('new');
+            });
 
-Route::admin()
-    ->controller(BlogSettingController::class)
-    ->name('blog.')
-    ->group(function () {
-        Route::get('/blog-settings', 'index')->name('settings');
-        Route::post('/blog-settings', 'update')->name('settings.update');
+        Route::controller(BlogSettingController::class)
+            ->name('blog.')
+            ->group(function () {
+                Route::get('/blog-settings', 'index')->name('settings');
+                Route::post('/blog-settings', 'update')->name('settings.update');
+            });
     });
