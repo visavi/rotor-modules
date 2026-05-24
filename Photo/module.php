@@ -14,6 +14,7 @@ return [
 
     'models' => [
         Photo::class => [
+            'label'  => __('photo::photos.photos'),
             'search' => ['view' => 'photo::search/_photos'],
             'feed'   => ['withs' => ['user', 'files'], 'view' => 'photo::feeds/_photos'],
             'upload' => 'media',

@@ -14,6 +14,7 @@ return [
 
     'models' => [
         News::class => [
+            'label'  => __('news::news.news'),
             'search' => ['view' => 'news::search/_news'],
             'feed'   => ['withs' => ['user', 'files'], 'view' => 'news::feeds/_news'],
             'upload' => 'media',

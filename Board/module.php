@@ -15,6 +15,7 @@ return [
 
     'models' => [
         Item::class => [
+            'label'  => __('board::boards.boards'),
             'search' => ['view' => 'board::search/_items'],
             'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'board::feeds/_items'],
             'upload' => 'media',

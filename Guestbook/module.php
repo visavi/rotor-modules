@@ -13,6 +13,7 @@ return [
 
     'models' => [
         Guestbook::class => [
+            'label'  => __('guestbook::guestbook.guestbook'),
             'search' => ['view' => 'guestbook::search/_guestbooks'],
             'upload' => 'media',
             'spam'   => true,

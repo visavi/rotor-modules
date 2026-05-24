@@ -14,6 +14,7 @@ return [
 
     'models' => [
         Offer::class => [
+            'label'  => __('offer::offers.offers'),
             'search' => ['view' => 'offer::search/_offers'],
             'feed'   => ['withs' => ['user'], 'view' => 'offer::feeds/_offers'],
             'rating' => true,
