@@ -11,6 +11,13 @@ return [
     'messages_success_cleared' => 'Повідомлення успішно очищено!',
     'require_publish'          => 'Вимагають публікації',
     'not_publish'              => 'Не опубліковано',
+    'guestbook_guests_allow' => 'Дозволити гостям писати в гостьовій',
+    'guestbook_moderation'   => 'Модерація повідомлень для гостей',
+    'guestbook_per_page'     => 'Повідомлень у гостьовій на стор',
+    'guestbook_text_length'  => 'Довжина тексту повідомлення',
+    'guestbook_point'        => 'Сума балів, що нараховуються',
+    'guestbook_money'        => 'Сума нарахованих грошей',
+
     'settings'                 => 'Налаштування гостьової',
     'guestbook' => 'Гостьова',
 ];

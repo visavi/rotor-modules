@@ -209,7 +209,7 @@
         </div>
 
     @else
-        {{ showError(trans_choice('forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getName()])) }}
+        {{ showError(trans_choice('forum::forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getName()])) }}
     @endif
 
     <a href="/stickers">{{ __('main.stickers') }}</a>  /

@@ -26,7 +26,6 @@ return [
     'title_create'              => 'Публикация новой статьи',
     'title_edit_blog'           => 'Редактирование раздела',
     'title_edit_article'        => 'Редактирование статьи',
-    'title_edit_comment'        => 'Редактирование комментария',
     'new_articles'              => 'Новые статьи',
     'new_comments'              => 'Новые комментарии',
     'title_rss'                 => 'RSS статей',
@@ -42,7 +41,6 @@ return [
     'draft'                     => 'Черновик',
 
     'categories_not_created'      => 'Разделы блогов еще не созданы!',
-    'article_not_author'          => 'Вы не автор данной статьи!',
     'articles_closed'             => 'Публикация статей запрещена администрацией сайта!',
     'category_not_exist'          => 'Данного раздела не существует!',
     'article_not_exist'           => 'Данной статьи не существует!',

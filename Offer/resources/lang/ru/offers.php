@@ -10,7 +10,6 @@ return [
     'report_problem'    => 'Сообщить о проблеме',
     'condition_add'     => 'Для добавления записи вам необходимо :point!',
     'editing_record'    => 'Редактирование записи',
-    'editing_comment'   => 'Редактирование комментария',
     'reply_record'      => 'Ответ на запись',
     'answer'            => 'Ответ',
     'status'            => 'Статус',

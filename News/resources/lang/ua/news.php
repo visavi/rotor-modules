@@ -3,9 +3,6 @@
 return [
     'empty_news'      => 'Новин ще немає!',
     'confirm_delete'  => 'Ви дійсно хочете видалити цю новину?',
-    'all_comments'    => 'Всі коментарі',
-    'comments_title'  => 'Коментарі',
-    'edit_title'      => 'Редагування коментаря',
     'rss_title'       => 'RSS новин',
     'on_homepage'     => 'На головній',
     'total_news'      => 'Усього новин',
@@ -17,6 +14,10 @@ return [
     'news_success_edited'  => 'Новину успішно змінено!',
     'news_success_added'   => 'Новину успішно додано!',
     'news_success_deleted' => 'Новину успішно видалено!',
+
+    'news_per_page'     => 'Новин на сторінку',
+    'news_title_length' => 'Довжина назви новини',
+    'news_text_length'  => 'Довжина тексту новини',
 
     'settings'               => 'Налаштування новин',
     'settings_empty'         => 'Налаштування не передані!',

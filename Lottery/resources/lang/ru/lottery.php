@@ -15,7 +15,6 @@ return [
     'ticket_price'           => 'Стоимость билета',
     'in_stock'               => 'В наличии',
     'participants'           => 'Участники',
-    'rate'                   => 'Ставка',
     'no_participants'        => 'Участников еще нет!',
 
     'lottery_not_activated'    => 'Лотерея еще не активирована!',

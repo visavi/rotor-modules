@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('admin.paid_adverts.create_advert'))
+@section('title', __('payment::payments.paid_adverts.create_advert'))
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item active"><a href="/admin/paid-adverts">{{ __('payment::payments.paid_adverts') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('admin.paid_adverts.create_advert') }}</li>
+            <li class="breadcrumb-item active">{{ __('payment::payments.paid_adverts.create_advert') }}</li>
         </ol>
     </nav>
 @stop

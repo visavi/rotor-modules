@@ -247,7 +247,7 @@
                 </form>
             </div>
         @else
-            {{ showError(trans_choice('forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getProfile()])) }}
+            {{ showError(trans_choice('forum::forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getProfile()])) }}
         @endif
     @else
         {{ showError(__('main.not_authorized')) }}

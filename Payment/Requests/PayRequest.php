@@ -22,7 +22,7 @@ class PayRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'data' => __('admin.paid_adverts.payment_data'),
+            'data' => __('payment::payments.paid_adverts.payment_data'),
         ];
     }
 

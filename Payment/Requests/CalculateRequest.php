@@ -32,12 +32,12 @@ class CalculateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'place'   => __('admin.paid_adverts.place'),
+            'place'   => __('payment::payments.paid_adverts.place'),
             'site'    => __('adverts.link'),
-            'names.*' => __('admin.paid_adverts.name'),
-            'color'   => __('admin.paid_adverts.color'),
-            'bold'    => __('admin.paid_adverts.bold'),
-            'term'    => __('admin.paid_adverts.term'),
+            'names.*' => __('payment::payments.paid_adverts.name'),
+            'color'   => __('payment::payments.paid_adverts.color'),
+            'bold'    => __('payment::payments.paid_adverts.bold'),
+            'term'    => __('payment::payments.paid_adverts.term'),
             'comment' => __('main.comment'),
         ];
     }

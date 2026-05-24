@@ -6,7 +6,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/payments/advert">{{ __('admin.paid_adverts.create_advert') }}</a></li>
+            <li class="breadcrumb-item"><a href="/payments/advert">{{ __('payment::payments.paid_adverts.create_advert') }}</a></li>
             <li class="breadcrumb-item active">{{ __('payment::payments.order_cost') }}</li>
         </ol>
     </nav>
@@ -24,7 +24,7 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-solid fa-map-marker-alt text-muted me-2"></i>
-                        {{ __('admin.paid_adverts.place') }}: {{ __('admin.paid_adverts.' . $advert['place']) }}
+                        {{ __('payment::payments.paid_adverts.place') }}: {{ __('payment::payments.paid_adverts.' . $advert['place']) }}
                     </div>
                     <span class="text-primary fw-bold">{{ $advert['prices']['place'] }} {{ setting('currency') }}</span>
                 </div>
@@ -45,7 +45,7 @@
                     <div class="d-flex justify-content-between mb-2">
                         <div>
                             <i class="fa-solid fa-heading text-muted me-2"></i>
-                            {{ __('admin.paid_adverts.names') }} <span class="badge bg-adaptive">{{ count($advert['names']) }}</span>
+                            {{ __('payment::payments.paid_adverts.names') }} <span class="badge bg-adaptive">{{ count($advert['names']) }}</span>
                         </div>
                         <span class="text-primary fw-bold">{{ $advert['prices']['names'] }} {{ setting('currency') }}</span>
                     </div>
@@ -60,7 +60,7 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-solid fa-palette text-muted me-2"></i>
-                        {{ __('admin.paid_adverts.color') }}:
+                        {{ __('payment::payments.paid_adverts.color') }}:
 
                         @if ($advert['color'])
                             <span class="color-badge" style="background-color: {{ $advert['color'] }};"></span>
@@ -77,7 +77,7 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-solid fa-bold text-muted me-2"></i>
-                        {{ __('admin.paid_adverts.bold') }}: {{ $advert['bold'] ? 'Да' : 'Нет' }}
+                        {{ __('payment::payments.paid_adverts.bold') }}: {{ $advert['bold'] ? 'Да' : 'Нет' }}
                     </div>
                     <span class="text-primary fw-bold">{{ $advert['prices']['bold'] }} {{ setting('currency') }}</span>
                 </div>
@@ -86,7 +86,7 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-regular fa-calendar-alt text-muted me-2"></i>
-                        {{ __('admin.paid_adverts.term') }}
+                        {{ __('payment::payments.paid_adverts.term') }}
                     </div>
                     <span>{{ plural($advert['term'], __('main.plural_days')) }}</span>
                 </div>

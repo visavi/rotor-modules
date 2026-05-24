@@ -26,10 +26,10 @@ class SettingRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'prices.places.*'   => __('admin.paid_adverts.place'),
-            'prices.colorPrice' => __('admin.paid_adverts.color'),
-            'prices.boldPrice'  => __('admin.paid_adverts.bold'),
-            'prices.namePrice'  => __('admin.paid_adverts.name'),
+            'prices.places.*'   => __('payment::payments.paid_adverts.place'),
+            'prices.colorPrice' => __('payment::payments.paid_adverts.color'),
+            'prices.boldPrice'  => __('payment::payments.paid_adverts.bold'),
+            'prices.namePrice'  => __('payment::payments.paid_adverts.name'),
         ];
     }
 }

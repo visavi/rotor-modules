@@ -3,9 +3,6 @@
 return [
     'empty_news'      => 'No news yet!',
     'confirm_delete'  => 'Do you really want to delete this news?',
-    'all_comments'    => 'All comments',
-    'comments_title'  => 'Comments',
-    'edit_title'      => 'Editing comment',
     'rss_title'       => 'RSS news',
     'on_homepage'     => 'On homepage',
     'total_news'      => 'Total news',
@@ -17,6 +14,10 @@ return [
     'news_success_edited'  => 'News successfully edited!',
     'news_success_added'   => 'News successfully added!',
     'news_success_deleted' => 'News successfully deleted!',
+
+    'news_per_page'     => 'News per page',
+    'news_title_length' => 'Length of news title',
+    'news_text_length'  => 'Length of news text',
 
     'settings'               => 'News settings',
     'settings_empty'         => 'No settings provided!',

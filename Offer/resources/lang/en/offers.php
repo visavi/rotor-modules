@@ -10,7 +10,6 @@ return [
     'report_problem'    => 'Report a problem',
     'condition_add'     => 'To add an entry you need :point!',
     'editing_record'    => 'Editing a record',
-    'editing_comment'   => 'Editing a comment',
     'reply_record'      => 'Answer to record',
     'answer'            => 'Answer',
     'status'            => 'Status',

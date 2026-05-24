@@ -5,7 +5,6 @@ return [
     'admin_title'    => 'Шаблон — администрирование',
     'manage_records' => 'Управление записями',
     'records'        => 'Записи',
-    'add_record'     => 'Добавить запись',
     'record_added'   => 'Запись добавлена',
     'record_deleted' => 'Запись удалена',
     'no_records'     => 'Записей нет',

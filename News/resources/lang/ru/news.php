@@ -3,9 +3,6 @@
 return [
     'empty_news'      => 'Новостей еще нет!',
     'confirm_delete'  => 'Вы действительно хотите удалить данную новость?',
-    'all_comments'    => 'Все комментарии',
-    'comments_title'  => 'Комментарии',
-    'edit_title'      => 'Редактирование комментария',
     'rss_title'       => 'RSS новостей',
     'on_homepage'     => 'На главной',
     'total_news'      => 'Всего новостей',
@@ -17,6 +14,10 @@ return [
     'news_success_edited'  => 'Новость успешно изменена!',
     'news_success_added'   => 'Новость успешно добавлена!',
     'news_success_deleted' => 'Новость успешно удалена!',
+
+    'news_per_page'     => 'Новостей на страницу',
+    'news_title_length' => 'Длина названия новости',
+    'news_text_length'  => 'Длина текста новости',
 
     'settings'               => 'Настройки новостей',
     'settings_empty'         => 'Настройки не переданы!',

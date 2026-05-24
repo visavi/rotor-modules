@@ -80,7 +80,7 @@ class PaidAdvert extends Model
     {
         $places = [];
         foreach (self::PLACES as $place) {
-            $places[$place] = __('admin.paid_adverts.' . $place);
+            $places[$place] = __('payment::payments.paid_adverts.' . $place);
         }
 
         return $places;

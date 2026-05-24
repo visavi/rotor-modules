@@ -66,13 +66,13 @@ class PaidAdvertController extends AdminController
             $names = array_unique(array_diff($names, ['']));
 
             $validator
-                ->in($place, $places, ['place' => __('admin.paid_adverts.place_invalid')])
+                ->in($place, $places, ['place' => __('payment::payments.paid_adverts.place_invalid')])
                 ->url($site, ['site' => __('validator.url')])
                 ->length($site, 5, 100, ['site' => __('validator.url_text')])
                 ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, SITETIME, ['term' => __('admin.paid_adverts.term_invalid')])
+                ->gt($term, SITETIME, ['term' => __('payment::payments.paid_adverts.term_invalid')])
                 ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
-                ->gte(count($names), 1, ['names' => __('admin.paid_adverts.names_count')]);
+                ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
 
             foreach ($names as $name) {
                 $validator->length($name, 5, 35, ['names' => __('validator.text')]);
@@ -113,7 +113,7 @@ class PaidAdvertController extends AdminController
         $advert = PaidAdvert::query()->find($id);
 
         if (! $advert) {
-            abort(404, __('admin.paid_adverts.not_found'));
+            abort(404, __('payment::payments.paid_adverts.not_found'));
         }
 
         $place = $request->input('place');
@@ -130,13 +130,13 @@ class PaidAdvertController extends AdminController
             $names = array_unique(array_diff($names, ['']));
 
             $validator
-                ->in($place, $places, ['place' => __('admin.paid_adverts.place_invalid')])
+                ->in($place, $places, ['place' => __('payment::payments.paid_adverts.place_invalid')])
                 ->url($site, ['site' => __('validator.url')])
                 ->length($site, 5, 100, ['site' => __('validator.url_text')])
                 ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, SITETIME, ['term' => __('admin.paid_adverts.term_invalid')])
+                ->gt($term, SITETIME, ['term' => __('payment::payments.paid_adverts.term_invalid')])
                 ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
-                ->gte(count($names), 1, ['names' => __('admin.paid_adverts.names_count')]);
+                ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
 
             foreach ($names as $name) {
                 $validator->length($name, 5, 35, ['names' => __('validator.text')]);
@@ -174,7 +174,7 @@ class PaidAdvertController extends AdminController
         $advert = PaidAdvert::query()->find($id);
 
         if (! $advert) {
-            abort(404, __('admin.paid_adverts.not_found'));
+            abort(404, __('payment::payments.paid_adverts.not_found'));
         }
 
         $advert->delete();

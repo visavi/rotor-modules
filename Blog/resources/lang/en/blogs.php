@@ -26,7 +26,6 @@ return [
     'title_create'              => 'Publication of a new article',
     'title_edit_blog'           => 'Editing a section',
     'title_edit_article'        => 'Editing an article',
-    'title_edit_comment'        => 'Editing a comment',
     'new_articles'              => 'New Articles',
     'new_comments'              => 'New comments',
     'title_rss'                 => 'RSS articles',
@@ -42,7 +41,6 @@ return [
     'draft'                     => 'Draft',
 
     'categories_not_created'      => 'Blog sections not yet created!',
-    'article_not_author'          => 'You are not the author of this article!',
     'articles_closed'             => 'Publication of articles is prohibited by the site administration!',
     'category_not_exist'          => 'This section does not exist!',
     'article_not_exist'           => 'This article does not exist!',

@@ -14,7 +14,6 @@ return [
     'name'                   => 'Title',
     'description'            => 'Photo caption',
     'edit_photo'             => 'Photo editing',
-    'edit_comment'           => 'Editing a comment',
     'photo_not_exist'        => 'Photo not found!',
     'photo_success_uploaded' => 'Photo uploaded successfully!',
     'photo_not_author'       => 'Photo not found or you are not the author of this photo!',

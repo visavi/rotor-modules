@@ -24,7 +24,7 @@
     <div class="mb-3">
         @foreach ($places as $placeName)
             <?php $active = ($place === $placeName) ? 'primary' : 'adaptive'; ?>
-            <a class="btn btn-{{ $active }} btn-sm" href="/admin/paid-adverts?place={{ $placeName }}">{{ __('admin.paid_adverts.' . $placeName) }} <span class="badge bg-adaptive">{{ $totals[$placeName] }}</span></a>
+            <a class="btn btn-{{ $active }} btn-sm" href="/admin/paid-adverts?place={{ $placeName }}">{{ __('payment::payments.paid_adverts.' . $placeName) }} <span class="badge bg-adaptive">{{ $totals[$placeName] }}</span></a>
         @endforeach
     </div>
 
@@ -39,11 +39,11 @@
                     @endif
 
                     @if ($data->deleted_at < SITETIME)
-                        <span class="badge bg-danger">{{ __('admin.paid_adverts.expired') }}</span>
+                        <span class="badge bg-danger">{{ __('payment::payments.paid_adverts.expired') }}</span>
                     @endif
                     <div class="float-end">
                         <a href="/admin/paid-adverts/edit/{{ $data->id }}"><i class="fas fa-pencil-alt text-muted"></i></a>
-                        <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('admin.paid_adverts.confirm_delete_advert') }}')">
+                        <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('payment::payments.paid_adverts.confirm_delete_advert') }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-link p-0"><i class="fa fa-times text-muted"></i></button>
@@ -57,16 +57,16 @@
                     </div>
 
                     <i class="far fa-user"></i> {{ $data->user->getProfile() }}
-                    <small class="section-date text-muted fst-italic">{{ __('admin.paid_adverts.expires') }}: {{ dateFixed($data->deleted_at) }}</small>
+                    <small class="section-date text-muted fst-italic">{{ __('payment::payments.paid_adverts.expires') }}: {{ dateFixed($data->deleted_at) }}</small>
 
                     <div class="small text-muted fst-italic mt-2">
-                        {{ __('admin.paid_adverts.color') }}: {!! $data->color ? '<span style="color:' . $data->color .'">'. $data->color .'</span>' : '<i class="fas fa-times text-danger"></i>' !!},
-                        {{ __('admin.paid_adverts.bold') }}: {!! $data->bold ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}
+                        {{ __('payment::payments.paid_adverts.color') }}: {!! $data->color ? '<span style="color:' . $data->color .'">'. $data->color .'</span>' : '<i class="fas fa-times text-danger"></i>' !!},
+                        {{ __('payment::payments.paid_adverts.bold') }}: {!! $data->bold ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}
                     </div>
                 </div>
             </div>
         @endforeach
     @else
-        {{ showError(__('admin.paid_adverts.empty_links')) }}
+        {{ showError(__('payment::payments.paid_adverts.empty_links')) }}
     @endif
 @stop

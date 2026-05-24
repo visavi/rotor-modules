@@ -28,21 +28,21 @@
         @endforeach
 
         <div class="mb-3{{ hasError('prices.colorPrice') }}">
-            <label for="price_colorPrice" class="form-label">{{ __('admin.paid_adverts.color') }}:</label>
+            <label for="price_colorPrice" class="form-label">{{ __('payment::payments.paid_adverts.color') }}:</label>
 
             <input class="form-control" name="prices[colorPrice]" id="price_colorPrice" value="{{ old('prices.colorPrice', $prices['colorPrice']) }}" required>
             <div class="invalid-feedback">{{ textError('prices.colorPrice') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('prices.boldPrice') }}">
-            <label for="boldPrice" class="form-label">{{ __('admin.paid_adverts.bold') }}:</label>
+            <label for="boldPrice" class="form-label">{{ __('payment::payments.paid_adverts.bold') }}:</label>
 
             <input class="form-control" name="prices[boldPrice]" id="price_boldPrice" value="{{ old('prices.boldPrice', $prices['boldPrice']) }}" required>
             <div class="invalid-feedback">{{ textError('prices.boldPrice') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('prices.namePrice') }}">
-            <label for="namePrice" class="form-label">{{ __('admin.paid_adverts.name') }}:</label>
+            <label for="namePrice" class="form-label">{{ __('payment::payments.paid_adverts.name') }}:</label>
 
             <input class="form-control" name="prices[namePrice]" id="price_namePrice" value="{{ old('prices.namePrice', $prices['namePrice']) }}" required>
             <div class="invalid-feedback">{{ textError('prices.namePrice') }}</div>
