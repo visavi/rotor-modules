@@ -18,7 +18,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
+          CHANGED=0
           MODULES="[]"
+          FOUND=()
+
           if gh release view registry &>/dev/null; then
             gh release download registry -p "registry.json" -D /tmp/ 2>/dev/null || true
             if [ -f /tmp/registry.json ]; then
@@ -27,9 +30,6 @@ jobs:
           else
             CHANGED=1
           fi
-
-          CHANGED=0
-          FOUND=()
 
           for file in $(find . -maxdepth 2 -name 'module.php' | sort); do
             get() { grep -oP "'$1'\s*=>\s*'\K[^']+" "$file"; }
