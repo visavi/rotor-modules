@@ -1,3 +1,4 @@
+@use('App\Classes\Hook')
 @extends('layout')
 
 @section('title', __('index.forums'))
@@ -26,7 +27,7 @@
 @stop
 
 @section('content')
-    @include('ads/_forum')
+    {!! Hook::call('advertForum') !!}
 
     <div class="my-3 py-2 border-bottom">
         @if (getUser())

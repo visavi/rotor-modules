@@ -37,7 +37,7 @@ class BackupController extends AdminController
         if ($request->isMethod('post')) {
             $sheets = check($request->input('sheets'));
             $method = $request->input('method');
-            $level  = int($request->input('level'));
+            $level = int($request->input('level'));
 
             $validator
                 ->notEmpty($sheets, ['sheets' => __('backup::backup.no_tables_save')])
@@ -48,20 +48,20 @@ class BackupController extends AdminController
                 $placeholders = implode(',', array_fill(0, count($sheets), '?'));
                 $selectTables = DB::select('SHOW TABLE STATUS WHERE name IN(' . $placeholders . ')', (array) $sheets);
 
-                $limit    = 3000;
+                $limit = 3000;
                 $filename = 'backup_' . $this->date . '.sql';
 
                 $fp = $this->fopen(storage_path('backups/' . $filename), 'w', $method, $level);
 
                 foreach ($selectTables as $table) {
-                    $show          = DB::selectOne("SHOW CREATE TABLE `{$table->Name}`");
+                    $show = DB::selectOne("SHOW CREATE TABLE `{$table->Name}`");
                     $columnsFields = DB::select("SHOW COLUMNS FROM `{$table->Name}`");
-                    $columns       = '(' . implode(',', array_column($columnsFields, 'Field')) . ')';
+                    $columns = '(' . implode(',', array_column($columnsFields, 'Field')) . ')';
 
                     $this->fwrite($fp, "--\n-- Structure table `{$table->Name}`\n--\n\n", $method);
-                    $isView    = $table->Engine === null;
+                    $isView = $table->Engine === null;
                     $createSql = $isView ? $show->{'Create View'} : $show->{'Create Table'};
-                    $dropSql   = $isView ? "DROP VIEW IF EXISTS `{$table->Name}`" : "DROP TABLE IF EXISTS `{$table->Name}`";
+                    $dropSql = $isView ? "DROP VIEW IF EXISTS `{$table->Name}`" : "DROP TABLE IF EXISTS `{$table->Name}`";
                     $this->fwrite($fp, "{$dropSql};\n{$createSql};\n\n", $method);
 
                     if ($table->Engine === null) {
@@ -85,8 +85,8 @@ class BackupController extends AdminController
                             $columns = [];
 
                             foreach ($records as $record) {
-                                $record     = is_int($record) || is_null($record) ? $record : "'" . str_replace("'", "''", $record) . "'";
-                                $columns[]  = $record ?? 'null';
+                                $record = is_int($record) || is_null($record) ? $record : "'" . str_replace("'", "''", $record) . "'";
+                                $columns[] = $record ?? 'null';
                             }
 
                             $this->fwrite($fp, ($key || $i ? ',' : '') . '(' . implode(',', $columns) . ')', $method);
@@ -124,7 +124,7 @@ class BackupController extends AdminController
         $file = $request->input('file');
 
         $backupDir = storage_path('backups');
-        $fullPath  = realpath($backupDir . '/' . $file);
+        $fullPath = realpath($backupDir . '/' . $file);
 
         $validator
             ->notEmpty($file, __('backup::backup.backup_not_indicated'))

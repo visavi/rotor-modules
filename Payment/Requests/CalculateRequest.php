@@ -2,7 +2,7 @@
 
 namespace Modules\Payment\Requests;
 
-use App\Models\PaidAdvert;
+use Modules\Payment\Models\PaidAdvert;
 use App\Rules\EmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 

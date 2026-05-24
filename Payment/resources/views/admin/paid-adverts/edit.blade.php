@@ -27,6 +27,6 @@
     @endif
 
     <div class="section-form mb-3 shadow">
-        @include('admin/paid-adverts/_form')
+        @include('payment::admin/paid-adverts/_form')
     </div>
 @stop

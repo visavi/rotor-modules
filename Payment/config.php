@@ -9,11 +9,11 @@ return [
     // Цены за сутки
     'prices' => [
         'places' => [
-            \App\Models\PaidAdvert::TOP_ALL    => 80,
-            \App\Models\PaidAdvert::TOP        => 35,
-            \App\Models\PaidAdvert::FORUM      => 20,
-            \App\Models\PaidAdvert::BOTTOM_ALL => 50,
-            \App\Models\PaidAdvert::BOTTOM     => 10,
+            \Modules\Payment\Models\PaidAdvert::TOP_ALL    => 80,
+            \Modules\Payment\Models\PaidAdvert::TOP        => 35,
+            \Modules\Payment\Models\PaidAdvert::FORUM      => 20,
+            \Modules\Payment\Models\PaidAdvert::BOTTOM_ALL => 50,
+            \Modules\Payment\Models\PaidAdvert::BOTTOM     => 10,
         ],
         'colorPrice' => 3, // цена за цветной текст
         'boldPrice'  => 3, // цена за жирный текст

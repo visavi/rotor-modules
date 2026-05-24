@@ -6,7 +6,7 @@ namespace Modules\Payment\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Module;
-use App\Models\PaidAdvert;
+use Modules\Payment\Models\PaidAdvert;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Payment\Requests\SettingRequest;

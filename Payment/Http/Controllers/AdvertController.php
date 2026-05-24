@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Payment\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\PaidAdvert;
+use Modules\Payment\Models\PaidAdvert;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
