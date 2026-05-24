@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.blogs'), __('blog::blogs.new_articles'), __('main.page_num', ['page' => $articles->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('blog::blogs.blogs'), __('blog::blogs.new_articles'), __('main.page_num', ['page' => $articles->currentPage()])))
 
 @section('header')
     <h1>{{ __('blog::blogs.new_articles') }}</h1>
@@ -11,8 +11,8 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.blogs.index') }}">{{ __('index.blogs') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('index.new_articles') }}</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.blogs.index') }}">{{ __('blog::blogs.blogs') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('blog::blogs.new_articles') }}</li>
         </ol>
     </nav>
 @stop

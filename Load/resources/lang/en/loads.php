@@ -70,4 +70,5 @@ return [
     'settings'               => 'Load settings',
     'settings_empty'         => 'No settings provided!',
     'settings_success_saved' => 'Settings saved successfully!',
+    'loads'  => 'Downloads',
 ];

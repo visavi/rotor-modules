@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s (%s)', __('index.photos'), __('main.page_num', ['page' => $photos->currentPage()])))
+@section('title', sprintf('%s (%s)', __('photo::photos.photos'), __('main.page_num', ['page' => $photos->currentPage()])))
 
 @section('header')
     <div class="float-end">
@@ -13,14 +13,14 @@
         @endif
     </div>
 
-    <h1>{{ __('index.photos') }}</h1>
+    <h1>{{ __('photo::photos.photos') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.photos') }}</li>
+            <li class="breadcrumb-item active">{{ __('photo::photos.photos') }}</li>
         </ol>
     </nav>
 @stop

@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.forums'), __('forum::forums.title_active_topics', ['user' => $user->getName()]), __('main.page_num', ['page' => $topics->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('forum::forums.forums'), __('forum::forums.title_active_topics', ['user' => $user->getName()]), __('main.page_num', ['page' => $topics->currentPage()])))
 
 @section('header')
     <h1>{{ __('forum::forums.title_active_topics', ['user' => $user->getName()]) }}</h1>
@@ -10,7 +10,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('index.forums') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('forum::forums.forums') }}</a></li>
             <li class="breadcrumb-item active">{{ __('forum::forums.title_active_topics', ['user' => $user->getName()]) }}</li>
         </ol>
     </nav>

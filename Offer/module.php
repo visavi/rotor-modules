@@ -14,10 +14,10 @@ return [
 
     'models' => [
         Offer::class => [
-            'search' => ['label' => __('index.offers'), 'view' => 'offer::search/_offers'],
+            'search' => ['view' => 'offer::search/_offers'],
             'feed'   => ['withs' => ['user'], 'view' => 'offer::feeds/_offers'],
             'rating' => true,
-        ],
+            ],
     ],
 
     'panel' => [

@@ -4,7 +4,7 @@ use App\Classes\Hook;
 
 // Ссылки на фото пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('index.photos') . '</a></b>'
+    return '<li class="list-inline-item"><b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('photo::photos.photos') . '</a></b>'
         . ' (<a href="' . route('photos.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
 });
 
@@ -12,7 +12,7 @@ Hook::add('userProfileLinks', static function ($user) {
 Hook::add('sidebarMenu', static function () {
     $url = route('photos.index');
     $active = request()->is('photos*') ? ' active' : '';
-    $label = __('index.photos');
+    $label = __('photo::photos.photos');
     $stats = statsPhotos();
 
     return '<li>
@@ -27,7 +27,7 @@ Hook::add('sidebarMenu', static function () {
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
     $url = route('admin.photos.index');
-    $label = __('index.photos');
+    $label = __('photo::photos.photos');
     $stats = statsPhotos();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

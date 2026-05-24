@@ -12,4 +12,5 @@ return [
     'require_publish'          => 'Require publish',
     'not_publish'              => 'Not publish',
     'settings'                 => 'Guestbook settings',
+    'guestbook' => 'Guest book',
 ];

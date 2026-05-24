@@ -14,7 +14,7 @@
             <description>{{ $newsText }}</description>
             <dc:creator>{{ $news->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $news->created_at) }}</pubDate>
-            <category>{{ __('index.news') }}</category>
+            <category>{{ __('news::news.news') }}</category>
             <guid>{{ route('news.view', ['id' => $news->id]) }}</guid>
             @if ($news->files->isNotEmpty())
                 <enclosure url="{{ $news->files->first()->getUrl() }}" length="{{ $news->files->first()->size }}" type="{{ $news->files->first()->mime_type }}" />

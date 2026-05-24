@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-regular fa-image"></i> <a href="{{ route('photos.index') }}" class="text-muted">{{ __('index.photos') }}</a>
+            <i class="fa-regular fa-image"></i> <a href="{{ route('photos.index') }}" class="text-muted">{{ __('photo::photos.photos') }}</a>
         </li>
     </ol>
 

@@ -34,4 +34,5 @@ return [
     'settings_photo_text_length'  => 'Длина текста фотографии',
     'feed_photos_show'            => 'Показывать фото в ленте',
     'feed_photos_rating'          => 'Скрывать фото с рейтингом ниже',
+    'photos' => 'Галерея',
 ];

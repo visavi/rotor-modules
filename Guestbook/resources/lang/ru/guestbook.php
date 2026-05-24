@@ -12,4 +12,5 @@ return [
     'require_publish'          => 'Требуют публикации',
     'not_publish'              => 'Не опубликовано',
     'settings'                 => 'Настройки гостевой',
+    'guestbook' => 'Гостевая',
 ];

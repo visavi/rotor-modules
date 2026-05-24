@@ -54,4 +54,5 @@ return [
     'settings_board_category_length' => 'Довжина категорії оголошення',
 
     'feed_items_show' => 'Показувати оголошення у стрічці',
+    'boards' => 'Оголошення',
 ];

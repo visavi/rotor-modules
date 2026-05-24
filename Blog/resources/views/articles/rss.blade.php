@@ -14,7 +14,7 @@
             <description>{{ $articleText }}</description>
             <dc:creator>{{ $article->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $article->created_at) }}</pubDate>
-            <category>{{ __('index.blogs') }}</category>
+            <category>{{ __('blog::blogs.blogs') }}</category>
             <guid>{{ route('articles.view', ['slug' => $article->slug]) }}</guid>
         </item>
     @endforeach

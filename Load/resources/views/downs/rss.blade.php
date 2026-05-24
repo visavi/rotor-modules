@@ -12,7 +12,7 @@
             <description>{{ $downText }}</description>
             <dc:creator>{{ $down->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $down->created_at) }}</pubDate>
-            <category>{{ __('index.loads') }}</category>
+            <category>{{ __('load::loads.loads') }}</category>
             <guid>{{ route('downs.view', ['id' => $down->id]) }}</guid>
         </item>
     @endforeach

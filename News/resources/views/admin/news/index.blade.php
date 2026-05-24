@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('index.news'))
+@section('title', __('news::news.news'))
 
 @section('header')
     <div class="float-end">
@@ -8,7 +8,7 @@
         <a class="btn btn-adaptive" href="{{ route('news.index') }}"><i class="fas fa-wrench"></i></a>
     </div>
 
-    <h1>{{ __('index.news') }}</h1>
+    <h1>{{ __('news::news.news') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -16,7 +16,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('index.news') }}</li>
+            <li class="breadcrumb-item active">{{ __('news::news.news') }}</li>
         </ol>
     </nav>
 @stop

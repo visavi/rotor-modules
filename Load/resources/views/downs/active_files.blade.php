@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.loads'), __('load::loads.active_downs', ['user' => $user->getName()]), __('main.page_num', ['page' => $downs->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('load::loads.loads'), __('load::loads.active_downs', ['user' => $user->getName()]), __('main.page_num', ['page' => $downs->currentPage()])))
 
 @section('header')
     <h1>{{ __('load::loads.active_downs', ['user' => $user->getName()]) }}</h1>
@@ -10,7 +10,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('loads.index') }}">{{ __('index.loads') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('loads.index') }}">{{ __('load::loads.loads') }}</a></li>
             <li class="breadcrumb-item active">{{ __('load::loads.active_downs', ['user' => $user->login]) }}</li>
         </ol>
     </nav>

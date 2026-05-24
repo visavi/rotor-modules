@@ -54,7 +54,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('index.forums') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('forums.index') }}">{{ __('forum::forums.forums') }}</a></li>
 
             @foreach ($topic->forum->getParents() as $parent)
                 <li class="breadcrumb-item"><a href="{{ route('forums.forum', ['id' => $parent->id]) }}">{{ $parent->title }}</a></li>

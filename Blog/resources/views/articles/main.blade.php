@@ -17,7 +17,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('blogs.index') }}">{{ __('index.blogs') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('blogs.index') }}">{{ __('blog::blogs.blogs') }}</a></li>
             <li class="breadcrumb-item active">{{ __('blog::blogs.articles_all') }}</li>
         </ol>
     </nav>

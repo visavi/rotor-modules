@@ -34,4 +34,5 @@ return [
     'settings_photo_text_length'  => 'Photo text length',
     'feed_photos_show'            => 'Show photos in feed',
     'feed_photos_rating'          => 'Hide photos with rating below',
+    'photos' => 'Gallery',
 ];

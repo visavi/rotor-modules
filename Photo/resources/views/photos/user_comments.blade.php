@@ -10,7 +10,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('photos.index') }}">{{ __('index.photos') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('photos.index') }}">{{ __('photo::photos.photos') }}</a></li>
             <li class="breadcrumb-item active">{{ __('main.comments') }} {{ $user->getName() }}</li>
         </ol>
     </nav>

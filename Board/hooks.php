@@ -6,7 +6,7 @@ use App\Classes\Hook;
 Hook::add('sidebarMenu', static function () {
     $url = route('boards.index');
     $active = request()->is('boards*', 'item*') ? ' active' : '';
-    $label = __('index.boards');
+    $label = __('board::boards.boards');
     $stats = statsBoard();
 
     return '<li>
@@ -26,7 +26,7 @@ Hook::add('adminSettingsNav', static function () {
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
     $url = route('admin.boards.index');
-    $label = __('index.boards');
+    $label = __('board::boards.boards');
     $stats = statsBoard();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

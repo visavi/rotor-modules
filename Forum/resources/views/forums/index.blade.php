@@ -1,7 +1,7 @@
 @use('App\Classes\Hook')
 @extends('layout')
 
-@section('title', __('index.forums'))
+@section('title', __('forum::forums.forums'))
 
 @section('header')
     <div class="float-end">
@@ -14,14 +14,14 @@
         @endif
     </div>
 
-    <h1>{{ __('index.forums') }}</h1>
+    <h1>{{ __('forum::forums.forums') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.forums') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.forums') }}</li>
         </ol>
     </nav>
 @stop

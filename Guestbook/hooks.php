@@ -15,7 +15,7 @@ Registry::complaint(Guestbook::$morphName, function (int $id, mixed $page): arra
 // Ссылка в боковом меню (default, nordic, newspaper темы)
 Hook::add('sidebarMenu', static function () {
     $active = request()->is('guestbook*') ? ' active' : '';
-    $label = __('index.guestbook');
+    $label = __('guestbook::guestbook.guestbook');
     $stats = statsGuestbook();
 
     return '<li>
@@ -29,7 +29,7 @@ Hook::add('sidebarMenu', static function () {
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
-    $label = __('index.guestbook');
+    $label = __('guestbook::guestbook.guestbook');
     $stats = statsGuestbook();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . route('admin.guestbook.index') . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

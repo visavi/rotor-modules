@@ -70,4 +70,5 @@ return [
     'settings'               => 'Настройки загрузок',
     'settings_empty'         => 'Настройки не переданы!',
     'settings_success_saved' => 'Настройки успешно сохранены!',
+    'loads'  => 'Загрузки',
 ];

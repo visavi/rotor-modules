@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('index.guestbook'))
+@section('title', __('guestbook::guestbook.guestbook'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('index.guestbook') }}</li>
+            <li class="breadcrumb-item active">{{ __('guestbook::guestbook.guestbook') }}</li>
         </ol>
     </nav>
 @stop
@@ -17,7 +17,7 @@
         <a class="btn btn-adaptive" href="{{ route('guestbook.index', ['page' => $posts->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
     </div>
 
-    <h1>{{ __('index.guestbook') }}</h1>
+    <h1>{{ __('guestbook::guestbook.guestbook') }}</h1>
 @stop
 
 @section('content')

@@ -11,7 +11,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.loads.index') }}">{{ __('index.loads') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.loads.index') }}">{{ __('load::loads.loads') }}</a></li>
             <li class="breadcrumb-item active">{{ __('load::loads.new_publications') }}</li>
         </ol>
     </nav>

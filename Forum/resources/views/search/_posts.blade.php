@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-regular fa-message"></i> <a class="text-muted" href="{{ route('forums.index') }}"> {{ __('index.forums') }}</a>
+            <i class="fa-regular fa-message"></i> <a class="text-muted" href="{{ route('forums.index') }}"> {{ __('forum::forums.forums') }}</a>
         </li>
         <li class="breadcrumb-item">
             <a class="text-muted" href="{{ route('topics.topic', ['id' => $post->topic->id]) }}">{{ $post->topic->title }}</a>

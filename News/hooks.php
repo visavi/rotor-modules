@@ -44,7 +44,7 @@ Hook::add('head', static function () {
 Hook::add('sidebarMenu', static function () {
     $url = route('news.index');
     $active = request()->is('news*') ? ' active' : '';
-    $label = __('index.news');
+    $label = __('news::news.news');
     $stats = statsNews();
 
     return '<li>
@@ -59,7 +59,7 @@ Hook::add('sidebarMenu', static function () {
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', static function () {
     $url = route('news.index');
-    $label = __('index.news');
+    $label = __('news::news.news');
     $stats = statsNews();
 
     return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
@@ -68,7 +68,7 @@ Hook::add('footerColumnMiddle', static function () {
 // Ссылка в блоке «Администрирование» в админке
 Hook::add('adminBlockAdmin', static function () {
     $url = route('admin.news.index');
-    $label = __('index.news');
+    $label = __('news::news.news');
     $stats = statsNews();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

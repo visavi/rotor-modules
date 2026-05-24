@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('index.boards'))
+@section('title', __('board::boards.boards'))
 
 @section('header')
     <div class="float-end">
@@ -8,9 +8,9 @@
     </div>
 
     @if ($board)
-        <h1>{{ $board->name }} <small>({{ __('index.boards') }}: {{ $board->count_items }})</small></h1>
+        <h1>{{ $board->name }} <small>({{ __('board::boards.boards') }}: {{ $board->count_items }})</small></h1>
     @else
-        <h1>{{ __('index.boards') }}</h1>
+        <h1>{{ __('board::boards.boards') }}</h1>
     @endif
 @stop
 
@@ -21,13 +21,13 @@
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
 
             @if ($board)
-                <li class="breadcrumb-item"><a href="{{ route('admin.boards.index') }}">{{ __('index.boards') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.boards.index') }}">{{ __('board::boards.boards') }}</a></li>
 
                 @foreach ($board->getParents() as $parent)
                     <li class="breadcrumb-item"><a href="{{ route('admin.boards.index', ['id' => $parent->id]) }}">{{ $parent->name }}</a></li>
                 @endforeach
             @else
-                <li class="breadcrumb-item active">{{ __('index.boards') }}</li>
+                <li class="breadcrumb-item active">{{ __('board::boards.boards') }}</li>
             @endif
         </ol>
     </nav>

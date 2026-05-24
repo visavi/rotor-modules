@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-solid fa-download"></i> <a href="{{ route('loads.index') }}" class="text-muted">{{ __('index.loads') }}</a>
+            <i class="fa-solid fa-download"></i> <a href="{{ route('loads.index') }}" class="text-muted">{{ __('load::loads.loads') }}</a>
         </li>
 
         @if ($post->category->parent->id)

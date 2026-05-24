@@ -13,14 +13,14 @@ return [
 
     'models' => [
         Guestbook::class => [
-            'search' => ['label' => __('index.guestbook'), 'view' => 'guestbook::search/_guestbooks'],
+            'search' => ['view' => 'guestbook::search/_guestbooks'],
             'upload' => 'media',
-            'spam'   => __('index.guestbook'),
+            'spam'   => true,
         ],
     ],
 
     'panel' => [
-        '/admin/guestbook'          => __('index.guestbook'),
+        '/admin/guestbook'          => __('guestbook::guestbook.guestbook'),
         '/admin/guestbook-settings' => __('guestbook::guestbook.settings'),
     ],
 ];

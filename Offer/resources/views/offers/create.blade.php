@@ -6,7 +6,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('offers.index') }}">{{ __('index.offers') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('offers.index') }}">{{ __('offer::offers.offers') }}</a></li>
             <li class="breadcrumb-item active">{{ __('offer::offers.adding_record') }}</li>
         </ol>
     </nav>

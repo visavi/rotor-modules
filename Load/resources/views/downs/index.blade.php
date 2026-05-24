@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('index.loads'))
+@section('title', __('load::loads.loads'))
 
 @section('header')
     <div class="float-end">
@@ -13,14 +13,14 @@
         @endif
     </div>
 
-    <h1>{{ __('index.loads') }}</h1>
+    <h1>{{ __('load::loads.loads') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.loads') }}</li>
+            <li class="breadcrumb-item active">{{ __('load::loads.loads') }}</li>
         </ol>
     </nav>
 @stop

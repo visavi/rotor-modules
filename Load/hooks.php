@@ -27,14 +27,14 @@ Registry::sitemap('downs', static function () {
 
 // Ссылки на файлы пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
+    return '<li class="list-inline-item"><b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('load::loads.loads') . '</a></b>'
         . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
 });
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
     $expanded = request()->is('loads*', 'downs*') ? ' is-expanded' : '';
-    $label = __('index.loads');
+    $label = __('load::loads.loads');
     $labelList = __('load::loads.loads_list');
     $labelNew = __('load::loads.new_downs');
     $labelComments = __('load::loads.new_comments');
@@ -59,7 +59,7 @@ Hook::add('sidebarMenu', static function () {
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
     $url = route('admin.loads.index');
-    $label = __('index.loads');
+    $label = __('load::loads.loads');
     $stats = statsLoad();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

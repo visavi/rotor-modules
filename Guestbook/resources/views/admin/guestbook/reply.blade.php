@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.guestbook.index') }}">{{ __('index.guestbook') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.guestbook.index') }}">{{ __('guestbook::guestbook.guestbook') }}</a></li>
             <li class="breadcrumb-item active">{{ __('guestbook::guestbook.title_reply') }}</li>
         </ol>
     </nav>

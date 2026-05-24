@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('index.blogs') . ' - ' . __('blog::blogs.blogs_list'))
+@section('title', __('blog::blogs.blogs') . ' - ' . __('blog::blogs.blogs_list'))
 
 @section('header')
     @if (getUser())
@@ -13,14 +13,14 @@
         </div>
     @endif
 
-    <h1>{{ __('index.blogs') }}</h1>
+    <h1>{{ __('blog::blogs.blogs') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.blogs') }}</li>
+            <li class="breadcrumb-item active">{{ __('blog::blogs.blogs') }}</li>
         </ol>
     </nav>
 @stop

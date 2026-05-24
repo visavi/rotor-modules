@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('index.photos'))
+@section('title', __('photo::photos.photos'))
 
 @section('header')
     <div class="float-end">
@@ -8,7 +8,7 @@
         <a class="btn btn-adaptive" href="{{ route('photos.index', ['page' => $photos->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
     </div>
 
-    <h1>{{ __('index.photos') }}</h1>
+    <h1>{{ __('photo::photos.photos') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -16,7 +16,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('index.photos') }}</li>
+            <li class="breadcrumb-item active">{{ __('photo::photos.photos') }}</li>
         </ol>
     </nav>
 @stop

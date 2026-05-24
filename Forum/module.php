@@ -17,13 +17,16 @@ return [
 
     'models' => [
         Topic::class => [
-            'search' => ['label' => __('forum::forums.topics'), 'view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
+            'label'  => __('forum::forums.topics'),
+            'search' => ['view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
             'feed'   => ['withs' => ['lastPost.user', 'lastPost.files', 'forum.parent'], 'view' => 'forum::feeds/_topics'],
         ],
         Post::class => [
-            'search' => ['label' => __('index.posts'), 'view' => 'forum::search/_posts', 'with' => ['topic']],
+            'label'  => __('forum::forums.posts'),
+            'search' => ['view' => 'forum::search/_posts', 'with' => ['topic']],
             'upload' => 'file',
             'rating' => true,
+            'spam'   => true,
         ],
     ],
 
@@ -33,7 +36,7 @@ return [
     ],
 
     'panel' => [
-        '/admin/forums'         => __('index.forums'),
+        '/admin/forums'         => __('forum::forums.forums'),
         '/admin/forum-settings' => __('forum::forums.settings'),
     ],
 

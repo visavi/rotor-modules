@@ -14,11 +14,11 @@ return [
 
     'models' => [
         Photo::class => [
-            'search' => ['label' => __('photo::photos.photos_section'), 'view' => 'photo::search/_photos'],
+            'search' => ['view' => 'photo::search/_photos'],
             'feed'   => ['withs' => ['user', 'files'], 'view' => 'photo::feeds/_photos'],
             'upload' => 'media',
             'rating' => true,
-        ],
+            ],
     ],
 
     'panel' => [

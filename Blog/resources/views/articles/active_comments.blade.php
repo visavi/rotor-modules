@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s - %s (%s)', __('index.blogs'), __('blog::blogs.comments_list', ['user' => $user->getName()]), __('main.page_num', ['page' => $comments->currentPage()])))
+@section('title', sprintf('%s - %s (%s)', __('blog::blogs.blogs'), __('blog::blogs.comments_list', ['user' => $user->getName()]), __('main.page_num', ['page' => $comments->currentPage()])))
 
 @section('header')
     <h1> {{ __('blog::blogs.comments_list', ['user' => $user->getName()]) }}</h1>
@@ -10,7 +10,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('blogs.index') }}">{{ __('index.blogs') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('blogs.index') }}">{{ __('blog::blogs.blogs') }}</a></li>
             <li class="breadcrumb-item active">{{ __('blog::blogs.comments_list', ['user' => $user->getName()]) }}</li>
         </ol>
     </nav>

@@ -16,11 +16,11 @@ return [
 
     'models' => [
         Article::class => [
-            'search' => ['label' => __('blog::blogs.blogs_section'), 'view' => 'blog::search/_articles', 'with' => ['category']],
+            'search' => ['view' => 'blog::search/_articles', 'with' => ['category']],
             'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
             'upload' => 'media',
             'rating' => true,
-        ],
+            ],
     ],
 
     'observers' => [

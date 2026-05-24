@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.news.index') }}">{{ __('index.news') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.news.index') }}">{{ __('news::news.news') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('news.view', ['id' => $news->id]) }}">{{ $news->title }}</a></li>
             <li class="breadcrumb-item active">{{ __('news::news.edit_news_title') }}</li>
         </ol>

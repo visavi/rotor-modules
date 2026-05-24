@@ -78,7 +78,7 @@ Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
 
 // Ссылки на форум в анкете пользователя
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('index.forums') . '</a></b>'
+    return '<li class="list-inline-item"><b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('forum::forums.forums') . '</a></b>'
         . ' (<a href="' . route('forums.active-posts', ['user' => $user->login]) . '">' . __('main.messages') . '</a>)</li>';
 });
 
@@ -86,7 +86,7 @@ Hook::add('userProfileLinks', static function ($user) {
 Hook::add('sidebarMenu', static function () {
     $url = route('forums.index');
     $active = request()->is('forums*', 'topics*') ? ' active' : '';
-    $label = __('index.forums');
+    $label = __('forum::forums.forums');
     $stats = statsForum();
 
     return '<li>
@@ -101,7 +101,7 @@ Hook::add('sidebarMenu', static function () {
 // Блок форума в панели администратора
 Hook::add('adminBlockEditor', static function () {
     $url = route('admin.forums.index');
-    $label = __('index.forums');
+    $label = __('forum::forums.forums');
     $stats = statsForum();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

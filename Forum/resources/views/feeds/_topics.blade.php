@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-regular fa-message"></i> <a href="{{ route('forums.index') }}" class="text-muted"> {{ __('index.forums') }}</a>
+            <i class="fa-regular fa-message"></i> <a href="{{ route('forums.index') }}" class="text-muted"> {{ __('forum::forums.forums') }}</a>
         </li>
         @if ($post->forum->parent->id)
             <li class="breadcrumb-item">

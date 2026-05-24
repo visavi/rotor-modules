@@ -28,7 +28,7 @@ Registry::sitemap('articles', static function () {
 
 // Ссылки на публикации пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
+    return '<li class="list-inline-item"><b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('blog::blogs.blogs') . '</a></b>'
         . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
 });
 
@@ -36,7 +36,7 @@ Hook::add('userProfileLinks', static function ($user) {
 Hook::add('sidebarMenu', static function () {
     $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
     $url = route('blogs.index');
-    $label = __('index.blogs');
+    $label = __('blog::blogs.blogs');
 
     return '<li class="treeview' . $active . '">
         <a class="menu-item" href="' . $url . '" data-bs-toggle="treeview">
@@ -57,8 +57,8 @@ Hook::add('sidebarMenu', static function () {
 Hook::add('adminBlockEditor', static function () {
     $urlBlogs = route('admin.blogs.index');
     $urlNew = route('admin.articles.new');
-    $labelBlogs = __('index.blogs');
-    $labelNew = __('index.new_articles');
+    $labelBlogs = __('blog::blogs.blogs');
+    $labelNew = __('blog::blogs.new_articles');
     $statsBlogs = statsBlog();
     $statsNew = statsNewArticles();
 

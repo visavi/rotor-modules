@@ -6,7 +6,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('boards.index') }}">{{ __('index.boards') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('boards.index') }}">{{ __('board::boards.boards') }}</a></li>
             <li class="breadcrumb-item active">{{ __('board::boards.create_item') }}</li>
         </ol>
     </nav>

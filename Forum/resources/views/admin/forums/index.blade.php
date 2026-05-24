@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('index.forums'))
+@section('title', __('forum::forums.forums'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('index.forums') }}</li>
+            <li class="breadcrumb-item active">{{ __('forum::forums.forums') }}</li>
         </ol>
     </nav>
 @stop
@@ -17,7 +17,7 @@
         <a class="btn btn-adaptive" href="{{ route('forums.index') }}"><i class="fas fa-wrench"></i></a>
     </div>
 
-    <h1>{{ __('index.forums') }}</h1>
+    <h1>{{ __('forum::forums.forums') }}</h1>
 @stop
 
 @section('content')

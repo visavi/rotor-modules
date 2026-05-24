@@ -6,7 +6,7 @@ use App\Classes\Hook;
 Hook::add('sidebarMenu', static function () {
     $url = route('offers.index');
     $active = request()->is('offers*') ? ' active' : '';
-    $label = __('index.offers');
+    $label = __('offer::offers.offers');
     $stats = statsOffers();
 
     return '<li>
@@ -21,7 +21,7 @@ Hook::add('sidebarMenu', static function () {
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', static function () {
     $url = route('offers.index');
-    $label = __('index.offers');
+    $label = __('offer::offers.offers');
     $stats = statsOffers();
 
     return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
@@ -30,7 +30,7 @@ Hook::add('footerColumnMiddle', static function () {
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockAdmin', static function () {
     $url = route('admin.offers.index');
-    $label = __('index.offers');
+    $label = __('offer::offers.offers');
     $stats = statsOffers();
 
     return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';

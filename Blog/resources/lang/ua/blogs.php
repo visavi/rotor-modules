@@ -83,4 +83,6 @@ return [
     'settings_blog_category_length' => 'Довжина категорії блогу (мін/макс)',
     'feed_articles_show'            => 'Показувати статті у стрічці',
     'feed_articles_rating'          => 'Приховувати статті з рейтингом нижче',
+    'new_articles' => 'Нові статті',
+    'blogs'  => 'Блоги',
 ];

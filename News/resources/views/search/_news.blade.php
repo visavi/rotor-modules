@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-solid fa-newspaper"></i> <a href="{{ route('news.index') }}" class="text-muted"> {{ __('index.news') }}</a>
+            <i class="fa-solid fa-newspaper"></i> <a href="{{ route('news.index') }}" class="text-muted"> {{ __('news::news.news') }}</a>
         </li>
     </ol>
 

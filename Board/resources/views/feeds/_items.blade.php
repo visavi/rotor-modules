@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-solid fa-rectangle-list"></i> <a href="{{ route('boards.index') }}" class="text-muted">{{ __('index.boards') }}</a>
+            <i class="fa-solid fa-rectangle-list"></i> <a href="{{ route('boards.index') }}" class="text-muted">{{ __('board::boards.boards') }}</a>
         </li>
 
         @if ($post->category->parent->id)

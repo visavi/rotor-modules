@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s (%s)', __('index.guestbook'), __('main.page_num', ['page' => $posts->currentPage()])))
+@section('title', sprintf('%s (%s)', __('guestbook::guestbook.guestbook'), __('main.page_num', ['page' => $posts->currentPage()])))
 
 @section('header')
     @if (getUser() || setting('bookadds'))
@@ -13,14 +13,14 @@
         </div>
     @endif
 
-    <h1>{{ __('index.guestbook') }}</h1>
+    <h1>{{ __('guestbook::guestbook.guestbook') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.guestbook') }}</li>
+            <li class="breadcrumb-item active">{{ __('guestbook::guestbook.guestbook') }}</li>
         </ol>
     </nav>
 @stop

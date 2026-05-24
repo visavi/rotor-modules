@@ -14,15 +14,15 @@ return [
 
     'models' => [
         News::class => [
-            'search' => ['label' => __('index.news'), 'view' => 'news::search/_news'],
+            'search' => ['view' => 'news::search/_news'],
             'feed'   => ['withs' => ['user', 'files'], 'view' => 'news::feeds/_news'],
             'upload' => 'media',
             'rating' => true,
-        ],
+            ],
     ],
 
     'panel' => [
-        '/admin/news'          => __('index.news'),
+        '/admin/news'          => __('news::news.news'),
         '/admin/news-settings' => __('news::news.settings'),
     ],
 

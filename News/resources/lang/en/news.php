@@ -21,4 +21,5 @@ return [
     'settings'               => 'News settings',
     'settings_empty'         => 'No settings provided!',
     'settings_success_saved' => 'Settings successfully saved!',
+    'news'   => 'News',
 ];

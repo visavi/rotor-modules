@@ -54,4 +54,5 @@ return [
     'settings_board_category_length' => 'Длина категории объявления',
 
     'feed_items_show' => 'Показывать объявления в ленте',
+    'boards' => 'Объявления',
 ];

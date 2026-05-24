@@ -1,7 +1,7 @@
 <div class="section mb-3 shadow">
     <ol class="breadcrumb mb-1">
         <li class="breadcrumb-item">
-            <i class="fa-regular fa-note-sticky"></i> <a href="{{ route('guestbook.index') }}" class="text-muted">{{ __('index.guestbook') }}</a>
+            <i class="fa-regular fa-note-sticky"></i> <a href="{{ route('guestbook.index') }}" class="text-muted">{{ __('guestbook::guestbook.guestbook') }}</a>
         </li>
     </ol>
 

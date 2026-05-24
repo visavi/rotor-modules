@@ -90,7 +90,7 @@ class GuestbookController extends Controller
             clearCache('statGuestbook');
             $flood->saveState();
 
-            sendNotify($msg, route('guestbook.index', absolute: false), __('index.guestbook', locale: setting('language')));
+            sendNotify($msg, route('guestbook.index', absolute: false), __('guestbook::guestbook.guestbook', locale: setting('language')));
 
             return redirect()
                 ->route('guestbook.index')

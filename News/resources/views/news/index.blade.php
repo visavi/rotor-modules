@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', sprintf('%s (%s)', __('index.news'), __('main.page_num', ['page' => $news->currentPage()])))
+@section('title', sprintf('%s (%s)', __('news::news.news'), __('main.page_num', ['page' => $news->currentPage()])))
 
 @section('header')
     @if (isAdmin('moder'))
@@ -9,14 +9,14 @@
         </div>
     @endif
 
-    <h1>{{ __('index.news') }}</h1>
+    <h1>{{ __('news::news.news') }}</h1>
 @stop
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">{{ __('index.news') }}</li>
+            <li class="breadcrumb-item active">{{ __('news::news.news') }}</li>
         </ol>
     </nav>
 @stop

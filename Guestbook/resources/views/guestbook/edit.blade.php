@@ -6,7 +6,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('guestbook.index') }}">{{ __('index.guestbook') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('guestbook.index') }}">{{ __('guestbook::guestbook.guestbook') }}</a></li>
             <li class="breadcrumb-item active">{{ __('guestbook::guestbook.title_edit') }}</li>
         </ol>
     </nav>
