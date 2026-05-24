@@ -4,7 +4,7 @@ use App\Classes\Hook;
 use App\Services\GithubService;
 
 // Добавляем ссылку в меню сайта
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $version = (new GithubService())->getLatestVersion();
 
     return '<li>

@@ -1,20 +1,15 @@
 <?php
 
 use App\Classes\Hook;
-use Illuminate\Support\Facades\Route;
 
 // Ссылки на фото пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    if (! Route::has('photos.index')) {
-        return null;
-    }
-
-    return ' / <b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('index.photos') . '</a></b>'
-        . ' (<a href="' . route('photos.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
+    return '<li class="list-inline-item"><b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('index.photos') . '</a></b>'
+        . ' (<a href="' . route('photos.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $url = route('photos.index');
     $active = request()->is('photos*') ? ' active' : '';
     $label = __('index.photos');

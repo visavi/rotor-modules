@@ -26,11 +26,13 @@ Registry::sitemap('downs', static function () {
 });
 
 // Ссылки на файлы пользователя в анкете
-Hook::add('userProfileLinks', static fn ($user) => ' / <b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
-    . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)');
+Hook::add('userProfileLinks', static function ($user) {
+    return '<li class="list-inline-item"><b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('index.loads') . '</a></b>'
+        . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
+});
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $expanded = request()->is('loads*', 'downs*') ? ' is-expanded' : '';
     $label = __('index.loads');
     $labelList = __('load::loads.loads_list');

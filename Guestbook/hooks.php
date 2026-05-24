@@ -13,7 +13,7 @@ Registry::complaint(Guestbook::$morphName, function (int $id, mixed $page): arra
 });
 
 // Ссылка в боковом меню (default, nordic, newspaper темы)
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $active = request()->is('guestbook*') ? ' active' : '';
     $label = __('index.guestbook');
     $stats = statsGuestbook();

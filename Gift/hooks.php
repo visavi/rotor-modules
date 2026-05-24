@@ -4,7 +4,7 @@ use App\Classes\Hook;
 use Modules\Gift\Models\GiftsUser;
 
 // Добавляем ссылку на подарки в меню сайта
-Hook::add('sidebarMenuEnd', static fn () => '<li>
+Hook::add('sidebarMenu', static fn () => '<li>
         <a class="menu-item' . (request()->is('gifts*') ? ' active' : '') . '" href="/gifts">
             <i class="menu-icon fas fa-gift"></i>
             <span class="menu-label">Подарки</span>

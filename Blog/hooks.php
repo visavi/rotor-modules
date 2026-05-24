@@ -3,7 +3,6 @@
 use App\Classes\Hook;
 use App\Classes\Registry;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Route;
 use Modules\Blog\Models\Article;
 
 // Регистрация страницы sitemap для статей
@@ -29,16 +28,12 @@ Registry::sitemap('articles', static function () {
 
 // Ссылки на публикации пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    if (! Route::has('articles.user-articles')) {
-        return null;
-    }
-
-    return ' / <b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
-        . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)';
+    return '<li class="list-inline-item"><b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('index.blogs') . '</a></b>'
+        . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
 });
 
 // Ссылка в боковом меню и горизонтальной навигации
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $active = request()->is('blogs*', 'articles*') ? ' is-expanded' : '';
     $url = route('blogs.index');
     $label = __('index.blogs');

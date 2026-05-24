@@ -3,7 +3,7 @@
 use App\Classes\Hook;
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $url = route('offers.index');
     $active = request()->is('offers*') ? ' active' : '';
     $label = __('index.offers');

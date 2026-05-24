@@ -6,7 +6,6 @@ use App\Classes\Restatement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Route;
 use Modules\Forum\Models\Bookmark;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
@@ -79,20 +78,12 @@ Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
 
 // Ссылки на форум в анкете пользователя
 Hook::add('userProfileLinks', static function ($user) {
-    if (! Route::has('forums.active-topics')) {
-        return null;
-    }
-
-    return ' / <b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('index.forums') . '</a></b>'
-        . ' (<a href="' . route('forums.active-posts', ['user' => $user->login]) . '">' . __('main.messages') . '</a>)';
+    return '<li class="list-inline-item"><b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('index.forums') . '</a></b>'
+        . ' (<a href="' . route('forums.active-posts', ['user' => $user->login]) . '">' . __('main.messages') . '</a>)</li>';
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuStart', static function () {
-    if (! Route::has('forums.index')) {
-        return null;
-    }
-
+Hook::add('sidebarMenu', static function () {
     $url = route('forums.index');
     $active = request()->is('forums*', 'topics*') ? ' active' : '';
     $label = __('index.forums');
@@ -109,10 +100,6 @@ Hook::add('sidebarMenuStart', static function () {
 
 // Блок форума в панели администратора
 Hook::add('adminBlockEditor', static function () {
-    if (! Route::has('admin.forums.index')) {
-        return null;
-    }
-
     $url = route('admin.forums.index');
     $label = __('index.forums');
     $stats = statsForum();
@@ -122,9 +109,5 @@ Hook::add('adminBlockEditor', static function () {
 
 // Ссылка на настройки в навигации настроек
 Hook::add('adminSettingsNav', static function () {
-    if (! Route::has('forum.settings')) {
-        return null;
-    }
-
     return '<a class="nav-link" href="' . route('forum.settings') . '">' . __('forum::forums.settings') . '</a>';
 });

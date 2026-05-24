@@ -4,7 +4,6 @@ use App\Classes\Hook;
 use App\Classes\Registry;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Route;
 use Modules\News\Models\News;
 
 Registry::complaint(News::$morphName, static function (int $id) {
@@ -38,15 +37,11 @@ Registry::sitemap('news', static function () {
 
 // RSS-ссылка в <head>
 Hook::add('head', static function () {
-    if (! Route::has('news.rss')) {
-        return null;
-    }
-
     return '<link href="' . route('news.rss') . '" title="RSS News" type="application/rss+xml" rel="alternate">';
 });
 
 // Ссылка в боковом меню
-Hook::add('sidebarMenuEnd', static function () {
+Hook::add('sidebarMenu', static function () {
     $url = route('news.index');
     $active = request()->is('news*') ? ' active' : '';
     $label = __('index.news');
