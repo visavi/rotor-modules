@@ -64,7 +64,6 @@ return [
     'down_success_published'   => 'Download successfully posted!',
     'down_success_unpublished' => 'Download successfully removed from publication!',
 
-    'loads_max_files'             => 'Maximum load count. files',
     'loads_per_page'              => 'Files in downloads on page',
     'loads_archives'              => 'View archives on page',
     'loads_files_allow'           => 'Allow users to upload files',

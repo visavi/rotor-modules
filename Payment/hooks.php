@@ -11,7 +11,7 @@ Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="/admin/
 Hook::add('adminBlockBoss', static function () {
     $ordersCount = Order::query()->count();
 
-    return '<i class="far fa-circle text-muted"></i> <a href="/admin/paid-adverts">' . __('payment::payments.paid_adverts') . '</a><br>'
+    return '<i class="far fa-circle text-muted"></i> <a href="/admin/paid-adverts">' . __('payment::payments.paid_adverts.title') . '</a><br>'
         . '<i class="far fa-circle text-muted"></i> <a href="/admin/orders">' . __('payment::payments.orders') . '</a> <span class="badge bg-adaptive">' . $ordersCount . '</span><br>';
 });
 

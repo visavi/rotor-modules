@@ -105,6 +105,9 @@ return [
     'forum_point'              => 'Total points awarded',
     'forum_money'              => 'Total moneys awarded',
     'forum_merge_posts'        => 'Allow to merge posts',
+    'editforumpoint'           => 'Asset to change forum topics',
+    'feed_topics_show'         => 'Show topics in feed',
+    'feed_topics_rating'       => 'Hide topics with rating below',
 
     'settings'               => 'Forum settings',
     'settings_empty'         => 'No settings provided!',

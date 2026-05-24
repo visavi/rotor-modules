@@ -99,10 +99,28 @@
         </div>
     </div>
 
+    <div class="mb-3{{ hasError('sets[editforumpoint]') }}">
+        <label for="editforumpoint" class="form-label">{{ __('forum::forums.editforumpoint') }}:</label>
+        <input type="number" class="form-control" id="editforumpoint" name="sets[editforumpoint]" maxlength="6" value="{{ getInput('sets.editforumpoint', $settings['editforumpoint']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets[editforumpoint]') }}</div>
+    </div>
+
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[forum_merge_posts]">
         <input type="checkbox" class="form-check-input" value="1" name="sets[forum_merge_posts]" id="forum_merge_posts"{{ getInput('sets.forum_merge_posts', $settings['forum_merge_posts']) ? ' checked' : '' }}>
         <label class="form-check-label" for="forum_merge_posts">{{ __('forum::forums.forum_merge_posts') }}</label>
+    </div>
+
+    <div class="form-check mb-3">
+        <input type="hidden" value="0" name="sets[feed_topics_show]">
+        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_topics_show]" id="feed_topics_show"{{ ! empty($settings['feed_topics_show']) ? ' checked' : '' }}>
+        <label class="form-check-label" for="feed_topics_show">{{ __('forum::forums.feed_topics_show') }}</label>
+    </div>
+
+    <div class="mb-3{{ hasError('sets[feed_topics_rating]') }}">
+        <label for="feed_topics_rating" class="form-label">{{ __('forum::forums.feed_topics_rating') }}:</label>
+        <input type="number" class="form-control" id="feed_topics_rating" name="sets[feed_topics_rating]" maxlength="4" value="{{ getInput('sets.feed_topics_rating', $settings['feed_topics_rating']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets[feed_topics_rating]') }}</div>
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>
