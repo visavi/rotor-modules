@@ -30,7 +30,7 @@ jobs:
           FOUND=()
 
           for file in $(find . -maxdepth 2 -name 'module.php' | sort); do
-            get() { grep -oP "'$1'\s*=>\s*'\K[^']+'" "$file"; }
+            get() { grep -oP "'$1'\s*=>\s*'\K[^']+" "$file"; }
 
             MODULE=$(basename $(dirname "$file"))
             VERSION=$(get version)
