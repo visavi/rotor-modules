@@ -24,6 +24,8 @@ jobs:
             if [ -f /tmp/registry.json ]; then
               MODULES=$(jq '.modules // []' /tmp/registry.json)
             fi
+          else
+            CHANGED=1
           fi
 
           CHANGED=0
