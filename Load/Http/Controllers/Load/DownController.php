@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
+use Modules\Load\Services\ZipTree;
 use Symfony\Component\HttpFoundation\Response;
 use ZipArchive;
 
@@ -26,6 +27,9 @@ class DownController extends Controller
 
     protected string $commentableModelClass = Down::class;
 
+    /**
+     * Просмотр загрузки
+     */
     public function view(int $id): View
     {
         $down = Down::query()
@@ -54,6 +58,9 @@ class DownController extends Controller
         return view('load::downs/down', compact('down', 'allowDownload', 'comments', 'files'));
     }
 
+    /**
+     * Создание загрузки
+     */
     public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
     {
         $cid = int($request->input('category'));
@@ -153,6 +160,9 @@ class DownController extends Controller
         return view('load::downs/create', compact('categories', 'down', 'cid', 'files'));
     }
 
+    /**
+     * Редактирование загрузки
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $cid = int($request->input('category'));
@@ -233,6 +243,9 @@ class DownController extends Controller
         return view('load::downs/edit', compact('categories', 'down', 'cid', 'files'));
     }
 
+    /**
+     * Скачивание файла
+     */
     public function download(int $id, int $fid, Validator $validator): Response
     {
         $file = File::query()->where('relate_type', Down::$morphName)->find($fid);
@@ -262,6 +275,9 @@ class DownController extends Controller
         return redirect()->route('downs.view', ['id' => $file->relate->id]);
     }
 
+    /**
+     * Скачивание файла по ссылке
+     */
     public function downloadLink(int $id, int $linkId, Validator $validator): Response
     {
         $down = Down::query()->find($id);
@@ -291,79 +307,43 @@ class DownController extends Controller
         return redirect()->route('downs.view', ['id' => $down->id]);
     }
 
+    /**
+     * Просмотр zip архива
+     */
     public function zip(int $id, int $fid): View
     {
-        $down = Down::query()->find($id);
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        [$down, $file, $archive] = $this->openZipFile($id, $fid);
 
-        if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(200, __('load::loads.down_not_verified'));
-        }
-
-        $file = $down->files->firstWhere('id', $fid);
-        if (! $file) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if ($file->extension !== 'zip') {
-            abort(200, __('load::loads.archive_only_zip'));
-        }
-
-        $archive = new ZipArchive();
-        $opened = $archive->open(public_path($file->path), ZipArchive::RDONLY);
-
-        if ($opened !== true) {
-            abort(200, __('load::loads.archive_not_open'));
-        }
-
-        $documents = [];
+        $flat = [];
         for ($i = 0; $i < $archive->count(); $i++) {
-            $stat = $archive->statIndex($i);
+            $stat  = $archive->statIndex($i);
+            $isDir = str_ends_with($stat['name'], '/');
 
-            $documents[] = [
+            $flat[] = [
                 'index' => $stat['index'],
                 'name'  => $stat['name'],
                 'size'  => $stat['size'],
-                'isDir' => str_ends_with($stat['name'], '/'),
-                'ext'   => getExtension($stat['name']),
+                'isDir' => $isDir,
+                'ext'   => $isDir ? '' : getExtension($stat['name']),
             ];
         }
 
         $archive->close();
 
-        $documents = paginate($documents, setting('ziplist'));
+        $tree = ZipTree::build($flat);
 
-        return view('load::downs/zip', compact('down', 'file', 'documents'));
+        $totalCount = $tree['__count'];
+        $totalSize  = $tree['__size'];
+
+        return view('load::downs/zip', compact('down', 'file', 'tree', 'totalCount', 'totalSize'));
     }
 
-    public function zipView(int $id, int $fid, int $zid): View
+    /**
+     * Просмотр файла в zip архиве
+     */
+    public function zipView(int $id, int $fid, int $zid): View|Response
     {
-        $down = Down::query()->find($id);
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(200, __('load::loads.down_not_verified'));
-        }
-
-        $file = $down->files->firstWhere('id', $fid);
-        if (! $file) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if ($file->extension !== 'zip') {
-            abort(200, __('load::loads.archive_only_zip'));
-        }
-
-        $archive = new ZipArchive();
-        $opened = $archive->open(public_path($file->path), ZipArchive::RDONLY);
-
-        if ($opened !== true) {
-            abort(200, __('load::loads.archive_not_open'));
-        }
+        [$down, $file, $archive] = $this->openZipFile($id, $fid);
 
         $content = $archive->getFromIndex($zid);
         $document = $archive->statIndex($zid);
@@ -374,20 +354,26 @@ class DownController extends Controller
 
         $archive->close();
 
-        $ext = getExtension($document['name']);
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
 
-        if (! in_array($ext, $down->getViewExt(), true)) {
+        $isImage = str_starts_with($mime, 'image/');
+        $isText  = str_starts_with($mime, 'text/') || in_array($mime, [
+            'application/json',
+            'application/xml',
+            'application/javascript',
+            'application/x-httpd-php',
+            'application/sql',
+        ], true);
+
+        if (! $isImage && ! $isText) {
             abort(200, __('load::loads.file_not_read'));
         }
 
-        if (
-            $document['size'] > 0
-            && preg_match("/\.(gif|png|bmp|jpg|jpeg|webp)$/", $document['name'])
-        ) {
-            header('Content-type: image/' . $ext);
-            header('Content-Length: ' . strlen($content));
-            header('Content-Disposition: inline; filename="' . $document['name'] . '";');
-            exit($content);
+        if ($isImage) {
+            return response($content)
+                ->header('Content-Type', $mime)
+                ->header('Content-Length', strlen($content))
+                ->header('Content-Disposition', 'inline; filename="' . $document['name'] . '"');
         }
 
         if (! mb_check_encoding($content, 'utf-8')) {
@@ -397,6 +383,37 @@ class DownController extends Controller
         return view('load::downs/zip_view', compact('down', 'file', 'document', 'content'));
     }
 
+    private function openZipFile(int $id, int $fid): array
+    {
+        $down = Down::query()->find($id);
+        if (! $down) {
+            abort(404, __('load::loads.down_not_exist'));
+        }
+
+        if (! $down->active && ! isAdmin(User::ADMIN)) {
+            abort(200, __('load::loads.down_not_verified'));
+        }
+
+        $file = $down->files->firstWhere('id', $fid);
+        if (! $file) {
+            abort(404, __('load::loads.down_not_exist'));
+        }
+
+        if ($file->extension !== 'zip') {
+            abort(200, __('load::loads.archive_only_zip'));
+        }
+
+        $archive = new ZipArchive();
+        if ($archive->open(public_path($file->path), ZipArchive::RDONLY) !== true) {
+            abort(200, __('load::loads.archive_not_open'));
+        }
+
+        return [$down, $file, $archive];
+    }
+
+    /**
+     * RSS комментариев
+     */
     public function rss(int $id): Response
     {
         $down = Down::query()->where('id', $id)->with('lastComments')->first();

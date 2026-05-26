@@ -8,7 +8,6 @@ return new class extends Migration {
     {
         $settings = [
             ['name' => 'downlist',            'value' => 10],
-            ['name' => 'ziplist',             'value' => 50],
             ['name' => 'downupload',          'value' => 1],
             ['name' => 'down_allow_links',    'value' => 0],
             ['name' => 'down_guest_download', 'value' => 1],

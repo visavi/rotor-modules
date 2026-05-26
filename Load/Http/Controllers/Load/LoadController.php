@@ -12,6 +12,9 @@ use Modules\Load\Models\Load;
 
 class LoadController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $categories = Load::query()
@@ -27,6 +30,9 @@ class LoadController extends Controller
         return view('load::downs/index', compact('categories'));
     }
 
+    /**
+     * Список файлов в категории
+     */
     public function load(int $id, Request $request): View
     {
         $category = Load::query()->with('parent')->find($id);
@@ -51,6 +57,9 @@ class LoadController extends Controller
         return view('load::downs/load', compact('category', 'downs', 'sorting'));
     }
 
+    /**
+     * RSS всех файлов
+     */
     public function rss(): View
     {
         $downs = Down::query()

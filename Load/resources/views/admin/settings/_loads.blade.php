@@ -27,12 +27,6 @@
         <div class="invalid-feedback">{{ textError('sets[downlist]') }}</div>
     </div>
 
-    <div class="mb-3{{ hasError('sets[ziplist]') }}">
-        <label for="ziplist" class="form-label">{{ __('load::loads.loads_archives') }}:</label>
-        <input type="number" class="form-control" id="ziplist" name="sets[ziplist]" maxlength="2" value="{{ getInput('sets.ziplist', $settings['ziplist']) }}" required>
-        <div class="invalid-feedback">{{ textError('sets[ziplist]') }}</div>
-    </div>
-
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[downupload]">
         <input type="checkbox" class="form-check-input" value="1" name="sets[downupload]" id="downupload"{{ getInput('sets.downupload', $settings['downupload']) ? ' checked' : '' }}>

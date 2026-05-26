@@ -17,6 +17,9 @@ use Modules\Load\Models\Load;
 
 class LoadController extends AdminController
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $categories = Load::query()
@@ -32,6 +35,9 @@ class LoadController extends AdminController
         return view('load::admin/downs/index', compact('categories', 'new'));
     }
 
+    /**
+     * Создание раздела
+     */
     public function create(Request $request, Validator $validator): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -61,6 +67,9 @@ class LoadController extends AdminController
         return redirect()->route('admin.loads.index');
     }
 
+    /**
+     * Редактирование раздела
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -105,6 +114,9 @@ class LoadController extends AdminController
         return view('load::admin/downs/edit', compact('loads', 'load'));
     }
 
+    /**
+     * Удаление раздела
+     */
     public function delete(int $id, Validator $validator): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -135,6 +147,9 @@ class LoadController extends AdminController
         return redirect()->route('admin.loads.index');
     }
 
+    /**
+     * Пересчет данных
+     */
     public function restatement(): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -148,6 +163,9 @@ class LoadController extends AdminController
             ->with('success', __('main.success_recounted'));
     }
 
+    /**
+     * Просмотр загрузок раздела
+     */
     public function load(int $id, Request $request): View
     {
         $category = Load::query()->with('parent')->find($id);
@@ -172,6 +190,9 @@ class LoadController extends AdminController
         return view('load::admin/downs/load', compact('category', 'downs', 'sorting'));
     }
 
+    /**
+     * Редактирование загрузки
+     */
     public function editDown(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $cid = int($request->input('category'));
@@ -254,6 +275,9 @@ class LoadController extends AdminController
         return view('load::admin/downs/edit_down', compact('categories', 'down', 'cid', 'files'));
     }
 
+    /**
+     * Удаление загрузки
+     */
     public function deleteDown(int $id): RedirectResponse
     {
         $down = Down::query()->find($id);
@@ -278,6 +302,9 @@ class LoadController extends AdminController
         return redirect()->route('admin.loads.load', ['id' => $down->category_id]);
     }
 
+    /**
+     * Новые публикации
+     */
     public function new(): View
     {
         $downs = Down::query()
@@ -289,6 +316,9 @@ class LoadController extends AdminController
         return view('load::admin/downs/new', compact('downs'));
     }
 
+    /**
+     * Публикация загрузки
+     */
     public function publish(int $id): RedirectResponse
     {
         $down = Down::query()->find($id);

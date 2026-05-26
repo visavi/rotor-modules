@@ -12,6 +12,9 @@ use Modules\Load\Models\Down;
 
 class NewController extends Controller
 {
+    /**
+     * Новые файлы
+     */
     public function files(Request $request): View
     {
         $sort = $request->input('sort', 'date');
@@ -29,6 +32,9 @@ class NewController extends Controller
         return view('load::downs/new_files', compact('downs', 'sorting'));
     }
 
+    /**
+     * Новые комментарии
+     */
     public function comments(): View
     {
         $comments = Comment::query()

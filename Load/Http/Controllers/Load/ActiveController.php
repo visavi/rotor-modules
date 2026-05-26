@@ -15,6 +15,9 @@ class ActiveController extends Controller
 {
     public ?User $user;
 
+    /**
+     * Конструктор
+     */
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
@@ -29,6 +32,9 @@ class ActiveController extends Controller
         });
     }
 
+    /**
+     * Мои файлы
+     */
     public function files(Request $request): View
     {
         $active = (bool) $request->input('active', true);
@@ -62,6 +68,9 @@ class ActiveController extends Controller
         return view('load::downs/active_files', compact('downs', 'user', 'active', 'activeCount', 'pendingCount'));
     }
 
+    /**
+     * Мои комментарии
+     */
     public function comments(): View
     {
         $user = $this->user;

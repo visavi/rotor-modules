@@ -19,31 +19,13 @@
 @stop
 
 @section('content')
-    {{ __('main.total') }}: {{ $documents->total() }}
-    <hr>
+    @if (! empty($tree['__files']) || ! empty($tree['__dirs']))
+        <small class="text-muted d-block mb-2">{{ __('main.total') }}: {{ $totalCount }} / {{ formatSize($totalSize) }}</small>
 
-    @if ($documents->isNotEmpty())
         <div class="mb-3">
-            @foreach ($documents as $document)
-                @if ($document['isDir'])
-                    <i class="far fa-folder-open"></i>
-                    <b>{{ __('load::loads.directory') }} {{ rtrim($document['name'], '/') }}</b><br>
-                @else
-                    └─ {{ icons($document['ext']) }}
-
-                    @if (in_array($document['ext'], $down->getViewExt(), true))
-                        <a href="{{ route('downs.zip-view', ['id' => $down->id, 'fid' => $file->id, 'zid' => $document['index']]) }}">{{ $document['name'] }}</a>
-                    @else
-                        {{ $document['name'] }}
-                    @endif
-
-                    ({{ formatSize($document['size']) }})<br>
-                @endif
-            @endforeach
+            @include('load::downs/_zip_tree', ['tree' => $tree])
         </div>
     @else
         {{ showError(__('load::loads.empty_archive')) }}
     @endif
-
-    {{ $documents->links() }}
 @stop
