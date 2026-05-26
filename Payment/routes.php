@@ -22,7 +22,7 @@ Route::middleware('web')
     });
 
 /* Админка */
-Route::middleware('web')
+Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);

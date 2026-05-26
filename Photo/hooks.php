@@ -22,7 +22,7 @@ Hook::add('sidebarMenu', static function () {
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
     </li>';
-}, 10);
+}, 14);
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {

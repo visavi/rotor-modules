@@ -2,15 +2,26 @@
 
 @section('title', __('template::template.admin_title'))
 
-@section('content')
-    <nav class="mb-3">
+@section('header')
+    <div class="float-end">
+        <a class="btn btn-adaptive" href="{{ route('template.index') }}"><i class="fas fa-eye"></i></a>
+    </div>
+
+    <h1>{{ __('template::template.admin_title') }}</h1>
+@stop
+
+@section('breadcrumb')
+    <nav>
         <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item active">{{ __('template::template.template') }}</li>
         </ol>
     </nav>
+@stop
 
-    <h1>{{ __('template::template.records') }}</h1>
+@section('content')
+    <h2>{{ __('template::template.records') }}</h2>
 
     @forelse($templates as $template)
         <div class="card mb-2">

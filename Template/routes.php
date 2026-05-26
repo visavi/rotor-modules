@@ -13,7 +13,7 @@ Route::middleware('web')
         Route::post('/create', 'store')->middleware('auth')->name('store');
     });
 
-Route::middleware(['web', 'check.admin', 'admin.logger'])
+Route::middleware(['web', 'check.admin:moder', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::controller(AdminTemplateController::class)

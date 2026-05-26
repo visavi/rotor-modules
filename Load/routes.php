@@ -42,7 +42,7 @@ Route::prefix('downs')
     });
 
 /* Административная панель */
-Route::middleware(['check.admin'])
+Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         /* Загрузки */

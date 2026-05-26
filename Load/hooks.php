@@ -54,7 +54,7 @@ Hook::add('sidebarMenu', static function () {
             <li><a class="treeview-item' . $activeComments . '" href="' . route('downs.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelComments . '</a></li>
         </ul>
     </li>';
-}, 10);
+}, 15);
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {

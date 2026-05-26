@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\DB;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
+use Modules\Forum\Models\Vote;
 use Modules\Forum\Observers\PostObserver;
 use Modules\Forum\Observers\TopicObserver;
 
@@ -28,6 +29,7 @@ return [
             'rating' => true,
             'spam'   => true,
         ],
+        Vote::class => [],
     ],
 
     'observers' => [

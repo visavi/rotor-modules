@@ -96,7 +96,7 @@ Hook::add('sidebarMenu', static function () {
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
     </li>';
-}, 25);
+}, 30);
 
 // Блок форума в панели администратора
 Hook::add('adminBlockEditor', static function () {

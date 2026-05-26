@@ -13,7 +13,7 @@ Route::middleware('web')
         Route::get('/{login}', [IndexController::class, 'gifts']);
     });
 
-Route::middleware('web')
+Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::match(['get', 'post'], '/gifts', [PanelController::class, 'index']);

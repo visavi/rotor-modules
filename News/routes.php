@@ -19,7 +19,7 @@ Route::middleware('web')
     });
 
 /* Админ */
-Route::middleware(['web', 'check.admin', 'admin.logger'])
+Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::controller(AdminNewsController::class)

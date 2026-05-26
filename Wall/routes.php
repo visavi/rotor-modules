@@ -13,7 +13,7 @@ Route::controller(WallController::class)
         Route::post('/{login}/delete', 'delete')->name('delete');
     });
 
-Route::middleware('check.admin')
+Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/wall-settings', [SettingController::class, 'index'])->name('wall.settings');

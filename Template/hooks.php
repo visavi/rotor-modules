@@ -18,8 +18,8 @@ Hook::add('sidebarMenu', static function () {
     </li>';
 }, 10);
 
-// Ссылка в блоке администрирования
-Hook::add('adminBlockAdmin', static function () {
+// Ссылка в блоке модератора
+Hook::add('adminBlockModer', static function () {
     return '<div class="col">
         <a href="' . route('admin.template.index') . '" class="app-tile">
             <div class="app-tile-icon" style="background:#fd7e14"><i class="far fa-file"></i></div>

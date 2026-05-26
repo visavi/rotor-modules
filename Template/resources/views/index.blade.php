@@ -2,9 +2,26 @@
 
 @section('title', __('template::template.template'))
 
-@section('content')
-    <h1>{{ __('template::template.template') }}</h1>
+@section('header')
+    @if (isAdmin('moder'))
+        <div class="float-end">
+            <a class="btn btn-adaptive" href="{{ route('admin.template.index') }}"><i class="fas fa-wrench"></i></a>
+        </div>
+    @endif
 
+    <h1>{{ __('template::template.template') }}</h1>
+@stop
+
+@section('breadcrumb')
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item active">{{ __('template::template.template') }}</li>
+        </ol>
+    </nav>
+@stop
+
+@section('content')
     @auth
         <form action="{{ route('template.store') }}" method="post">
             @csrf

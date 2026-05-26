@@ -54,7 +54,7 @@ Route::prefix('posts')
     });
 
 /* ---- Админ роуты ---- */
-Route::middleware(['web', 'check.admin'])
+Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->controller(AdminForumController::class)
     ->prefix('admin/forums')
     ->name('admin.forums.')
@@ -67,7 +67,7 @@ Route::middleware(['web', 'check.admin'])
         Route::post('/restatement', 'restatement')->name('restatement');
     });
 
-Route::middleware(['web', 'check.admin'])
+Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->controller(AdminForumController::class)
     ->prefix('admin/topics')
     ->name('admin.topics.')
@@ -79,7 +79,7 @@ Route::middleware(['web', 'check.admin'])
         Route::delete('/{id}/delete', 'deleteTopic')->name('delete');
     });
 
-Route::middleware(['web', 'check.admin'])
+Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->controller(AdminForumController::class)
     ->prefix('admin/posts')
     ->name('admin.posts.')
@@ -89,7 +89,7 @@ Route::middleware(['web', 'check.admin'])
     });
 
 /* ---- Настройки форума ---- */
-Route::middleware(['web', 'check.admin'])
+Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->controller(ForumSettingController::class)
     ->prefix('admin/forum-settings')
     ->name('forum.')

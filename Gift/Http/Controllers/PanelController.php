@@ -15,14 +15,6 @@ use Modules\Gift\Models\GiftsUser;
 class PanelController extends AdminController
 {
     /**
-     * PanelController constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware('check.admin:boss');
-    }
-
-    /**
      * Main page
      */
     public function index(Request $request, Validator $validator): View|RedirectResponse

@@ -26,7 +26,7 @@ Hook::add('footer', function () {
 Hook::add('adminBlockAdmin', static function () {
     return '<div class="col">
         <a href="' . route('admin.editor.index') . '" class="app-tile">
-            <div class="app-tile-icon" style="background:#6c757d"><i class="fas fa-paint-brush"></i></div>
+            <div class="app-tile-icon" style="background:#e3015d"><i class="fas fa-paint-brush"></i></div>
             <div class="app-tile-label">' . __('style_editor::editor.css_js_editor') . '</div>
         </a>
     </div>';
