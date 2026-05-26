@@ -27,7 +27,7 @@
 @stop
 
 @section('content')
-    {!! Hook::call('advertForum') !!}
+    @hook('advertForum')
 
     <div class="my-3 py-2 border-bottom">
         @if (getUser())

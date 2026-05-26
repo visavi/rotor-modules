@@ -1,13 +1,13 @@
 @extends('layout')
 
-@section('title', __('payment::payments.paid_adverts'))
+@section('title', __('payment::payments.paid_adverts.title'))
 
 @section('header')
     <div class="float-end">
         <a class="btn btn-success" href="/admin/paid-adverts/create?place={{ $place }}">{{ __('main.create') }}</a>
     </div>
 
-    <h1>{{ __('payment::payments.paid_adverts') }}</h1>
+    <h1>{{ __('payment::payments.paid_adverts.title') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -15,7 +15,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('payment::payments.paid_adverts') }}</li>
+            <li class="breadcrumb-item active">{{ __('payment::payments.paid_adverts.title') }}</li>
         </ol>
     </nav>
 @stop

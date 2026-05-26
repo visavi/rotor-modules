@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active"><a href="/admin/paid-adverts">{{ __('payment::payments.paid_adverts') }}</a></li>
+            <li class="breadcrumb-item active"><a href="/admin/paid-adverts">{{ __('payment::payments.paid_adverts.title') }}</a></li>
             <li class="breadcrumb-item active">{{ __('payment::payments.paid_adverts.edit_advert') }}</li>
         </ol>
     </nav>
