@@ -25,9 +25,10 @@ Hook::add('adminSettingsNav', static function () {
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
-    $url = route('admin.boards.index');
-    $label = __('board::boards.boards');
-    $stats = statsBoard();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.boards.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#fd7e14"><i class="far fa-rectangle-list"></i></div>
+            <div class="app-tile-label">' . __('board::boards.boards') . '<span class="badge bg-adaptive app-tile-badge">' . statsBoard() . '</span></div>
+        </a>
+    </div>';
 });

@@ -55,15 +55,18 @@ Hook::add('sidebarMenu', static function () {
 
 // Ссылка блоги в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
-    $urlBlogs = route('admin.blogs.index');
-    $urlNew = route('admin.articles.new');
-    $labelBlogs = __('blog::blogs.blogs');
-    $labelNew = __('blog::blogs.new_articles');
-    $statsBlogs = statsBlog();
-    $statsNew = statsNewArticles();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $urlBlogs . '">' . $labelBlogs . '</a> <span class="badge bg-adaptive">' . $statsBlogs . '</span><br>' . PHP_EOL
-        . '<i class="far fa-circle text-muted"></i> <a href="' . $urlNew . '">' . $labelNew . '</a> <span class="badge bg-adaptive">' . $statsNew . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.blogs.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#0d6efd"><i class="far fa-sticky-note"></i></div>
+            <div class="app-tile-label">' . __('blog::blogs.blogs') . '<span class="badge bg-adaptive app-tile-badge">' . statsBlog() . '</span></div>
+        </a>
+    </div>
+    <div class="col">
+        <a href="' . route('admin.articles.new') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#ffc107"><i class="fas fa-pen-nib"></i></div>
+            <div class="app-tile-label">' . __('blog::blogs.new_articles') . '<span class="badge bg-adaptive app-tile-badge">' . statsNewArticles() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Ссылка в навигации настроек админки

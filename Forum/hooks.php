@@ -96,15 +96,16 @@ Hook::add('sidebarMenu', static function () {
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
     </li>';
-}, 5);
+}, 25);
 
 // Блок форума в панели администратора
 Hook::add('adminBlockEditor', static function () {
-    $url = route('admin.forums.index');
-    $label = __('forum::forums.forums');
-    $stats = statsForum();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.forums.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#6f42c1"><i class="far fa-comment-alt"></i></div>
+            <div class="app-tile-label">' . __('forum::forums.forums') . '<span class="badge bg-adaptive app-tile-badge">' . statsForum() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Ссылка на настройки в навигации настроек

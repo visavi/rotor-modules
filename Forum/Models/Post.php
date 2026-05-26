@@ -75,15 +75,6 @@ class Post extends Model
         return ['text'];
     }
 
-    /**
-     * Первый пост темы не индексируется — тема покрывает его содержимое
-     */
-    public function shouldBeSearchable(): bool
-    {
-        $firstPostId = static::query()->where('topic_id', $this->topic_id)->min('id');
-
-        return $this->id !== $firstPostId;
-    }
 
     /**
      * Возвращает список сортируемых полей

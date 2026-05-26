@@ -25,14 +25,16 @@ Hook::add('sidebarMenu', static function () {
             <span class="badge menu-badge">' . $stats . '</span>
         </a>
     </li>';
-}, 5);
+}, 20);
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
-    $label = __('guestbook::guestbook.guestbook');
-    $stats = statsGuestbook();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . route('admin.guestbook.index') . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.guestbook.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#20c997"><i class="far fa-comment"></i></div>
+            <div class="app-tile-label">' . __('guestbook::guestbook.guestbook') . '<span class="badge bg-adaptive app-tile-badge">' . statsGuestbook() . '</span></div>
+        </a>
+    </div>';
 }, 10);
 
 // Вкладка в настройках администратора

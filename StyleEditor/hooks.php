@@ -24,8 +24,10 @@ Hook::add('footer', function () {
 
 // Ссылка в блоке admin в админке
 Hook::add('adminBlockAdmin', static function () {
-    $url = route('admin.editor.index');
-    $label = __('style_editor::editor.css_js_editor');
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a><br>';
+    return '<div class="col">
+        <a href="' . route('admin.editor.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#6c757d"><i class="fas fa-paint-brush"></i></div>
+            <div class="app-tile-label">' . __('style_editor::editor.css_js_editor') . '</div>
+        </a>
+    </div>';
 });

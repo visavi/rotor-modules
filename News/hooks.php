@@ -56,22 +56,14 @@ Hook::add('sidebarMenu', static function () {
     </li>';
 }, 20);
 
-// Ссылка в колонке footer
-Hook::add('footerColumnMiddle', static function () {
-    $url = route('news.index');
-    $label = __('news::news.news');
-    $stats = statsNews();
-
-    return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
-});
-
 // Ссылка в блоке «Администрирование» в админке
 Hook::add('adminBlockAdmin', static function () {
-    $url = route('admin.news.index');
-    $label = __('news::news.news');
-    $stats = statsNews();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.news.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#ffc107"><i class="far fa-newspaper"></i></div>
+            <div class="app-tile-label">' . __('news::news.news') . '<span class="badge bg-adaptive app-tile-badge">' . statsNews() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Ссылка в навигации настроек админки

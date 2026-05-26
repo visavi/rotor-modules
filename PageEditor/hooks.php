@@ -4,8 +4,10 @@ use App\Classes\Hook;
 
 // Ссылка в блоке boss в админке
 Hook::add('adminBlockBoss', static function () {
-    $url = '/admin/files';
-    $label = __('page_editor::files.page_editor');
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a><br>';
+    return '<div class="col">
+        <a href="/admin/files" class="app-tile">
+            <div class="app-tile-icon" style="background:#212529"><i class="fas fa-file-code"></i></div>
+            <div class="app-tile-label">' . __('page_editor::files.page_editor') . '</div>
+        </a>
+    </div>';
 });

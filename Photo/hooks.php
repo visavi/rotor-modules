@@ -26,11 +26,12 @@ Hook::add('sidebarMenu', static function () {
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockEditor', static function () {
-    $url = route('admin.photos.index');
-    $label = __('photo::photos.photos');
-    $stats = statsPhotos();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.photos.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#e91e63"><i class="far fa-image"></i></div>
+            <div class="app-tile-label">' . __('photo::photos.photos') . '<span class="badge bg-adaptive app-tile-badge">' . statsPhotos() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Ссылка в навигации настроек админки

@@ -20,9 +20,10 @@ Hook::add('sidebarMenu', static function () {
 
 // Ссылка в блоке администрирования
 Hook::add('adminBlockAdmin', static function () {
-    $url = route('admin.template.index');
-    $label = __('template::template.template');
-    $stats = statsTemplate();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.template.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#fd7e14"><i class="far fa-file"></i></div>
+            <div class="app-tile-label">' . __('template::template.template') . '<span class="badge bg-adaptive app-tile-badge">' . statsTemplate() . '</span></div>
+        </a>
+    </div>';
 });

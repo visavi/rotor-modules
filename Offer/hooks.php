@@ -29,11 +29,12 @@ Hook::add('footerColumnMiddle', static function () {
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockAdmin', static function () {
-    $url = route('admin.offers.index');
-    $label = __('offer::offers.offers');
-    $stats = statsOffers();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span><br>';
+    return '<div class="col">
+        <a href="' . route('admin.offers.index') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#d63384"><i class="fa-regular fa-circle-question"></i></div>
+            <div class="app-tile-label">' . __('offer::offers.offers') . '<span class="badge bg-adaptive app-tile-badge">' . statsOffers() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Ссылка в навигации настроек админки

@@ -9,10 +9,18 @@ Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="/admin/
 
 // Ссылки в блок администратора
 Hook::add('adminBlockBoss', static function () {
-    $ordersCount = Order::query()->count();
-
-    return '<i class="far fa-circle text-muted"></i> <a href="/admin/paid-adverts">' . __('payment::payments.paid_adverts.title') . '</a><br>'
-        . '<i class="far fa-circle text-muted"></i> <a href="/admin/orders">' . __('payment::payments.orders') . '</a> <span class="badge bg-adaptive">' . $ordersCount . '</span><br>';
+    return '<div class="col">
+        <a href="/admin/paid-adverts" class="app-tile">
+            <div class="app-tile-icon" style="background:#ffc107"><i class="fas fa-ad"></i></div>
+            <div class="app-tile-label">' . __('payment::payments.paid_adverts.title') . '</div>
+        </a>
+    </div>
+    <div class="col">
+        <a href="/admin/orders" class="app-tile">
+            <div class="app-tile-icon" style="background:#0d6efd"><i class="fas fa-shopping-cart"></i></div>
+            <div class="app-tile-label">' . __('payment::payments.orders') . '<span class="badge bg-adaptive app-tile-badge">' . Order::query()->count() . '</span></div>
+        </a>
+    </div>';
 });
 
 // Платная реклама в шаблоне (верх/низ всех страниц)

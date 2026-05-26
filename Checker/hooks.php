@@ -3,7 +3,10 @@
 use App\Classes\Hook;
 
 Hook::add('adminBlockBoss', static function () {
-    return '<i class="far fa-circle text-muted"></i> <a href="/admin/checkers">'
-        . __('checker::checker.site_scan')
-        . '</a> <span class="badge bg-adaptive">' . statsChecker() . '</span><br>';
+    return '<div class="col">
+        <a href="/admin/checkers" class="app-tile">
+            <div class="app-tile-icon" style="background:#dc3545"><i class="fas fa-search"></i></div>
+            <div class="app-tile-label">' . __('checker::checker.site_scan') . '<span class="badge bg-adaptive app-tile-badge">' . statsChecker() . '</span></div>
+        </a>
+    </div>';
 });
