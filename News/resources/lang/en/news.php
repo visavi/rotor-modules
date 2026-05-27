@@ -19,8 +19,8 @@ return [
     'news_title_length' => 'Length of news title',
     'news_text_length'  => 'Length of news text',
 
-    'feed_news_show'         => 'Show news in feed',
-    'feed_news_rating'       => 'Hide news with rating',
+    'feed_news_show'   => 'Show news in feed',
+    'feed_news_rating' => 'Hide news with rating',
 
     'settings'               => 'News settings',
     'settings_empty'         => 'No settings provided!',

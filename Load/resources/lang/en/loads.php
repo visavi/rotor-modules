@@ -76,8 +76,8 @@ return [
     'down_point'                  => 'Total points awarded',
     'down_money'                  => 'Total moneys awarded',
 
-    'feed_downs_show'        => 'Show downloads in feed',
-    'feed_downs_rating'      => 'Hide downloads with rating',
+    'feed_downs_show'   => 'Show downloads in feed',
+    'feed_downs_rating' => 'Hide downloads with rating',
 
     'settings'               => 'Load settings',
     'settings_empty'         => 'No settings provided!',
