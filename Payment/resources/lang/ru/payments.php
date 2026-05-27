@@ -24,7 +24,7 @@ return [
     'settings'                   => 'Настройки платежей',
     'settings_success_saved'     => 'Настройки успешно сохранены!',
     'empty_orders'               => 'Заказов еще нет!',
-    'paid_adverts' => [
+    'paid_adverts'               => [
         'title'                 => 'Платная реклама',
         'top_all'               => 'Все верх',
         'top'                   => 'Главная верх',

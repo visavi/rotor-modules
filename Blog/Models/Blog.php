@@ -27,20 +27,35 @@ class Blog extends Model
 {
     use CategoryTreeTrait;
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Возвращает связь родительской категории
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id')->withDefault();
     }
 
+    /**
+     * Возвращает связь подкатегорий
+     */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort');
     }
 
+    /**
+     * Возвращает количество статей за последние 3 дня
+     */
     public function new(): hasOne
     {
         return $this->hasOne(Article::class, 'category_id')
@@ -50,11 +65,17 @@ class Blog extends Model
             ->groupBy('category_id');
     }
 
+    /**
+     * Возвращает статьи
+     */
     public function articles(): HasMany
     {
         return $this->hasMany(Article::class, 'category_id');
     }
 
+    /**
+     * Возвращает последнюю статью
+     */
     public function lastArticle(): hasOne
     {
         return $this->hasOne(Article::class, 'category_id')
@@ -63,6 +84,9 @@ class Blog extends Model
             ->limit(1);
     }
 
+    /**
+     * Пересчет раздела
+     */
     public function restatement(): void
     {
         $this->update([

@@ -12,6 +12,9 @@ use Illuminate\View\View;
 
 class BoardSettingController extends Controller
 {
+    /**
+     * Настройки
+     */
     public function index(): View
     {
         $settings = Setting::query()->pluck('value', 'name')->all();
@@ -19,6 +22,9 @@ class BoardSettingController extends Controller
         return view('board::admin/settings/_boards', compact('settings'));
     }
 
+    /**
+     * Сохранение настроек
+     */
     public function update(Request $request): RedirectResponse
     {
         $sets = $request->input('sets', []);

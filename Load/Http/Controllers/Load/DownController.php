@@ -25,6 +25,9 @@ class DownController extends Controller
 {
     use CommentableTrait;
 
+    /**
+     * Модель для комментариев
+     */
     protected string $commentableModelClass = Down::class;
 
     /**
@@ -316,7 +319,7 @@ class DownController extends Controller
 
         $flat = [];
         for ($i = 0; $i < $archive->count(); $i++) {
-            $stat  = $archive->statIndex($i);
+            $stat = $archive->statIndex($i);
             $isDir = str_ends_with($stat['name'], '/');
 
             $flat[] = [
@@ -333,7 +336,7 @@ class DownController extends Controller
         $tree = ZipTree::build($flat);
 
         $totalCount = $tree['__count'];
-        $totalSize  = $tree['__size'];
+        $totalSize = $tree['__size'];
 
         return view('load::downs/zip', compact('down', 'file', 'tree', 'totalCount', 'totalSize'));
     }
@@ -357,7 +360,7 @@ class DownController extends Controller
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
 
         $isImage = str_starts_with($mime, 'image/');
-        $isText  = str_starts_with($mime, 'text/') || in_array($mime, [
+        $isText = str_starts_with($mime, 'text/') || in_array($mime, [
             'application/json',
             'application/xml',
             'application/javascript',
@@ -383,6 +386,9 @@ class DownController extends Controller
         return view('load::downs/zip_view', compact('down', 'file', 'document', 'content'));
     }
 
+    /**
+     * Открывает zip-архив и возвращает загрузку, файл и архив
+     */
     private function openZipFile(int $id, int $fid): array
     {
         $down = Down::query()->find($id);

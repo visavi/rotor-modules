@@ -14,6 +14,9 @@ use Modules\Guestbook\Models\Guestbook;
 
 class GuestbookController extends AdminController
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $posts = Guestbook::query()
@@ -26,6 +29,9 @@ class GuestbookController extends AdminController
         return view('guestbook::admin/guestbook/index', compact('posts', 'unpublished'));
     }
 
+    /**
+     * Редактирование сообщения
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $page = int($request->input('page'));
@@ -58,6 +64,9 @@ class GuestbookController extends AdminController
         return view('guestbook::admin/guestbook/edit', compact('post', 'page'));
     }
 
+    /**
+     * Ответ на сообщение
+     */
     public function reply(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $page = int($request->input('page'));
@@ -88,6 +97,9 @@ class GuestbookController extends AdminController
         return view('guestbook::admin/guestbook/reply', compact('post', 'page'));
     }
 
+    /**
+     * Удаление сообщений
+     */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -114,6 +126,9 @@ class GuestbookController extends AdminController
             ->withErrors($validator->getErrors());
     }
 
+    /**
+     * Активация сообщений
+     */
     public function publish(Request $request, Validator $validator): RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -141,6 +156,9 @@ class GuestbookController extends AdminController
             ->withErrors($validator->getErrors());
     }
 
+    /**
+     * Очистка сообщений
+     */
     public function clear(Validator $validator): RedirectResponse
     {
         $validator->true(isAdmin(User::BOSS), __('main.page_only_owner'));

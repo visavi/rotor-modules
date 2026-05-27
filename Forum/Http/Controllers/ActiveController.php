@@ -14,6 +14,9 @@ use Modules\Forum\Models\Topic;
 
 class ActiveController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     public ?User $user;
 
     /**

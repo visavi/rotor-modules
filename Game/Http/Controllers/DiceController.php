@@ -10,6 +10,9 @@ use Illuminate\View\View;
 
 class DiceController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

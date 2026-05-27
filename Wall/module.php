@@ -14,8 +14,8 @@ return [
 
     'models' => [
         Wall::class => [
-            'label'  => __('wall::walls.wall_posts'),
-            'spam' => true,
+            'label' => __('wall::walls.wall_posts'),
+            'spam'  => true,
         ],
     ],
 

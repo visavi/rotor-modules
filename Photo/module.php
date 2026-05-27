@@ -19,7 +19,7 @@ return [
             'feed'   => ['withs' => ['user', 'files'], 'view' => 'photo::feeds/_photos'],
             'upload' => 'media',
             'rating' => true,
-            ],
+        ],
     ],
 
     'panel' => [

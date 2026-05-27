@@ -21,6 +21,9 @@ use Modules\Forum\Models\VoteAnswer;
 
 class ForumApiController extends Controller
 {
+    /**
+     * Список категорий форума
+     */
     public function categoryForums(): JsonResource
     {
         $forums = Forum::query()
@@ -36,6 +39,9 @@ class ForumApiController extends Controller
         return ForumResource::collection($forums);
     }
 
+    /**
+     * Список тем форума
+     */
     public function forums(int $id, Request $request): JsonResource
     {
         $forum = Forum::query()->find($id);
@@ -55,6 +61,9 @@ class ForumApiController extends Controller
             ->additional(['forum' => ForumResource::make($forum)]);
     }
 
+    /**
+     * Список сообщений темы
+     */
     public function topics(int $id, Request $request): JsonResource
     {
         $topic = Topic::query()->find($id);
@@ -73,6 +82,9 @@ class ForumApiController extends Controller
             ->additional(['topic' => TopicResource::make($topic)]);
     }
 
+    /**
+     * Создание сообщения
+     */
     public function createPost(int $id, Request $request, Flood $flood): JsonResponse
     {
         $user = getUser();
@@ -140,6 +152,9 @@ class ForumApiController extends Controller
         ], 201);
     }
 
+    /**
+     * Создание темы
+     */
     public function createTopic(int $id, Request $request, Flood $flood): JsonResponse
     {
         $user = getUser();
@@ -217,6 +232,9 @@ class ForumApiController extends Controller
         ], 201);
     }
 
+    /**
+     * Возвращает порядок сортировки
+     */
     private function getOrder(Request $request, string $default = 'desc'): string
     {
         $order = $request->input('order', $default);
@@ -224,6 +242,9 @@ class ForumApiController extends Controller
         return in_array($order, ['asc', 'desc']) ? $order : $default;
     }
 
+    /**
+     * Возвращает количество элементов на страницу
+     */
     private function getPerPage(Request $request): int
     {
         $perPage = $request->integer('per_page', 10);

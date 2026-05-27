@@ -12,6 +12,9 @@ use Illuminate\View\View;
 
 class SettingController extends AdminController
 {
+    /**
+     * Настройки
+     */
     public function index(): View
     {
         $settings = Setting::query()->pluck('value', 'name')->all();
@@ -19,6 +22,9 @@ class SettingController extends AdminController
         return view('wall::admin/settings/index', compact('settings'));
     }
 
+    /**
+     * Сохранение настроек
+     */
     public function update(Request $request): RedirectResponse
     {
         $sets = $request->input('sets');

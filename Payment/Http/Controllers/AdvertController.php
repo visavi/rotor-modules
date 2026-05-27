@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Payment\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Modules\Payment\Models\PaidAdvert;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Modules\Payment\Models\Order;
+use Modules\Payment\Models\PaidAdvert;
 use Modules\Payment\Requests\CalculateRequest;
 use Modules\Payment\Requests\PayRequest;
 use Modules\Payment\Services\OrderService;
@@ -22,6 +22,9 @@ use RuntimeException;
 
 class AdvertController extends Controller
 {
+    /**
+     * Конструктор
+     */
     public function __construct(
         private readonly YooKassaService $yooKassaService,
         private readonly PaymentService $paymentService,

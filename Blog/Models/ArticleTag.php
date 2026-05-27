@@ -15,7 +15,13 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ArticleTag extends Model
 {
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 }

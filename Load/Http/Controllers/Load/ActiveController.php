@@ -13,6 +13,9 @@ use Modules\Load\Models\Down;
 
 class ActiveController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     public ?User $user;
 
     /**

@@ -112,6 +112,6 @@ return [
     'settings'               => 'Forum settings',
     'settings_empty'         => 'No settings provided!',
     'settings_success_saved' => 'Settings saved successfully!',
-    'posts' => 'Forum posts',
-    'forums' => 'Forum',
+    'posts'                  => 'Forum posts',
+    'forums'                 => 'Forum',
 ];

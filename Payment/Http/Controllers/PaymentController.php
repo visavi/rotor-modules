@@ -17,6 +17,9 @@ use Modules\Payment\Services\YooKassaService;
 
 class PaymentController extends Controller
 {
+    /**
+     * Конструктор
+     */
     public function __construct(
         private readonly YooKassaService $yooKassaService,
         private readonly PaymentService $paymentService,

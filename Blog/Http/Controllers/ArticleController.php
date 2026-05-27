@@ -30,11 +30,17 @@ class ArticleController extends Controller
 
     protected string $commentableModelClass = Article::class;
 
+    /**
+     * Возвращает маршрут для просмотра комментируемой модели
+     */
     protected function commentableViewRoute(Model $model): array
     {
         return ['articles.view', ['slug' => $model->getAttribute('slug')]];
     }
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $categories = Blog::query()
@@ -50,6 +56,9 @@ class ArticleController extends Controller
         return view('blog::articles/index', compact('categories'));
     }
 
+    /**
+     * Список статей
+     */
     public function blog(int $id, Request $request): View
     {
         $category = Blog::query()->with('parent')->find($id);
@@ -74,6 +83,9 @@ class ArticleController extends Controller
         return view('blog::articles/blog', compact('articles', 'category', 'sorting'));
     }
 
+    /**
+     * Просмотр статьи
+     */
     public function view(string $slug): View
     {
         $id = Str::before($slug, '-');
@@ -94,6 +106,9 @@ class ArticleController extends Controller
         return view('blog::articles/view', compact('article', 'comments', 'files'));
     }
 
+    /**
+     * Создание статьи
+     */
     public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
     {
         $cid = int($request->input('cid'));
@@ -192,6 +207,9 @@ class ArticleController extends Controller
         return view('blog::articles/create', compact('article', 'categories', 'cid', 'files'));
     }
 
+    /**
+     * Редактирование статьи
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         if (! $user = getUser()) {
@@ -280,6 +298,9 @@ class ArticleController extends Controller
         return view('blog::articles/edit', compact('article', 'categories'));
     }
 
+    /**
+     * Просмотр по категориям
+     */
     public function authors(): View
     {
         $articles = Article::query()
@@ -294,6 +315,9 @@ class ArticleController extends Controller
         return view('blog::articles/authors', compact('articles'));
     }
 
+    /**
+     * Печать
+     */
     public function print(int $id): View
     {
         $article = Article::query()->find($id);
@@ -305,6 +329,9 @@ class ArticleController extends Controller
         return view('blog::articles/print', compact('article'));
     }
 
+    /**
+     * RSS всех блогов
+     */
     public function rss(): Response
     {
         $articles = Article::query()
@@ -323,6 +350,9 @@ class ArticleController extends Controller
             ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 
+    /**
+     * RSS комментариев к блогу
+     */
     public function rssComments(int $id): Response
     {
         $article = Article::query()->where('id', $id)->with('lastComments')->first();
@@ -336,6 +366,9 @@ class ArticleController extends Controller
             ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 
+    /**
+     * Вывод всех тегов
+     */
     public function tags(): View
     {
         $tags = Cache::remember('tagCloud', 3600, static function () {
@@ -360,6 +393,9 @@ class ArticleController extends Controller
         return view('blog::articles/tags', compact('tags', 'max', 'min'));
     }
 
+    /**
+     * Поиск по тегам
+     */
     public function getTag(string $tag): View|RedirectResponse
     {
         $tag = urldecode($tag);
@@ -387,6 +423,9 @@ class ArticleController extends Controller
         return view('blog::articles/tags_search', compact('articles', 'tag'));
     }
 
+    /**
+     * Search tags
+     */
     public function searchTags(Request $request): JsonResponse
     {
         $query = $request->input('query');
@@ -413,6 +452,9 @@ class ArticleController extends Controller
         return response()->json($formattedTags);
     }
 
+    /**
+     * Новые статьи
+     */
     public function newArticles(Request $request): View
     {
         $sort = $request->input('sort', 'date');
@@ -430,6 +472,9 @@ class ArticleController extends Controller
         return view('blog::articles/new_articles', compact('articles', 'sorting'));
     }
 
+    /**
+     * Новые комментарии
+     */
     public function newComments(): View
     {
         $comments = Comment::query()
@@ -443,6 +488,9 @@ class ArticleController extends Controller
         return view('blog::articles/new_comments', compact('comments'));
     }
 
+    /**
+     * Статьи пользователя
+     */
     public function userArticles(Request $request): View
     {
         $active = (bool) $request->input('active', true);
@@ -468,6 +516,9 @@ class ArticleController extends Controller
         return view('blog::articles/active_articles', compact('articles', 'user', 'activeCount', 'delayCount', 'active'));
     }
 
+    /**
+     * Комментарии пользователя
+     */
     public function userComments(Request $request): View
     {
         $login = $request->input('user', getUser('login'));
@@ -490,6 +541,9 @@ class ArticleController extends Controller
         return view('blog::articles/active_comments', compact('comments', 'user'));
     }
 
+    /**
+     * Список всех блогов (Для вывода на главную страницу)
+     */
     public function main(): View
     {
         $articles = Article::query()

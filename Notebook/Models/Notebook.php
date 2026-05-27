@@ -20,10 +20,19 @@ use Illuminate\Support\HtmlString;
  */
 class Notebook extends Model
 {
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -32,11 +41,17 @@ class Notebook extends Model
         ];
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'notebook-' . $this->id);
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();

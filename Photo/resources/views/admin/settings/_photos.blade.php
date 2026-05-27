@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Photo']) }}">{{ __('photo::photos.photos_section') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Photo']) }}">{{ __('photo::photos.photos') }}</a></li>
             <li class="breadcrumb-item active">{{ __('photo::photos.settings') }}</li>
         </ol>
     </nav>

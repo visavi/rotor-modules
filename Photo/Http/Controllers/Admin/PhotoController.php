@@ -15,6 +15,9 @@ use Modules\Photo\Models\Photo;
 
 class PhotoController extends AdminController
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $photos = Photo::query()
@@ -25,6 +28,9 @@ class PhotoController extends AdminController
         return view('photo::admin/photos/index', compact('photos'));
     }
 
+    /**
+     * Редактирование ссылки
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -65,6 +71,9 @@ class PhotoController extends AdminController
         return view('photo::admin/photos/edit', compact('photo', 'page'));
     }
 
+    /**
+     * Удаление записей
+     */
     public function delete(int $id, Request $request): RedirectResponse
     {
         if (! is_writable(public_path('uploads/photos'))) {
@@ -87,6 +96,9 @@ class PhotoController extends AdminController
         return redirect()->route('admin.photos.index', ['page' => $page]);
     }
 
+    /**
+     * Пересчет комментариев
+     */
     public function restatement(): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {

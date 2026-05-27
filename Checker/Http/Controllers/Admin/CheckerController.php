@@ -14,6 +14,9 @@ class CheckerController extends AdminController
 {
     private string $filename = 'checker.php';
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $diff = [];
@@ -29,6 +32,9 @@ class CheckerController extends AdminController
         return view('checker::admin/checkers/index', compact('diff'));
     }
 
+    /**
+     * Сканирование сайта
+     */
     public function scan(): RedirectResponse
     {
         $files = $this->scanFiles(base_path());
@@ -40,6 +46,9 @@ class CheckerController extends AdminController
         return redirect('admin/checkers');
     }
 
+    /**
+     * Сканирует директорию сайта
+     */
     private function scanFiles(string $dir): array
     {
         $state = [];

@@ -19,12 +19,24 @@ use Illuminate\Support\HtmlString;
  */
 class Template extends Model
 {
+    /**
+     * The table associated with the model.
+     */
     protected $table = 'templates';
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -32,11 +44,17 @@ class Template extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'template-' . $this->id);

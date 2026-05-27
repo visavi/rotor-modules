@@ -13,6 +13,9 @@ use Modules\Template\Models\Template;
 
 class TemplateController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $templates = Template::query()
@@ -23,6 +26,9 @@ class TemplateController extends Controller
         return view('template::admin/index', compact('templates'));
     }
 
+    /**
+     * Удаление шаблона
+     */
     public function delete(Request $request): RedirectResponse
     {
         $id = (int) $request->input('id');

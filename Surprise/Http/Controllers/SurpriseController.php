@@ -10,6 +10,9 @@ use Modules\Surprise\Models\Surprise;
 
 class SurpriseController extends Controller
 {
+    /**
+     * Получение новогоднего подарка
+     */
     public function index(): RedirectResponse
     {
         $money = mt_rand(10000, 50000);

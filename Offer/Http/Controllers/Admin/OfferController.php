@@ -15,6 +15,9 @@ use Modules\Offer\Models\Offer;
 
 class OfferController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(Request $request, string $type = Offer::OFFER): View
     {
         $offerCount = Offer::query()->where('type', Offer::OFFER)->count();
@@ -35,6 +38,9 @@ class OfferController extends Controller
         return view('offer::admin/offers/index', compact('offers', 'order', 'type', 'sort', 'sorting', 'offerCount', 'issueCount'));
     }
 
+    /**
+     * Просмотр записи
+     */
     public function view(int $id): View
     {
         $offer = Offer::query()->where('offers.id', $id)->first();
@@ -46,6 +52,9 @@ class OfferController extends Controller
         return view('offer::admin/offers/view', compact('offer'));
     }
 
+    /**
+     * Редактирование записи
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $offer = Offer::query()->where('id', $id)->first();
@@ -89,6 +98,9 @@ class OfferController extends Controller
         return view('offer::admin/offers/edit', compact('offer'));
     }
 
+    /**
+     * Ответ на предложение
+     */
     public function reply(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $offer = Offer::query()->where('id', $id)->first();
@@ -140,6 +152,9 @@ class OfferController extends Controller
         return view('offer::admin/offers/reply', compact('offer', 'statuses'));
     }
 
+    /**
+     * Пересчет комментариев
+     */
     public function restatement(): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -153,6 +168,9 @@ class OfferController extends Controller
             ->with('success', __('main.success_recounted'));
     }
 
+    /**
+     * Удаление записей
+     */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
         $page = int($request->input('page', 1));

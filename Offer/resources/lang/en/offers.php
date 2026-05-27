@@ -37,5 +37,5 @@ return [
 
     'feed_offers_show'   => 'Show offers / issues in feed',
     'feed_offers_rating' => 'Hide offers / issues in feed with rating below',
-    'offers' => 'Suggestions / Problems',
+    'offers'             => 'Suggestions / Problems',
 ];

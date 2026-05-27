@@ -38,27 +38,51 @@ class Guestbook extends Model
     use SearchableTrait;
     use UploadTrait;
 
+    /**
+     * The table associated with the model.
+     */
     protected $table = 'guestbook';
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Morph name
+     */
     public static string $morphName = 'guestbook';
 
+    /**
+     * Директория загрузки файлов
+     */
     public string $uploadPath = '/uploads/guestbook';
 
+    /**
+     * Возвращает поля участвующие в поиске
+     */
     public function searchableFields(): array
     {
         return ['text', 'reply'];
     }
 
+    /**
+     * Scope a query to only include active records.
+     */
     #[Scope]
     protected function active(Builder $query, bool $type = true): void
     {
         $query->where('active', $type);
     }
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -68,47 +92,74 @@ class Guestbook extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Возвращает связь пользователя изменившего запись
+     */
     public function editUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'edit_user_id')->withDefault();
     }
 
+    /**
+     * Возвращает загруженные файлы
+     */
     public function files(): MorphMany
     {
         return $this->morphMany(File::class, 'relate')
             ->orderBy('created_at');
     }
 
+    /**
+     * Возвращает файлы
+     */
     public function getFiles(): Collection
     {
         return $this->files->filter(static fn (File $f) => ! $f->isImage() && ! $f->isVideo());
     }
 
+    /**
+     * Возвращает медиафайлы (картинки и видео)
+     */
     public function getMedia(): Collection
     {
         return $this->files->filter(static fn (File $f) => $f->isImage() || $f->isVideo());
     }
 
+    /**
+     * Возвращает медиафайлы, не вставленные в текст
+     */
     public function getDetachedMedia(): Collection
     {
         return $this->getMedia()->reject(fn (File $f) => str_contains($this->text ?? '', $f->path));
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'guestbook-' . $this->id);
     }
 
+    /**
+     * Get reply
+     */
     public function getReply(): HtmlString
     {
         return renderHtml($this->reply);
     }
 
+    /**
+     * Удаление записи и загруженных файлов
+     */
     public function delete(): ?bool
     {
         return DB::transaction(function () {

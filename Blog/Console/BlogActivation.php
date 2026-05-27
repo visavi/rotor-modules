@@ -8,10 +8,19 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class BlogActivation extends Command
 {
+    /**
+     * The name and signature of the console command.
+     */
     protected $signature = 'blog:activation';
 
+    /**
+     * The console command description.
+     */
     protected $description = 'Blog activation';
 
+    /**
+     * Пересчитывает счетчик объявлений
+     */
     public function handle(): int
     {
         Article::query()

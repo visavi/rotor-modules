@@ -75,7 +75,6 @@ class Post extends Model
         return ['text'];
     }
 
-
     /**
      * Возвращает список сортируемых полей
      */

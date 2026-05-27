@@ -15,6 +15,9 @@ use Modules\Guestbook\Models\Guestbook;
 
 class GuestbookController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $posts = Guestbook::query()
@@ -38,6 +41,9 @@ class GuestbookController extends Controller
         return view('guestbook::guestbook/index', compact('posts', 'unpublished', 'files'));
     }
 
+    /**
+     * Добавление сообщения
+     */
     public function add(Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
         $msg = $request->input('msg');
@@ -102,6 +108,9 @@ class GuestbookController extends Controller
             ->withInput();
     }
 
+    /**
+     * Редактирование сообщения
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         if (! $user = getUser()) {

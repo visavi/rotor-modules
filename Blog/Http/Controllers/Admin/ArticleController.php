@@ -19,6 +19,9 @@ use Modules\Blog\Models\Tag;
 
 class ArticleController extends AdminController
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $categories = Blog::query()
@@ -35,6 +38,9 @@ class ArticleController extends AdminController
         return view('blog::admin/articles/index', compact('categories', 'new'));
     }
 
+    /**
+     * Создание раздела
+     */
     public function create(Request $request, Validator $validator): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -64,6 +70,9 @@ class ArticleController extends AdminController
         return redirect()->route('admin.blogs.index');
     }
 
+    /**
+     * Редактирование раздела
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -108,6 +117,9 @@ class ArticleController extends AdminController
         return view('blog::admin/articles/edit', compact('categories', 'category'));
     }
 
+    /**
+     * Удаление раздела
+     */
     public function delete(int $id, Validator $validator): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -138,6 +150,9 @@ class ArticleController extends AdminController
         return redirect()->route('admin.blogs.index');
     }
 
+    /**
+     * Пересчет данных
+     */
     public function restatement(): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -151,6 +166,9 @@ class ArticleController extends AdminController
             ->with('success', __('main.success_recounted'));
     }
 
+    /**
+     * Список блогов
+     */
     public function blog(int $id): View
     {
         $category = Blog::query()->with('parent')->find($id);
@@ -169,6 +187,9 @@ class ArticleController extends AdminController
         return view('blog::admin/articles/blog', compact('articles', 'category'));
     }
 
+    /**
+     * Редактирование статьи
+     */
     public function editArticle(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $article = Article::query()->find($id);
@@ -247,6 +268,9 @@ class ArticleController extends AdminController
         return view('blog::admin/articles/edit_article', compact('article', 'categories'));
     }
 
+    /**
+     * Удаление статьи
+     */
     public function deleteArticle(int $id, Request $request): RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -266,6 +290,9 @@ class ArticleController extends AdminController
         return redirect()->route('admin.blogs.blog', ['id' => $article->category_id, 'page' => $page]);
     }
 
+    /**
+     * Публикация статьи
+     */
     public function publish(int $id): RedirectResponse
     {
         $article = Article::query()->find($id);
@@ -297,6 +324,9 @@ class ArticleController extends AdminController
             ->with('success', $status);
     }
 
+    /**
+     * Новые статьи
+     */
     public function new(): View
     {
         $articles = Article::query()

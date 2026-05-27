@@ -14,6 +14,9 @@ use Illuminate\View\View;
 
 class BlackjackController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

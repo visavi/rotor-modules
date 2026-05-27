@@ -13,6 +13,9 @@ use Illuminate\View\View;
 
 class SafeController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

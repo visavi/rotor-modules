@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Services;
 
-use Modules\Payment\Models\PaidAdvert;
 use Modules\Payment\Models\Order;
+use Modules\Payment\Models\PaidAdvert;
 
 class PaymentService
 {

@@ -81,6 +81,6 @@ return [
     'settings_blog_category_length' => 'Blog category length (min/max)',
     'feed_articles_show'            => 'Show articles in feed',
     'feed_articles_rating'          => 'Hide articles with rating below',
-    'new_articles' => 'New articles',
-    'blogs'  => 'Blogs',
+    'new_articles'                  => 'New articles',
+    'blogs'                         => 'Blogs',
 ];

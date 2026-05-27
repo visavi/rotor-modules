@@ -19,7 +19,7 @@ return [
             'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
             'upload' => 'file',
             'rating' => true,
-            ],
+        ],
     ],
 
     'panel' => [

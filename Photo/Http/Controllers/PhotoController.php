@@ -20,8 +20,14 @@ class PhotoController extends Controller
 {
     use CommentableTrait;
 
+    /**
+     * Модель для комментариев
+     */
     protected string $commentableModelClass = Photo::class;
 
+    /**
+     * Главная страница
+     */
     public function index(Request $request): View
     {
         $sort = $request->input('sort', 'date');
@@ -44,6 +50,9 @@ class PhotoController extends Controller
         return view('photo::photos/index', compact('photos', 'sorting'));
     }
 
+    /**
+     * Просмотр полной фотографии
+     */
     public function view(int $id): View
     {
         $photo = Photo::query()
@@ -66,6 +75,9 @@ class PhotoController extends Controller
         return view('photo::photos/view', compact('photo', 'comments', 'files'));
     }
 
+    /**
+     * Форма загрузки фото
+     */
     public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
     {
         if (! isAdmin() && ! setting('photos_create')) {
@@ -130,6 +142,9 @@ class PhotoController extends Controller
         return view('photo::photos/create', compact('files'));
     }
 
+    /**
+     * Редактирование фото
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -176,6 +191,9 @@ class PhotoController extends Controller
         return view('photo::photos/edit', compact('photo', 'checked', 'page'));
     }
 
+    /**
+     * Удаление фотографий
+     */
     public function delete(int $id, Request $request, Validator $validator): RedirectResponse
     {
         $page = int($request->input('page', 1));
@@ -203,6 +221,9 @@ class PhotoController extends Controller
         return redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page]);
     }
 
+    /**
+     * Альбомы пользователей
+     */
     public function albums(): View
     {
         $albums = Photo::query()
@@ -217,6 +238,9 @@ class PhotoController extends Controller
         return view('photo::photos/albums', compact('albums'));
     }
 
+    /**
+     * Альбом пользователя
+     */
     public function album(Request $request): View
     {
         $login = $request->input('user', getUser('login'));
@@ -238,6 +262,9 @@ class PhotoController extends Controller
         return view('photo::photos/user_albums', compact('photos', 'moder', 'user'));
     }
 
+    /**
+     * Выводит все комментарии
+     */
     public function allComments(): View
     {
         $comments = Comment::query()
@@ -251,6 +278,9 @@ class PhotoController extends Controller
         return view('photo::photos/all_comments', compact('comments'));
     }
 
+    /**
+     * Выводит комментарии пользователя
+     */
     public function userComments(Request $request): View
     {
         $login = $request->input('user', getUser('login'));

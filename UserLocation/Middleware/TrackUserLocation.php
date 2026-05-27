@@ -12,6 +12,9 @@ use Modules\UserLocation\Models\UserLocation;
 
 class TrackUserLocation
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);

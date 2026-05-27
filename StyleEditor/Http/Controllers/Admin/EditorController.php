@@ -14,12 +14,18 @@ class EditorController extends Controller
     private string $cssPath;
     private string $jsPath;
 
+    /**
+     * Конструктор
+     */
     public function __construct()
     {
         $this->cssPath = public_path('assets/custom.css');
         $this->jsPath = public_path('assets/custom.js');
     }
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $css = file_exists($this->cssPath) ? file_get_contents($this->cssPath) : '';
@@ -28,6 +34,9 @@ class EditorController extends Controller
         return view('style_editor::admin/editor/index', compact('css', 'js'));
     }
 
+    /**
+     * Сохранение стилей
+     */
     public function save(Request $request): RedirectResponse
     {
         $css = $request->input('css', '');

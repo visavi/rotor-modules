@@ -18,14 +18,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Surprise extends Model
 {
+    /**
+     * Morph name
+     */
     public static string $morphName = 'surprises';
 
+    /**
+     * The table associated with the model.
+     */
     protected $table = 'surprise';
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -34,6 +49,9 @@ class Surprise extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();

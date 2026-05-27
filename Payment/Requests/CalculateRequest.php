@@ -2,9 +2,9 @@
 
 namespace Modules\Payment\Requests;
 
-use Modules\Payment\Models\PaidAdvert;
 use App\Rules\EmailRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Payment\Models\PaidAdvert;
 
 class CalculateRequest extends FormRequest
 {
@@ -42,6 +42,9 @@ class CalculateRequest extends FormRequest
         ];
     }
 
+    /**
+     * Configure the validator instance.
+     */
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {

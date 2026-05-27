@@ -50,6 +50,9 @@ class Offer extends Model
     public const string CANCEL = 'cancel';
     public const string PROCESS = 'process';
 
+    /**
+     * Статусы
+     */
     public const array STATUSES = [
         self::DONE,
         self::WAIT,
@@ -60,22 +63,40 @@ class Offer extends Model
     public const string OFFER = 'offer';
     public const string ISSUE = 'issue';
 
+    /**
+     * Типы
+     */
     public const array TYPES = [
         self::OFFER,
         self::ISSUE,
     ];
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Morph name
+     */
     public static string $morphName = 'offers';
 
+    /**
+     * Возвращает поля участвующие в поиске
+     */
     public function searchableFields(): array
     {
         return ['title', 'text', 'reply'];
     }
 
+    /**
+     * Возвращает список сортируемых полей
+     */
     protected static function sortableFields(): array
     {
         return [
@@ -87,6 +108,9 @@ class Offer extends Model
         ];
     }
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -96,33 +120,51 @@ class Offer extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Возвращает связь с голосованиями
+     */
     public function polls(): MorphMany
     {
         return $this->MorphMany(Poll::class, 'relate');
     }
 
+    /**
+     * Возвращает связь с голосованием
+     */
     public function poll(): MorphOne
     {
         return $this->morphOne(Poll::class, 'relate')
             ->where('user_id', getUser('id'));
     }
 
+    /**
+     * Возвращает связь с комментариями
+     */
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'relate')
             ->with('relate', 'user');
     }
 
+    /**
+     * Возвращает связь пользователей
+     */
     public function replyUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reply_user_id')->withDefault();
     }
 
+    /**
+     * Возвращает последние комментарии
+     */
     public function lastComments(int $limit = 15): HasMany
     {
         return $this->hasMany(Comment::class, 'relate_id')
@@ -132,16 +174,25 @@ class Offer extends Model
             ->limit($limit);
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'offer-' . $this->id);
     }
 
+    /**
+     * Get reply
+     */
     public function getReply(): HtmlString
     {
         return renderHtml($this->reply);
     }
 
+    /**
+     * Возвращает статус записи
+     */
     public function getStatus(): HtmlString
     {
         $status = match ($this->status) {
@@ -154,6 +205,9 @@ class Offer extends Model
         return new HtmlString($status);
     }
 
+    /**
+     * Удаление записи
+     */
     public function delete(): ?bool
     {
         return DB::transaction(function () {

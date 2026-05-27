@@ -16,6 +16,9 @@ class FileController extends Controller
     private string $file;
     private ?string $path;
 
+    /**
+     * Конструктор
+     */
     public function __construct(Request $request)
     {
         $this->file = ltrim(check($request->input('file')), '/');
@@ -32,6 +35,9 @@ class FileController extends Controller
         }
     }
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $path = $this->path;
@@ -55,6 +61,9 @@ class FileController extends Controller
         return view('page_editor::admin/files/index', compact('files', 'path', 'directories'));
     }
 
+    /**
+     * Редактирование файла
+     */
     public function edit(Request $request, Validator $validator): View|RedirectResponse
     {
         $path = $this->path;
@@ -94,6 +103,9 @@ class FileController extends Controller
         return view('page_editor::admin/files/edit', compact('contest', 'path', 'file', 'writable'));
     }
 
+    /**
+     * Создание файла
+     */
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
         if (! is_writable(resource_path('views/' . $this->path))) {
@@ -146,6 +158,9 @@ class FileController extends Controller
         return view('page_editor::admin/files/create', ['path' => $this->path]);
     }
 
+    /**
+     * Удаление файла
+     */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
         if (! is_writable(resource_path('views/' . $this->path))) {

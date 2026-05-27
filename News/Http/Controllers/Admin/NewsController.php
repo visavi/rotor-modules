@@ -16,6 +16,9 @@ use Modules\News\Models\News;
 
 class NewsController extends AdminController
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $news = News::query()
@@ -26,6 +29,9 @@ class NewsController extends AdminController
         return view('news::admin/news/index', compact('news'));
     }
 
+    /**
+     * Редактирование новости
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         $news = News::query()->find($id);
@@ -66,6 +72,9 @@ class NewsController extends AdminController
         return view('news::admin/news/edit', compact('news', 'page'));
     }
 
+    /**
+     * Создание новости
+     */
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
         $files = File::query()
@@ -111,6 +120,9 @@ class NewsController extends AdminController
         return view('news::admin/news/create', compact('files'));
     }
 
+    /**
+     * Пересчет комментариев
+     */
     public function restatement(): RedirectResponse
     {
         if (! isAdmin(User::BOSS)) {
@@ -124,6 +136,9 @@ class NewsController extends AdminController
             ->with('success', __('main.success_recounted'));
     }
 
+    /**
+     * Удаление новостей
+     */
     public function delete(int $id, Request $request): RedirectResponse
     {
         $page = int($request->input('page', 1));

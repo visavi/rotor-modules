@@ -14,6 +14,9 @@ use Modules\Template\Models\Template;
 
 class TemplateController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $templates = Template::query()
@@ -24,6 +27,9 @@ class TemplateController extends Controller
         return view('template::index', compact('templates'));
     }
 
+    /**
+     * Добавление шаблона
+     */
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([

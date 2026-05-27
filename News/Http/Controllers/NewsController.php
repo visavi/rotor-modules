@@ -16,8 +16,14 @@ class NewsController extends Controller
 {
     use CommentableTrait;
 
+    /**
+     * Модель для комментариев
+     */
     protected string $commentableModelClass = News::class;
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $news = News::query()
@@ -34,6 +40,9 @@ class NewsController extends Controller
         return view('news::news/index', compact('news'));
     }
 
+    /**
+     * Вывод новости
+     */
     public function view(int $id): View
     {
         $news = News::query()
@@ -54,6 +63,9 @@ class NewsController extends Controller
         return view('news::news/view', compact('news', 'comments', 'files'));
     }
 
+    /**
+     * Rss новостей
+     */
     public function rss(): Response
     {
         $newses = News::query()
@@ -71,6 +83,9 @@ class NewsController extends Controller
             ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 
+    /**
+     * Все комментарии
+     */
     public function allComments(): View
     {
         $comments = Comment::query()

@@ -54,5 +54,5 @@ return [
     'settings_board_category_length' => 'Ad category length',
 
     'feed_items_show' => 'Show boards in feed',
-    'boards' => 'Bulletin board',
+    'boards'          => 'Bulletin board',
 ];

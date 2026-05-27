@@ -15,6 +15,9 @@ class NotebookController extends Controller
 {
     private Notebook $note;
 
+    /**
+     * Конструктор
+     */
     public function __construct()
     {
         $this->middleware('check.user');
@@ -30,11 +33,17 @@ class NotebookController extends Controller
         });
     }
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         return view('notebook::notebooks/index', ['note' => $this->note]);
     }
 
+    /**
+     * Редактирование
+     */
     public function edit(Request $request, Validator $validator): View|RedirectResponse
     {
         if ($request->isMethod('post')) {

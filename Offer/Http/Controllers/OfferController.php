@@ -18,8 +18,14 @@ class OfferController extends Controller
 {
     use CommentableTrait;
 
+    /**
+     * Модель для комментариев
+     */
     protected string $commentableModelClass = Offer::class;
 
+    /**
+     * Главная страница
+     */
     public function index(Request $request, string $type = 'offer'): View
     {
         $offerCount = Offer::query()->where('type', Offer::OFFER)->count();
@@ -40,6 +46,9 @@ class OfferController extends Controller
         return view('offer::offers/index', compact('offers', 'order', 'type', 'sort', 'sorting', 'offerCount', 'issueCount'));
     }
 
+    /**
+     * Просмотр записи
+     */
     public function view(int $id): View
     {
         $offer = Offer::query()
@@ -61,6 +70,9 @@ class OfferController extends Controller
         return view('offer::offers/view', compact('offer', 'comments', 'files'));
     }
 
+    /**
+     * Создание записи
+     */
     public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
     {
         if (! $user = getUser()) {
@@ -108,6 +120,9 @@ class OfferController extends Controller
         return view('offer::offers/create', compact('type'));
     }
 
+    /**
+     * Редактирование записи
+     */
     public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
     {
         if (! $user = getUser()) {

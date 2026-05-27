@@ -15,6 +15,9 @@ use Modules\Wall\Models\Wall;
 
 class WallController extends Controller
 {
+    /**
+     * Главная страница
+     */
     public function index(string $login): View
     {
         $user = getUserByLogin($login);
@@ -32,6 +35,9 @@ class WallController extends Controller
         return view('wall::walls/index', compact('messages', 'user'));
     }
 
+    /**
+     * Добавление записи на стену
+     */
     public function create(string $login, Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
         if (! getUser()) {
@@ -72,6 +78,9 @@ class WallController extends Controller
         return redirect('walls/' . $user->login);
     }
 
+    /**
+     * Удаление записи со стены
+     */
     public function delete(string $login, Request $request, Validator $validator): JsonResponse
     {
         $id = int($request->input('id'));

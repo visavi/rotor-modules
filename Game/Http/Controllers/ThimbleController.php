@@ -12,6 +12,9 @@ use Illuminate\View\View;
 
 class ThimbleController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

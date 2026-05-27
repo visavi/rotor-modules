@@ -10,6 +10,9 @@ use Illuminate\View\View;
 
 class BanditController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

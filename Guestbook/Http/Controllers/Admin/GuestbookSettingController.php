@@ -13,6 +13,9 @@ use Illuminate\View\View;
 
 class GuestbookSettingController extends AdminController
 {
+    /**
+     * Настройки
+     */
     public function index(): View
     {
         $settings = Setting::getSettings();
@@ -20,6 +23,9 @@ class GuestbookSettingController extends AdminController
         return view('guestbook::admin/settings/_guestbook', compact('settings'));
     }
 
+    /**
+     * Сохранение настроек
+     */
     public function update(Request $request, Validator $validator): RedirectResponse
     {
         $sets = $request->input('sets');

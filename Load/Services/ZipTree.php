@@ -6,18 +6,21 @@ namespace Modules\Load\Services;
 
 class ZipTree
 {
+    /**
+     * Строит дерево из плоского списка файлов архива
+     */
     public static function build(array $flat): array
     {
         $tree = ['__files' => [], '__dirs' => [], '__count' => 0, '__size' => 0];
 
         foreach ($flat as $entry) {
-            $path  = rtrim($entry['name'], '/');
+            $path = rtrim($entry['name'], '/');
             $parts = explode('/', $path);
-            $node  = &$tree;
+            $node = &$tree;
 
             $depth = count($parts);
             for ($j = 0; $j < $depth; $j++) {
-                $part   = $parts[$j];
+                $part = $parts[$j];
                 $isLast = ($j === $depth - 1);
 
                 if ($isLast && ! $entry['isDir']) {
@@ -37,15 +40,18 @@ class ZipTree
         return $tree;
     }
 
+    /**
+     * Рекурсивно вычисляет количество файлов и суммарный размер
+     */
     private static function computeStats(array &$tree): void
     {
         $tree['__count'] = count($tree['__files']);
-        $tree['__size']  = (int) array_sum(array_column($tree['__files'], 'size'));
+        $tree['__size'] = (int) array_sum(array_column($tree['__files'], 'size'));
 
         foreach ($tree['__dirs'] as &$subtree) {
             self::computeStats($subtree);
             $tree['__count'] += $subtree['__count'];
-            $tree['__size']  += $subtree['__size'];
+            $tree['__size'] += $subtree['__size'];
         }
         unset($subtree);
     }

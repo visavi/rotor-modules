@@ -43,6 +43,9 @@ class YooKassaService
         self::ERROR               => 'Ошибка платежа',
     ];
 
+    /**
+     * Конструктор
+     */
     public function __construct()
     {
         $this->apiUrl = config('payment.yookassa_api_url');

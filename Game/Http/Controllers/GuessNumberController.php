@@ -13,6 +13,9 @@ use Illuminate\View\View;
 
 class GuessNumberController extends Controller
 {
+    /**
+     * Текущий пользователь
+     */
     private User $user;
 
     /**

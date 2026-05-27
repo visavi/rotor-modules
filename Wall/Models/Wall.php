@@ -18,12 +18,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Wall extends Model
 {
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Morph name
+     */
     public static string $morphName = 'walls';
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -33,11 +45,17 @@ class Wall extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Возвращает связь владельца
+     */
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id')->withDefault();

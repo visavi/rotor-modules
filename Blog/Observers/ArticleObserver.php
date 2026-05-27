@@ -7,12 +7,18 @@ use Modules\Blog\Models\Blog;
 
 class ArticleObserver
 {
+    /**
+     * Handle the Article "created" event.
+     */
     public function created(Article $article): void
     {
         $article->category->restatement();
         clearCache(['statArticles', 'recentArticles']);
     }
 
+    /**
+     * Handle the Article "updated" event.
+     */
     public function updated(Article $article): void
     {
         if ($article->isDirty('category_id')) {
@@ -44,16 +50,25 @@ class ArticleObserver
         clearCache(['statArticles', 'recentArticles']);
     }
 
+    /**
+     * Handle the Article "deleted" event.
+     */
     public function deleted(Article $article): void
     {
         $article->category->restatement();
         clearCache(['statArticles', 'recentArticles']);
     }
 
+    /**
+     * Handle the Article "restored" event.
+     */
     public function restored(Article $article): void
     {
     }
 
+    /**
+     * Handle the Article "force deleted" event.
+     */
     public function forceDeleted(Article $article): void
     {
     }

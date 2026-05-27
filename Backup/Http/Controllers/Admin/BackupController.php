@@ -15,6 +15,9 @@ class BackupController extends AdminController
 {
     public string $date;
 
+    /**
+     * Конструктор
+     */
     public function __construct()
     {
         if (function_exists('set_time_limit')) {
@@ -24,6 +27,9 @@ class BackupController extends AdminController
         $this->date = date('d-M-Y_H-i-s', SITETIME);
     }
 
+    /**
+     * Главная страница
+     */
     public function index(): View
     {
         $files = glob(storage_path('backups/*.{zip,gz,bz2,sql}'), GLOB_BRACE);
@@ -32,6 +38,9 @@ class BackupController extends AdminController
         return view('backup::admin/backups/index', compact('files'));
     }
 
+    /**
+     * Создание нового бэкапа
+     */
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
         if ($request->isMethod('post')) {
@@ -119,6 +128,9 @@ class BackupController extends AdminController
         return view('backup::admin/backups/create', compact('tables', 'bzopen', 'gzopen', 'levels'));
     }
 
+    /**
+     * Удаляет сохраненный бэкап
+     */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
         $file = $request->input('file');
@@ -143,6 +155,8 @@ class BackupController extends AdminController
     }
 
     /**
+     * Открывает поток
+     *
      * @return bool|resource
      */
     private function fopen(string $name, string $mode, string $method, int $level)
@@ -159,6 +173,8 @@ class BackupController extends AdminController
     }
 
     /**
+     * Записывает данные в поток
+     *
      * @param resource $fp
      */
     private function fwrite($fp, string $str, string $method): void
@@ -173,6 +189,8 @@ class BackupController extends AdminController
     }
 
     /**
+     * Закрывает поток
+     *
      * @param resource $fp
      */
     private function fclose($fp, string $method): void

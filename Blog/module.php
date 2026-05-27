@@ -21,7 +21,7 @@ return [
             'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
             'upload' => 'media',
             'rating' => true,
-            ],
+        ],
     ],
 
     'observers' => [

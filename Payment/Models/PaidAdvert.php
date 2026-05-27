@@ -26,6 +26,9 @@ use Illuminate\Support\HtmlString;
  */
 class PaidAdvert extends Model
 {
+    /**
+     * Места размещения (идентификаторы)
+     */
     public const string TOP_ALL = 'top_all';
     public const string TOP = 'top';
     public const string FORUM = 'forum';

@@ -46,19 +46,37 @@ class Photo extends Model
     use SortableTrait;
     use UploadTrait;
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Директория загрузки файлов
+     */
     public string $uploadPath = '/uploads/photos';
 
+    /**
+     * Morph name
+     */
     public static string $morphName = 'photos';
 
+    /**
+     * Возвращает поля участвующие в поиске
+     */
     public function searchableFields(): array
     {
         return ['title', 'text'];
     }
 
+    /**
+     * Возвращает список сортируемых полей
+     */
     protected static function sortableFields(): array
     {
         return [
@@ -69,6 +87,9 @@ class Photo extends Model
         ];
     }
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -77,38 +98,59 @@ class Photo extends Model
         ];
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Возвращает комментарии фотографий
+     */
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'relate')->with('relate');
     }
 
+    /**
+     * Возвращает загруженные файлы
+     */
     public function files(): MorphMany
     {
         return $this->morphMany(File::class, 'relate')
             ->orderBy('created_at');
     }
 
+    /**
+     * Возвращает связь с голосованиями
+     */
     public function polls(): MorphMany
     {
         return $this->MorphMany(Poll::class, 'relate');
     }
 
+    /**
+     * Возвращает связь с голосованием
+     */
     public function poll(): MorphOne
     {
         return $this->morphOne(Poll::class, 'relate')
             ->where('user_id', getUser('id'));
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'photo-' . $this->id);
     }
 
+    /**
+     * Удаление фото и загруженных файлов
+     */
     public function delete(): ?bool
     {
         return DB::transaction(function () {

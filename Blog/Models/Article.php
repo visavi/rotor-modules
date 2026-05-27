@@ -59,16 +59,34 @@ class Article extends Model
     use ConvertVideoTrait;
     use UploadTrait;
 
+    /**
+     * Indicates if the model should be timestamped.
+     */
     public $timestamps = false;
 
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
 
+    /**
+     * Директория загрузки файлов
+     */
     public string $uploadPath = '/uploads/articles';
 
+    /**
+     * Counting field
+     */
     public string $countingField = 'visits';
 
+    /**
+     * Morph name
+     */
     public static string $morphName = 'articles';
 
+    /**
+     * Get the attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -79,11 +97,17 @@ class Article extends Model
         ];
     }
 
+    /**
+     * Возвращает поля участвующие в поиске
+     */
     public function searchableFields(): array
     {
         return ['title', 'text'];
     }
 
+    /**
+     * Возвращает список сортируемых полей
+     */
     protected static function sortableFields(): array
     {
         return [
@@ -95,6 +119,9 @@ class Article extends Model
         ];
     }
 
+    /**
+     * Get the slug
+     */
     protected function slug(): Attribute
     {
         return Attribute::make(
@@ -103,22 +130,34 @@ class Article extends Model
         );
     }
 
+    /**
+     * Scope a query to only include active records.
+     */
     #[Scope]
     protected function active(Builder $query, bool $active = true): void
     {
         $query->where('active', $active);
     }
 
+    /**
+     * Возвращает связь пользователя
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
     }
 
+    /**
+     * Возвращает комментарии блогов
+     */
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'relate')->with('relate');
     }
 
+    /**
+     * Возвращает последние комментарии к статье
+     */
     public function lastComments(int $limit = 15): HasMany
     {
         return $this->hasMany(Comment::class, 'relate_id')
@@ -128,38 +167,59 @@ class Article extends Model
             ->limit($limit);
     }
 
+    /**
+     * Возвращает связь категории блога
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Blog::class, 'category_id')->withDefault();
     }
 
+    /**
+     * Возвращает загруженные файлы
+     */
     public function files(): MorphMany
     {
         return $this->morphMany(File::class, 'relate')
             ->orderBy('created_at');
     }
 
+    /**
+     * Возвращает медиафайлы (картинки и видео)
+     */
     public function getMedia(): Collection
     {
         return $this->files->filter(static fn (File $f) => $f->isImage() || $f->isVideo());
     }
 
+    /**
+     * Возвращает медиафайлы, не вставленные в текст
+     */
     public function getDetachedMedia(): Collection
     {
         return $this->getMedia()->reject(fn (File $f) => str_contains($this->text ?? '', $f->path));
     }
 
+    /**
+     * Возвращает связь с голосованиями
+     */
     public function polls(): MorphMany
     {
         return $this->MorphMany(Poll::class, 'relate');
     }
 
+    /**
+     * Возвращает связь с голосованием
+     */
     public function poll(): MorphOne
     {
         return $this->morphOne(Poll::class, 'relate')
             ->where('user_id', getUser('id'));
     }
 
+    /**
+     * Tags
+     */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'article_tags', 'article_id', 'tag_id')
@@ -167,6 +227,9 @@ class Article extends Model
             ->orderBy('article_tags.sort');
     }
 
+    /**
+     * Возвращает путь к первому файлу
+     */
     public function getFirstImage(): ?HtmlString
     {
         $image = $this->files->first();
@@ -178,21 +241,33 @@ class Article extends Model
         return new HtmlString('<img src="' . $image->path . '" atl="' . $this->title . '" class="card-img-top">');
     }
 
+    /**
+     * Is new article
+     */
     public function isNew(): bool
     {
         return $this->created_at > strtotime('-3 day');
     }
 
+    /**
+     * Is published
+     */
     public function isPublished(): bool
     {
         return $this->published_at === null || ! $this->published_at->isFuture();
     }
 
+    /**
+     * Get text
+     */
     public function getText(): HtmlString
     {
         return renderHtml($this->text, 'article-' . $this->id);
     }
 
+    /**
+     * Удаление статьи и загруженных файлов
+     */
     public function delete(): ?bool
     {
         return DB::transaction(function () {

@@ -81,6 +81,6 @@ return [
     'settings_blog_category_length' => 'Длина категории блога (мин/макс)',
     'feed_articles_show'            => 'Показывать статьи в ленте',
     'feed_articles_rating'          => 'Скрывать статьи с рейтингом ниже',
-    'new_articles' => 'Новые статьи',
-    'blogs'  => 'Блоги',
+    'new_articles'                  => 'Новые статьи',
+    'blogs'                         => 'Блоги',
 ];
