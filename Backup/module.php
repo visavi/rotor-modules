@@ -10,6 +10,6 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'panel' => [
-        '/admin/backups' => 'Backup',
+        '/admin/backups' => __('backup::backup.backup'),
     ],
 ];

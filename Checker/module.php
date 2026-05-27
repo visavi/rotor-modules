@@ -10,6 +10,6 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'panel' => [
-        '/admin/checkers' => 'Checker',
+        '/admin/checkers' => __('checker::checker.site_scan'),
     ],
 ];

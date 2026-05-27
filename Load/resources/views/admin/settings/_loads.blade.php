@@ -106,16 +106,16 @@
     </div>
 
     <div class="mb-3{{ hasError('sets[feed_downs_show]') }}">
-        <label class="form-label">{{ __('settings.feed_downs_show') }}:</label>
+        <label class="form-label">{{ __('load::loads.feed_downs_show') }}:</label>
         <div class="form-check">
             <input type="hidden" value="0" name="sets[feed_downs_show]">
             <input type="checkbox" class="form-check-input" value="1" name="sets[feed_downs_show]" id="feed_downs_show"{{ getInput('sets.feed_downs_show', $settings['feed_downs_show']) ? ' checked' : '' }}>
-            <label for="feed_downs_show" class="form-check-label">{{ __('settings.feed_downs_show') }}</label>
+            <label for="feed_downs_show" class="form-check-label">{{ __('load::loads.feed_downs_show') }}</label>
         </div>
     </div>
 
     <div class="mb-3{{ hasError('sets[feed_downs_rating]') }}">
-        <label for="feed_downs_rating" class="form-label">{{ __('settings.feed_downs_rating') }}:</label>
+        <label for="feed_downs_rating" class="form-label">{{ __('load::loads.feed_downs_rating') }}:</label>
         <input type="number" class="form-control" id="feed_downs_rating" name="sets[feed_downs_rating]" value="{{ getInput('sets.feed_downs_rating', $settings['feed_downs_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_downs_rating]') }}</div>
     </div>

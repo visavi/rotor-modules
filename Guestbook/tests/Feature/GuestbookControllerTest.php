@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Modules\Guestbook\Tests\Feature;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Guestbook\Models\Guestbook;

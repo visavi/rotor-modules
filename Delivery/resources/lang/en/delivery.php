@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'delivery'                => 'Private newsletter',
     'online'                  => 'Online',
     'active'                  => 'Active',
     'admins'                  => 'Administration',

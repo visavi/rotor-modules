@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Modules\PageEditor\Tests\Feature;
 
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;

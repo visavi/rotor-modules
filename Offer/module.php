@@ -22,6 +22,7 @@ return [
     ],
 
     'panel' => [
+        '/admin/offers'         => __('offer::offers.offers'),
         '/admin/offer-settings' => __('offer::offers.settings'),
     ],
 

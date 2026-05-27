@@ -19,6 +19,9 @@ return [
     'news_title_length' => 'Длина названия новости',
     'news_text_length'  => 'Длина текста новости',
 
+    'feed_news_show'         => 'Показывать новости в ленте',
+    'feed_news_rating'       => 'Скрывать новости с рейтингом',
+
     'settings'               => 'Настройки новостей',
     'settings_empty'         => 'Настройки не переданы!',
     'settings_success_saved' => 'Настройки успешно сохранены!',
