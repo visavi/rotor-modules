@@ -6,7 +6,7 @@
 
 ```
 modules/Template/
-├── module.php                                 — метаданные, panel (ссылки в админке)
+├── module.php                                 — метаданные, actions (ссылки в админке)
 ├── routes.php                                 — web + admin маршруты
 ├── helpers.php                                — глобальные функции (statsTemplate)
 ├── hooks.php                                  — регистрация хуков (меню, футер, админ-блок)

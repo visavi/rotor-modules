@@ -9,7 +9,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'panel' => [
+    'actions' => [
         '/admin/template' => __('template::template.manage_records'),
     ],
 ];
