@@ -22,7 +22,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/board-settings' => __('board::boards.settings'),
     ],
 

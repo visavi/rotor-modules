@@ -22,7 +22,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/loads'         => __('load::loads.loads'),
         '/admin/load-settings' => __('load::loads.settings'),
     ],

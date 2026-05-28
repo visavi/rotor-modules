@@ -22,7 +22,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/photos'         => __('photo::photos.photos'),
         '/admin/photo-settings' => __('photo::photos.settings'),
     ],

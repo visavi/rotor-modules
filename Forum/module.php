@@ -37,7 +37,7 @@ return [
         Post::class  => PostObserver::class,
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/forums'         => __('forum::forums.forums'),
         '/admin/forum-settings' => __('forum::forums.settings'),
     ],

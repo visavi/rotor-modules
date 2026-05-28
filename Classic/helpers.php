@@ -1,14 +1,14 @@
 <?php
 
 use App\Classes\Calendar;
-use App\Models\Article;
-use App\Models\News;
-use App\Models\Photo;
-use App\Models\Topic;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;
+use Modules\Blog\Models\Article;
+use Modules\Forum\Models\Topic;
 use Modules\Load\Models\Down;
+use Modules\News\Models\News;
+use Modules\Photo\Models\Photo;
 
 if (! function_exists('onlineWidget')) {
     function onlineWidget(): HtmlString

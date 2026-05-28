@@ -22,7 +22,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/news'          => __('news::news.news'),
         '/admin/news-settings' => __('news::news.settings'),
     ],

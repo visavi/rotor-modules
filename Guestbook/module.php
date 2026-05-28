@@ -20,7 +20,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/guestbook'          => __('guestbook::guestbook.guestbook'),
         '/admin/guestbook-settings' => __('guestbook::guestbook.settings'),
     ],

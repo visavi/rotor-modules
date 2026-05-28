@@ -28,7 +28,7 @@ return [
         Article::class => ArticleObserver::class,
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/blog-settings' => __('blog::blogs.settings'),
     ],
 
