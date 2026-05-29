@@ -42,16 +42,11 @@ Hook::add('head', static function () {
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
-    $url = route('news.index');
-    $active = request()->is('news*') ? ' active' : '';
-    $label = __('news::news.news');
-    $stats = statsNews();
-
     return '<li>
-        <a class="menu-item' . $active . '" href="' . $url . '">
+        <a class="menu-item' . (request()->is('news*') ? ' active' : '') . '" href="' . route('news.index') . '">
             <i class="menu-icon far fa-newspaper"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
+            <span class="menu-label">' . __('news::news.news') . '</span>
+            <span class="badge menu-badge">' . statsNews() . '</span>
         </a>
     </li>';
 }, 20);

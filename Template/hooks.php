@@ -4,16 +4,11 @@ use App\Classes\Hook;
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
-    $url = route('template.index');
-    $active = request()->is('template*') ? ' active' : '';
-    $label = __('template::template.template');
-    $stats = statsTemplate();
-
     return '<li>
-        <a class="menu-item' . $active . '" href="' . $url . '">
+        <a class="menu-item' . (request()->is('template*') ? ' active' : '') . '" href="' . route('template.index') . '">
             <i class="menu-icon far fa-file"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
+            <span class="menu-label">' . __('template::template.template') . '</span>
+            <span class="badge menu-badge">' . statsTemplate() . '</span>
         </a>
     </li>';
 }, 10);

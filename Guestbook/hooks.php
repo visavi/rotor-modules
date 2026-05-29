@@ -14,15 +14,11 @@ Registry::complaint(Guestbook::$morphName, function (int $id, mixed $page): arra
 
 // Ссылка в боковом меню (default, nordic, newspaper темы)
 Hook::add('sidebarMenu', static function () {
-    $active = request()->is('guestbook*') ? ' active' : '';
-    $label = __('guestbook::guestbook.guestbook');
-    $stats = statsGuestbook();
-
     return '<li>
-        <a class="menu-item' . $active . '" href="' . route('guestbook.index') . '">
+        <a class="menu-item' . (request()->is('guestbook*') ? ' active' : '') . '" href="' . route('guestbook.index') . '">
             <i class="menu-icon far fa-comment"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
+            <span class="menu-label">' . __('guestbook::guestbook.guestbook') . '</span>
+            <span class="badge menu-badge">' . statsGuestbook() . '</span>
         </a>
     </li>';
 }, 25);

@@ -11,6 +11,8 @@
     </nav>
 @stop
 
+@section('content')
+
 @if(Route::has('forums.index'))
     <div class="section mb-3 shadow">
         <div class="section-title">
@@ -50,3 +52,5 @@
         {{ recentPhotos() }}
     </div>
 @endif
+
+@stop

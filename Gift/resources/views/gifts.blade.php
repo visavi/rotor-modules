@@ -12,6 +12,14 @@
     </nav>
 @stop
 
+@section('header')
+    <div class="float-end">
+        <a class="btn btn-success" href="/gifts?user={{ $user->login }}">{{ __('gift::gifts.send_gift') }}</a>
+    </div>
+
+    <h1>{{ __('gift::gifts.title') }} {{ $user->getName() }}</h1>
+@stop
+
 @section('content')
     <div class="container-fluid">
         @if ($gifts->isNotEmpty())

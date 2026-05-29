@@ -33,25 +33,16 @@ Hook::add('userProfileLinks', static function ($user) {
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
-    $expanded = request()->is('loads*', 'downs*') ? ' is-expanded' : '';
-    $label = __('load::loads.loads');
-    $labelList = __('load::loads.loads_list');
-    $labelNew = __('load::loads.new_downs');
-    $labelComments = __('load::loads.new_comments');
-    $activeList = request()->routeIs('loads.index') ? ' active' : '';
-    $activeNew = request()->routeIs('downs.new-files') ? ' active' : '';
-    $activeComments = request()->routeIs('downs.new-comments') ? ' active' : '';
-
-    return '<li class="treeview' . $expanded . '">
+    return '<li class="treeview' . (request()->is('loads*', 'downs*') ? ' is-expanded' : '') . '">
         <a class="menu-item" href="' . route('loads.index') . '" data-bs-toggle="treeview">
             <i class="menu-icon fas fa-download"></i>
-            <span class="menu-label">' . $label . '</span>
+            <span class="menu-label">' . __('load::loads.loads') . '</span>
             <i class="treeview-indicator fa fa-angle-down"></i>
         </a>
         <ul class="treeview-menu">
-            <li><a class="treeview-item' . $activeList . '" href="' . route('loads.index') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelList . '</a></li>
-            <li><a class="treeview-item' . $activeNew . '" href="' . route('downs.new-files') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelNew . '</a></li>
-            <li><a class="treeview-item' . $activeComments . '" href="' . route('downs.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . $labelComments . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('loads.index') ? ' active' : '') . '" href="' . route('loads.index') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('load::loads.loads_list') . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('downs.new-files') ? ' active' : '') . '" href="' . route('downs.new-files') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('load::loads.new_downs') . '</a></li>
+            <li><a class="treeview-item' . (request()->routeIs('downs.new-comments') ? ' active' : '') . '" href="' . route('downs.new-comments') . '"><i class="icon fas fa-circle fa-xs"></i> ' . __('load::loads.new_comments') . '</a></li>
         </ul>
     </li>';
 }, 15);

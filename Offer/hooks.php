@@ -2,30 +2,13 @@
 
 use App\Classes\Hook;
 
-// Ссылка в боковом меню
-Hook::add('sidebarMenu', static function () {
-    $url = route('offers.index');
-    $active = request()->is('offers*') ? ' active' : '';
-    $label = __('offer::offers.offers');
-    $stats = statsOffers();
-
-    return '<li>
-        <a class="menu-item' . $active . '" href="' . $url . '">
-            <i class="menu-icon fa-regular fa-circle-question"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
-        </a>
-    </li>';
-}, 10);
-
 // Ссылка в колонке footer
-Hook::add('footerColumnMiddle', static function () {
-    $url = route('offers.index');
-    $label = __('offer::offers.offers');
-    $stats = statsOffers();
-
-    return '<li><a class="footer-item" href="' . $url . '">' . $label . '</a> <span class="badge bg-adaptive">' . $stats . '</span></li>';
-});
+Hook::add('footerColumnMiddle', static fn () => '<li>
+    <a class="footer-item" href="' . route('offers.index') . '">
+        ' . __('offer::offers.offers') . '
+    </a>
+     <span class="badge bg-adaptive">' . statsOffers() . '</span>
+ </li>');
 
 // Ссылка в блоке редактора в админке
 Hook::add('adminBlockAdmin', static function () {

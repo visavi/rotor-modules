@@ -84,16 +84,11 @@ Hook::add('userProfileLinks', static function ($user) {
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
-    $url = route('forums.index');
-    $active = request()->is('forums*', 'topics*') ? ' active' : '';
-    $label = __('forum::forums.forums');
-    $stats = statsForum();
-
     return '<li>
-        <a class="menu-item' . $active . '" href="' . $url . '">
+        <a class="menu-item' . (request()->is('forums*', 'topics*') ? ' active' : '') . '" href="' . route('forums.index') . '">
             <i class="menu-icon far fa-comment-alt"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
+            <span class="menu-label">' . __('forum::forums.forums') . '</span>
+            <span class="badge menu-badge">' . statsForum() . '</span>
         </a>
     </li>';
 }, 30);
@@ -109,6 +104,4 @@ Hook::add('adminBlockEditor', static function () {
 });
 
 // Ссылка на настройки в навигации настроек
-Hook::add('adminSettingsNav', static function () {
-    return '<a class="nav-link" href="' . route('forum.settings') . '">' . __('forum::forums.settings') . '</a>';
-});
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('forum.settings') . '">' . __('forum::forums.settings') . '</a>');

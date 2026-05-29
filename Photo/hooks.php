@@ -1,6 +1,21 @@
 <?php
 
 use App\Classes\Hook;
+use App\Classes\Registry;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+Registry::onAdminDeleteUser(function (User $user, Request $request): void {
+    if ($request->input('delimages')) {
+        $user->deleteAlbum();
+    }
+});
+
+// Добавление чекбокса удаления фотографий на страницу удаления пользователя
+Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
+    <input type="checkbox" class="form-check-input" value="1" name="delimages" id="delimages">
+    <label class="form-check-label" for="delimages">' . __('users.photos') . '</label>
+</div>');
 
 // Ссылки на фото пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
@@ -10,16 +25,11 @@ Hook::add('userProfileLinks', static function ($user) {
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {
-    $url = route('photos.index');
-    $active = request()->is('photos*') ? ' active' : '';
-    $label = __('photo::photos.photos');
-    $stats = statsPhotos();
-
     return '<li>
-        <a class="menu-item' . $active . '" href="' . $url . '">
+        <a class="menu-item' . (request()->is('photos*') ? ' active' : '') . '" href="' . route('photos.index') . '">
             <i class="menu-icon far fa-image"></i>
-            <span class="menu-label">' . $label . '</span>
-            <span class="badge menu-badge">' . $stats . '</span>
+            <span class="menu-label">' . __('photo::photos.photos') . '</span>
+            <span class="badge menu-badge">' . statsPhotos() . '</span>
         </a>
     </li>';
 }, 14);
