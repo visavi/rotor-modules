@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Advert\Http\Controllers\AdvertController;
 use Modules\Advert\Http\Controllers\Admin\AdminAdvertController;
 use Modules\Advert\Http\Controllers\Admin\AdvertController as AdminUserAdvertController;
 use Modules\Advert\Http\Controllers\Admin\SettingController;
+use Modules\Advert\Http\Controllers\AdvertController;
 
 Route::controller(AdvertController::class)
     ->prefix('adverts')

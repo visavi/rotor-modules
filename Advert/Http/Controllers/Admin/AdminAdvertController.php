@@ -24,10 +24,10 @@ class AdminAdvertController extends AdminController
             ->firstOrNew();
 
         if ($request->isMethod('post')) {
-            $site  = $request->input('site');
-            $name  = $request->input('name');
+            $site = $request->input('site');
+            $name = $request->input('name');
             $color = $request->input('color');
-            $bold  = empty($request->input('bold')) ? 0 : 1;
+            $bold = empty($request->input('bold')) ? 0 : 1;
 
             $validator
                 ->regex($site, '|^https?://[а-яa-z0-9_\-.]+(\.[а-яa-z0-9/\-?_=#]+)+$|iu', ['site' => __('validator.url')])
