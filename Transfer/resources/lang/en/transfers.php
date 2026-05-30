@@ -16,13 +16,13 @@ return [
     'transfer_yourself'          => 'It is forbidden to transfer money to yourself!',
     'transfer_success_completed' => 'Transfer completed successfully!',
 
-    'points_transfer'            => 'Asset for money transfer',
-    'transfers_per_page'         => 'Operations per page',
+    'points_transfer'    => 'Asset for money transfer',
+    'transfers_per_page' => 'Operations per page',
 
-    'notice_name'                => 'Money transfer',
-    'notice_text'                => '<p>User %login% transferred %money% to you</p><p>Comment: %comment%</p>',
+    'notice_name' => 'Money transfer',
+    'notice_text' => '<p>User %login% transferred %money% to you</p><p>Comment: %comment%</p>',
 
-    'settings'                   => 'Transfer Settings',
-    'settings_empty'             => 'No settings provided!',
-    'settings_success_saved'     => 'Settings saved successfully!',
+    'settings'               => 'Transfer Settings',
+    'settings_empty'         => 'No settings provided!',
+    'settings_success_saved' => 'Settings saved successfully!',
 ];

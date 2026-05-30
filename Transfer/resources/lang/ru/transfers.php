@@ -16,13 +16,13 @@ return [
     'transfer_yourself'          => 'Запрещено переводить деньги самому себе!',
     'transfer_success_completed' => 'Перевод успешно завершен!',
 
-    'points_transfer'            => 'Актива для перечисления денег',
-    'transfers_per_page'         => 'Операций на странице',
+    'points_transfer'    => 'Актива для перечисления денег',
+    'transfers_per_page' => 'Операций на странице',
 
-    'notice_name'                => 'Перевод денег',
-    'notice_text'                => '<p>Пользователь %login% перечислил вам %money%</p><p>Комментарий: %comment%</p>',
+    'notice_name' => 'Перевод денег',
+    'notice_text' => '<p>Пользователь %login% перечислил вам %money%</p><p>Комментарий: %comment%</p>',
 
-    'settings'                   => 'Настройки переводов',
-    'settings_empty'             => 'Настройки не переданы!',
-    'settings_success_saved'     => 'Настройки успешно сохранены!',
+    'settings'               => 'Настройки переводов',
+    'settings_empty'         => 'Настройки не переданы!',
+    'settings_success_saved' => 'Настройки успешно сохранены!',
 ];
