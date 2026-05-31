@@ -116,7 +116,7 @@
         <h5>{{ $vote->title }}</h5>
 
         <div class="mb-3">
-            @if ($vote->poll || $vote->closed || ! getUser())
+            @if ($vote->poll || ! getUser())
                 @foreach ($vote->voted as $key => $value)
                     <?php $proc = round(($value * 100) / $vote->sum, 1); ?>
                     <?php $maxproc = round(($value * 100) / $vote->max); ?>

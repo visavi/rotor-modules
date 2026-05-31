@@ -85,7 +85,7 @@
         <h5>{{ $vote->title }}</h5>
 
         <div class="mb-3">
-            @if ($vote->poll || $vote->closed)
+            @if ($vote->poll)
                 @foreach ($vote->voted as $key => $data)
                     @php
                         $proc = round(($data * 100) / $vote->sum, 1);
