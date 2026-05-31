@@ -49,7 +49,7 @@ Registry::pollResolver(Topic::class, function (Topic $topic): ?array {
 });
 
 Registry::onAdminDeleteUser(function (User $user, Request $request): void {
-    if ($request->input('deltopics')) {
+    if ($request->boolean('deltopics')) {
         $topics = Topic::query()->where('user_id', $user->id)->get();
         $topics->each(static fn (Topic $topic) => $topic->delete());
         if ($topics->isNotEmpty()) {
@@ -57,7 +57,7 @@ Registry::onAdminDeleteUser(function (User $user, Request $request): void {
         }
     }
 
-    if ($request->input('delposts')) {
+    if ($request->boolean('delposts')) {
         $posts = Post::query()->where('user_id', $user->id)->get();
         $posts->each(static fn (Post $post) => $post->delete());
         if ($posts->isNotEmpty()) {
