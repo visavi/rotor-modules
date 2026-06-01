@@ -141,13 +141,17 @@ class Item extends Model
     /**
      * Возвращает путь к первому файлу
      */
-    public function getFirstImage(): ?HtmlString
+    public function getFirstImage(): HtmlString
     {
         $image = $this->files->first();
 
         $path = $image->path ?? null;
 
-        return $path ? new HtmlString('<img src="' . e($path) . '" alt="' . e($this->title) . '" class="img-fluid">') : null;
+        if ($path) {
+            return new HtmlString('<img src="' . e($path) . '" alt="' . e($this->title) . '" class="img-fluid">');
+        }
+
+        return new HtmlString('<div class="text-center text-secondary py-3"><i class="fa fa-image fa-5x"></i></div>');
     }
 
     /**
