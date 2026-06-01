@@ -14,7 +14,7 @@ return [
 
     'models' => [
         Offer::class => [
-            'label'  => __('offer::offers.offers'),
+            'label'  => __('offer::offers.section'),
             'search' => ['view' => 'offer::search/_offers'],
             'feed'   => ['withs' => ['user'], 'view' => 'offer::feeds/_offers'],
             'rating' => true,
@@ -22,7 +22,7 @@ return [
     ],
 
     'panel' => [
-        '/admin/offers'         => __('offer::offers.offers'),
+        '/admin/offers'         => __('offer::offers.section'),
         '/admin/offer-settings' => __('offer::offers.settings'),
     ],
 

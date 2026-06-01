@@ -5,7 +5,7 @@ use App\Classes\Hook;
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', static fn () => '<li>
     <a class="footer-item" href="' . route('offers.index') . '">
-        ' . __('offer::offers.offers') . '
+        ' . __('offer::offers.section') . '
     </a>
      <span class="badge bg-adaptive">' . statsOffers() . '</span>
  </li>');
@@ -15,7 +15,7 @@ Hook::add('adminBlockAdmin', static function () {
     return '<div class="col">
         <a href="' . route('admin.offers.index') . '" class="app-tile">
             <div class="app-tile-icon" style="background:#d63384"><i class="fa-regular fa-circle-question"></i></div>
-            <div class="app-tile-label">' . __('offer::offers.offers') . '<span class="badge bg-adaptive app-tile-badge">' . statsOffers() . '</span></div>
+            <div class="app-tile-label">' . __('offer::offers.section') . '<span class="badge bg-adaptive app-tile-badge">' . statsOffers() . '</span></div>
         </a>
     </div>';
 });

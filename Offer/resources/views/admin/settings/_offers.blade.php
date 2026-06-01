@@ -10,7 +10,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Offer']) }}">{{ __('offer::offers.offers') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Offer']) }}">{{ __('offer::offers.section') }}</a></li>
             <li class="breadcrumb-item active">{{ __('offer::offers.settings') }}</li>
         </ol>
     </nav>

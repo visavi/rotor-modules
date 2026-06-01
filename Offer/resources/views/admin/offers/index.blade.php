@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', __('offer::offers.offers'))
+@section('title', __('offer::offers.section'))
 
 @section('header')
     <div class="float-end">
@@ -8,7 +8,7 @@
         <a class="btn btn-adaptive" href="{{ route('offers.index', ['type' => $type, 'page' => $offers->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
     </div>
 
-    <h1>{{ __('offer::offers.offers') }}</h1>
+    <h1>{{ __('offer::offers.section') }}</h1>
 @stop
 
 @section('breadcrumb')
@@ -16,7 +16,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-            <li class="breadcrumb-item active">{{ __('offer::offers.offers') }}</li>
+            <li class="breadcrumb-item active">{{ __('offer::offers.section') }}</li>
         </ol>
     </nav>
 @stop

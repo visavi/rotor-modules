@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'section'           => 'Suggestions and problems',
     'offers'            => 'Suggestions',
     'problems'          => 'Problems',
     'official_response' => 'Official answer',
@@ -37,5 +38,4 @@ return [
 
     'feed_offers_show'   => 'Show offers / issues in feed',
     'feed_offers_rating' => 'Hide offers / issues in feed with rating below',
-    'offers'             => 'Suggestions / Problems',
 ];
