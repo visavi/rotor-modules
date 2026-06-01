@@ -36,6 +36,10 @@
 @stop
 
 @section('content')
+    <div class="border-bottom pb-3 mb-3">
+        <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a><i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
+    </div>
+
     <div class="sort-links border-bottom pb-3 mb-3">
         {{ __('main.sort') }}:
         @foreach ($sorting as $key => $option)
@@ -130,6 +134,4 @@
 
     {{ $articles->links() }}
 
-    <a href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a> /
-    <a href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
 @stop

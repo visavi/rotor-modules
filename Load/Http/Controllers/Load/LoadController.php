@@ -6,6 +6,7 @@ namespace Modules\Load\Http\Controllers\Load;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
@@ -60,7 +61,7 @@ class LoadController extends Controller
     /**
      * RSS всех файлов
      */
-    public function rss(): View
+    public function rss(): Response
     {
         $downs = Down::query()
             ->orderByDesc('created_at')
@@ -71,6 +72,8 @@ class LoadController extends Controller
             abort(200, __('load::loads.downs_not_found'));
         }
 
-        return view('load::downs/rss', compact('downs'));
+        return response()
+            ->view('load::downs/rss', compact('downs'))
+            ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 }

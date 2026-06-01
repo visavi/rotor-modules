@@ -111,6 +111,4 @@
 
     @include('guestbook::guestbook/_form')
 
-    <a href="/stickers">{{ __('main.stickers') }}</a>  /
-    <a href="/rules">{{ __('main.rules') }}</a>
 @stop

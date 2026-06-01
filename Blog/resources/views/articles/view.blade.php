@@ -67,10 +67,6 @@
         </div>
     @endif
 
-    <i class="fas fa-print"></i> <a class="me-3" href="{{ route('articles.print', ['id' => $article->id]) }}">{{ __('main.print') }}</a>
-    <i class="fas fa-rss"></i> <a href="{{ route('articles.rss-comments', ['id' => $article->id]) }}">{{ __('main.rss') }}</a>
-    <hr>
-
     <div class="section mb-3 shadow">
         @if ($article->getDetachedMedia()->isNotEmpty())
             @include('app/_media_slider', ['model' => $article, 'files' => $article->getDetachedMedia()])

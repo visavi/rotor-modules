@@ -39,9 +39,6 @@
         </div>
     @endif
 
-    <i class="fas fa-rss"></i> <a class="me-3" href="{{ route('downs.rss', ['id' => $down->id]) }}">{{ __('main.rss') }}</a>
-    <hr>
-
     <div class="section mb-3 shadow">
     <div class="section-content">
         @if ($down->getDetachedMedia()->isNotEmpty())

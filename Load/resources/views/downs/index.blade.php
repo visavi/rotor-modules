@@ -35,6 +35,8 @@
     {{ __('main.new') }}:
     <a href="{{ route('downs.new-files') }}" class="badge bg-adaptive">{{ __('load::loads.downs') }}</a>
     <a href="{{ route('downs.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
+
+    <div class="mt-2"><i class="fa fa-rss"></i> <a class="me-3" href="{{ route('loads.rss') }}">{{ __('main.rss') }}</a></div>
     <hr>
 
     @foreach ($categories as $category)
@@ -85,5 +87,4 @@
         </div>
     @endforeach
 
-    <a href="{{ route('loads.rss') }}">{{ __('main.rss') }}</a>
 @stop

@@ -16,9 +16,9 @@
             <pubDate>{{ date('r', $news->created_at) }}</pubDate>
             <category>{{ __('news::news.news') }}</category>
             <guid>{{ route('news.view', ['id' => $news->id]) }}</guid>
-            @if ($news->files->isNotEmpty())
-                <enclosure url="{{ $news->files->first()->getUrl() }}" length="{{ $news->files->first()->size }}" type="{{ $news->files->first()->mime_type }}" />
-            @endif
+            @foreach ($news->files as $file)
+                <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="image" />
+            @endforeach
         </item>
     @endforeach
 @stop

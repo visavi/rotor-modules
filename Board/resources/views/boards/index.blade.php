@@ -43,34 +43,33 @@
 @stop
 
 @section('content')
-    @if (getUser())
-        <div class="mb-3">
-            <i class="far fa-list-alt"></i> <a href="{{ route('boards.active') }}">{{ __('board::boards.my_items') }}</a>
+    @if ($boards->isNotEmpty())
+        <div class="row row-cols-2 row-cols-md-4 g-2 mb-3">
+            @foreach ($boards as $child)
+                <div class="col">
+                    <a href="{{ route('boards.index', ['id' => $child->id]) }}">{{ $child->name }}</a>
+                    <span class="badge bg-adaptive">{{ $child->count_items + $child->children->sum('count_items') }}</span>
+                </div>
+            @endforeach
         </div>
     @endif
 
-    @if ($boards->isNotEmpty())
-        <div class="row mb-3">
-            @foreach ($boards->chunk(3) as $chunk)
-                @foreach ($chunk as $child)
-                    <div class="col-md-3 col-6">
-                        <a href="{{ route('boards.index', ['id' => $child->id]) }}">{{ $child->name }}</a> {{ $child->count_items + $child->children->sum('count_items') }}
-                    </div>
-                @endforeach
-            @endforeach
+    <div class="sort-links border-bottom pb-3 mb-3">
+        {{ __('main.sort') }}:
+        @foreach ($sorting as $key => $option)
+            <a href="{{ route('boards.index', ['id' => $board?->id, 'sort' => $key, 'order' => $option['inverse'] ?? 'desc']) }}" class="badge bg-{{ $option['badge'] ?? 'adaptive' }}">
+                {{ $option['label'] }}{{ $option['icon'] ?? '' }}
+            </a>
+        @endforeach
+    </div>
+
+    @if (getUser())
+        <div class="border-bottom pb-3 mb-3">
+            <i class="far fa-list-alt"></i> <a class="me-3" href="{{ route('boards.active') }}">{{ __('board::boards.my_items') }}</a>
         </div>
     @endif
 
     @if ($items->isNotEmpty())
-        <div class="sort-links border-bottom pb-3 mb-3">
-            {{ __('main.sort') }}:
-            @foreach ($sorting as $key => $option)
-                <a href="{{ route('boards.index', ['id' => $board?->id, 'sort' => $key, 'order' => $option['inverse'] ?? 'desc']) }}" class="badge bg-{{ $option['badge'] ?? 'adaptive' }}">
-                    {{ $option['label'] }}{{ $option['icon'] ?? '' }}
-                </a>
-            @endforeach
-        </div>
-
         @foreach ($items as $item)
             <div class="row mb-3">
                 <div class="col-md-12">
@@ -98,11 +97,13 @@
                                         </div>
                                     </div>
 
-                                    <p class="card-text">
-                                        <a href="tel:{{ $item->phone }}" class="text-decoration-none">
-                                            <i class="fa-solid fa-phone fs-5 me-2"></i> {{ $item->phone }}
-                                        </a>
-                                    </p>
+                                    @if ($item->phone)
+                                        <p class="card-text">
+                                            <a href="tel:{{ $item->phone }}" class="text-decoration-none">
+                                                <i class="fa-solid fa-phone fs-5 me-2"></i> {{ $item->phone }}
+                                            </a>
+                                        </p>
+                                    @endif
 
                                     <div>
                                         <i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }}

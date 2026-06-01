@@ -545,27 +545,4 @@ class TopicController extends Controller
 
         return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page]);
     }
-
-    /**
-     * Print topic
-     */
-    public function print(int $id): View
-    {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $posts = Post::query()
-            ->where('topic_id', $topic->id)
-            ->with('user')
-            ->orderBy('created_at')
-            ->get();
-
-        $firstPost = $posts->first();
-        $description = $firstPost ? truncateDescription($firstPost->text) : $topic->title;
-
-        return view('forum::forums/print', compact('topic', 'posts', 'description'));
-    }
 }

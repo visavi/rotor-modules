@@ -95,6 +95,5 @@
         {{ showError(__('forum::forums.empty_forums')) }}
     @endif
 
-    <a href="/rules">{{ __('main.rules') }}</a> /
     <a href="{{ route('forums.rss') }}">{{ __('main.rss') }}</a><br>
 @stop

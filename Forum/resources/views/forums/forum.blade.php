@@ -105,5 +105,4 @@
 
     {{ $topics->links() }}
 
-    <a href="/rules">{{ __('main.rules') }}</a><br>
 @stop

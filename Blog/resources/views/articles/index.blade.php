@@ -36,6 +36,10 @@
         {{ __('main.new') }}:
         <a href="{{ route('articles.index') }}" class="badge bg-adaptive">{{ __('blog::blogs.articles') }}</a>
         <a href="{{ route('articles.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
+
+        <div class="mt-2">
+            <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a><i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
+        </div>
     </div>
 
     @foreach ($categories as $key => $category)
@@ -91,7 +95,4 @@
         </div>
     @endforeach
 
-    <a href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a> /
-    <a href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a> /
-    <a href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a>
 @stop

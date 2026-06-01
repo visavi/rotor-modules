@@ -416,20 +416,4 @@ class DownController extends Controller
 
         return [$down, $file, $archive];
     }
-
-    /**
-     * RSS комментариев
-     */
-    public function rss(int $id): Response
-    {
-        $down = Down::query()->where('id', $id)->with('lastComments')->first();
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        return response()
-            ->view('load::downs/rss_comments', compact('down'))
-            ->header('Content-Type', 'application/rss+xml; charset=utf-8');
-    }
 }

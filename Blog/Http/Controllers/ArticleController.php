@@ -316,20 +316,6 @@ class ArticleController extends Controller
     }
 
     /**
-     * Печать
-     */
-    public function print(int $id): View
-    {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
-
-        return view('blog::articles/print', compact('article'));
-    }
-
-    /**
      * RSS всех блогов
      */
     public function rss(): Response
@@ -347,22 +333,6 @@ class ArticleController extends Controller
 
         return response()
             ->view('blog::articles/rss', compact('articles'))
-            ->header('Content-Type', 'application/rss+xml; charset=utf-8');
-    }
-
-    /**
-     * RSS комментариев к блогу
-     */
-    public function rssComments(int $id): Response
-    {
-        $article = Article::query()->where('id', $id)->with('lastComments')->first();
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
-
-        return response()
-            ->view('blog::articles/rss_comments', compact('article'))
             ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 

@@ -66,8 +66,7 @@
 @stop
 
 @section('content')
-    <i class="fas fa-print"></i> <a class="me-3" href="{{ route('topics.print', ['id' => $topic->id]) }}">{{ __('main.print') }}</a>
-    <i class="fas fa-rss"></i> <a class="me-3" href="{{ route('topics.rss', ['id' => $topic->id]) }}">{{ __('main.rss') }}</a>
+
 
     @if (getUser())
         @if (! $topic->closed && getUser('id') === $topic->user->id && getUser('point') >= setting('editforumpoint'))
@@ -253,6 +252,4 @@
         {{ showError(__('main.not_authorized')) }}
     @endif
 
-    <a href="/stickers">{{ __('main.stickers') }}</a>  /
-    <a href="/rules">{{ __('main.rules') }}</a><br>
 @stop

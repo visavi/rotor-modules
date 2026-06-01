@@ -30,7 +30,6 @@ Route::middleware('web')->group(function () {
 
             Route::get('/{id}', [DownController::class, 'view'])->name('view');
             Route::post('/{id}/comments', [DownController::class, 'storeComment'])->name('add-comment');
-            Route::get('/{id}/rss', [DownController::class, 'rss'])->name('rss');
 
             Route::get('/{id}/download/{fid}', [DownController::class, 'download'])->name('download');
             Route::get('/{id}/link/{lid}', [DownController::class, 'downloadLink'])->whereNumber('lid')->name('download-link');

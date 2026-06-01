@@ -212,6 +212,4 @@
         {{ showError(trans_choice('forum::forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getName()])) }}
     @endif
 
-    <a href="/stickers">{{ __('main.stickers') }}</a>  /
-    <a href="/rules">{{ __('main.rules') }}</a><br>
 @stop

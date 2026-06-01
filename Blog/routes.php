@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Blog\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use Modules\Blog\Http\Controllers\Admin\BlogSettingController;
 use Modules\Blog\Http\Controllers\ArticleController;
+use Modules\Blog\Models\Article;
 
 /* Категория блогов */
 Route::middleware('web')
@@ -31,13 +32,18 @@ Route::middleware('web')
         Route::get('/', 'newArticles')->name('index');
         Route::get('/{slug}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
-        Route::get('/{id}/print', 'print')->name('print');
-        Route::get('/{id}/rss', 'rssComments')->name('rss-comments');
         Route::get('/new/comments', 'newComments')->name('new-comments');
         Route::get('/active/articles', 'userArticles')->name('user-articles');
         Route::get('/active/comments', 'userComments')->name('user-comments');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
     });
+
+/* Редиректы */
+Route::middleware('web')->get('/articles/{id}/print', function (int $id) {
+    $article = Article::find($id);
+
+    return redirect($article ? route('articles.view', ['slug' => $article->slug]) : route('articles.index'), 301);
+});
 
 /* Админ — блоги и статьи */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

@@ -16,6 +16,9 @@
             <pubDate>{{ date('r', $article->created_at) }}</pubDate>
             <category>{{ __('blog::blogs.blogs') }}</category>
             <guid>{{ route('articles.view', ['slug' => $article->slug]) }}</guid>
+            @foreach ($article->files as $file)
+                <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="image" />
+            @endforeach
         </item>
     @endforeach
 @stop

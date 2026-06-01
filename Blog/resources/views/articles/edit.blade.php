@@ -41,6 +41,5 @@
         @include('blog::articles/_form')
     </div>
 
-    <a href="/rules">{{ __('main.rules') }}</a> /
-    <a href="/stickers">{{ __('main.stickers') }}</a><br><br>
+
 @stop

@@ -204,27 +204,4 @@ class ForumController extends Controller
             ->view('forum::forums/rss', compact('topics'))
             ->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
-
-    /**
-     * RSS постов
-     */
-    public function rssPosts(int $id): Response
-    {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $posts = Post::query()
-            ->where('topic_id', $topic->id)
-            ->orderByDesc('created_at')
-            ->with('user')
-            ->limit(15)
-            ->get();
-
-        return response()
-            ->view('forum::forums/rss_posts', compact('topic', 'posts'))
-            ->header('Content-Type', 'application/rss+xml; charset=utf-8');
-    }
 }

@@ -41,10 +41,7 @@ Route::middleware('web')->group(function () {
             Route::post('/{id}/close', [TopicController::class, 'close'])->name('close');
             Route::post('/{id}/create', [TopicController::class, 'create'])->name('create');
             Route::post('/{id}/delete', [TopicController::class, 'delete'])->name('delete');
-            Route::get('/{id}/print', [TopicController::class, 'print'])->name('print');
             Route::match(['get', 'post'], '/{id}/edit', [TopicController::class, 'edit'])->name('edit');
-
-            Route::get('/{id}/rss', [ForumController::class, 'rssPosts'])->name('rss');
         });
 
     Route::prefix('posts')
@@ -54,6 +51,10 @@ Route::middleware('web')->group(function () {
             Route::match(['get', 'post'], '/{id}/edit', [TopicController::class, 'editPost'])->name('edit');
         });
 });
+
+/* Редиректы */
+Route::middleware('web')
+    ->get('/topics/{id}/print', fn (int $id) => redirect(route('topics.topic', ['id' => $id]), 301));
 
 /* ---- Админ роуты ---- */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

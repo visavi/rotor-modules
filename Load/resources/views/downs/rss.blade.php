@@ -14,6 +14,9 @@
             <pubDate>{{ date('r', $down->created_at) }}</pubDate>
             <category>{{ __('load::loads.loads') }}</category>
             <guid>{{ route('downs.view', ['id' => $down->id]) }}</guid>
+            @foreach ($down->files as $file)
+                <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="image" />
+            @endforeach
         </item>
     @endforeach
 @stop

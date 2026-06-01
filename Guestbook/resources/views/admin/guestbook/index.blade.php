@@ -28,7 +28,7 @@
             </div>
         @endif
 
-        <form method="post">
+        <form id="guestbook-form" method="post">
             @csrf
             @foreach ($posts as $post)
                 <div class="section mb-3 shadow">
@@ -93,17 +93,18 @@
                     </div>
                 </div>
             @endforeach
-
-            <div class="clearfix mb-3">
-                <button class="btn btn-sm btn-danger float-end" formaction="{{ route('admin.guestbook.delete', ['page' => $posts->currentPage()]) }}">{{ __('main.delete_selected') }}</button>
-
-                @if ($unpublished)
-                    <button class="btn btn-sm btn-success float-end me-1" formaction="{{ route('admin.guestbook.publish', ['page' => $posts->currentPage()]) }}">{{ __('main.publish') }}</button>
-                @endif
-            </div>
         </form>
 
-        {{ $posts->links() }}
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+            {{ $posts->links() }}
+
+            <div class="d-flex gap-2">
+                @if ($unpublished)
+                    <button class="btn btn-sm btn-success" form="guestbook-form" formaction="{{ route('admin.guestbook.publish', ['page' => $posts->currentPage()]) }}">{{ __('main.publish') }}</button>
+                @endif
+                <button class="btn btn-sm btn-danger" form="guestbook-form" formaction="{{ route('admin.guestbook.delete', ['page' => $posts->currentPage()]) }}">{{ __('main.delete_selected') }}</button>
+            </div>
+        </div>
 
         <div class="mb-3">
             {{ __('guestbook::guestbook.total_messages') }}: <b>{{ $posts->total() }}</b>

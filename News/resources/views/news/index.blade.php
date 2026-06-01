@@ -22,6 +22,9 @@
 @stop
 
 @section('content')
+    <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('news.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-comment"></i> <a class="me-3" href="{{ route('news.all-comments') }}">{{ __('main.last_comments') }}</a>
+    <hr>
+
     @if ($news->isNotEmpty())
         @foreach ($news as $data)
             <div class="section mb-3 shadow">
@@ -90,6 +93,4 @@
 
     {{ $news->links() }}
 
-    <i class="fa fa-rss"></i> <a href="{{ route('news.rss') }}">{{ __('main.rss') }}</a><br>
-    <i class="fa fa-comment"></i> <a href="{{ route('news.all-comments') }}">{{ __('main.last_comments') }}</a><br>
 @stop
