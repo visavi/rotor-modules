@@ -17,8 +17,8 @@
                 <pubDate>{{ date('r', $topic->updated_at) }}</pubDate>
                 <category>{{ __('forum::forums.topics') }}</category>
                 <guid>{{ route('topics.topic', ['id' => $topic->id]) }}</guid>
-                @foreach ($topic->lastPost->files as $file)
-                    <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="image" />
+                @foreach ($topic->lastPost->getMedia() as $file)
+                    <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="{{ $file->isVideo() ? 'video' : 'image' }}" />
                 @endforeach
             </item>
         @endif

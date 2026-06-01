@@ -16,8 +16,8 @@
             <pubDate>{{ date('r', $news->created_at) }}</pubDate>
             <category>{{ __('news::news.news') }}</category>
             <guid>{{ route('news.view', ['id' => $news->id]) }}</guid>
-            @foreach ($news->files as $file)
-                <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="image" />
+            @foreach ($news->getMedia() as $file)
+                <media:content url="{{ $file->getUrl() }}" fileSize="{{ $file->size }}" type="{{ $file->mime_type }}" medium="{{ $file->isVideo() ? 'video' : 'image' }}" />
             @endforeach
         </item>
     @endforeach
