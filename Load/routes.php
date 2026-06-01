@@ -9,37 +9,39 @@ use Modules\Load\Http\Controllers\Load\LoadController;
 use Modules\Load\Http\Controllers\Load\NewController;
 
 /* Категории загрузок */
-Route::prefix('loads')
-    ->name('loads.')
-    ->group(function () {
-        Route::get('/', [LoadController::class, 'index'])->name('index');
-        Route::get('/{id}', [LoadController::class, 'load'])->name('load');
-        Route::get('/rss', [LoadController::class, 'rss'])->name('rss');
-    });
+Route::middleware('web')->group(function () {
+    Route::prefix('loads')
+        ->name('loads.')
+        ->group(function () {
+            Route::get('/', [LoadController::class, 'index'])->name('index');
+            Route::get('/{id}', [LoadController::class, 'load'])->name('load');
+            Route::get('/rss', [LoadController::class, 'rss'])->name('rss');
+        });
 
-/* Загрузки */
-Route::prefix('downs')
-    ->name('downs.')
-    ->group(function () {
-        Route::get('/', [NewController::class, 'files'])->name('new-files');
-        Route::get('/comments', [NewController::class, 'comments'])->name('new-comments');
+    /* Загрузки */
+    Route::prefix('downs')
+        ->name('downs.')
+        ->group(function () {
+            Route::get('/', [NewController::class, 'files'])->name('new-files');
+            Route::get('/comments', [NewController::class, 'comments'])->name('new-comments');
 
-        Route::get('/active/files', [ActiveController::class, 'files'])->name('active-files');
-        Route::get('/active/comments', [ActiveController::class, 'comments'])->name('active-comments');
+            Route::get('/active/files', [ActiveController::class, 'files'])->name('active-files');
+            Route::get('/active/comments', [ActiveController::class, 'comments'])->name('active-comments');
 
-        Route::get('/{id}', [DownController::class, 'view'])->name('view');
-        Route::post('/{id}/comments', [DownController::class, 'storeComment'])->name('add-comment');
-        Route::get('/{id}/rss', [DownController::class, 'rss'])->name('rss');
+            Route::get('/{id}', [DownController::class, 'view'])->name('view');
+            Route::post('/{id}/comments', [DownController::class, 'storeComment'])->name('add-comment');
+            Route::get('/{id}/rss', [DownController::class, 'rss'])->name('rss');
 
-        Route::get('/{id}/download/{fid}', [DownController::class, 'download'])->name('download');
-        Route::get('/{id}/link/{lid}', [DownController::class, 'downloadLink'])->whereNumber('lid')->name('download-link');
+            Route::get('/{id}/download/{fid}', [DownController::class, 'download'])->name('download');
+            Route::get('/{id}/link/{lid}', [DownController::class, 'downloadLink'])->whereNumber('lid')->name('download-link');
 
-        Route::get('/{id}/zip/{fid}', [DownController::class, 'zip'])->name('zip');
-        Route::get('/{id}/zip/{fid}/{zid}', [DownController::class, 'zipView'])->whereNumber('zid')->name('zip-view');
+            Route::get('/{id}/zip/{fid}', [DownController::class, 'zip'])->name('zip');
+            Route::get('/{id}/zip/{fid}/{zid}', [DownController::class, 'zipView'])->whereNumber('zid')->name('zip-view');
 
-        Route::match(['get', 'post'], '/create', [DownController::class, 'create'])->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', [DownController::class, 'edit'])->name('edit');
-    });
+            Route::match(['get', 'post'], '/create', [DownController::class, 'create'])->name('create');
+            Route::match(['get', 'post'], '/{id}/edit', [DownController::class, 'edit'])->name('edit');
+        });
+});
 
 /* Административная панель */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

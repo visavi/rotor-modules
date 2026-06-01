@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Wall\Http\Controllers\Admin\SettingController;
 use Modules\Wall\Http\Controllers\WallController;
 
-Route::controller(WallController::class)
+Route::middleware('web')
+    ->controller(WallController::class)
     ->prefix('walls')
     ->name('walls.')
     ->group(function () {

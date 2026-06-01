@@ -6,7 +6,8 @@ use Modules\Advert\Http\Controllers\Admin\AdvertController as AdminUserAdvertCon
 use Modules\Advert\Http\Controllers\Admin\SettingController;
 use Modules\Advert\Http\Controllers\AdvertController;
 
-Route::controller(AdvertController::class)
+Route::middleware('web')
+    ->controller(AdvertController::class)
     ->prefix('adverts')
     ->group(function () {
         Route::get('/', 'index');
