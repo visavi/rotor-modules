@@ -1,0 +1,12 @@
+- ## RotorCMS
+    - [Установка](/docs/rotor-installation)
+    - [Настройка](/docs/rotor-configuration)
+    - [Обновление](/docs/rotor-upgrade)
+    - [Деплой](/docs/rotor-deploy)
+    - [Модули](/docs/rotor-modules)
+    - [Хуки](/docs/rotor-hooks)
+    - [Шаблоны](/docs/rotor-templates)
+    - [Сборка ресурсов](/docs/rotor-assets)
+    - [Роли и права](/docs/rotor-permissions)
+    - [Настройки сайта](/docs/rotor-settings)
+    - [Artisan-команды](/docs/rotor-commands)

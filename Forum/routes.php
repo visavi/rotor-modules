@@ -10,6 +10,19 @@ use Modules\Forum\Http\Controllers\ForumController;
 use Modules\Forum\Http\Controllers\NewController;
 use Modules\Forum\Http\Controllers\TopicController;
 
+/* Редиректы */
+Route::redirect('/forum', '/forums', 301);
+Route::redirect('/forums/search', '/search', 301);
+Route::redirect('/topic/{id}', '/topics/{id}', 301);
+Route::redirect('/topics/print/{id}', '/topics/{id}', 301);
+Route::redirect('/topics/{id}/print', '/topics/{id}', 301);
+Route::redirect('/topics/rss/{id}', '/topics/{id}', 301);
+Route::redirect('/topics/{id}/rss', '/topics/{id}', 301);
+Route::redirect('/topics/end/{id}', '/topics/{id}', 301);
+Route::redirect('/topics/{id}/{pid}', '/topics/{id}?pid={pid}', 301)->whereNumber('pid');
+Route::redirect('/forums/top/topics', '/topics?sort=posts', 301);
+Route::redirect('/forums/top/posts', '/posts?sort=rating', 301);
+
 /* ---- Публичные роуты ---- */
 Route::middleware('web')->group(function () {
     Route::prefix('forums')
@@ -51,10 +64,6 @@ Route::middleware('web')->group(function () {
             Route::match(['get', 'post'], '/{id}/edit', [TopicController::class, 'editPost'])->name('edit');
         });
 });
-
-/* Редиректы */
-Route::middleware('web')
-    ->get('/topics/{id}/print', fn (int $id) => redirect(route('topics.topic', ['id' => $id]), 301));
 
 /* ---- Админ роуты ---- */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

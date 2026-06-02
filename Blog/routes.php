@@ -4,7 +4,22 @@ use Illuminate\Support\Facades\Route;
 use Modules\Blog\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use Modules\Blog\Http\Controllers\Admin\BlogSettingController;
 use Modules\Blog\Http\Controllers\ArticleController;
-use Modules\Blog\Models\Article;
+
+/* Редиректы */
+Route::redirect('/blog', '/blogs', 301);
+Route::redirect('/blog/tags', '/blogs/tags', 301);
+Route::redirect('/blogs/search', '/search', 301);
+Route::redirect('/blogs/top', '/articles?sort=rating', 301);
+Route::redirect('/articles/comments/{id}', '/articles/{id}', 301);
+Route::redirect('/articles/comment/{id}/{cid}', '/articles/{id}?cid={cid}', 301);
+Route::redirect('/articles/rss/{id}', '/articles/{id}', 301);
+Route::redirect('/articles/{id}/rss', '/articles/{id}', 301);
+Route::redirect('/articles/print/{id}', '/articles/{id}', 301);
+Route::redirect('/articles/{id}/print', '/articles/{id}', 301);
+Route::redirect('/articles/end/{id}', '/articles/{id}', 301);
+Route::redirect('/articles/{id}/comments', '/articles/{id}', 301);
+Route::get('/blogs/active/articles', static fn () => redirect('/articles/active/articles?' . request()->server('QUERY_STRING'), 301));
+Route::get('/blogs/active/comments', static fn () => redirect('/articles/active/comments?' . request()->server('QUERY_STRING'), 301));
 
 /* Категория блогов */
 Route::middleware('web')
@@ -37,13 +52,6 @@ Route::middleware('web')
         Route::get('/active/comments', 'userComments')->name('user-comments');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
     });
-
-/* Редиректы */
-Route::middleware('web')->get('/articles/{id}/print', function (int $id) {
-    $article = Article::find($id);
-
-    return redirect($article ? route('articles.view', ['slug' => $article->slug]) : route('articles.index'), 301);
-});
 
 /* Админ — блоги и статьи */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

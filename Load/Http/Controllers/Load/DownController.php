@@ -311,6 +311,25 @@ class DownController extends Controller
     }
 
     /**
+     * Редиректит старые роуты на новый путь (используется только для редиректов в роутах)
+     */
+    public function redirectZip(int $id, ?int $fid = null): RedirectResponse
+    {
+        $file = File::query()->where('relate_type', Down::$morphName)->find($id);
+        $down = $file?->relate;
+
+        if (! $file || ! $down) {
+            abort(404, __('load::loads.down_not_exist'));
+        }
+
+        if ($fid) {
+            return redirect()->to("/downs/{$down->id}/zip/{$id}/{$fid}", 301);
+        }
+
+        return redirect()->to("/downs/{$down->id}/zip/{$id}", 301);
+    }
+
+    /**
      * Просмотр zip архива
      */
     public function zip(int $id, int $fid): View
