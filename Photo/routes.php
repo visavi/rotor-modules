@@ -12,7 +12,6 @@ Route::redirect('/photos/comments/{id}', '/photos/{id}', 301);
 Route::redirect('/photos/comment/{id}/{cid}', '/photos/{id}?cid={cid}', 301);
 Route::redirect('/photos/albums/{login}', '/photos/active/albums?user={login}', 301);
 Route::redirect('/photos/comments/active/{login}', '/photos/active/comments?user={login}', 301);
-Route::redirect('/photos/{id}/comments', '/photos/{id}', 301);
 
 /* Галерея */
 Route::middleware('web')

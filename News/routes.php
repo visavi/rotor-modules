@@ -9,7 +9,6 @@ use Modules\News\Http\Controllers\NewsController;
 Route::redirect('/news/comments/{id}', '/news/{id}', 301);
 Route::redirect('/news/comment/{id}/{cid}', '/news/{id}?cid={cid}', 301);
 Route::redirect('/news/end/{id}', '/news/{id}', 301);
-Route::redirect('/news/{id}/comments', '/news/{id}', 301);
 
 /* Новости */
 Route::middleware('web')

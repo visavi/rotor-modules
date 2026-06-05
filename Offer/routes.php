@@ -9,7 +9,6 @@ use Modules\Offer\Http\Controllers\OfferController;
 Route::redirect('/offers/comments/{id}', '/offers/{id}', 301);
 Route::redirect('/offers/comment/{id}/{cid}', '/offers/{id}?cid={cid}', 301);
 Route::redirect('/offers/end/{id}', '/offers/{id}', 301);
-Route::redirect('/offers/{id}/comments', '/offers/{id}', 301);
 
 /* Предложения и проблемы */
 Route::middleware('web')

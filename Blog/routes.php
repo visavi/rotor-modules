@@ -17,9 +17,6 @@ Route::redirect('/articles/{id}/rss', '/articles/{id}', 301);
 Route::redirect('/articles/print/{id}', '/articles/{id}', 301);
 Route::redirect('/articles/{id}/print', '/articles/{id}', 301);
 Route::redirect('/articles/end/{id}', '/articles/{id}', 301);
-Route::redirect('/articles/{id}/comments', '/articles/{id}', 301);
-Route::get('/blogs/active/articles', static fn () => redirect('/articles/active/articles?' . request()->server('QUERY_STRING'), 301));
-Route::get('/blogs/active/comments', static fn () => redirect('/articles/active/comments?' . request()->server('QUERY_STRING'), 301));
 
 /* Категория блогов */
 Route::middleware('web')

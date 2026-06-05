@@ -93,14 +93,14 @@
             <h5 id="comments"><i class="fa-regular fa-comment"></i> {{ __('main.comments') }}</h5>
         </div>
         <div class="px-3">
+            @include('app/_comment_form', [
+                'action' => route('news.add-comment', ['id' => $news->id]),
+                'closed' => $news->closed,
+            ])
+
             @foreach ($comments as $comment)
                 @include('app/_comment_item', ['action' => route('news.add-comment', ['id' => $news->id]), 'closed' => $news->closed])
             @endforeach
         </div>
     </div>
-
-    @include('app/_comment_form', [
-        'action' => route('news.add-comment', ['id' => $news->id]),
-        'closed' => $news->closed,
-    ])
 @stop

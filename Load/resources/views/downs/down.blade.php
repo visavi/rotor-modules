@@ -119,14 +119,14 @@
             <h5 class="mb-0"><i class="fa-regular fa-comment"></i> {{ __('main.comments') }}</h5>
         </div>
         <div class="px-3">
+            @include('app/_comment_form', [
+                'action' => route('downs.add-comment', ['id' => $down->id]),
+                'closed' => $down->closed,
+            ])
+
             @foreach ($comments as $comment)
                 @include('app/_comment_item', ['action' => route('downs.add-comment', ['id' => $down->id]), 'closed' => $down->closed])
             @endforeach
         </div>
     </div>
-
-    @include('app/_comment_form', [
-        'action' => route('downs.add-comment', ['id' => $down->id]),
-        'closed' => $down->closed,
-    ])
 @stop
