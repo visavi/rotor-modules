@@ -1,5 +1,6 @@
 @if (view()->exists('theme::sidebar'))
     @section('sidebar')
+        <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
         <aside class="app-sidebar docs-in-sidebar">
             @include('docs::_nav')
         </aside>
