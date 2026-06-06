@@ -9,10 +9,19 @@
 @once
     @push('styles')
         <style>
-            /* Навигация документации в слоте sidebar темы */
+            /* Навигация документации в слоте sidebar темы.
+               Цвет текста наследуется от сайдбара темы (currentColor): тёмный сайдбар → светлый текст,
+               светлый → тёмный. Фон не навязываем — берём фон сайдбара темы. */
             .docs-in-sidebar { padding-left: .75rem; padding-right: .75rem; }
-            .docs-in-sidebar a, .docs-in-sidebar a:hover { text-decoration: none; }
+            .docs-in-sidebar a { text-decoration: none; }
             .docs-in-sidebar .docs-search { margin-top: .75rem; margin-bottom: 1rem; }
+            .docs-in-sidebar .docs-nav-item,
+            .docs-in-sidebar .docs-nav-section-toggle { color: inherit; }
+            .docs-in-sidebar .docs-nav-group-title { color: inherit; opacity: .6; }
+            .docs-in-sidebar .docs-divider { border-color: currentColor; opacity: .15; }
+            /* Ховер с гарантированным контрастом на любом фоне */
+            .docs-in-sidebar .docs-nav-item:hover,
+            .docs-in-sidebar .docs-nav-section-toggle:hover { background: rgba(128, 128, 128, .18); color: inherit; }
 
             /* Стили навигации */
             .docs-nav-group { margin-bottom: .5rem; }
