@@ -12,6 +12,8 @@
     </nav>
 @stop
 
+@include('docs::_sidebar')
+
 @section('content')
     <div class="mb-4">
         <form action="/docs/search" method="get" class="d-flex gap-2">

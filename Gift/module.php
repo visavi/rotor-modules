@@ -20,7 +20,7 @@ INFO,
     'requires' => '14.0.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
-    'panel'    => [
+    'actions'  => [
         '/admin/gifts' => __('gift::gifts.title'),
     ],
 

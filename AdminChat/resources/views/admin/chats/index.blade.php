@@ -13,8 +13,6 @@
 @stop
 
 @section('content')
-    <a href="/stickers">{{ __('main.stickers') }}</a><hr>
-
     @if ($posts->isNotEmpty())
         @foreach ($posts as $post)
             <div class="section mb-3 shadow">

@@ -9,7 +9,7 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    'panel' => [
+    'actions' => [
         '/admin/backups' => __('backup::backup.backup'),
     ],
 ];

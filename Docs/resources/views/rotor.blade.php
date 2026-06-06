@@ -1,51 +1,276 @@
 @extends('layout')
 
-@section('title', 'RotorCMS')
-
-@section('breadcrumb')
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item active">RotorCMS</li>
-        </ol>
-    </nav>
-@stop
+@section('titlebar', '')
 
 @section('content')
-    <div class="col-md-8 mx-auto text-center">
-        <?php if ($release): ?>
-            <a class="badge bg-warning text-black mb-4 p-2 px-4" href="/rotor/releases">
-                Последняя версия <?= $release['tag_name'] ?>
-            </a>
-        <?php endif; ?>
+    <section class="rotor-hero">
+        <div class="rotor-hero__bg" aria-hidden="true"></div>
 
-        <img src="/assets/modules/docs/rotor.png" alt="RotorCMS" class="d-block mx-auto mb-3">
+        <div class="rotor-hero__inner">
+            @if ($release)
+                <a class="rotor-badge" href="/rotor/releases">
+                    <span class="rotor-badge__dot"></span>
+                    Новая версия {{ $release['tag_name'] }}
+                    <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            @endif
 
-        <h1 class="mb-3 fw-semibold lh-1">Создайте свой первый сайт</h1>
-        <p class="lead mb-4">
-            Легкий и быстрый движок для сайта. Работает абсолютно на всех бесплатных хостингах
-        </p>
+            <img src="/assets/modules/docs/rotor.png" alt="RotorCMS" class="rotor-hero__logo">
 
-        <div class="d-flex flex-column flex-lg-row align-items-md-stretch justify-content-md-center gap-3 mb-4">
-            <div class="d-inline-block v-align-middle fs-5">
-                <div class="input-group">
-                    <input class="form-control form-control-lg" type="text" value="composer create-project visavi/rotor .">
-                    <span class="input-group-text" onclick="return copyToClipboard(this)" data-bs-toggle="tooltip" title="{{ __('main.copy') }}"><i class="far fa-clipboard"></i></span>
-                </div>
+            <h1 class="rotor-hero__title">Создайте свой первый сайт</h1>
+
+            <p class="rotor-hero__lead">
+                Лёгкий и быстрый движок для сообщества. Работает абсолютно на всех
+                бесплатных хостингах — без боли и лишних настроек.
+            </p>
+
+            <div class="rotor-install">
+                <span class="rotor-install__prompt">$</span>
+                <input class="rotor-install__field" type="text" readonly
+                       value="composer create-project visavi/rotor .">
+                <button class="rotor-install__copy" type="button"
+                        onclick="return copyToClipboard(this)"
+                        data-bs-toggle="tooltip" title="{{ __('main.copy') }}">
+                    <i class="far fa-clipboard"></i>
+                </button>
             </div>
 
-            <a href="/docs" class="btn btn-lg btn-primary">
-                <i class="fa-solid fa-book-open"></i> Документация
-            </a>
+            <div class="rotor-cta">
+                <a href="/docs" class="btn btn-primary btn-lg rotor-cta__primary">
+                    <i class="fa-solid fa-book-open me-1"></i> Документация
+                </a>
+                <a href="https://github.com/visavi/rotor" class="btn btn-lg rotor-cta__ghost" rel="noopener" target="_blank">
+                    <i class="fab fa-github me-1"></i> GitHub
+                </a>
+            </div>
+
+            <p class="rotor-meta">
+                @if ($release)
+                    Текущая версия <strong>{{ $release['tag_name'] }}</strong>
+                    <span class="rotor-meta__sep">&middot;</span>
+                @endif
+                <a href="/rotor/releases">Последние версии</a>
+                <span class="rotor-meta__sep">&middot;</span>
+                <a href="/rotor/commits">История изменений</a>
+            </p>
         </div>
-        <p class="text-muted mb-0">
-            <?php if ($release): ?>
-            Версия <strong><?= $release['tag_name'] ?></strong>
-            <span class="px-1">&middot;</span>
-            <?php endif; ?>
-            <a href="/rotor/releases" class="link-secondary text-nowrap">Последние версии</a>
-            <span class="px-1">&middot;</span>
-            <a href="/rotor/commits" class="link-secondary text-nowrap">История изменений</a>
-        </p>
-    </div>
+    </section>
+
+    <section class="rotor-features">
+        @php
+            $features = [
+                ['icon' => 'fa-bolt',          'title' => 'Лёгкий и быстрый',  'text' => 'Минимум ресурсов, максимум скорости даже на слабом железе.'],
+                ['icon' => 'fa-server',        'title' => 'Любой хостинг',     'text' => 'Запускается даже на бесплатных тарифах без лишних требований.'],
+                ['icon' => 'fa-puzzle-piece',  'title' => 'Модульность',       'text' => 'Форум, блог, доска объявлений, галерея и десятки модулей.'],
+                ['icon' => 'fa-layer-group',   'title' => 'На базе Laravel',   'text' => 'Современный фундамент, понятная архитектура и экосистема.'],
+                ['icon' => 'fa-palette',       'title' => 'Гибкие темы',       'text' => 'Несколько готовых тем и простая кастомизация под себя.'],
+                ['icon' => 'fa-code-branch',   'title' => 'Открытый код',      'text' => 'Свободная разработка и развитие сообществом на GitHub.'],
+            ];
+        @endphp
+
+        <div class="row g-3 g-md-4">
+            @foreach ($features as $i => $feature)
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="rotor-card" style="--d: {{ $i * 60 }}ms">
+                        <div class="rotor-card__icon">
+                            <i class="fas {{ $feature['icon'] }}"></i>
+                        </div>
+                        <h3 class="rotor-card__title">{{ $feature['title'] }}</h3>
+                        <p class="rotor-card__text">{{ $feature['text'] }}</p>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
 @stop
+
+@push('styles')
+    <style>
+        .rotor-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            padding: clamp(2.5rem, 3vw, 5rem) 1.25rem clamp(2rem, 4vw, 3rem);
+            isolation: isolate;
+        }
+        .rotor-hero__bg {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(60% 55% at 50% -10%, rgba(46, 140, 194, .28), transparent 70%),
+                radial-gradient(45% 40% at 85% 20%, rgba(46, 140, 194, .18), transparent 70%),
+                radial-gradient(40% 45% at 10% 30%, rgba(120, 200, 230, .15), transparent 70%);
+        }
+        .rotor-hero__bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--bs-border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bs-border-color) 1px, transparent 1px);
+            background-size: 38px 38px;
+            opacity: .25;
+            mask-image: radial-gradient(70% 70% at 50% 30%, #000 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(70% 70% at 50% 30%, #000 30%, transparent 75%);
+        }
+        .rotor-hero__inner {
+            max-width: 720px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .rotor-hero__inner > * { animation: rotor-up .6s both; }
+        .rotor-hero__inner > *:nth-child(1) { animation-delay: .02s; }
+        .rotor-hero__inner > *:nth-child(2) { animation-delay: .08s; }
+        .rotor-hero__inner > *:nth-child(3) { animation-delay: .14s; }
+        .rotor-hero__inner > *:nth-child(4) { animation-delay: .20s; }
+        .rotor-hero__inner > *:nth-child(5) { animation-delay: .26s; }
+        .rotor-hero__inner > *:nth-child(6) { animation-delay: .32s; }
+        .rotor-hero__inner > *:nth-child(7) { animation-delay: .38s; }
+
+        .rotor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            font-size: .8rem;
+            font-weight: 600;
+            padding: .35rem .85rem;
+            border-radius: 100px;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            text-decoration: none;
+            margin-bottom: 1.75rem;
+            transition: border-color .2s, transform .2s;
+        }
+        .rotor-badge:hover { border-color: var(--bs-primary); transform: translateY(-1px); color: var(--bs-body-color); }
+        .rotor-badge:hover .fa-arrow-right { transform: translateX(3px); }
+        .rotor-badge .fa-arrow-right { font-size: .7rem; transition: transform .2s; }
+        .rotor-badge__dot {
+            width: .5rem; height: .5rem; border-radius: 50%;
+            background: var(--bs-primary);
+            box-shadow: 0 0 0 0 rgba(46, 140, 194, .6);
+            animation: rotor-pulse 2s infinite;
+        }
+
+        .rotor-hero__logo { display: block; width: 200px; height: auto; margin: 1rem auto 1.5rem; }
+
+        .rotor-hero__title {
+            font-size: clamp(1.6rem, 4vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -.02em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--bs-body-color) 30%, var(--bs-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .rotor-hero__lead {
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            color: var(--bs-secondary-color);
+            max-width: 560px;
+            margin: 0 auto 2rem;
+        }
+
+        .rotor-install {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            max-width: 460px;
+            margin: 0 auto 1.75rem;
+            padding: .35rem .35rem .35rem .9rem;
+            border-radius: .9rem;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-tertiary-bg);
+            font-family: var(--bs-font-monospace);
+        }
+        .rotor-install__prompt { color: var(--bs-primary); font-weight: 700; }
+        .rotor-install__field {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            background: transparent;
+            color: var(--bs-body-color);
+            font-size: .9rem;
+            font-family: inherit;
+            outline: none;
+        }
+        .rotor-install__copy {
+            flex-shrink: 0;
+            width: 38px; height: 38px;
+            border: 0;
+            border-radius: .6rem;
+            background: var(--bs-primary);
+            color: #fff;
+            cursor: pointer;
+            transition: filter .2s, transform .15s;
+        }
+        .rotor-install__copy:hover { filter: brightness(1.08); }
+        .rotor-install__copy:active { transform: scale(.94); }
+
+        .rotor-cta {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: .75rem;
+            margin-bottom: 1.5rem;
+        }
+        .rotor-cta__primary { padding-inline: 1.5rem; box-shadow: 0 8px 24px -10px rgba(46, 140, 194, .8); }
+        .rotor-cta__ghost {
+            padding-inline: 1.5rem;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+        .rotor-cta__ghost:hover { border-color: var(--bs-body-color); background: var(--bs-tertiary-bg); color: var(--bs-body-color); }
+
+        .rotor-meta { font-size: .9rem; color: var(--bs-secondary-color); margin-bottom: 0; }
+        .rotor-meta a { color: var(--bs-secondary-color); text-decoration: none; }
+        .rotor-meta a:hover { color: var(--bs-primary); }
+        .rotor-meta__sep { padding-inline: .4rem; opacity: .5; }
+
+        .rotor-card {
+            height: 100%;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--bs-border-color);
+            background: var(--bs-body-bg);
+            transition: transform .25s, border-color .25s, box-shadow .25s;
+            animation: rotor-up .6s both;
+            animation-delay: var(--d, 0ms);
+        }
+        .rotor-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--bs-primary);
+            box-shadow: 0 18px 40px -22px rgba(46, 140, 194, .7);
+        }
+        .rotor-card__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px; height: 48px;
+            border-radius: .85rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: var(--bs-primary);
+            background: rgba(46, 140, 194, .12);
+        }
+        .rotor-card__title { font-size: 1.1rem; font-weight: 700; margin-bottom: .4rem; }
+        .rotor-card__text { font-size: .92rem; color: var(--bs-secondary-color); margin-bottom: 0; }
+
+        @keyframes rotor-up {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes rotor-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(46, 140, 194, .55); }
+            70%  { box-shadow: 0 0 0 6px rgba(46, 140, 194, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 140, 194, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .rotor-hero__inner > *, .rotor-card { animation: none; }
+            .rotor-badge__dot { animation: none; }
+        }
+    </style>
+@endpush

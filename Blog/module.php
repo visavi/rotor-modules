@@ -29,6 +29,7 @@ return [
     ],
 
     'actions' => [
+        '/admin/blogs'         => __('blog::blogs.blogs'),
         '/admin/blog-settings' => __('blog::blogs.settings'),
     ],
 

@@ -27,6 +27,7 @@ return [
     ],
 
     'actions' => [
+        '/admin/boards'         => __('board::boards.boards'),
         '/admin/board-settings' => __('board::boards.settings'),
     ],
 

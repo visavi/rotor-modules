@@ -21,7 +21,7 @@ return [
         ],
     ],
 
-    'panel' => [
+    'actions' => [
         '/admin/offers'         => __('offer::offers.section'),
         '/admin/offer-settings' => __('offer::offers.settings'),
     ],
