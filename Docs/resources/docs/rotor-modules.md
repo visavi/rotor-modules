@@ -42,14 +42,20 @@ return [
     'email'       => 'author@example.com',
     'homepage'    => 'https://example.com',
 
-    // Ссылки в AdminPanel
-    'panel' => [
-        '/admin/my-module' => 'Мой модуль',
+    // Модели модуля и их возможности.
+    // morphName берётся из статика $morphName модели и регистрируется в morphMap Laravel
+    'models' => [
+        \Modules\MyModule\Models\MyEntity::class => [
+            'label'  => 'Моя сущность',                        // метка раздела (поиск, спам, рейтинг)
+            'search' => ['view' => 'my-module::search/_items'], // глобальный поиск
+            'upload' => 'media',                               // media | file
+            'spam'   => true,                                  // пометка спама
+        ],
     ],
 
-    // Полиморфные отношения
-    'morphMap' => [
-        'my_entity' => \Modules\MyModule\Models\MyEntity::class,
+    // Ссылки-действия на странице модуля в админке
+    'actions' => [
+        '/admin/my-module' => 'Мой модуль',
     ],
 
     // Расписание (cron)
@@ -135,6 +141,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
+    // Обязателен для моделей, заявленных в `models` в module.php.
+    // Используется как ключ morphMap и для регистрации возможностей
+    public static string $morphName = 'posts';
+
     protected $fillable = ['title', 'body', 'user_id'];
 }
 ```
