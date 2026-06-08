@@ -42,15 +42,21 @@ return [
     'email'       => 'author@example.com',
     'homepage'    => 'https://example.com',
 
-    // Модели модуля и их возможности.
-    // morphName берётся из статика $morphName модели и регистрируется в morphMap Laravel
+    // Модели модуля и их возможности
     'models' => [
         \Modules\MyModule\Models\MyEntity::class => [
-            'label'  => 'Моя сущность',                        // метка раздела (поиск, спам, рейтинг)
-            'search' => ['view' => 'my-module::search/_items'], // глобальный поиск
-            'upload' => 'media',                               // media | file
-            'spam'   => true,                                  // пометка спама
+            'label'  => 'Моя сущность',                                          // метка раздела (поиск, спам, рейтинг)
+            'search' => ['view' => 'my-module::search/_items', 'with' => ['user']], // глобальный поиск
+            'feed'   => ['withs' => ['user', 'files'], 'view' => 'my-module::feeds/_items'], // лента активности
+            'upload' => 'media',                                                 // media | file
+            'rating' => true,                                                    // лайки/дизлайки
+            'spam'   => true,                                                    // пометка спама
         ],
+    ],
+
+    // Наблюдатели Eloquent-моделей
+    'observers' => [
+        \Modules\MyModule\Models\MyEntity::class => \Modules\MyModule\Observers\MyEntityObserver::class,
     ],
 
     // Ссылки-действия на странице модуля в админке
@@ -141,8 +147,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    // Обязателен для моделей, заявленных в `models` в module.php.
-    // Используется как ключ morphMap и для регистрации возможностей
+    // Обязателен для моделей, заявленных в `models` в module.php
     public static string $morphName = 'posts';
 
     protected $fillable = ['title', 'body', 'user_id'];
