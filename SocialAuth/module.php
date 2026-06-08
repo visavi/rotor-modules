@@ -2,7 +2,7 @@
 
 return [
     'name'        => 'SocialAuth',
-    'description' => 'Авторизация через социальные сети (Google, GitHub, Yandex)',
+    'description' => 'Авторизация через социальные сети (Google, GitHub, Yandex, VK)',
     'version'     => '1.0.0',
     'requires'    => '14.0.0',
     'author'      => 'Vantuz',

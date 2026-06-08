@@ -7,6 +7,7 @@ namespace Modules\SocialAuth\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Class Social
@@ -16,14 +17,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $provider
  * @property string $provider_id
  * @property string $token
- * @property string $refresh_token
- * @property int    $created_at
+ * @property Carbon $created_at
  */
 class Social extends Model
 {
-    public $timestamps = false;
+    const UPDATED_AT = null;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'token' => 'encrypted',
+    ];
 
     public function user(): BelongsTo
     {

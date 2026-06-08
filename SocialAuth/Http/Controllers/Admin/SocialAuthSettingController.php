@@ -44,7 +44,7 @@ class SocialAuthSettingController extends Controller
             ['value' => (int) $request->boolean('sets.social_autolink_email')]
         );
 
-        clearCache('settings');
+        Setting::forgetSettings();
 
         if ($errors) {
             setFlash('warning', $errors);

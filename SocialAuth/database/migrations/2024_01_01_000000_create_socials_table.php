@@ -15,9 +15,8 @@ return new class extends Migration {
                 $table->unsignedInteger('user_id');
                 $table->string('provider', 20);
                 $table->string('provider_id', 100);
-                $table->string('token', 500)->nullable();
-                $table->string('refresh_token', 500)->nullable();
-                $table->integer('created_at');
+                $table->text('token')->nullable();
+                $table->timestamp('created_at')->useCurrent();
 
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->unique(['provider', 'provider_id']);

@@ -19,6 +19,8 @@ Route::middleware('web')
     ->prefix('social')
     ->group(function () {
         Route::get('/accounts', 'accounts')->name('social.accounts');
+        Route::get('/complete', 'completeForm')->name('social.complete');
+        Route::post('/complete', 'complete')->name('social.complete.post');
         Route::get('/{provider}/link', 'link')->name('social.link')->where('provider', '[a-z]+');
         Route::delete('/{provider}/unlink', 'unlink')->name('social.unlink')->where('provider', '[a-z]+');
     });

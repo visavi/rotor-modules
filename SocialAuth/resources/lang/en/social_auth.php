@@ -26,4 +26,7 @@ return [
     'no_code'                    => 'Provider did not return an authorization code',
     'provider_error'             => 'Error retrieving data from provider',
     'account_banned'             => 'Your account is banned',
+
+    'complete_title' => 'Complete registration',
+    'complete_hint'  => 'The provider did not share your email. Enter it to complete registration.',
 ];
