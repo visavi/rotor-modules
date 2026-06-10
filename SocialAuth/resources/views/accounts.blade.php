@@ -23,7 +23,7 @@
     <div class="list-group">
         @foreach($availableProviders as $provider)
             <div class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ ucfirst($provider) }}</span>
+                <span>{{ \Modules\SocialAuth\Models\Social::providerConfig($provider)['name'] }}</span>
                 @if(isset($socials[$provider]))
                     <form method="post" action="{{ route('social.unlink', ['provider' => $provider]) }}">
                         @csrf

@@ -37,10 +37,7 @@ class SocialAuthController extends Controller
     {
         $oauthProvider = $this->resolveEnabledProvider($provider);
 
-        $state = Str::random(40);
-        $request->session()->put('oauth_state', $state);
-
-        return redirect($oauthProvider->buildAuthUrl($state));
+        return $this->redirectToProvider($oauthProvider, $request);
     }
 
     /**
@@ -69,12 +66,11 @@ class SocialAuthController extends Controller
 
         try {
             if ($oauthProvider instanceof VkProvider) {
-                $tokenData = $oauthProvider->getTokenData($code);
+                $codeVerifier = $request->session()->pull('oauth_code_verifier', '');
+                $deviceId = $request->input('device_id', '');
+                $tokenData = $oauthProvider->getTokenData($code, $codeVerifier, $deviceId);
                 $token = $tokenData['access_token'];
                 $oauthUser = $oauthProvider->getUser($token);
-                // VK отдаёт email в ответе токена
-                $oauthUser['email'] = $tokenData['email'] ?? null;
-                $oauthUser['id'] = (string) ($tokenData['user_id'] ?? $oauthUser['id']);
             } else {
                 $token = $oauthProvider->getToken($code);
                 $oauthUser = $oauthProvider->getUser($token);
@@ -82,7 +78,9 @@ class SocialAuthController extends Controller
         } catch (RuntimeException $e) {
             report($e);
 
-            return redirect('login')->with('danger', __('social_auth::social_auth.provider_error'));
+            $fallback = Auth::check() ? redirect()->route('social.accounts') : redirect('login');
+
+            return $fallback->with('danger', __('social_auth::social_auth.provider_error'));
         }
 
         $providerId = $oauthUser['id'];
@@ -139,10 +137,7 @@ class SocialAuthController extends Controller
             return redirect()->route('social.accounts');
         }
 
-        $state = Str::random(40);
-        $request->session()->put('oauth_state', $state);
-
-        return redirect($oauthProvider->buildAuthUrl($state));
+        return $this->redirectToProvider($oauthProvider, $request);
     }
 
     /**
@@ -353,6 +348,21 @@ class SocialAuthController extends Controller
 
         return redirect('/')
             ->with('success', __('users.welcome', ['login' => $login], $user->language));
+    }
+
+    private function redirectToProvider(AbstractOAuthProvider $oauthProvider, Request $request): RedirectResponse
+    {
+        $state = Str::random(40);
+        $request->session()->put('oauth_state', $state);
+
+        if ($oauthProvider instanceof VkProvider) {
+            $pkce = $oauthProvider->buildAuthUrlWithPkce($state);
+            $request->session()->put('oauth_code_verifier', $pkce['code_verifier']);
+
+            return redirect($pkce['url']);
+        }
+
+        return redirect($oauthProvider->buildAuthUrl($state));
     }
 
     private function generateLogin(string $name): string
