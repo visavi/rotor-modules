@@ -17,7 +17,7 @@
 @section('content')
     <div class="mb-4">
         <form action="/docs/search" method="get" class="d-flex gap-2">
-            <input name="q" class="form-control" type="search"
+            <input name="query" class="form-control" type="search"
                    placeholder="Поиск по документации..." value="{{ $query }}" minlength="3" maxlength="64">
             <button class="btn btn-primary">Найти</button>
         </form>
@@ -37,16 +37,39 @@
                             {{ $result['title'] }}
                         </a>
                         @if ($result['type'] === 'laravel')
-                            <span class="badge" style="background:#f05340;font-size:.65rem;">Laravel</span>
+                            <span class="badge bg-danger">Laravel</span>
                         @else
-                            <span class="badge bg-primary" style="font-size:.65rem;">RotorCMS</span>
+                            <span class="badge bg-primary">RotorCMS</span>
                         @endif
                     </div>
-                    <p class="text-muted mb-0 mt-1" style="font-size:.85rem;">
-                        {!! nl2br(e($result['excerpt'])) !!}
-                    </p>
+                    <div class="docs-excerpt text-muted mt-1" style="font-size:.85rem;">
+                        {!! \Illuminate\Support\Str::of($result['excerpt'])->markdown(['html_input' => 'strip']) !!}
+                    </div>
                 </div>
             </div>
         @endforeach
     @endif
 @stop
+
+@push('scripts')
+    <script type="module">
+        const query = new URLSearchParams(window.location.search).get('query');
+
+        if (query) {
+            const searchWords = query.split(' ')
+                .filter(word => word.length >= 3)
+                .filter((word, index, self) => self.indexOf(word) === index);
+
+            if (searchWords.length > 0) {
+                const regex = new RegExp('(' + searchWords.join('|') + ')', 'gi');
+
+                document.querySelectorAll('.docs-excerpt').forEach(function (el) {
+                    el.innerHTML = el.innerHTML.replace(
+                        /(<[^>]+>)|([^<]+)/g,
+                        (m, tag, text) => tag || text.replace(regex, '<mark>$1</mark>')
+                    );
+                });
+            }
+        }
+    </script>
+@endpush

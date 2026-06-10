@@ -10,7 +10,7 @@ class DocsService
 {
     public const string LARAVEL_VERSION = '13.x';
 
-    private const array SKIP_FILES = ['documentation', 'readme', 'license'];
+    private const array SKIP_FILES = ['documentation', 'readme', 'license', 'navigation'];
 
     /**
      * Извлекает заголовок h1 из markdown
@@ -140,21 +140,20 @@ class DocsService
      */
     private function buildExcerpt(string $raw, string $query): string
     {
-        $pos = mb_stripos($raw, $query) ?: 0;
+        $text = preg_replace('/```[\w]*\n[\s\S]*?```/u', '', $raw);
+
+        $pos = mb_stripos($text, $query) ?: 0;
         $start = max(0, $pos - 100);
 
         if ($start > 0) {
-            $firstSpace = mb_strpos($raw, ' ', $start);
+            $firstSpace = mb_strpos($text, ' ', $start);
             $start = $firstSpace !== false ? $firstSpace + 1 : $start;
         }
 
-        $excerpt = mb_substr($raw, $start, 500);
-        $excerpt = preg_replace(
-            ['/`{1,3}[^`]*`{1,3}/', '/!?\[([^\]]*)]([^)]*\))/', '/[#*_>-]{2,}/'],
-            ['', '$1', ''],
-            strip_tags($excerpt)
-        );
-        $excerpt = trim(preg_replace(['/[ \t]+/', '/\n{3,}/'], [' ', "\n\n"], $excerpt));
+        $excerpt = mb_substr($text, $start, 500);
+        $excerpt = preg_replace('/^#\s+.+$/mu', '', $excerpt);
+        $excerpt = preg_replace('/^#{2,6}\s+(.+)$/mu', '**$1**', $excerpt);
+        $excerpt = trim(preg_replace('/\n{3,}/', "\n\n", $excerpt));
 
         if (mb_strlen($excerpt) > 400) {
             $excerpt = mb_substr($excerpt, 0, mb_strrpos(mb_substr($excerpt, 0, 400), ' '));

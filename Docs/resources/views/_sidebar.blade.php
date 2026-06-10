@@ -18,7 +18,8 @@
             .docs-in-sidebar .docs-search { margin-top: .75rem; margin-bottom: 1rem; }
             .docs-in-sidebar .docs-nav-item,
             .docs-in-sidebar .docs-nav-section-toggle { color: inherit; }
-            .docs-in-sidebar .docs-nav-group-title { color: inherit; opacity: .6; }
+            .docs-in-sidebar .docs-nav-group-title { color: inherit; }
+            .docs-in-sidebar .docs-nav-group-title > span:first-child { opacity: .6; }
             .docs-in-sidebar .docs-divider { border-color: currentColor; opacity: .15; }
             /* Ховер с гарантированным контрастом на любом фоне */
             .docs-in-sidebar .docs-nav-item:hover,
@@ -35,7 +36,6 @@
             .docs-nav-item:hover { background: var(--bs-tertiary-bg); color: var(--bs-body-color); }
             .docs-nav-item.active { background: var(--bs-primary); color: #fff; }
             .docs-divider { border-top: 1px solid var(--bs-border-color); margin: 1rem 0; }
-            .docs-badge { font-size: .65rem; font-weight: 600; background: #f05340; color: #fff; border-radius: .25rem; padding: .1rem .35rem; vertical-align: middle; margin-left: .3rem; }
         </style>
     @endpush
 

@@ -1,14 +1,14 @@
 <div class="docs-search mb-2">
     <form action="/docs/search" method="get">
-        <input name="q" class="form-control form-control-sm" type="search"
-               placeholder="Поиск по документации..." value="{{ request('q') }}" minlength="3" maxlength="64">
+        <input name="query" class="form-control form-control-sm" type="search"
+               placeholder="Поиск по документации..." value="{{ request('query') }}" minlength="3" maxlength="64">
     </form>
 </div>
 
 @foreach ($menu['rotor']['nav'] as $group)
     <div class="docs-nav-group">
         <div class="docs-nav-group-title">
-            {{ $group['title'] }} <span class="docs-badge bg-primary">{{ ROTOR_VERSION }}</span>
+            <span>{{ $group['title'] }}</span> <span class="badge bg-primary">{{ ROTOR_VERSION }}</span>
         </div>
         @foreach ($group['items'] as $item)
             @php $isActive = ($section ?? null) === 'rotor' && ($menu['rotor']['page'] ?? null) === $item['page']; @endphp
@@ -21,7 +21,7 @@
 
 @if (!empty($menu['laravel']['nav']))
     <div class="docs-nav-group-title mb-1">
-        Laravel <span class="docs-badge">{{ \Modules\Docs\Services\DocsService::LARAVEL_VERSION }}</span>
+        <span>Laravel</span> <span class="badge bg-danger">{{ \Modules\Docs\Services\DocsService::LARAVEL_VERSION }}</span>
     </div>
     <div id="docs-laravel-accordion">
     @foreach ($menu['laravel']['nav'] as $group)
