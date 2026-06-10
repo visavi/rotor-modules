@@ -10,7 +10,7 @@ use RuntimeException;
 
 class VkProvider extends AbstractOAuthProvider
 {
-    private const API_VERSION = '5.131';
+    private const string API_VERSION = '5.199';
 
     public function getName(): string
     {

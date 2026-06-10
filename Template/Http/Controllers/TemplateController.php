@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\Template\Models\Template;
 
@@ -53,7 +52,7 @@ class TemplateController extends Controller
             'created_at' => SITETIME,
         ]);
 
-        Cache::forget('statTemplate');
+        clearCache('statTemplate');
 
         setFlash('success', __('template::template.record_added'));
 

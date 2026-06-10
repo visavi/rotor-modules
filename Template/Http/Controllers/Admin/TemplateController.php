@@ -7,7 +7,6 @@ namespace Modules\Template\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\Template\Models\Template;
 
@@ -36,7 +35,7 @@ class TemplateController extends Controller
         $template = Template::query()->find($id);
         if ($template) {
             $template->delete();
-            Cache::forget('statTemplate');
+            clearCache('statTemplate');
             setFlash('success', __('template::template.record_deleted'));
         }
 

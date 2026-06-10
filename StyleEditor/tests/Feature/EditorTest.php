@@ -3,7 +3,6 @@
 namespace Modules\StyleEditor\Tests\Feature;
 
 use App\Models\User;
-use Database\Seeders\DatabaseSeeder;
 use Tests\ModuleTestCase;
 
 class EditorTest extends ModuleTestCase
@@ -16,7 +15,6 @@ class EditorTest extends ModuleTestCase
     {
         parent::setUp();
 
-        $this->seed(DatabaseSeeder::class);
         $this->admin = User::factory()->admin()->create(['login' => 'admin_test']);
     }
 

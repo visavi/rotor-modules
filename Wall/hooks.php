@@ -8,7 +8,7 @@ use Modules\Wall\Models\Wall;
 
 Registry::onDeleteUser(function (User $user): void {
     Wall::query()->where('user_id', $user->id)->delete();
-    Cache::forget('wall_count_' . $user->id);
+    clearCache('wall_count_' . $user->id);
 });
 
 Registry::complaint('walls', function (int $id, $page) {

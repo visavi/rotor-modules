@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  */
 class Social extends Model
 {
-    const UPDATED_AT = null;
+    public const UPDATED_AT = null;
 
     protected $guarded = [];
 

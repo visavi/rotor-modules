@@ -7,7 +7,6 @@ namespace Modules\SocialAuth\Http\Requests;
 use App\Models\BlackList;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class CompleteRequest extends FormRequest
 {

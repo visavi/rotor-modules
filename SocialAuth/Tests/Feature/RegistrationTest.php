@@ -6,7 +6,6 @@ namespace Modules\SocialAuth\Tests\Feature;
 
 use App\Models\Setting;
 use App\Models\User;
-use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Http;
 use Modules\SocialAuth\Models\Social;
@@ -20,7 +19,6 @@ class RegistrationTest extends ModuleTestCase
     {
         parent::setUp();
 
-        $this->seed(DatabaseSeeder::class);
         $this->seedSettings();
     }
 
@@ -44,7 +42,7 @@ class RegistrationTest extends ModuleTestCase
             Setting::query()->updateOrInsert(['name' => $name], ['value' => $value]);
         }
 
-        Setting::forgetSettings();
+        clearCache('settings');
     }
 
     /**
@@ -136,7 +134,7 @@ class RegistrationTest extends ModuleTestCase
     public function testNewUserRegistersViaVk(): void
     {
         Http::fake([
-            'oauth.vk.com/access_token*'  => Http::response([
+            'oauth.vk.com/access_token*' => Http::response([
                 'access_token' => 'tok',
                 'user_id'      => 999,
                 'email'        => 'vk@example.com',
@@ -221,8 +219,8 @@ class RegistrationTest extends ModuleTestCase
         Http::fake([
             'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
             'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
-                'id'    => 'G-NOEMAIL',
-                'name'  => 'NoMail',
+                'id'   => 'G-NOEMAIL',
+                'name' => 'NoMail',
             ]),
         ]);
 
