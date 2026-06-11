@@ -19,6 +19,9 @@ class RegistrationTest extends ModuleTestCase
     {
         parent::setUp();
 
+        // Незафейканный запрос — ошибка теста, а не молчаливый поход в реальную сеть
+        Http::preventStrayRequests();
+
         $this->seedSettings();
     }
 
@@ -59,9 +62,10 @@ class RegistrationTest extends ModuleTestCase
         Http::fake([
             'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
             'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
-                'id'    => 'G-100',
-                'email' => 'john@example.com',
-                'name'  => 'John Doe',
+                'id'             => 'G-100',
+                'email'          => 'john@example.com',
+                'verified_email' => true,
+                'name'           => 'John Doe',
             ]),
         ]);
 
@@ -134,19 +138,22 @@ class RegistrationTest extends ModuleTestCase
     public function testNewUserRegistersViaVk(): void
     {
         Http::fake([
-            'oauth.vk.com/access_token*' => Http::response([
+            'id.vk.ru/oauth2/auth*' => Http::response([
                 'access_token' => 'tok',
-                'user_id'      => 999,
-                'email'        => 'vk@example.com',
             ]),
-            'api.vk.com/method/users.get*' => Http::response([
-                'response' => [
-                    ['id' => 999, 'screen_name' => 'vkuser'],
+            'id.vk.ru/oauth2/user_info*' => Http::response([
+                'user' => [
+                    'user_id'    => 999,
+                    'email'      => 'vk@example.com',
+                    'first_name' => 'VK',
+                    'last_name'  => 'User',
                 ],
             ]),
         ]);
 
-        $response = $this->hitCallback('vk');
+        // VK ID присылает device_id в callback, code_verifier лежит в сессии (PKCE)
+        $response = $this->withSession(['oauth_state' => 'st', 'oauth_code_verifier' => 'ver'])
+            ->get('/auth/vk/callback?state=st&code=authcode&device_id=dev-1');
 
         $response->assertRedirect('/');
         $this->assertAuthenticated();
@@ -175,9 +182,10 @@ class RegistrationTest extends ModuleTestCase
         Http::fake([
             'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'newtok']),
             'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
-                'id'    => 'G-100',
-                'email' => 'exist@example.com',
-                'name'  => 'Existing',
+                'id'             => 'G-100',
+                'email'          => 'exist@example.com',
+                'verified_email' => true,
+                'name'           => 'Existing',
             ]),
         ]);
 
@@ -196,9 +204,10 @@ class RegistrationTest extends ModuleTestCase
         Http::fake([
             'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
             'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
-                'id'    => 'G-777',
-                'email' => 'link@example.com',
-                'name'  => 'Linker',
+                'id'             => 'G-777',
+                'email'          => 'link@example.com',
+                'verified_email' => true,
+                'name'           => 'Linker',
             ]),
         ]);
 

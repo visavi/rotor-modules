@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Calendar;
+use Modules\Classic\Classes\Calendar;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;

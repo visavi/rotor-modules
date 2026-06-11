@@ -46,9 +46,12 @@ class GoogleProvider extends AbstractOAuthProvider
 
     protected function mapUser(array $data): array
     {
+        // Endpoint v2 отдаёт флаг как verified_email, OIDC/v3 — как email_verified
+        $verified = $data['verified_email'] ?? $data['email_verified'] ?? false;
+
         return [
             'id'    => (string) $data['id'],
-            'email' => ($data['email_verified'] ?? false) ? ($data['email'] ?? null) : null,
+            'email' => $verified ? ($data['email'] ?? null) : null,
             'name'  => $data['name'] ?? null,
         ];
     }
