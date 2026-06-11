@@ -25,7 +25,7 @@ class Social extends Model
 
     public const array PROVIDERS = [
         'google' => ['name' => 'Google', 'icon' => 'fab fa-google fa-2x', 'color' => '#4285F4'],
-        'github' => ['name' => 'GitHub', 'icon' => 'fab fa-github fa-2x', 'color' => '#24292e'],
+        'github' => ['name' => 'GitHub', 'icon' => 'fab fa-github fa-2x', 'color' => '#8b949e'],
         'yandex' => ['name' => 'Яндекс', 'icon' => 'fab fa-yandex fa-2x', 'color' => '#FC3F1D'],
         'vk'     => ['name' => 'ВКонтакте', 'icon' => 'fab fa-vk fa-2x', 'color' => '#0077FF'],
     ];

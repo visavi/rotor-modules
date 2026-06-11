@@ -76,4 +76,37 @@ class GithubProvider extends AbstractOAuthProvider
             'name'  => $data['login'] ?? $data['name'] ?? null,
         ];
     }
+
+    public function getUser(string $token): array
+    {
+        $user = parent::getUser($token);
+
+        if (empty($user['email'])) {
+            $user['email'] = $this->fetchVerifiedEmail($token);
+        }
+
+        return $user;
+    }
+
+    private function fetchVerifiedEmail(string $token): ?string
+    {
+        $response = Http::withToken($token)
+            ->withHeaders([
+                'Accept'     => 'application/vnd.github.v3+json',
+                'User-Agent' => config('app.name'),
+            ])
+            ->get('https://api.github.com/user/emails');
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        foreach ($response->json() as $email) {
+            if (($email['primary'] ?? false) && ($email['verified'] ?? false)) {
+                return $email['email'];
+            }
+        }
+
+        return null;
+    }
 }

@@ -48,7 +48,7 @@ class GoogleProvider extends AbstractOAuthProvider
     {
         return [
             'id'    => (string) $data['id'],
-            'email' => $data['email'] ?? null,
+            'email' => ($data['email_verified'] ?? false) ? ($data['email'] ?? null) : null,
             'name'  => $data['name'] ?? null,
         ];
     }

@@ -23,7 +23,11 @@
     <div class="list-group">
         @foreach($availableProviders as $provider)
             <div class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ \Modules\SocialAuth\Models\Social::providerConfig($provider)['name'] }}</span>
+                @php $cfg = \Modules\SocialAuth\Models\Social::providerConfig($provider) @endphp
+                <span>
+                    <i class="{{ $cfg['icon'] }}" style="color: {{ $cfg['color'] }}"></i>
+                    {{ $cfg['name'] }}
+                </span>
                 @if(isset($socials[$provider]))
                     <form method="post" action="{{ route('social.unlink', ['provider' => $provider]) }}">
                         @csrf
