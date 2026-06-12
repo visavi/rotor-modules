@@ -35,6 +35,30 @@ class BoardSmokeTest extends ModuleTestCase
         $this->get(route('boards.index', ['id' => $board->id]))->assertOk();
     }
 
+    public function testSettingsUpdate(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($admin)->post(route('board.settings.update'), [
+            'sets' => ['board_create_user_point' => '15'],
+        ]);
+
+        $response->assertRedirect(route('board.settings'));
+        $this->assertDatabaseHas('settings', ['name' => 'board_create_user_point', 'value' => '15']);
+    }
+
+    public function testSettingsUpdateEmpty(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->from(route('boards.index'))
+            ->post(route('board.settings.update'))
+            ->assertRedirect(route('boards.index'));
+
+        self::assertSame(__('settings.settings_empty'), session('flash.danger'));
+    }
+
     public function testItem(): void
     {
         $board = Board::query()->create(['name' => 'Test board']);

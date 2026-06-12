@@ -110,7 +110,5 @@ return [
     'feed_topics_rating'       => 'Скрывать темы с рейтингом ниже',
 
     'settings'               => 'Настройки форума',
-    'settings_empty'         => 'Настройки не переданы!',
-    'settings_success_saved' => 'Настройки успешно сохранены!',
     'forums'                 => 'Форум',
 ];

@@ -23,7 +23,5 @@ return [
     'feed_news_rating' => 'Hide news with rating',
 
     'settings'               => 'News settings',
-    'settings_empty'         => 'No settings provided!',
-    'settings_success_saved' => 'Settings successfully saved!',
     'news'                   => 'News',
 ];

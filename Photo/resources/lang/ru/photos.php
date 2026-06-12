@@ -22,8 +22,6 @@ return [
     'photo_success_deleted'       => 'Фотография успешно удалена!',
     'photos_closed'               => 'Добавление фотографий запрещено администрацией сайта',
     'settings'                    => 'Настройки галереи',
-    'settings_empty'              => 'Не переданы настройки галереи',
-    'settings_success_saved'      => 'Настройки галереи успешно сохранены!',
     'settings_photos_per_page'    => 'Фотографий на страницу',
     'settings_photos_groups'      => 'Групп на страницу в галерее',
     'settings_photos_create'      => 'Разрешать пользователям загружать фотографии',

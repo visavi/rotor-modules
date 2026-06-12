@@ -4,41 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Wall\Http\Controllers\Admin;
 
-use App\Http\Controllers\Admin\AdminController;
-use App\Models\Setting;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
+use App\Http\Controllers\Admin\ModuleSettingController;
 
-class SettingController extends AdminController
+class SettingController extends ModuleSettingController
 {
-    /**
-     * Настройки
-     */
-    public function index(): View
-    {
-        $settings = Setting::query()->pluck('value', 'name')->all();
+    protected string $view = 'wall::admin/settings/index';
 
-        return view('wall::admin/settings/index', compact('settings'));
-    }
-
-    /**
-     * Сохранение настроек
-     */
-    public function update(Request $request): RedirectResponse
-    {
-        $sets = $request->input('sets');
-
-        $settings = [
-            'wallpost' => int($sets['wallpost'] ?? 10),
-        ];
-
-        foreach ($settings as $key => $value) {
-            Setting::query()->where('name', $key)->update(['value' => $value]);
-        }
-
-        setFlash('success', __('wall::walls.settings_saved'));
-
-        return redirect()->route('wall.settings');
-    }
+    protected string $route = 'wall.settings';
 }

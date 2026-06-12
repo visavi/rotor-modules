@@ -42,8 +42,6 @@ return [
     'category_success_deleted' => 'Category successfully deleted!',
 
     'settings'               => 'Board settings',
-    'settings_empty'         => 'Settings not provided',
-    'settings_success_saved' => 'Settings successfully saved',
     'boards_section'         => 'Boards',
 
     'settings_boards_create'         => 'Allow users to post ads',

@@ -33,8 +33,6 @@ return [
     'offer_reply_length' => 'Offer reply length',
 
     'settings'               => 'Offer settings',
-    'settings_empty'         => 'No settings provided!',
-    'settings_success_saved' => 'Settings saved successfully!',
 
     'feed_offers_show'   => 'Show offers / issues in feed',
     'feed_offers_rating' => 'Hide offers / issues in feed with rating below',

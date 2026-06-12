@@ -66,8 +66,6 @@ return [
     'article_delayed_time'        => 'Дата отложенной публикации должна быть больше текущего времени!',
 
     'settings'                      => 'Настройки блогов',
-    'settings_empty'                => 'Настройки не переданы!',
-    'settings_success_saved'        => 'Настройки успешно сохранены!',
     'settings_blogs_per_page'       => 'Статей на страницу',
     'settings_blogs_groups'         => 'Блогов на страницу',
     'settings_blog_point'           => 'Очки за статью',

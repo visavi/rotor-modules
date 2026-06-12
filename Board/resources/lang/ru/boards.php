@@ -42,8 +42,6 @@ return [
     'category_success_deleted' => 'Категория успешно удалена!',
 
     'settings'               => 'Настройки объявлений',
-    'settings_empty'         => 'Настройки не переданы',
-    'settings_success_saved' => 'Настройки успешно сохранены',
     'boards_section'         => 'Объявления',
 
     'settings_boards_create'         => 'Разрешить пользователям размещение объявлений',

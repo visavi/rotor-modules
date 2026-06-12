@@ -80,7 +80,5 @@ return [
     'feed_downs_rating' => 'Hide downloads with rating',
 
     'settings'               => 'Load settings',
-    'settings_empty'         => 'No settings provided!',
-    'settings_success_saved' => 'Settings saved successfully!',
     'loads'                  => 'Downloads',
 ];

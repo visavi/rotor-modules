@@ -22,8 +22,6 @@ return [
     'photo_success_deleted'       => 'Photo successfully deleted!',
     'photos_closed'               => 'Adding photos is prohibited by the site administration',
     'settings'                    => 'Gallery settings',
-    'settings_empty'              => 'Gallery settings not provided',
-    'settings_success_saved'      => 'Gallery settings saved successfully!',
     'settings_photos_per_page'    => 'Photos per page',
     'settings_photos_groups'      => 'Groups per page in gallery',
     'settings_photos_create'      => 'Allow users to upload photos',

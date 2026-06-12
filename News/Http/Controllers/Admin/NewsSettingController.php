@@ -4,44 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\News\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Setting;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
+use App\Http\Controllers\Admin\ModuleSettingController;
 
-class NewsSettingController extends Controller
+class NewsSettingController extends ModuleSettingController
 {
-    /**
-     * Настройки
-     */
-    public function index(): View
-    {
-        $settings = Setting::query()->pluck('value', 'name')->all();
+    protected string $view = 'news::admin/settings/_news';
 
-        return view('news::admin/settings/_news', compact('settings'));
-    }
-
-    /**
-     * Сохранение настроек
-     */
-    public function update(Request $request): RedirectResponse
-    {
-        $sets = $request->input('sets', []);
-
-        if (empty($sets)) {
-            setFlash('danger', __('news::news.settings_empty'));
-
-            return redirect()->back();
-        }
-
-        foreach ($sets as $name => $value) {
-            Setting::query()->updateOrInsert(['name' => $name], ['value' => $value]);
-        }
-
-        clearCache('settings');
-        setFlash('success', __('news::news.settings_success_saved'));
-
-        return redirect()->route('news.settings');
-    }
+    protected string $route = 'news.settings';
 }

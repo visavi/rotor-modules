@@ -23,6 +23,4 @@ return [
     'notice_text' => '<p>Пользователь %login% перечислил вам %money%</p><p>Комментарий: %comment%</p>',
 
     'settings'               => 'Настройки переводов',
-    'settings_empty'         => 'Настройки не переданы!',
-    'settings_success_saved' => 'Настройки успешно сохранены!',
 ];

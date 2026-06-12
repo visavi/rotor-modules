@@ -5,6 +5,5 @@ return [
     'wall_posts'       => 'Стена сообщений',
     'wall_posts_login' => 'Стена сообщений :login',
     'settings'         => 'Стена сообщений',
-    'settings_saved'   => 'Настройки успешно сохранены!',
     'walls_per_page'   => 'Постов на стене сообщений',
 ];

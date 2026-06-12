@@ -110,7 +110,5 @@ return [
     'feed_topics_rating'       => 'Hide topics with rating below',
 
     'settings'               => 'Forum settings',
-    'settings_empty'         => 'No settings provided!',
-    'settings_success_saved' => 'Settings saved successfully!',
     'forums'                 => 'Forum',
 ];

@@ -29,7 +29,6 @@ return [
     'advert_success_posted' => 'Рекламне посилання успішно розміщено!',
 
     'settings'       => 'Налаштування реклами',
-    'settings_saved' => 'Налаштування успішно збережено!',
 
     'adverts_count_links' => 'Кільк. рекламних посилань',
     'adverts_price'       => 'Ціна реклами',

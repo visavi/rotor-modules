@@ -23,6 +23,4 @@ return [
     'notice_text' => '<p>User %login% transferred %money% to you</p><p>Comment: %comment%</p>',
 
     'settings'               => 'Transfer Settings',
-    'settings_empty'         => 'No settings provided!',
-    'settings_success_saved' => 'Settings saved successfully!',
 ];

@@ -29,7 +29,6 @@ return [
     'advert_success_posted' => 'Sponsored link successfully posted!',
 
     'settings'       => 'Advert settings',
-    'settings_saved' => 'Settings saved successfully!',
 
     'adverts_count_links' => 'Qty. sponsored links',
     'adverts_price'       => 'Advertising price',

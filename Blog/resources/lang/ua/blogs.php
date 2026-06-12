@@ -66,8 +66,6 @@ return [
     'article_delayed_time'        => 'Дата відкладеної публікації має бути більшою за поточний час!',
 
     'settings'                      => 'Налаштування блогів',
-    'settings_empty'                => 'Налаштування не передані!',
-    'settings_success_saved'        => 'Налаштування успішно збережено!',
     'settings_blogs_per_page'       => 'Статей на сторінку',
     'settings_blogs_groups'         => 'Блогів на сторінку',
     'settings_blog_point'           => 'Очки за статтю',

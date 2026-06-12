@@ -66,8 +66,6 @@ return [
     'article_delayed_time'        => 'The delayed publication date must be greater than the current time!',
 
     'settings'                      => 'Blog Settings',
-    'settings_empty'                => 'No settings provided!',
-    'settings_success_saved'        => 'Settings saved successfully!',
     'settings_blogs_per_page'       => 'Articles per page',
     'settings_blogs_groups'         => 'Blogs per page',
     'settings_blog_point'           => 'Points per article',
