@@ -16,7 +16,7 @@ return [
         Offer::class => [
             'label'  => __('offer::offers.section'),
             'search' => ['view' => 'offer::search/_offers'],
-            'feed'   => ['withs' => ['user'], 'view' => 'offer::feeds/_offers'],
+            'feed'   => ['with' => ['user'], 'view' => 'offer::feeds/_offers'],
             'rating' => true,
         ],
     ],

@@ -100,7 +100,7 @@ return [
         MyModel::class => [
             'label'  => 'Метка раздела',
             'search' => ['view' => 'MyModule::search/_results', 'with' => ['user']],
-            'feed'   => ['withs' => ['user', 'files'], 'view' => 'MyModule::feeds/_feed'],
+            'feed'   => ['with' => ['user', 'files'], 'view' => 'MyModule::feeds/_feed'],
             'upload' => 'media',
             'rating' => true,
             'spam'   => true,
@@ -147,7 +147,7 @@ return [
 |---|---|
 | `label` | Метка раздела модели — название в результатах поиска, на странице «Спам» и в рейтингах. |
 | `search` | Подключает модель к глобальному поиску. `view` — шаблон одного результата, `with` (опц.) — отношения для eager-load. |
-| `feed` | Подключает к общей ленте активности. `withs` — отношения для eager-load, `view` — шаблон записи, `scope` (опц.) — замыкание, ограничивающее выборку. |
+| `feed` | Подключает к общей ленте активности. `with` — отношения для eager-load, `view` — шаблон записи, `scope` (опц.) — замыкание, ограничивающее выборку. |
 | `upload` | Разрешает прикреплять файлы. `media` — изображения и видео, `file` — любые файлы. |
 | `rating` | `true` — включает лайки/дизлайки. |
 | `spam` | `true` — записи можно помечать как спам (раздел на странице «Спам» в админке; название раздела берётся из `label`). |
@@ -232,6 +232,8 @@ class MyModel extends \Illuminate\Database\Eloquent\Model
 
 `$morphName` обязательно у моделей, заявленных в `models` (используется ядром для регистрации возможностей).
 
+Ограничения морф-имени: максимум **20 символов** (ширина колонки `relate_type` в БД) и неизменность после релиза модуля — имя сохраняется в записях БД.
+
 ---
 
 ## Хуки (hooks.php)
@@ -292,7 +294,39 @@ Registry::sitemap('mymodels', function () {
 Registry::onDeleteUser(function (\App\Models\User $user) {
     MyModel::query()->where('user_id', $user->id)->delete();
 });
+
+// Удаление пользователя администратором (в Request — чекбоксы формы удаления,
+// добавить свой можно через Hook::add('adminUserDeleteFields', ...))
+Registry::onAdminDeleteUser(function (\App\Models\User $user, \Illuminate\Http\Request $request) {
+    if ($request->boolean('delmymodels')) {
+        MyModel::query()->where('user_id', $user->id)->get()->each->delete();
+    }
+});
+
+// Где искать голосование для модели (морф-имя и id связанной записи)
+Registry::pollResolver(MyModel::class, function (MyModel $model): ?array {
+    return ['posts', $model->last_post_id];
+});
 ```
+
+Полный список методов `Registry`:
+
+| Метод | Назначение |
+|---|---|
+| `fileType($morphName)` | тип принимает файлы (вызывается из `module.php` через `'upload' => 'file'`) |
+| `mediaType($morphName)` | тип принимает фото/видео (`'upload' => 'media'`) |
+| `ratingType($morphName)` | тип поддерживает рейтинг (`'rating' => true`) |
+| `spamType($morphName, $label)` | тип — источник жалоб на спам (`'spam' => true`) |
+| `label($morphName, $label)` | отображаемое название типа (`'label' => '...'`) |
+| `feed($class, $config)` | запись в ленте активности (`'feed' => [...]`) |
+| `search($class, $view, $with)` | полнотекстовый поиск (`'search' => [...]`) |
+| `complaint($morphName, $handler)` | обработчик жалобы |
+| `sitemap($key, $handler)` | страница в sitemap |
+| `pollResolver($class, $handler)` | резолвер голосований |
+| `onDeleteUser($handler)` | очистка при удалении пользователя |
+| `onAdminDeleteUser($handler)` | удаление пользователя администратором |
+
+Первые семь обычно регистрируются декларативно через `module.php`, вручную их вызывать не нужно.
 
 ---
 

@@ -47,7 +47,7 @@ return [
         \Modules\MyModule\Models\MyEntity::class => [
             'label'  => 'Моя сущность',                                          // метка раздела (поиск, спам, рейтинг)
             'search' => ['view' => 'my-module::search/_items', 'with' => ['user']], // глобальный поиск
-            'feed'   => ['withs' => ['user', 'files'], 'view' => 'my-module::feeds/_items'], // лента активности
+            'feed'   => ['with' => ['user', 'files'], 'view' => 'my-module::feeds/_items'], // лента активности
             'upload' => 'media',                                                 // media | file
             'rating' => true,                                                    // лайки/дизлайки
             'spam'   => true,                                                    // пометка спама
@@ -68,6 +68,13 @@ return [
     'schedule' => function (Schedule $schedule) {
         $schedule->command('my-module:cleanup')->daily();
     },
+
+    // Пересчёт счётчиков — запускается из админки кнопкой «Пересчёт»
+    'restatement' => [
+        'myentities' => function () {
+            // DB::update('update ...');
+        },
+    ],
 ];
 ```
 
@@ -154,6 +161,8 @@ class Post extends Model
 }
 ```
 
+> Морф-имя — максимум 20 символов (ширина колонки `relate_type` в БД). Оно сохраняется в записях БД, поэтому после релиза модуля менять его нельзя.
+
 ## Переводы
 
 Файлы переводов хранятся в `resources/lang/{locale}/`:
@@ -202,19 +211,15 @@ class CleanupCommand extends Command
 
 1. Перейдите в AdminPanel → Модули
 2. Найдите модуль в списке
-3. Нажмите «Включить»
+3. Нажмите «Установить» — выполнятся миграции, создадутся симлинки на статические файлы
 
-Или через Artisan:
+## Установка сторонних модулей
 
-```bash
-php artisan module:enable MyModule
-```
+- **Каталог** — AdminPanel → Модули → Каталог: модули из подключённых реестров скачиваются и устанавливаются автоматически.
+- **ZIP-архив** — AdminPanel → Модули → Загрузить: из файла или по прямой ссылке.
+- **Вручную** — распакуйте модуль в `modules/ИмяМодуля` и нажмите «Установить» в админке.
 
-## Установка модуля из пакета
+## См. также
 
-Сторонние модули устанавливаются через Composer и копируются в папку `modules/`:
-
-```bash
-composer require vendor/rotor-my-module
-php artisan module:install MyModule
-```
+- [Хуки](/docs/rotor-hooks) — вставка HTML в шаблоны ядра
+- [API модулей](/docs/rotor-module-api) — Registry: поиск, лента, жалобы, sitemap и события

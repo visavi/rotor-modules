@@ -5,6 +5,7 @@
     - [Деплой](/docs/rotor-deploy)
     - [Модули](/docs/rotor-modules)
     - [Хуки](/docs/rotor-hooks)
+    - [API модулей](/docs/rotor-module-api)
     - [Шаблоны](/docs/rotor-templates)
     - [Сборка ресурсов](/docs/rotor-assets)
     - [Роли и права](/docs/rotor-permissions)

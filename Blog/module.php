@@ -18,7 +18,7 @@ return [
         Article::class => [
             'label'  => __('blog::blogs.blogs'),
             'search' => ['view' => 'blog::search/_articles', 'with' => ['category']],
-            'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
+            'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
             'upload' => 'media',
             'rating' => true,
         ],

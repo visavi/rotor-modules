@@ -16,7 +16,7 @@ return [
         Down::class => [
             'label'  => __('load::loads.loads'),
             'search' => ['view' => 'load::search/_downs', 'with' => ['category']],
-            'feed'   => ['withs' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
+            'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
             'upload' => 'file',
             'rating' => true,
         ],

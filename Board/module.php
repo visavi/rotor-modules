@@ -18,7 +18,7 @@ return [
             'label'  => __('board::boards.boards'),
             'search' => ['view' => 'board::search/_items'],
             'feed'   => [
-                'withs' => ['user', 'files', 'category.parent'],
+                'with' => ['user', 'files', 'category.parent'],
                 'view'  => 'board::feeds/_items',
                 'scope' => fn ($query) => $query->where('active', true)->where('expires_at', '>', SITETIME),
             ],

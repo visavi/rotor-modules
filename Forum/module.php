@@ -21,7 +21,7 @@ return [
             'label'  => __('forum::forums.topics'),
             'search' => ['view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
             'feed'   => [
-                'withs' => ['lastPost.user', 'lastPost.files', 'forum.parent'],
+                'with' => ['lastPost.user', 'lastPost.files', 'forum.parent'],
                 'view'  => 'forum::feeds/_topics',
                 'scope' => fn ($query) => $query->leftJoin('posts', 'topics.last_post_id', '=', 'posts.id'),
             ],
