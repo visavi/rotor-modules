@@ -28,7 +28,7 @@ return [
     'advert_not_money'      => 'You don\'t have enough money to buy ads!',
     'advert_success_posted' => 'Sponsored link successfully posted!',
 
-    'settings'       => 'Advert settings',
+    'settings' => 'Advert settings',
 
     'adverts_count_links' => 'Qty. sponsored links',
     'adverts_price'       => 'Advertising price',

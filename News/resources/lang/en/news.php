@@ -22,6 +22,6 @@ return [
     'feed_news_show'   => 'Show news in feed',
     'feed_news_rating' => 'Hide news with rating',
 
-    'settings'               => 'News settings',
-    'news'                   => 'News',
+    'settings' => 'News settings',
+    'news'     => 'News',
 ];

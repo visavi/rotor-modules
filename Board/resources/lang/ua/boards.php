@@ -41,8 +41,8 @@ return [
     'category_has_items'       => 'У даній категорії є оголошення!',
     'category_success_deleted' => 'Категорія успішно видалена!',
 
-    'settings'               => 'Налаштування оголошень',
-    'boards_section'         => 'Оголошення',
+    'settings'       => 'Налаштування оголошень',
+    'boards_section' => 'Оголошення',
 
     'settings_boards_create'         => 'Дозволити користувачам розміщення оголошень',
     'settings_boards_period'         => 'Термін розміщення оголошень',

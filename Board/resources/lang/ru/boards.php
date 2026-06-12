@@ -41,8 +41,8 @@ return [
     'category_has_items'       => 'В данной категории имеются объявления!',
     'category_success_deleted' => 'Категория успешно удалена!',
 
-    'settings'               => 'Настройки объявлений',
-    'boards_section'         => 'Объявления',
+    'settings'       => 'Настройки объявлений',
+    'boards_section' => 'Объявления',
 
     'settings_boards_create'         => 'Разрешить пользователям размещение объявлений',
     'settings_boards_period'         => 'Срок размещения объявлений',

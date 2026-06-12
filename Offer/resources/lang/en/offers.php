@@ -32,7 +32,7 @@ return [
     'offer_text_length'  => 'Offer text length',
     'offer_reply_length' => 'Offer reply length',
 
-    'settings'               => 'Offer settings',
+    'settings' => 'Offer settings',
 
     'feed_offers_show'   => 'Show offers / issues in feed',
     'feed_offers_rating' => 'Hide offers / issues in feed with rating below',

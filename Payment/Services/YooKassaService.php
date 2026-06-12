@@ -70,7 +70,7 @@ class YooKassaService
                 ],
                 'confirmation' => [
                     'type'       => 'redirect',
-                    'return_url' => asset('payments/status?token=' . $order->token),
+                    'return_url' => url('payments/status?token=' . $order->token),
                 ],
                 'capture'     => true,
                 'description' => $order->description . ' #' . $order->id,

@@ -79,6 +79,6 @@ return [
     'feed_downs_show'   => 'Show downloads in feed',
     'feed_downs_rating' => 'Hide downloads with rating',
 
-    'settings'               => 'Load settings',
-    'loads'                  => 'Downloads',
+    'settings' => 'Load settings',
+    'loads'    => 'Downloads',
 ];

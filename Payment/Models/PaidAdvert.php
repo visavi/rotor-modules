@@ -14,15 +14,15 @@ use Illuminate\Support\HtmlString;
 /**
  * Class PaidAdvert
  *
- * @property int    $id
- * @property string $place
- * @property string $site
- * @property array  $names
- * @property string $color
- * @property bool   $bold
+ * @property int      $id
+ * @property string   $place
+ * @property string   $site
+ * @property array    $names
+ * @property string   $color
+ * @property bool     $bold
  * @property int|null $user_id
- * @property int    $created_at
- * @property int    $deleted_at
+ * @property int      $created_at
+ * @property int      $deleted_at
  */
 class PaidAdvert extends Model
 {

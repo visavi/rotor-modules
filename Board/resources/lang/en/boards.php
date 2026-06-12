@@ -41,8 +41,8 @@ return [
     'category_has_items'       => 'There are ads in this category!',
     'category_success_deleted' => 'Category successfully deleted!',
 
-    'settings'               => 'Board settings',
-    'boards_section'         => 'Boards',
+    'settings'       => 'Board settings',
+    'boards_section' => 'Boards',
 
     'settings_boards_create'         => 'Allow users to post ads',
     'settings_boards_period'         => 'Ad placement period',

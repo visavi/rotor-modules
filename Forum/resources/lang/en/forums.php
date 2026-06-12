@@ -110,6 +110,6 @@ return [
     'feed_topics_show'         => 'Show topics in feed',
     'feed_topics_rating'       => 'Hide topics with rating below',
 
-    'settings'               => 'Forum settings',
-    'forums'                 => 'Forum',
+    'settings' => 'Forum settings',
+    'forums'   => 'Forum',
 ];
