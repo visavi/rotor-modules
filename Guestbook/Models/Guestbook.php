@@ -8,6 +8,7 @@ use App\Casts\HtmlCast;
 use App\Models\File;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
+use App\Traits\FilesTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -15,7 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
@@ -35,6 +35,7 @@ use Illuminate\Support\HtmlString;
  */
 class Guestbook extends Model
 {
+    use FilesTrait;
     use ConvertVideoTrait;
     use SearchableTrait;
     use UploadTrait;
@@ -107,47 +108,6 @@ class Guestbook extends Model
     public function editUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'edit_user_id')->withDefault();
-    }
-
-    /**
-     * Возвращает загруженные файлы
-     *
-     * @return MorphMany<File, $this>
-     */
-    public function files(): MorphMany
-    {
-        return $this->morphMany(File::class, 'relate')
-            ->orderBy('created_at');
-    }
-
-    /**
-     * Возвращает файлы
-     *
-     * @return Collection<int, File>
-     */
-    public function getFiles(): Collection
-    {
-        return $this->files->filter(static fn (File $f) => ! $f->isImage() && ! $f->isVideo());
-    }
-
-    /**
-     * Возвращает медиафайлы (картинки и видео)
-     *
-     * @return Collection<int, File>
-     */
-    public function getMedia(): Collection
-    {
-        return $this->files->filter(static fn (File $f) => $f->isImage() || $f->isVideo());
-    }
-
-    /**
-     * Возвращает медиафайлы, не вставленные в текст
-     *
-     * @return Collection<int, File>
-     */
-    public function getDetachedMedia(): Collection
-    {
-        return $this->getMedia()->reject(fn (File $f) => str_contains($this->text ?? '', $f->path));
     }
 
     /**

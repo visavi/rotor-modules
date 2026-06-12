@@ -8,15 +8,14 @@ use App\Casts\HtmlCast;
 use App\Models\Comment;
 use App\Models\Poll;
 use App\Models\User;
+use App\Traits\CommentsTrait;
 use App\Traits\FeedableTrait;
+use App\Traits\PollsTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
@@ -42,6 +41,8 @@ use Illuminate\Support\HtmlString;
  */
 class Offer extends Model
 {
+    use CommentsTrait;
+    use PollsTrait;
     use FeedableTrait;
     use SearchableTrait;
     use SortableTrait;
@@ -131,49 +132,11 @@ class Offer extends Model
     }
 
     /**
-     * Возвращает связь с голосованиями
-     */
-    public function polls(): MorphMany
-    {
-        return $this->MorphMany(Poll::class, 'relate');
-    }
-
-    /**
-     * Возвращает связь с голосованием
-     */
-    public function poll(): MorphOne
-    {
-        return $this->morphOne(Poll::class, 'relate')
-            ->where('user_id', getUser('id'));
-    }
-
-    /**
-     * Возвращает связь с комментариями
-     */
-    public function comments(): MorphMany
-    {
-        return $this->morphMany(Comment::class, 'relate')
-            ->with('relate', 'user');
-    }
-
-    /**
      * Возвращает связь пользователей
      */
     public function replyUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reply_user_id')->withDefault();
-    }
-
-    /**
-     * Возвращает последние комментарии
-     */
-    public function lastComments(int $limit = 15): HasMany
-    {
-        return $this->hasMany(Comment::class, 'relate_id')
-            ->where('relate_type', self::$morphName)
-            ->orderBy('created_at', 'desc')
-            ->with('user')
-            ->limit($limit);
     }
 
     /**

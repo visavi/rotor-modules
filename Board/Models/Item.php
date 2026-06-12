@@ -9,6 +9,7 @@ use App\Models\File;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
+use App\Traits\FilesTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
@@ -42,6 +42,7 @@ use Illuminate\Support\HtmlString;
  */
 class Item extends Model
 {
+    use FilesTrait;
     use FeedableTrait;
     use SearchableTrait;
     use SortableTrait;
@@ -128,17 +129,6 @@ class Item extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Board::class, 'board_id')->withDefault();
-    }
-
-    /**
-     * Возвращает загруженные файлы
-     *
-     * @return MorphMany<File, $this>
-     */
-    public function files(): MorphMany
-    {
-        return $this->morphMany(File::class, 'relate')
-            ->orderBy('created_at');
     }
 
     /**

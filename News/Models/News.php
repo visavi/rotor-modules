@@ -9,15 +9,16 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
+use App\Traits\CommentsTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
+use App\Traits\FilesTrait;
+use App\Traits\PollsTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
@@ -38,6 +39,9 @@ use Illuminate\Support\HtmlString;
  */
 class News extends Model
 {
+    use CommentsTrait;
+    use PollsTrait;
+    use FilesTrait;
     use ConvertVideoTrait;
     use FeedableTrait;
     use SearchableTrait;
@@ -89,74 +93,6 @@ class News extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
-    }
-
-    /**
-     * Возвращает комментарии новостей
-     *
-     * @return MorphMany<Comment, $this>
-     */
-    public function comments(): MorphMany
-    {
-        return $this->morphMany(Comment::class, 'relate')->with('relate');
-    }
-
-    /**
-     * Возвращает загруженные файлы
-     *
-     * @return MorphMany<File, $this>
-     */
-    public function files(): MorphMany
-    {
-        return $this->morphMany(File::class, 'relate')
-            ->orderBy('created_at');
-    }
-
-    /**
-     * Возвращает файлы
-     *
-     * @return Collection<int, File>
-     */
-    public function getFiles(): Collection
-    {
-        return $this->files->filter(static fn (File $f) => ! $f->isImage() && ! $f->isVideo());
-    }
-
-    /**
-     * Возвращает медиафайлы (картинки и видео)
-     *
-     * @return Collection<int, File>
-     */
-    public function getMedia(): Collection
-    {
-        return $this->files->filter(static fn (File $f) => $f->isImage() || $f->isVideo());
-    }
-
-    /**
-     * Возвращает медиафайлы, не вставленные в текст
-     *
-     * @return Collection<int, File>
-     */
-    public function getDetachedMedia(): Collection
-    {
-        return $this->getMedia()->reject(fn (File $f) => str_contains($this->text ?? '', $f->path));
-    }
-
-    /**
-     * Возвращает связь с голосованиями
-     */
-    public function polls(): MorphMany
-    {
-        return $this->MorphMany(Poll::class, 'relate');
-    }
-
-    /**
-     * Возвращает связь с голосованием
-     */
-    public function poll(): MorphOne
-    {
-        return $this->morphOne(Poll::class, 'relate')
-            ->where('user_id', getUser('id'));
     }
 
     /**
