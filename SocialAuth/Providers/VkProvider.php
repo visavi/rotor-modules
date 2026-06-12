@@ -20,7 +20,7 @@ class VkProvider extends AbstractOAuthProvider
      */
     public function buildAuthUrlWithPkce(string $state): array
     {
-        $codeVerifier  = $this->generateCodeVerifier();
+        $codeVerifier = $this->generateCodeVerifier();
         $codeChallenge = $this->generateCodeChallenge($codeVerifier);
 
         $url = 'https://id.vk.ru/authorize?' . http_build_query([

@@ -4,10 +4,15 @@ use App\Classes\Hook;
 use App\Classes\Registry;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Modules\Photo\Models\Photo;
 
 Registry::onAdminDeleteUser(function (User $user, Request $request): void {
     if ($request->input('delimages')) {
-        $user->deleteAlbum();
+        $photos = Photo::query()->where('user_id', $user->id)->get();
+
+        foreach ($photos as $photo) {
+            $photo->delete();
+        }
     }
 });
 

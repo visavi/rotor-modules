@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int    $parent_id
  * @property string $name
  * @property int    $count_downs
- * @property int    $closed
+ * @property bool   $closed
  * @property int    $depth
  * @property mixed  $child
  * @property-read Load                  $parent
@@ -38,6 +38,16 @@ class Load extends Model
      * The attributes that aren't mass assignable.
      */
     protected $guarded = [];
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'closed' => 'bool',
+        ];
+    }
 
     /**
      * Возвращает связь родительской категории

@@ -4,20 +4,29 @@ declare(strict_types=1);
 
 namespace Modules\Load\Services;
 
+/**
+ * Дерево файлов архива: каждый экземпляр — узел (каталог)
+ */
 class ZipTree
 {
+    /** @var array<int, array<string, mixed>> */
+    public array $files = [];
+    /** @var array<string, self> */
+    public array $dirs = [];
+    public int $count = 0;
+    public int $size = 0;
+
     /**
      * Строит дерево из плоского списка файлов архива
      */
-    public static function build(array $flat): array
+    public static function build(array $flat): self
     {
-        /** @var array{__files: array[], __dirs: array<string, array>, __count: int, __size: int} $tree */
-        $tree = ['__files' => [], '__dirs' => [], '__count' => 0, '__size' => 0];
+        $tree = new self();
 
         foreach ($flat as $entry) {
             $path = rtrim($entry['name'], '/');
             $parts = explode('/', $path);
-            $node = &$tree;
+            $node = $tree;
 
             $depth = count($parts);
             for ($j = 0; $j < $depth; $j++) {
@@ -25,18 +34,15 @@ class ZipTree
                 $isLast = ($j === $depth - 1);
 
                 if ($isLast && ! $entry['isDir']) {
-                    $node['__files'][] = array_merge($entry, ['basename' => $part]);
+                    $node->files[] = array_merge($entry, ['basename' => $part]);
                 } else {
-                    if (! isset($node['__dirs'][$part])) {
-                        $node['__dirs'][$part] = ['__files' => [], '__dirs' => [], '__count' => 0, '__size' => 0];
-                    }
-                    $node = &$node['__dirs'][$part];
+                    $node->dirs[$part] ??= new self();
+                    $node = $node->dirs[$part];
                 }
             }
-            unset($node);
         }
 
-        self::computeStats($tree);
+        $tree->computeStats();
 
         return $tree;
     }
@@ -44,16 +50,15 @@ class ZipTree
     /**
      * Рекурсивно вычисляет количество файлов и суммарный размер
      */
-    private static function computeStats(array &$tree): void
+    private function computeStats(): void
     {
-        $tree['__count'] = count($tree['__files']);
-        $tree['__size'] = (int) array_sum(array_column($tree['__files'], 'size'));
+        $this->count = count($this->files);
+        $this->size = (int) array_sum(array_column($this->files, 'size'));
 
-        foreach ($tree['__dirs'] as &$subtree) {
-            self::computeStats($subtree);
-            $tree['__count'] += $subtree['__count'];
-            $tree['__size'] += $subtree['__size'];
+        foreach ($this->dirs as $subtree) {
+            $subtree->computeStats();
+            $this->count += $subtree->count;
+            $this->size += $subtree->size;
         }
-        unset($subtree);
     }
 }

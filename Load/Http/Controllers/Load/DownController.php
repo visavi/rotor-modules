@@ -355,8 +355,8 @@ class DownController extends Controller
 
         $tree = ZipTree::build($flat);
 
-        $totalCount = $tree['__count'];
-        $totalSize = $tree['__size'];
+        $totalCount = $tree->count;
+        $totalSize = $tree->size;
 
         return view('load::downs/zip', compact('down', 'file', 'tree', 'totalCount', 'totalSize'));
     }

@@ -19,7 +19,7 @@
 @stop
 
 @section('content')
-    @if (! empty($tree['__files']) || ! empty($tree['__dirs']))
+    @if ($tree->files || $tree->dirs)
         <small class="text-muted d-block mb-2">{{ __('main.total') }}: {{ $totalCount }} / {{ formatSize($totalSize) }}</small>
 
         <div class="mb-3">

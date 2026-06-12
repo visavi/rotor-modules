@@ -28,7 +28,7 @@ use Illuminate\Support\HtmlString;
  * @property int    $user_id
  * @property int    $created_at
  * @property int    $count_comments
- * @property int    $closed
+ * @property bool   $closed
  * @property int    $top
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
@@ -78,6 +78,7 @@ class News extends Model
     {
         return [
             'user_id' => 'int',
+            'closed'  => 'bool',
             'text'    => HtmlCast::class,
         ];
     }

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int    $parent_id
  * @property string $name
  * @property int    $count_items
- * @property int    $closed
+ * @property bool   $closed
  * @property int    $depth
  * @property mixed  $child
  * @property-read Board                  $parent
@@ -44,6 +44,16 @@ class Board extends Model
      * Директория загрузки файлов
      */
     public string $uploadPath = 'uploads/boards';
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'closed' => 'bool',
+        ];
+    }
 
     /**
      * Возвращает связь родительской категории

@@ -30,7 +30,7 @@ use Illuminate\Support\HtmlString;
  * @property int    $created_at
  * @property string $status
  * @property int    $count_comments
- * @property int    $closed
+ * @property bool   $closed
  * @property string $reply
  * @property int    $reply_user_id
  * @property int    $updated_at
@@ -116,6 +116,7 @@ class Offer extends Model
     {
         return [
             'user_id' => 'int',
+            'closed'  => 'bool',
             'text'    => HtmlCast::class,
             'reply'   => HtmlCast::class,
         ];

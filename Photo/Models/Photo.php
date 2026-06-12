@@ -31,7 +31,7 @@ use Illuminate\Support\HtmlString;
  * @property string $text
  * @property int    $created_at
  * @property int    $rating
- * @property int    $closed
+ * @property bool   $closed
  * @property int    $count_comments
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
@@ -95,6 +95,7 @@ class Photo extends Model
     {
         return [
             'user_id' => 'int',
+            'closed'  => 'bool',
             'text'    => HtmlCast::class,
         ];
     }
