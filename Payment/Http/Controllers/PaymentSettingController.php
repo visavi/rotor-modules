@@ -21,8 +21,10 @@ class PaymentSettingController extends Controller
         $advert = new PaidAdvert();
         $places = $advert->getPlaces();
         $prices = config('payment.prices');
+        $shopId = config('payment.yookassa_shop_id');
+        $secretKey = config('payment.yookassa_secret_key');
 
-        return view('payment::admin/settings', compact('places', 'prices'));
+        return view('payment::admin/settings', compact('places', 'prices', 'shopId', 'secretKey'));
     }
 
     /**
@@ -30,9 +32,15 @@ class PaymentSettingController extends Controller
      */
     public function save(SettingRequest $request): RedirectResponse
     {
+        // Пустые значения не сохраняем, чтобы не копить мусор в settings
+        $settings = array_filter(
+            $request->validated(),
+            static fn ($value) => $value !== null && $value !== ''
+        );
+
         Module::query()
             ->where('name', 'Payment')
-            ->update(['settings' => $request->validated()]);
+            ->update(['settings' => $settings]);
 
         clearCache('modules');
 

@@ -111,7 +111,7 @@ class YooKassaService
             ]);
             throw new RuntimeException('Не удалось подключиться к YooKassa');
         } catch (RequestException $e) {
-            $error = $e->response?->json() ?? $e->getMessage();
+            $error = $e->response->json() ?? $e->getMessage();
             Log::critical('YooKassa API error', [
                 'error' => $error,
             ]);
@@ -144,7 +144,7 @@ class YooKassaService
             ]);
             throw new RuntimeException('Не удалось подключиться к API YooKassa');
         } catch (RequestException $e) {
-            $error = $e->response?->json() ?? $e->getMessage();
+            $error = $e->response->json() ?? $e->getMessage();
             Log::critical('YooKassa API error', [
                 'payment_id' => $paymentId,
                 'error'      => $error,

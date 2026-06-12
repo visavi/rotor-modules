@@ -1,10 +1,9 @@
 <?php
 
-use Modules\Classic\Classes\Calendar;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;
 use Modules\Blog\Models\Article;
+use Modules\Classic\Classes\Calendar;
 use Modules\Forum\Models\Topic;
 use Modules\Load\Models\Down;
 use Modules\News\Models\News;
@@ -102,24 +101,6 @@ if (! function_exists('recentPhotos')) {
         });
 
         return new HtmlString(view('classic::widgets/_photos', compact('photos')));
-    }
-}
-
-if (! function_exists('getCourses')) {
-    function getCourses(): HtmlString
-    {
-        $courses = Cache::remember('courses', 3600, static function () {
-            try {
-                $response = Http::timeout(3)
-                    ->get('https://www.cbr-xml-daily.ru/daily_json.js');
-
-                return $response->json();
-            } catch (Exception) {
-                return null;
-            }
-        });
-
-        return new HtmlString(view('app/_courses', compact('courses')));
     }
 }
 

@@ -21,9 +21,14 @@ use Illuminate\Support\Facades\DB;
  * @property int    $count
  * @property int    $created_at
  * @property int    $topic_id
- * @property-read Topic                  $topic
- * @property-read Collection<VoteAnswer> $answers
- * @property-read Collection<Poll>       $polls
+ * @property array  $getAnswers
+ * @property int    $max
+ * @property int    $sum
+ * @property array  $voted
+ * @property-read Topic                       $topic
+ * @property-read ?Poll                       $poll
+ * @property-read Collection<int, VoteAnswer> $answers
+ * @property-read Collection<int, Poll>       $polls
  */
 class Vote extends Model
 {
@@ -52,6 +57,8 @@ class Vote extends Model
 
     /**
      * Возвращает варианты ответов
+     *
+     * @return HasMany<VoteAnswer, $this>
      */
     public function answers(): HasMany
     {

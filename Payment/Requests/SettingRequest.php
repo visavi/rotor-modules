@@ -12,11 +12,13 @@ class SettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'prices.places'     => 'required|array',
-            'prices.places.*'   => 'required|numeric|min:0',
-            'prices.colorPrice' => 'required|numeric|min:0',
-            'prices.boldPrice'  => 'required|numeric|min:0',
-            'prices.namePrice'  => 'required|numeric|min:0',
+            'yookassa_shop_id'    => 'nullable|string|max:100',
+            'yookassa_secret_key' => 'nullable|string|max:255',
+            'prices.places'       => 'required|array',
+            'prices.places.*'     => 'required|numeric|min:0',
+            'prices.colorPrice'   => 'required|numeric|min:0',
+            'prices.boldPrice'    => 'required|numeric|min:0',
+            'prices.namePrice'    => 'required|numeric|min:0',
         ];
     }
 

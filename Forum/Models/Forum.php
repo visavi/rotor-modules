@@ -22,9 +22,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int    $count_posts
  * @property int    $last_topic_id
  * @property int    $closed
- * @property-read Forum             $parent
- * @property-read Collection<Forum> $children
- * @property-read Topic             $lastTopic
+ * @property int    $depth
+ * @property mixed  $child
+ * @property-read Forum                 $parent
+ * @property-read Collection<int, Forum> $children
+ * @property-read Topic                 $lastTopic
  */
 class Forum extends Model
 {
@@ -90,7 +92,7 @@ class Forum extends Model
             ->first();
 
         $this->update([
-            'count_topics'  => (int) $topic?->count_topics,
+            'count_topics'  => (int) $topic?->getAttribute('count_topics'),
             'count_posts'   => (int) $topic?->count_posts,
             'last_topic_id' => $lastTopic->id ?? 0,
         ]);

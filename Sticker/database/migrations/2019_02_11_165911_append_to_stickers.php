@@ -39,7 +39,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*', GLOB_ONLYDIR)));
+        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR));
 
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->where('name', $categoryName)->first();

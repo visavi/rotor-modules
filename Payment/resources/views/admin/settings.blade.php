@@ -18,6 +18,20 @@
     <form method="post">
         @csrf
 
+        <div class="mb-3{{ hasError('yookassa_shop_id') }}">
+            <label for="yookassa_shop_id" class="form-label">{{ __('payment::payments.yookassa_shop_id') }}:</label>
+
+            <input class="form-control" name="yookassa_shop_id" id="yookassa_shop_id" value="{{ old('yookassa_shop_id', $shopId) }}">
+            <div class="invalid-feedback">{{ textError('yookassa_shop_id') }}</div>
+        </div>
+
+        <div class="mb-3{{ hasError('yookassa_secret_key') }}">
+            <label for="yookassa_secret_key" class="form-label">{{ __('payment::payments.yookassa_secret_key') }}:</label>
+
+            <input class="form-control" type="password" name="yookassa_secret_key" id="yookassa_secret_key" value="{{ old('yookassa_secret_key', $secretKey) }}" autocomplete="new-password">
+            <div class="invalid-feedback">{{ textError('yookassa_secret_key') }}</div>
+        </div>
+
         @foreach ($places as $place => $name)
             <div class="mb-3{{ hasError('prices.places.' . $place) }}">
                 <label for="price_place_{{ $place }}" class="form-label">{{ $name }}:</label>

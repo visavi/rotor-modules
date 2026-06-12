@@ -32,12 +32,15 @@ use Illuminate\Support\HtmlString;
  * @property string      $note
  * @property int         $last_post_id
  * @property int         $close_user_id
- * @property-read User                 $user
- * @property-read Post                 $lastPost
- * @property-read Forum                $forum
- * @property-read Collection<Post>     $posts
- * @property-read Collection<Bookmark> $bookmarks
- * @property-read Vote                 $vote
+ * @property int|null    $bookmark_posts
+ * @property bool        $isModer
+ * @property-read User                      $user
+ * @property-read Post                      $lastPost
+ * @property-read Forum                     $forum
+ * @property-read Collection<int, Post>     $posts
+ * @property-read Collection<int, Bookmark> $bookmarks
+ * @property-read Vote                      $vote
+ * @property Collection<int, User> $curators
  */
 class Topic extends Model
 {
@@ -123,7 +126,7 @@ class Topic extends Model
     /**
      * Возвращает голосование
      */
-    public function vote(): hasOne
+    public function vote(): HasOne
     {
         return $this->hasOne(Vote::class, 'topic_id')->withDefault();
     }

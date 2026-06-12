@@ -26,7 +26,6 @@ return [
     'title_create'              => 'Публикация новой статьи',
     'title_edit_blog'           => 'Редактирование раздела',
     'title_edit_article'        => 'Редактирование статьи',
-    'new_articles'              => 'Новые статьи',
     'new_comments'              => 'Новые комментарии',
     'title_rss'                 => 'RSS статей',
     'title_tags'                => 'Поиск по тегам',

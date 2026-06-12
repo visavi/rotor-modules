@@ -14,6 +14,7 @@ use App\Traits\FeedableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -32,19 +32,19 @@ use Illuminate\Support\Str;
 /**
  * Class Article
  *
- * @property int    $id
- * @property int    $category_id
- * @property int    $user_id
- * @property string $title
- * @property string $slug
- * @property string $text
- * @property int    $rating
- * @property int    $visits
- * @property int    $count_comments
- * @property int    $created_at
- * @property bool   $active
- * @property bool   $draft
- * @property Date   $published_at
+ * @property int              $id
+ * @property int              $category_id
+ * @property int              $user_id
+ * @property string           $title
+ * @property string           $slug
+ * @property string           $text
+ * @property int              $rating
+ * @property int              $visits
+ * @property int              $count_comments
+ * @property int              $created_at
+ * @property bool             $active
+ * @property bool             $draft
+ * @property ?CarbonImmutable $published_at
  * @property-read Collection<File>    $files
  * @property-read Collection<Comment> $comments
  * @property-read Collection<Poll>    $polls

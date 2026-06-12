@@ -100,7 +100,7 @@ class TopicController extends Controller
         $vote = Vote::query()->where('topic_id', $topic->id)->first();
 
         if ($vote) {
-            $vote->poll = $vote->poll()->first();
+            $vote->load('poll');
 
             if ($vote->answers->isNotEmpty()) {
                 $results = Arr::pluck($vote->answers, 'result', 'answer');

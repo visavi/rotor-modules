@@ -34,11 +34,11 @@ use Illuminate\Support\HtmlString;
  * @property int    $edit_user_id
  * @property int    $updated_at
  * @property-read User             $user
- * @property-read Collection<File> $files
- * @property-read Collection<Poll> $polls
- * @property-read Poll             $poll
- * @property-read Topic            $topic
- * @property-read User             $editUser
+ * @property-read Collection<int, File> $files
+ * @property-read Collection<int, Poll> $polls
+ * @property-read Poll                  $poll
+ * @property-read Topic                 $topic
+ * @property-read User                  $editUser
  */
 class Post extends Model
 {
@@ -123,6 +123,8 @@ class Post extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {
@@ -132,6 +134,8 @@ class Post extends Model
 
     /**
      * Возвращает файлы
+     *
+     * @return Collection<int, File>
      */
     public function getFiles(): Collection
     {
@@ -140,6 +144,8 @@ class Post extends Model
 
     /**
      * Возвращает медиафайлы (картинки и видео)
+     *
+     * @return Collection<int, File>
      */
     public function getMedia(): Collection
     {

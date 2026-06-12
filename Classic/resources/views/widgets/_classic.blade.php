@@ -61,17 +61,6 @@
     <div class="col-md-6">
         <div class="section mb-3 shadow">
             <div class="section-title">
-                <i class="fa fa-chart-line fa-lg text-muted"></i>
-                {{ __('index.courses') }}
-            </div>
-            <div class="section-body">
-                {{ getCourses() }}
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="section mb-3 shadow">
-            <div class="section-title">
                 <i class="fa fa-calendar-alt fa-lg text-muted"></i>
                 {{ __('classic::classic.calendar') }}
             </div>

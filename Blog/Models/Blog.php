@@ -56,7 +56,7 @@ class Blog extends Model
     /**
      * Возвращает количество статей за последние 3 дня
      */
-    public function new(): hasOne
+    public function new(): HasOne
     {
         return $this->hasOne(Article::class, 'category_id')
             ->active()
@@ -76,7 +76,7 @@ class Blog extends Model
     /**
      * Возвращает последнюю статью
      */
-    public function lastArticle(): hasOne
+    public function lastArticle(): HasOne
     {
         return $this->hasOne(Article::class, 'category_id')
             ->active()

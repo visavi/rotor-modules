@@ -26,7 +26,6 @@ return [
     'title_create'              => 'Publication of a new article',
     'title_edit_blog'           => 'Editing a section',
     'title_edit_article'        => 'Editing an article',
-    'new_articles'              => 'New Articles',
     'new_comments'              => 'New comments',
     'title_rss'                 => 'RSS articles',
     'title_tags'                => 'Tag Search',

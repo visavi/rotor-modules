@@ -26,7 +26,6 @@ return [
     'title_create'              => 'Публікація нової статті',
     'title_edit_blog'           => 'Редагування розділу',
     'title_edit_article'        => 'Редагування статті',
-    'new_articles'              => 'Нові статті',
     'new_comments'              => 'Нові коментарі',
     'title_rss'                 => 'RSS статей',
     'title_tags'                => 'Пошук за тегами',
