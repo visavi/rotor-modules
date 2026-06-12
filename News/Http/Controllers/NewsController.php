@@ -6,7 +6,7 @@ namespace Modules\News\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
-use App\Traits\CommentableTrait;
+use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -14,7 +14,7 @@ use Modules\News\Models\News;
 
 class NewsController extends Controller
 {
-    use CommentableTrait;
+    use HandlesComments;
 
     /**
      * Модель для комментариев

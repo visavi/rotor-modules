@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
-use App\Traits\CommentableTrait;
+use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ use Modules\Photo\Models\Photo;
 
 class PhotoController extends Controller
 {
-    use CommentableTrait;
+    use HandlesComments;
 
     /**
      * Модель для комментариев

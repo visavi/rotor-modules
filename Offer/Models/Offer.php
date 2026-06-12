@@ -8,9 +8,9 @@ use App\Casts\HtmlCast;
 use App\Models\Comment;
 use App\Models\Poll;
 use App\Models\User;
-use App\Traits\CommentsTrait;
+use App\Traits\CommentableTrait;
 use App\Traits\FeedableTrait;
-use App\Traits\PollsTrait;
+use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use Illuminate\Database\Eloquent\Collection;
@@ -41,8 +41,8 @@ use Illuminate\Support\HtmlString;
  */
 class Offer extends Model
 {
-    use CommentsTrait;
-    use PollsTrait;
+    use CommentableTrait;
+    use PollableTrait;
     use FeedableTrait;
     use SearchableTrait;
     use SortableTrait;

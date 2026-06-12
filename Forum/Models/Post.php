@@ -9,8 +9,8 @@ use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
-use App\Traits\FilesTrait;
-use App\Traits\PollsTrait;
+use App\Traits\FileableTrait;
+use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
@@ -42,8 +42,8 @@ use Illuminate\Support\HtmlString;
  */
 class Post extends Model
 {
-    use PollsTrait;
-    use FilesTrait;
+    use PollableTrait;
+    use FileableTrait;
     use ConvertVideoTrait;
     use SearchableTrait;
     use SortableTrait;

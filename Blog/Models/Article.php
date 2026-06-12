@@ -9,11 +9,11 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
-use App\Traits\CommentsTrait;
+use App\Traits\CommentableTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
-use App\Traits\FilesTrait;
-use App\Traits\PollsTrait;
+use App\Traits\FileableTrait;
+use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
@@ -54,9 +54,9 @@ use Illuminate\Support\Str;
  */
 class Article extends Model
 {
-    use CommentsTrait;
-    use PollsTrait;
-    use FilesTrait;
+    use CommentableTrait;
+    use PollableTrait;
+    use FileableTrait;
     use FeedableTrait;
     use SearchableTrait;
     use SortableTrait;

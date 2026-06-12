@@ -10,11 +10,11 @@ use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
 use App\Traits\AddFileToArchiveTrait;
-use App\Traits\CommentsTrait;
+use App\Traits\CommentableTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
-use App\Traits\FilesTrait;
-use App\Traits\PollsTrait;
+use App\Traits\FileableTrait;
+use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
@@ -50,9 +50,9 @@ use Illuminate\Support\HtmlString;
  */
 class Down extends Model
 {
-    use CommentsTrait;
-    use PollsTrait;
-    use FilesTrait;
+    use CommentableTrait;
+    use PollableTrait;
+    use FileableTrait;
     use AddFileToArchiveTrait;
     use ConvertVideoTrait;
     use FeedableTrait;

@@ -9,11 +9,11 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
-use App\Traits\CommentsTrait;
+use App\Traits\CommentableTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
-use App\Traits\FilesTrait;
-use App\Traits\PollsTrait;
+use App\Traits\FileableTrait;
+use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,9 +39,9 @@ use Illuminate\Support\HtmlString;
  */
 class News extends Model
 {
-    use CommentsTrait;
-    use PollsTrait;
-    use FilesTrait;
+    use CommentableTrait;
+    use PollableTrait;
+    use FileableTrait;
     use ConvertVideoTrait;
     use FeedableTrait;
     use SearchableTrait;

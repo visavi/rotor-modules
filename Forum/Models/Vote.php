@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Forum\Models;
 
 use App\Models\Poll;
-use App\Traits\PollsTrait;
+use App\Traits\PollableTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Vote extends Model
 {
-    use PollsTrait;
+    use PollableTrait;
     /**
      * Indicates if the model should be timestamped.
      */

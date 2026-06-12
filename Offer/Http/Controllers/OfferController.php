@@ -7,7 +7,7 @@ namespace Modules\Offer\Http\Controllers;
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
-use App\Traits\CommentableTrait;
+use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +16,7 @@ use Modules\Offer\Models\Offer;
 
 class OfferController extends Controller
 {
-    use CommentableTrait;
+    use HandlesComments;
 
     /**
      * Модель для комментариев

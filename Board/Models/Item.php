@@ -9,7 +9,7 @@ use App\Models\File;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
-use App\Traits\FilesTrait;
+use App\Traits\FileableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
@@ -42,7 +42,7 @@ use Illuminate\Support\HtmlString;
  */
 class Item extends Model
 {
-    use FilesTrait;
+    use FileableTrait;
     use FeedableTrait;
     use SearchableTrait;
     use SortableTrait;

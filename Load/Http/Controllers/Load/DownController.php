@@ -10,7 +10,7 @@ use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
-use App\Traits\CommentableTrait;
+use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ use ZipArchive;
 
 class DownController extends Controller
 {
-    use CommentableTrait;
+    use HandlesComments;
 
     /**
      * Модель для комментариев

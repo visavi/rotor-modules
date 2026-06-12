@@ -10,7 +10,7 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
-use App\Traits\CommentableTrait;
+use App\Traits\HandlesComments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +26,7 @@ use Modules\Blog\Models\Tag;
 
 class ArticleController extends Controller
 {
-    use CommentableTrait;
+    use HandlesComments;
 
     protected string $commentableModelClass = Article::class;
 

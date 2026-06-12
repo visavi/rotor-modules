@@ -8,7 +8,7 @@ use App\Casts\HtmlCast;
 use App\Models\File;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
-use App\Traits\FilesTrait;
+use App\Traits\FileableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -35,7 +35,7 @@ use Illuminate\Support\HtmlString;
  */
 class Guestbook extends Model
 {
-    use FilesTrait;
+    use FileableTrait;
     use ConvertVideoTrait;
     use SearchableTrait;
     use UploadTrait;
