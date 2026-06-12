@@ -24,6 +24,7 @@ return [
     'total_votes'          => 'Всего проголосовало',
     'topics'               => 'Темы',
     'posts'                => 'Сообщения',
+    'forum_posts'          => 'Сообщения форума',
     'bookmarks'            => 'Закладки',
     'to_bookmarks'         => 'В закладки',
     'from_bookmarks'       => 'Из закладок',

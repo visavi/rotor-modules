@@ -14,9 +14,9 @@ use App\Classes\Registry;
 Registry::fileType(string $morphName);                // тип принимает файлы
 Registry::mediaType(string $morphName);               // тип принимает фото/видео
 Registry::ratingType(string $morphName);              // тип поддерживает рейтинг
-Registry::spamType(string $morphName, string $label); // тип — источник жалоб на спам
+Registry::spamType(string $morphName);                // тип — источник жалоб на спам (метка берётся из labelTypes)
 Registry::label(string $morphName, string $label);    // отображаемое название типа
-Registry::feed(string $class, array $config);         // запись в ленте: ['view' => '', 'with' => [], 'scope' => ?Closure]
+Registry::feed(string $class, array $config);         // запись в ленте: ['view' => '', 'with' => [], 'scope' => ?Closure, 'poll' => ?Closure]
 Registry::search(string $class, string $view, array $with = []); // полнотекстовый поиск
 ```
 
@@ -66,20 +66,6 @@ Registry::sitemap('topics', function (): array {
             'lastmod' => gmdate('c', $topic->created_at),
         ])
         ->all();
-});
-```
-
-### pollResolver — где искать голосование
-
-Для моделей, у которых голосование привязано не к самой записи, а к связанной. Возвращает морф-имя и id связанной записи либо `null`:
-
-```php
-Registry::pollResolver(Topic::class, function (Topic $topic): ?array {
-    if (! $topic->last_post_id) {
-        return null;
-    }
-
-    return [Post::$morphName, $topic->last_post_id];
 });
 ```
 

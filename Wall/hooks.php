@@ -11,7 +11,7 @@ Registry::onDeleteUser(function (User $user): void {
     clearCache('wall_count_' . $user->id);
 });
 
-Registry::complaint('walls', function (int $id, $page) {
+Registry::complaint(Wall::$morphName, function (int $id, mixed $page): array {
     $model = Wall::query()->find($id);
 
     return [

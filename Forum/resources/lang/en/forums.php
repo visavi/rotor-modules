@@ -24,6 +24,7 @@ return [
     'total_votes'          => 'Total Voted',
     'topics'               => 'Themes',
     'posts'                => 'Messages',
+    'forum_posts'          => 'Forum posts',
     'bookmarks'            => 'Bookmarks',
     'to_bookmarks'         => 'To bookmarks',
     'from_bookmarks'       => 'From bookmarks',

@@ -147,7 +147,7 @@ return [
 |---|---|
 | `label` | Метка раздела модели — название в результатах поиска, на странице «Спам» и в рейтингах. |
 | `search` | Подключает модель к глобальному поиску. `view` — шаблон одного результата, `with` (опц.) — отношения для eager-load. |
-| `feed` | Подключает к общей ленте активности. `with` — отношения для eager-load, `view` — шаблон записи, `scope` (опц.) — замыкание, ограничивающее выборку. |
+| `feed` | Подключает к общей ленте активности. `with` — отношения для eager-load, `view` — шаблон записи, `scope` (опц.) — замыкание, ограничивающее выборку, `poll` (опц.) — замыкание `fn ($model): ?array`, возвращающее `[морф-имя, id]` связанной записи, если голосование привязано не к самой записи (тема → последний пост). |
 | `upload` | Разрешает прикреплять файлы. `media` — изображения и видео, `file` — любые файлы. |
 | `rating` | `true` — включает лайки/дизлайки. |
 | `spam` | `true` — записи можно помечать как спам (раздел на странице «Спам» в админке; название раздела берётся из `label`). |
@@ -240,7 +240,7 @@ class MyModel extends \Illuminate\Database\Eloquent\Model
 
 Файл `hooks.php` содержит:
 - вставки в шаблоны через `Hook::add` (UI-расширения);
-- регистрации в `Registry` для возможностей, которые не привязаны к одной модели (sitemap, complaint, pollResolver, onDeleteUser, onAdminDeleteUser);
+- регистрации в `Registry` для возможностей, которые не привязаны к одной модели (sitemap, complaint, onDeleteUser, onAdminDeleteUser);
 - регистрации `Restatement::register` (если не объявлено в `module.php`).
 
 ### Hook::add
@@ -302,11 +302,6 @@ Registry::onAdminDeleteUser(function (\App\Models\User $user, \Illuminate\Http\R
         MyModel::query()->where('user_id', $user->id)->get()->each->delete();
     }
 });
-
-// Где искать голосование для модели (морф-имя и id связанной записи)
-Registry::pollResolver(MyModel::class, function (MyModel $model): ?array {
-    return ['posts', $model->last_post_id];
-});
 ```
 
 Полный список методов `Registry`:
@@ -316,13 +311,12 @@ Registry::pollResolver(MyModel::class, function (MyModel $model): ?array {
 | `fileType($morphName)` | тип принимает файлы (вызывается из `module.php` через `'upload' => 'file'`) |
 | `mediaType($morphName)` | тип принимает фото/видео (`'upload' => 'media'`) |
 | `ratingType($morphName)` | тип поддерживает рейтинг (`'rating' => true`) |
-| `spamType($morphName, $label)` | тип — источник жалоб на спам (`'spam' => true`) |
+| `spamType($morphName)` | тип — источник жалоб на спам (`'spam' => true`, метка берётся из `label`) |
 | `label($morphName, $label)` | отображаемое название типа (`'label' => '...'`) |
 | `feed($class, $config)` | запись в ленте активности (`'feed' => [...]`) |
 | `search($class, $view, $with)` | полнотекстовый поиск (`'search' => [...]`) |
 | `complaint($morphName, $handler)` | обработчик жалобы |
 | `sitemap($key, $handler)` | страница в sitemap |
-| `pollResolver($class, $handler)` | резолвер голосований |
 | `onDeleteUser($handler)` | очистка при удалении пользователя |
 | `onAdminDeleteUser($handler)` | удаление пользователя администратором |
 

@@ -40,14 +40,6 @@ Registry::sitemap('topics', function (): array {
     });
 });
 
-Registry::pollResolver(Topic::class, function (Topic $topic): ?array {
-    if (! $topic->last_post_id) {
-        return null;
-    }
-
-    return [Post::$morphName, $topic->last_post_id];
-});
-
 Registry::onAdminDeleteUser(function (User $user, Request $request): void {
     if ($request->boolean('deltopics')) {
         $topics = Topic::query()->where('user_id', $user->id)->get();

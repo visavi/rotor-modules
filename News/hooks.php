@@ -2,19 +2,8 @@
 
 use App\Classes\Hook;
 use App\Classes\Registry;
-use App\Models\Comment;
 use Illuminate\Support\Facades\Cache;
 use Modules\News\Models\News;
-
-Registry::complaint(News::$morphName, static function (int $id) {
-    $model = Comment::query()->find($id);
-
-    return [
-        'model' => $model,
-        'path'  => $model?->getViewUrl(false),
-        'type'  => 'comments',
-    ];
-});
 
 Registry::sitemap('news', static function () {
     return Cache::remember('NewsSitemap', 600, static function () {

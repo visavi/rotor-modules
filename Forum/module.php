@@ -21,13 +21,17 @@ return [
             'label'  => __('forum::forums.topics'),
             'search' => ['view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
             'feed'   => [
-                'with' => ['lastPost.user', 'lastPost.files', 'forum.parent'],
+                'with'  => ['lastPost.user', 'lastPost.files', 'forum.parent'],
                 'view'  => 'forum::feeds/_topics',
                 'scope' => fn ($query) => $query->leftJoin('posts', 'topics.last_post_id', '=', 'posts.id'),
+                // В ленте голосование идёт за последний пост темы, а не за саму тему
+                'poll' => fn (Topic $topic): ?array => $topic->last_post_id
+                    ? [Post::$morphName, $topic->last_post_id]
+                    : null,
             ],
         ],
         Post::class => [
-            'label'  => __('forum::forums.posts'),
+            'label'  => __('forum::forums.forum_posts'),
             'search' => ['view' => 'forum::search/_posts', 'with' => ['topic']],
             'upload' => 'file',
             'rating' => true,
