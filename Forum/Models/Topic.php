@@ -243,7 +243,7 @@ class Topic extends Model
             ];
         }
 
-        return new HtmlString(view('forum::forums/_pagination', compact('pages')));
+        return new HtmlString(view('forum::forums/_pagination', compact('pages'))->render());
     }
 
     /**

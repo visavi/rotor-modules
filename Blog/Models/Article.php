@@ -45,11 +45,12 @@ use Illuminate\Support\Str;
  * @property bool             $active
  * @property bool             $draft
  * @property ?CarbonImmutable $published_at
- * @property-read Collection<File>    $files
- * @property-read Collection<Comment> $comments
- * @property-read Collection<Poll>    $polls
- * @property-read Poll                $poll
- * @property-read Blog                $category
+ * @property-read User                     $user
+ * @property-read Collection<int, File>    $files
+ * @property-read Collection<int, Comment> $comments
+ * @property-read Collection<int, Poll>    $polls
+ * @property-read Poll                     $poll
+ * @property-read Blog                     $category
  */
 class Article extends Model
 {
@@ -125,7 +126,7 @@ class Article extends Model
     protected function slug(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => str_replace(['%id%', '%slug%'], [$this->id, $value], setting('slug_template')),
+            get: fn (string $value) => str_replace(['%id%', '%slug%'], [(string) $this->id, $value], setting('slug_template')),
             set: fn ($value) => Str::slug($this->title),
         );
     }
@@ -149,6 +150,8 @@ class Article extends Model
 
     /**
      * Возвращает комментарии блогов
+     *
+     * @return MorphMany<Comment, $this>
      */
     public function comments(): MorphMany
     {
@@ -177,6 +180,8 @@ class Article extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {
@@ -186,6 +191,8 @@ class Article extends Model
 
     /**
      * Возвращает медиафайлы (картинки и видео)
+     *
+     * @return Collection<int, File>
      */
     public function getMedia(): Collection
     {
@@ -194,6 +201,8 @@ class Article extends Model
 
     /**
      * Возвращает медиафайлы, не вставленные в текст
+     *
+     * @return Collection<int, File>
      */
     public function getDetachedMedia(): Collection
     {

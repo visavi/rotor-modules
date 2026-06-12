@@ -252,8 +252,9 @@ class DownController extends Controller
     public function download(int $id, int $fid, Validator $validator): Response
     {
         $file = File::query()->where('relate_type', Down::$morphName)->find($fid);
+        $down = $file?->relate;
 
-        if (! $file || ! $file->relate) {
+        if (! $file || ! $down instanceof Down) {
             abort(404, __('load::loads.down_not_exist'));
         }
 
@@ -261,21 +262,21 @@ class DownController extends Controller
             abort(403, __('load::loads.download_authorized'));
         }
 
-        if (! $file->relate->active && ! isAdmin(User::ADMIN)) {
+        if (! $down->active && ! isAdmin(User::ADMIN)) {
             abort(200, __('load::loads.down_not_verified'));
         }
 
         $validator->true(file_exists(public_path($file->path)), __('load::loads.down_not_exist'));
 
         if ($validator->isValid()) {
-            Reader::countingStat($file->relate);
+            Reader::countingStat($down);
 
             return response()->download(public_path($file->path), $file->name);
         }
 
         setFlash('danger', $validator->getErrors());
 
-        return redirect()->route('downs.view', ['id' => $file->relate->id]);
+        return redirect()->route('downs.view', ['id' => $down->id]);
     }
 
     /**
@@ -318,7 +319,7 @@ class DownController extends Controller
         $file = File::query()->where('relate_type', Down::$morphName)->find($id);
         $down = $file?->relate;
 
-        if (! $file || ! $down) {
+        if (! $file || ! $down instanceof Down) {
             abort(404, __('load::loads.down_not_exist'));
         }
 
@@ -394,7 +395,7 @@ class DownController extends Controller
         if ($isImage) {
             return response($content)
                 ->header('Content-Type', $mime)
-                ->header('Content-Length', strlen($content))
+                ->header('Content-Length', (string) strlen($content))
                 ->header('Content-Disposition', 'inline; filename="' . $document['name'] . '"');
         }
 

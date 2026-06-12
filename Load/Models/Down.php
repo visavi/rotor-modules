@@ -41,11 +41,12 @@ use Illuminate\Support\HtmlString;
  * @property bool   $active
  * @property array  $links
  * @property int    $updated_at
- * @property-read Collection<File>    $files
- * @property-read Collection<Comment> $comments
- * @property-read Collection<Poll>    $polls
- * @property-read Poll                $poll
- * @property-read Load                $category
+ * @property-read User                       $user
+ * @property-read Collection<int, File>      $files
+ * @property-read Collection<int, Comment>   $comments
+ * @property-read Collection<int, Poll>      $polls
+ * @property-read Poll                       $poll
+ * @property-read Load                       $category
  */
 class Down extends Model
 {
@@ -143,6 +144,8 @@ class Down extends Model
 
     /**
      * Возвращает комментарии
+     *
+     * @return MorphMany<Comment, $this>
      */
     public function comments(): MorphMany
     {
@@ -180,6 +183,8 @@ class Down extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {
@@ -189,6 +194,8 @@ class Down extends Model
 
     /**
      * Возвращает файлы
+     *
+     * @return Collection<int, File>
      */
     public function getFiles(): Collection
     {
@@ -197,6 +204,8 @@ class Down extends Model
 
     /**
      * Возвращает медиафайлы (картинки и видео)
+     *
+     * @return Collection<int, File>
      */
     public function getMedia(): Collection
     {

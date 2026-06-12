@@ -30,10 +30,11 @@ use Illuminate\Support\HtmlString;
  * @property int    $count_comments
  * @property int    $closed
  * @property int    $top
- * @property-read Collection<Comment> $comments
- * @property-read Collection<File>    $files
- * @property-read Collection<Poll>    $polls
- * @property-read Poll                $poll
+ * @property-read User                     $user
+ * @property-read Collection<int, Comment> $comments
+ * @property-read Collection<int, File>    $files
+ * @property-read Collection<int, Poll>    $polls
+ * @property-read Poll                     $poll
  */
 class News extends Model
 {
@@ -91,6 +92,8 @@ class News extends Model
 
     /**
      * Возвращает комментарии новостей
+     *
+     * @return MorphMany<Comment, $this>
      */
     public function comments(): MorphMany
     {
@@ -99,6 +102,8 @@ class News extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {
@@ -108,6 +113,8 @@ class News extends Model
 
     /**
      * Возвращает файлы
+     *
+     * @return Collection<int, File>
      */
     public function getFiles(): Collection
     {
@@ -116,6 +123,8 @@ class News extends Model
 
     /**
      * Возвращает медиафайлы (картинки и видео)
+     *
+     * @return Collection<int, File>
      */
     public function getMedia(): Collection
     {
@@ -124,6 +133,8 @@ class News extends Model
 
     /**
      * Возвращает медиафайлы, не вставленные в текст
+     *
+     * @return Collection<int, File>
      */
     public function getDetachedMedia(): Collection
     {

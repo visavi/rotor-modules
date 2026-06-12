@@ -36,8 +36,9 @@ use Illuminate\Support\HtmlString;
  * @property int    $expires_at
  * @property bool   $active
  * @property int    $visits
- * @property-read Board            $category
- * @property-read Collection<File> $files
+ * @property-read User                  $user
+ * @property-read Board                 $category
+ * @property-read Collection<int, File> $files
  */
 class Item extends Model
 {
@@ -131,6 +132,8 @@ class Item extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {

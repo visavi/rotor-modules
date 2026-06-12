@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\Lottery\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Lottery
  *
- * @property int    $id
- * @property string $day
- * @property int    $amount
- * @property int    $number
+ * @property int                          $id
+ * @property string                       $day
+ * @property int                          $amount
+ * @property int                          $number
+ * @property Collection<int, LotteryUser> $winners
  */
 class Lottery extends Model
 {
@@ -34,6 +36,8 @@ class Lottery extends Model
 
     /**
      * Возвращает связь с участниками
+     *
+     * @return HasMany<LotteryUser, $this>
      */
     public function lotteryUsers(): HasMany
     {

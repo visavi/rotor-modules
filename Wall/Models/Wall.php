@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int    $author_id
  * @property string $text
  * @property int    $created_at
+ * @property-read User $user
  */
 class Wall extends Model
 {

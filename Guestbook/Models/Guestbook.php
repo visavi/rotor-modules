@@ -30,7 +30,8 @@ use Illuminate\Support\HtmlString;
  * @property int    $edit_user_id
  * @property bool   $active
  * @property int    $updated_at
- * @property-read Collection<File> $files
+ * @property-read User                  $user
+ * @property-read Collection<int, File> $files
  */
 class Guestbook extends Model
 {
@@ -110,6 +111,8 @@ class Guestbook extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {
@@ -119,6 +122,8 @@ class Guestbook extends Model
 
     /**
      * Возвращает файлы
+     *
+     * @return Collection<int, File>
      */
     public function getFiles(): Collection
     {
@@ -127,6 +132,8 @@ class Guestbook extends Model
 
     /**
      * Возвращает медиафайлы (картинки и видео)
+     *
+     * @return Collection<int, File>
      */
     public function getMedia(): Collection
     {
@@ -135,6 +142,8 @@ class Guestbook extends Model
 
     /**
      * Возвращает медиафайлы, не вставленные в текст
+     *
+     * @return Collection<int, File>
      */
     public function getDetachedMedia(): Collection
     {

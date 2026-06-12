@@ -5,25 +5,27 @@ declare(strict_types=1);
 namespace Modules\Payment\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Date;
 use Modules\Payment\Services\YooKassaService;
 
 /**
  * Class Order
  *
- * @property int    $id
- * @property int    $user_id
- * @property string $type
- * @property int    $amount
- * @property string $currency
- * @property string $token
- * @property string $payment_id
- * @property string $status
- * @property array  $data
- * @property Date   $created_at
- * @property Date   $updated_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property string          $type
+ * @property int             $amount
+ * @property string          $currency
+ * @property string          $token
+ * @property string          $payment_id
+ * @property string          $status
+ * @property string          $email
+ * @property string          $description
+ * @property array           $data
+ * @property CarbonImmutable $created_at
+ * @property CarbonImmutable $updated_at
  */
 class Order extends Model
 {

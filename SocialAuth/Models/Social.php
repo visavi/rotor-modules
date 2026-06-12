@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property string $provider_id
  * @property string $token
  * @property Carbon $created_at
+ * @property-read ?User $user
  */
 class Social extends Model
 {

@@ -11,6 +11,7 @@ class ZipTree
      */
     public static function build(array $flat): array
     {
+        /** @var array{__files: array[], __dirs: array<string, array>, __count: int, __size: int} $tree */
         $tree = ['__files' => [], '__dirs' => [], '__count' => 0, '__size' => 0];
 
         foreach ($flat as $entry) {

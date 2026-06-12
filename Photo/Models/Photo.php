@@ -33,10 +33,11 @@ use Illuminate\Support\HtmlString;
  * @property int    $rating
  * @property int    $closed
  * @property int    $count_comments
- * @property-read Collection<Comment> $comments
- * @property-read Collection<File>    $files
- * @property-read Collection<Poll>    $polls
- * @property-read Poll                $poll
+ * @property-read User                     $user
+ * @property-read Collection<int, Comment> $comments
+ * @property-read Collection<int, File>    $files
+ * @property-read Collection<int, Poll>    $polls
+ * @property-read Poll                     $poll
  */
 class Photo extends Model
 {
@@ -116,6 +117,8 @@ class Photo extends Model
 
     /**
      * Возвращает загруженные файлы
+     *
+     * @return MorphMany<File, $this>
      */
     public function files(): MorphMany
     {

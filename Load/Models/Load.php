@@ -20,8 +20,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $name
  * @property int    $count_downs
  * @property int    $closed
- * @property-read Load             $parent
- * @property-read Collection<Load> $children
+ * @property int    $depth
+ * @property mixed  $child
+ * @property-read Load                  $parent
+ * @property-read Collection<int, Load> $children
  */
 class Load extends Model
 {

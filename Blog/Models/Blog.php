@@ -20,8 +20,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $name
  * @property int    $count_articles
  * @property int    $closed
- * @property-read Blog             $parent
- * @property-read Collection<Blog> $children
+ * @property int    $depth
+ * @property mixed  $child
+ * @property-read Blog                  $parent
+ * @property-read Collection<int, Blog> $children
  */
 class Blog extends Model
 {
@@ -67,6 +69,8 @@ class Blog extends Model
 
     /**
      * Возвращает статьи
+     *
+     * @return HasMany<Article, $this>
      */
     public function articles(): HasMany
     {

@@ -34,10 +34,11 @@ use Illuminate\Support\HtmlString;
  * @property string $reply
  * @property int    $reply_user_id
  * @property int    $updated_at
- * @property-read Collection<Comment> $comments
- * @property-read Collection<Poll>    $polls
- * @property-read Poll                $poll
- * @property-read User                $replyUser
+ * @property-read User                     $user
+ * @property-read Collection<int, Comment> $comments
+ * @property-read Collection<int, Poll>    $polls
+ * @property-read Poll                     $poll
+ * @property-read User                     $replyUser
  */
 class Offer extends Model
 {

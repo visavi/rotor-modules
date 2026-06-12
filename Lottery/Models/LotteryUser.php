@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $number
  * @property int $created_at
+ * @property-read User $user
  */
 class LotteryUser extends Model
 {

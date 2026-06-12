@@ -20,8 +20,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property int    $count_items
  * @property int    $closed
- * @property-read Board             $parent
- * @property-read Collection<Board> $children
+ * @property int    $depth
+ * @property mixed  $child
+ * @property-read Board                  $parent
+ * @property-read Collection<int, Board> $children
  */
 class Board extends Model
 {
