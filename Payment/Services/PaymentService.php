@@ -32,16 +32,35 @@ class PaymentService
     }
 
     /**
+     * Возвращает цены за сутки размещения
+     */
+    public function getPrices(): array
+    {
+        $places = [];
+        foreach (PaidAdvert::PLACES as $place) {
+            $places[$place] = setting('payment_price_' . $place, 0);
+        }
+
+        return [
+            'places' => $places,
+            'color'  => setting('payment_price_color', 0),
+            'bold'   => setting('payment_price_bold', 0),
+            'name'   => setting('payment_price_name', 0),
+        ];
+    }
+
+    /**
      * Calculate
      */
     public function calculateAdvert(array $data): array
     {
         $countNames = count($data['names']);
+        $prices = $this->getPrices();
 
-        $placePrice = setting('payment_price_' . $data['place'], 0);
-        $colorPrice = setting('payment_price_color', 0);
-        $boldPrice = setting('payment_price_bold', 0);
-        $namePrice = setting('payment_price_name', 0);
+        $placePrice = $prices['places'][$data['place']] ?? 0;
+        $colorPrice = $prices['color'];
+        $boldPrice = $prices['bold'];
+        $namePrice = $prices['name'];
 
         $placePrice = $data['term'] * $placePrice;
         $colorPrice = $data['color'] ? $data['term'] * $colorPrice : 0;

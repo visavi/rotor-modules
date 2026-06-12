@@ -10,7 +10,7 @@ return new class extends Migration {
         if (! Schema::hasTable('paid_adverts')) {
             Schema::create('paid_adverts', function (Blueprint $table) {
                 $table->increments('id');
-                $table->integer('user_id');
+                $table->integer('user_id')->nullable();
                 $table->string('place', 20);
                 $table->string('site', 100);
                 $table->json('names');

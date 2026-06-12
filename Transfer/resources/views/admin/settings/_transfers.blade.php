@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Transfer']) }}">{{ __('transfer::transfers.cash_transactions') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Transfer']) }}">{{ __('admin.modules.module') }} {{ __('transfer::transfers.module_name') }}</a></li>
             <li class="breadcrumb-item active">{{ __('transfer::transfers.settings') }}</li>
         </ol>
     </nav>

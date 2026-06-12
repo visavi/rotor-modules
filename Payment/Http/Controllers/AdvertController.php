@@ -40,8 +40,9 @@ class AdvertController extends Controller
     {
         $advert = new PaidAdvert();
         $places = $advert->getPlaces();
+        $prices = $this->paymentService->getPrices();
 
-        return view('payment::advert/create', compact('advert', 'places'));
+        return view('payment::advert/create', compact('advert', 'places', 'prices'));
     }
 
     /**
@@ -124,9 +125,6 @@ class AdvertController extends Controller
             abort(404, __('payment::payments.payment_not_found'));
         }
 
-        return view('payment::advert.status', [
-            'order'    => $order,
-            'retryUrl' => '/payments/result?token=' . $order->token,
-        ]);
+        return view('payment::advert.status', compact('order'));
     }
 }

@@ -65,6 +65,10 @@ class PaymentController extends Controller
                     $order->update(['status' => $status]);
                 });
             }
+
+            if ($status === YooKassaService::CANCELED) {
+                $order->update(['status' => $status]);
+            }
         } catch (Exception $e) {
             Log::error($e->getMessage());
 

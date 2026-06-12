@@ -69,7 +69,7 @@
 
 
     @if (getUser())
-        @if (! $topic->closed && getUser('id') === $topic->user->id && getUser('point') >= setting('editforumpoint'))
+        @if (! $topic->closed && getUser('id') === $topic->user_id && getUser('point') >= setting('editforumpoint'))
             <i class="fas fa-lock"></i>
             <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
                 @csrf
@@ -154,7 +154,7 @@
                     <div class="flex-grow-1">
                         {{ $post->user->getProfile() }}
                         <small class="section-date text-muted fst-italic" data-date="{{ dateFixed($post->created_at, original: true) }}">{{ dateFixed($post->created_at) }}</small>
-                        @if ($topic->user->id === $post->user->id)
+                        @if ($topic->user_id === $post->user_id)
                             <span class="badge bg-info">{{ __('main.author') }}</span>
                         @endif
                         <br>

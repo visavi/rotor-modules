@@ -20,7 +20,7 @@ use Illuminate\Support\HtmlString;
  * @property array  $names
  * @property string $color
  * @property bool   $bold
- * @property int    $user_id
+ * @property int|null $user_id
  * @property int    $created_at
  * @property int    $deleted_at
  */

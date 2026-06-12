@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'module_name'                => 'Грошові перекази',
     'money_transfer'             => 'Переказ грошей',
     'cash_transactions'          => 'Грошові операції',
     'in_stock'                   => 'У наявності',

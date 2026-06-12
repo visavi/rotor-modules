@@ -30,7 +30,7 @@ class OrderService
             'user_id'     => getUser('id'),
             'type'        => $data['type'],
             'amount'      => $data['prices']['total'],
-            'currency'    => setting('currency'),
+            'currency'    => config('payment.yookassa_currency'),
             'token'       => Str::random(32),
             'email'       => $data['email'],
             'description' => $data['description'],

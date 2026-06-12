@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'module_name'                => 'Money transfers',
     'money_transfer'             => 'Money transfer',
     'cash_transactions'          => 'Cash transactions',
     'in_stock'                   => 'In stock',

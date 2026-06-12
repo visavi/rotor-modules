@@ -1,4 +1,4 @@
-<form action="/payments/calculate" method="post">
+<form action="/payments/calculate" method="post" class="js-advert-form" data-prices="{{ json_encode($prices) }}">
     @csrf
     <div class="mb-3">
         <label for="place" class="form-label">{{ __('payment::payments.paid_adverts.place') }}:</label>
@@ -7,7 +7,7 @@
         <select class="form-select{{ hasError('place') }}" name="place" id="place">
             @foreach ($places as $place => $name)
                 @php $selected = ($place === $inputPlace) ? ' selected' : ''; @endphp
-                <option value="{{ $place }}"{{ $selected }}>{{ $name }}</option>
+                <option value="{{ $place }}"{{ $selected }}>{{ $name }} &mdash; {{ $prices['places'][$place] ?? 0 }} {{ setting('currency') }} {{ __('payment::payments.paid_adverts.per_day') }}</option>
             @endforeach
         </select>
         <div class="invalid-feedback">{{ textError('place') }}</div>
@@ -27,6 +27,7 @@
                 @if ($i === 0)
                     <label for="names{{ $i }}">{{ __('payment::payments.paid_adverts.names') }}:</label>
                     <a class="js-advert-add" href="#" data-bs-toggle="tooltip" title="{{ __('main.add') }}"><i class="fas fa-plus-square"></i></a>
+                    <small class="text-muted">+{{ $prices['name'] }} {{ setting('currency') }} {{ __('payment::payments.paid_adverts.per_day') }} {{ __('payment::payments.paid_adverts.price_extra_name') }}</small>
                     <input type="text" name="names[]" class="form-control{{ hasError('names.' . $i) }}" id="names{{ $i }}" value="{{ $names[$i] ?? '' }}" maxlength="35" placeholder="{{ __('payment::payments.paid_adverts.name') }}" required>
                     <div class="invalid-feedback">{{ textError('names.' . $i) }}</div>
                 @else
@@ -44,7 +45,7 @@
 
     @php $color = old('color', $advert->color); @endphp
     <div class="col-sm-4 mb-3">
-        <label for="color" class="form-label">{{ __('payment::payments.paid_adverts.color') }}:</label>
+        <label for="color" class="form-label">{{ __('payment::payments.paid_adverts.color') }} <small class="text-muted">(+{{ $prices['color'] }} {{ setting('currency') }} {{ __('payment::payments.paid_adverts.per_day') }})</small>:</label>
         <div class="input-group">
             <input type="text" name="color" class="form-control{{ hasError('color') }} colorpicker" id="color" maxlength="7" value="{{ $color }}">
             <input type="color" class="form-control form-control-color colorpicker-addon" value="{{ $color ?? '#000000' }}">
@@ -55,16 +56,14 @@
     <div class="form-check form-switch">
         <input type="hidden" value="0" name="bold">
         <input type="checkbox" class="form-check-input" value="1" name="bold" id="bold"{{ old('bold', $advert->bold) ? ' checked' : '' }}>
-        <label class="form-check-label" for="bold">{{ __('payment::payments.paid_adverts.bold') }}</label>
+        <label class="form-check-label" for="bold">{{ __('payment::payments.paid_adverts.bold') }} <small class="text-muted">(+{{ $prices['bold'] }} {{ setting('currency') }} {{ __('payment::payments.paid_adverts.per_day') }})</small></label>
     </div>
 
-    @if (! $advert->id)
-        <div class="col-sm-4 mb-3">
-            <label for="term" class="form-label">{{ __('payment::payments.paid_adverts.term') }}:</label>
-            <input class="form-control{{ hasError('term') }}" type="number" name="term" id="term" value="{{ old('term', 10) }}" min="1" required>
-            <div class="invalid-feedback">{{ textError('term') }}</div>
-        </div>
-    @endif
+    <div class="col-sm-4 mb-3">
+        <label for="term" class="form-label">{{ __('payment::payments.paid_adverts.term') }}:</label>
+        <input class="form-control{{ hasError('term') }}" type="number" name="term" id="term" value="{{ old('term', 10) }}" min="1" max="365" required>
+        <div class="invalid-feedback">{{ textError('term') }}</div>
+    </div>
 
     <div class="mb-3">
         <label for="email" class="form-label">Email:</label>
@@ -78,11 +77,33 @@
         <div class="invalid-feedback">{{ textError('comment') }}</div>
     </div>
 
-    <button class="btn btn-primary">{{ $advert->id ? __('main.save') : __('payment::payments.place_order') }}</button>
+    <div class="mb-3">
+        <span class="fw-bold">{{ __('payment::payments.total_paid') }}:</span>
+        <span class="h5 text-primary"><span id="js-advert-total">0</span> {{ setting('currency') }}</span>
+    </div>
+
+    <button class="btn btn-primary">{{ __('payment::payments.place_order') }}</button>
 </form>
 
 @push('scripts')
     <script type="module">
+        const form = document.querySelector('.js-advert-form');
+        const prices = JSON.parse(form.dataset.prices);
+
+        function recalcTotal() {
+            const place = prices.places[form.querySelector('#place').value] || 0;
+            const term = parseInt(form.querySelector('#term').value, 10) || 0;
+            const names = form.querySelectorAll('input[name="names[]"]').length;
+            const color = form.querySelector('#color').value ? prices.color : 0;
+            const bold = form.querySelector('#bold').checked ? prices.bold : 0;
+
+            const total = term * (place + color + bold + (names - 1) * prices.name);
+            document.getElementById('js-advert-total').textContent = total;
+        }
+
+        form.addEventListener('input', recalcTotal);
+        form.addEventListener('change', recalcTotal);
+
         document.querySelector('.js-advert-add')?.addEventListener('click', function (e) {
             e.preventDefault();
             document.querySelector('.js-advert-list').insertAdjacentHTML('beforeend',
@@ -92,6 +113,7 @@
                     '<a class="js-advert-remove" href="#"><i class="fa fa-times"></i></a>' +
                 '</span>' +
                 '</div>');
+            recalcTotal();
         });
 
         document.addEventListener('click', function (e) {
@@ -99,6 +121,9 @@
             if (!btn) return;
             e.preventDefault();
             btn.closest('.js-advert-append').remove();
+            recalcTotal();
         });
+
+        recalcTotal();
     </script>
 @endpush
