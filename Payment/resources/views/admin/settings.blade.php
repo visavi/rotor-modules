@@ -15,51 +15,51 @@
 @stop
 
 @section('content')
-    <form method="post">
+    <form method="post" action="{{ route('payment.settings.update') }}">
         @csrf
 
-        <div class="mb-3{{ hasError('yookassa_shop_id') }}">
-            <label for="yookassa_shop_id" class="form-label">{{ __('payment::payments.yookassa_shop_id') }}:</label>
+        <div class="mb-3{{ hasError('sets[payment_yookassa_shop_id]') }}">
+            <label for="payment_yookassa_shop_id" class="form-label">{{ __('payment::payments.yookassa_shop_id') }}:</label>
 
-            <input class="form-control" name="yookassa_shop_id" id="yookassa_shop_id" value="{{ old('yookassa_shop_id', $shopId) }}">
-            <div class="invalid-feedback">{{ textError('yookassa_shop_id') }}</div>
+            <input class="form-control" name="sets[payment_yookassa_shop_id]" id="payment_yookassa_shop_id" value="{{ getInput('sets.payment_yookassa_shop_id', $settings['payment_yookassa_shop_id'] ?? '') }}">
+            <div class="invalid-feedback">{{ textError('sets[payment_yookassa_shop_id]') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('yookassa_secret_key') }}">
-            <label for="yookassa_secret_key" class="form-label">{{ __('payment::payments.yookassa_secret_key') }}:</label>
+        <div class="mb-3{{ hasError('sets[payment_yookassa_secret_key]') }}">
+            <label for="payment_yookassa_secret_key" class="form-label">{{ __('payment::payments.yookassa_secret_key') }}:</label>
 
-            <input class="form-control" type="password" name="yookassa_secret_key" id="yookassa_secret_key" value="{{ old('yookassa_secret_key', $secretKey) }}" autocomplete="new-password">
-            <div class="invalid-feedback">{{ textError('yookassa_secret_key') }}</div>
+            <input class="form-control" type="password" name="sets[payment_yookassa_secret_key]" id="payment_yookassa_secret_key" value="{{ getInput('sets.payment_yookassa_secret_key', $settings['payment_yookassa_secret_key'] ?? '') }}" autocomplete="new-password">
+            <div class="invalid-feedback">{{ textError('sets[payment_yookassa_secret_key]') }}</div>
         </div>
 
         @foreach ($places as $place => $name)
-            <div class="mb-3{{ hasError('prices.places.' . $place) }}">
-                <label for="price_place_{{ $place }}" class="form-label">{{ $name }}:</label>
+            <div class="mb-3{{ hasError('sets[payment_price_' . $place . ']') }}">
+                <label for="payment_price_{{ $place }}" class="form-label">{{ $name }}:</label>
 
-                <input class="form-control" name="prices[places][{{ $place }}]" id="price_place_{{ $place }}" value="{{ old('prices.places.' . $place, $prices['places'][$place]) }}" required>
-                <div class="invalid-feedback">{{ textError('prices.places.' . $place) }}</div>
+                <input type="number" class="form-control" name="sets[payment_price_{{ $place }}]" id="payment_price_{{ $place }}" min="0" value="{{ getInput('sets.payment_price_' . $place, $settings['payment_price_' . $place] ?? 0) }}" required>
+                <div class="invalid-feedback">{{ textError('sets[payment_price_' . $place . ']') }}</div>
             </div>
         @endforeach
 
-        <div class="mb-3{{ hasError('prices.colorPrice') }}">
-            <label for="price_colorPrice" class="form-label">{{ __('payment::payments.paid_adverts.color') }}:</label>
+        <div class="mb-3{{ hasError('sets[payment_price_color]') }}">
+            <label for="payment_price_color" class="form-label">{{ __('payment::payments.paid_adverts.color') }}:</label>
 
-            <input class="form-control" name="prices[colorPrice]" id="price_colorPrice" value="{{ old('prices.colorPrice', $prices['colorPrice']) }}" required>
-            <div class="invalid-feedback">{{ textError('prices.colorPrice') }}</div>
+            <input type="number" class="form-control" name="sets[payment_price_color]" id="payment_price_color" min="0" value="{{ getInput('sets.payment_price_color', $settings['payment_price_color'] ?? 0) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_price_color]') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('prices.boldPrice') }}">
-            <label for="boldPrice" class="form-label">{{ __('payment::payments.paid_adverts.bold') }}:</label>
+        <div class="mb-3{{ hasError('sets[payment_price_bold]') }}">
+            <label for="payment_price_bold" class="form-label">{{ __('payment::payments.paid_adverts.bold') }}:</label>
 
-            <input class="form-control" name="prices[boldPrice]" id="price_boldPrice" value="{{ old('prices.boldPrice', $prices['boldPrice']) }}" required>
-            <div class="invalid-feedback">{{ textError('prices.boldPrice') }}</div>
+            <input type="number" class="form-control" name="sets[payment_price_bold]" id="payment_price_bold" min="0" value="{{ getInput('sets.payment_price_bold', $settings['payment_price_bold'] ?? 0) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_price_bold]') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('prices.namePrice') }}">
-            <label for="namePrice" class="form-label">{{ __('payment::payments.paid_adverts.name') }}:</label>
+        <div class="mb-3{{ hasError('sets[payment_price_name]') }}">
+            <label for="payment_price_name" class="form-label">{{ __('payment::payments.paid_adverts.name') }}:</label>
 
-            <input class="form-control" name="prices[namePrice]" id="price_namePrice" value="{{ old('prices.namePrice', $prices['namePrice']) }}" required>
-            <div class="invalid-feedback">{{ textError('prices.namePrice') }}</div>
+            <input type="number" class="form-control" name="sets[payment_price_name]" id="payment_price_name" min="0" value="{{ getInput('sets.payment_price_name', $settings['payment_price_name'] ?? 0) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_price_name]') }}</div>
         </div>
 
         <button class="btn btn-primary">{{ __('main.save' )}}</button>

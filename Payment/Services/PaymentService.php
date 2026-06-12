@@ -38,10 +38,10 @@ class PaymentService
     {
         $countNames = count($data['names']);
 
-        $placePrice = config('payment.prices.places.' . $data['place']) ?? 0;
-        $colorPrice = config('payment.prices.colorPrice');
-        $boldPrice = config('payment.prices.boldPrice');
-        $namePrice = config('payment.prices.namePrice');
+        $placePrice = setting('payment_price_' . $data['place'], 0);
+        $colorPrice = setting('payment_price_color', 0);
+        $boldPrice = setting('payment_price_bold', 0);
+        $namePrice = setting('payment_price_name', 0);
 
         $placePrice = $data['term'] * $placePrice;
         $colorPrice = $data['color'] ? $data['term'] * $colorPrice : 0;

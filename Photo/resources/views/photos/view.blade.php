@@ -85,7 +85,7 @@
             ])
 
             @foreach ($comments as $comment)
-                @include('app/_comment_item', ['action' => route('photos.add-comment', ['id' => $photo->id]), 'closed' => $photo->closed])
+                @include('app/_comment_item', ['action' => route('photos.add-comment', ['id' => $photo->id]), 'closed' => $photo->closed, 'ownerId' => $photo->user_id])
             @endforeach
         </div>
     </div>

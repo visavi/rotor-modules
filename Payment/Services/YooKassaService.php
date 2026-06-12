@@ -49,8 +49,8 @@ class YooKassaService
     public function __construct()
     {
         $this->apiUrl = config('payment.yookassa_api_url');
-        $this->shopId = config('payment.yookassa_shop_id');
-        $this->secretKey = config('payment.yookassa_secret_key');
+        $this->shopId = (string) setting('payment_yookassa_shop_id', '');
+        $this->secretKey = (string) setting('payment_yookassa_secret_key', '');
         $this->currency = config('payment.yookassa_currency');
     }
 

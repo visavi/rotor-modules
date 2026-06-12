@@ -125,7 +125,7 @@
             ])
 
             @foreach ($comments as $comment)
-                @include('app/_comment_item', ['action' => route('downs.add-comment', ['id' => $down->id]), 'closed' => $down->closed])
+                @include('app/_comment_item', ['action' => route('downs.add-comment', ['id' => $down->id]), 'closed' => $down->closed, 'ownerId' => $down->user_id])
             @endforeach
         </div>
     </div>

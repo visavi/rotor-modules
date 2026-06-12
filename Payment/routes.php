@@ -26,8 +26,13 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);
-        Route::get('/payment-settings', [PaymentSettingController::class, 'index']);
-        Route::post('/payment-settings', [PaymentSettingController::class, 'save']);
+        /* Настройки */
+        Route::controller(PaymentSettingController::class)
+            ->name('payment.')
+            ->group(function () {
+                Route::get('/payment-settings', 'index')->name('settings');
+                Route::post('/payment-settings', 'update')->name('settings.update');
+            });
 
         Route::controller(PaidAdvertController::class)
             ->prefix('paid-adverts')

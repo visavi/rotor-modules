@@ -79,7 +79,7 @@
             ])
 
             @foreach ($comments as $comment)
-                @include('app/_comment_item', ['action' => route('offers.add-comment', ['id' => $offer->id]), 'closed' => $offer->closed])
+                @include('app/_comment_item', ['action' => route('offers.add-comment', ['id' => $offer->id]), 'closed' => $offer->closed, 'ownerId' => $offer->user_id])
             @endforeach
         </div>
     </div>

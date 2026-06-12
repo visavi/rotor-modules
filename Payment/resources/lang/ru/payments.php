@@ -22,7 +22,6 @@ return [
     'payment_link_failed'        => 'Не удалось получить ссылку для подтверждения платежа!',
     'payment_not_found'          => 'Не удалось найти платеж или истек срок его актуальности!',
     'settings'                   => 'Настройки платежей',
-    'settings_success_saved'     => 'Настройки успешно сохранены!',
     'yookassa_shop_id'           => 'YooKassa - идентификатор магазина (shopId)',
     'yookassa_secret_key'        => 'YooKassa - секретный ключ',
     'empty_orders'               => 'Заказов еще нет!',

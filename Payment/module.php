@@ -10,9 +10,8 @@ return [
 
 <p>Получите shop_id и secret_key в панели управления yookassa</p>
 
-<p>Пропишите эти данные в файле .env</p>
-<pre class="code"><code>YOOKASSA_SHOP_ID=Ваш shop_id
-YOOKASSA_SECRET_KEY=Ваш secret_key</code></pre>
+<p>Укажите эти данные на странице настроек модуля</p>
+<pre class="code"><code>/admin/payment-settings</code></pre>
 
 <p>Добавьте URL webhook для HTTP-уведомления в панели управления yookassa</p>
 <pre class="code"><code>https://адрес-сайта/payments/webhook</code></pre>
