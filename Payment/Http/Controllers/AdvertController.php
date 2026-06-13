@@ -168,8 +168,9 @@ class AdvertController extends Controller
     /**
      * Сохранение своей рекламы
      *
-     * Оплаченные опции заблокированы: нельзя включить цвет или жирность,
-     * если их не было при оплате, и добавить названия сверх оплаченных
+     * Оплаченные опции неизменяемы: жирность остаётся как при оплате,
+     * оплаченный цвет можно менять, но не отключать,
+     * количество названий фиксировано
      */
     public function update(MyAdvertRequest $request): RedirectResponse
     {
@@ -179,8 +180,7 @@ class AdvertController extends Controller
         $advert->update([
             'site'  => $validated['site'],
             'names' => array_values($validated['names']),
-            'color' => $advert->color ? ($validated['color'] ?? null) : $advert->color,
-            'bold'  => $advert->bold && $request->boolean('bold'),
+            'color' => $advert->color ? $validated['color'] : null,
         ]);
 
         clearCache('paidAdverts');

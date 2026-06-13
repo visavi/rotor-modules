@@ -30,8 +30,8 @@ class MyAdvertRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * Оплаченные опции заблокированы: нельзя добавить названия сверх оплаченных,
-     * цвет валидируется только если был оплачен
+     * Оплаченные опции неизменяемы: количество названий фиксировано,
+     * оплаченный цвет обязателен — его можно менять, но не отключать
      */
     public function rules(): array
     {
@@ -39,12 +39,12 @@ class MyAdvertRequest extends FormRequest
 
         $rules = [
             'site'    => ['required', 'url', 'max:100'],
-            'names'   => ['required', 'array', 'min:1', 'max:' . count($advert->names)],
-            'names.*' => ['string', 'min:5', 'max:35', 'distinct'],
+            'names'   => ['required', 'array', 'size:' . count($advert->names)],
+            'names.*' => ['required', 'string', 'min:5', 'max:35', 'distinct'],
         ];
 
         if ($advert->color) {
-            $rules['color'] = ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'];
+            $rules['color'] = ['required', 'regex:/^#[A-Fa-f0-9]{6}$/'];
         }
 
         return $rules;

@@ -262,7 +262,23 @@ class PaymentSmokeTest extends ModuleTestCase
         $this->assertSame('https://new-site.com', $advert->site);
         $this->assertSame(['New advert name'], $advert->names);
         $this->assertSame('#00ff00', $advert->color);
-        $this->assertFalse($advert->bold);
+        $this->assertTrue($advert->bold);
+    }
+
+    public function testUpdateCannotDisablePaidOptions(): void
+    {
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true]);
+
+        $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
+            'site'  => 'https://example.com',
+            'names' => ['Test advert name'],
+            'color' => '',
+        ])->assertSessionHasErrors('color');
+
+        $advert->refresh();
+        $this->assertSame('#ff0000', $advert->color);
+        $this->assertTrue($advert->bold);
     }
 
     public function testUpdateCannotEnableUnpaidOptions(): void

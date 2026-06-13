@@ -45,15 +45,14 @@
             <div class="col-sm-4 mb-3">
                 <label for="color" class="form-label">{{ __('payment::payments.paid_adverts.color') }}@if (! $advert->color) <small class="text-muted">({{ __('payment::payments.paid_adverts.option_not_paid') }})</small>@endif:</label>
                 <div class="input-group">
-                    <input type="text" name="color" class="form-control{{ hasError('color') }} colorpicker" id="color" maxlength="7" value="{{ old('color', $advert->color) }}"{{ $advert->color ? '' : ' disabled' }}>
+                    <input type="text" name="color" class="form-control{{ hasError('color') }} colorpicker" id="color" maxlength="7" value="{{ old('color', $advert->color) }}"{{ $advert->color ? ' required' : ' disabled' }}>
                     <input type="color" class="form-control form-control-color colorpicker-addon" value="{{ $advert->color ?: '#000000' }}"{{ $advert->color ? '' : ' disabled' }}>
                     <div class="invalid-feedback">{{ textError('color') }}</div>
                 </div>
             </div>
 
             <div class="form-check form-switch mb-3">
-                <input type="hidden" value="0" name="bold">
-                <input type="checkbox" class="form-check-input" value="1" name="bold" id="bold"{{ old('bold', $advert->bold) ? ' checked' : '' }}{{ $advert->bold ? '' : ' disabled' }}>
+                <input type="checkbox" class="form-check-input" value="1" id="bold"{{ $advert->bold ? ' checked' : '' }} disabled>
                 <label class="form-check-label" for="bold">{{ __('payment::payments.paid_adverts.bold') }}@if (! $advert->bold) <small class="text-muted">({{ __('payment::payments.paid_adverts.option_not_paid') }})</small>@endif</label>
             </div>
 
