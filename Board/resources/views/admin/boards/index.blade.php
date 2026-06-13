@@ -112,9 +112,7 @@
 
                                 <div class="col-md-2">
                                     @if ($item->price)
-                                        <div class="float-end">
-                                            <button type="button" class="btn btn-outline-info">{{ $item->price }} {{ setting('currency') }}</button>
-                                        </div>
+                                        <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $item->price }} {{ setting('currency') }}</div>
                                     @endif
                                 </div>
                             </div>

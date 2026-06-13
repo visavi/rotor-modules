@@ -76,6 +76,14 @@
                             </div>
                         @endif
 
+                        @if ($item->user->id && getUser('id') !== $item->user->id)
+                            <div class="mb-3">
+                                <a class="btn btn-primary" href="{{ route('messages.talk', ['login' => $item->user->login]) }}">
+                                    <i class="fa-solid fa-envelope me-1"></i> {{ __('board::boards.contact_seller') }}
+                                </a>
+                            </div>
+                        @endif
+
                         <i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }} / {{ dateFixed($item->updated_at) }}<br>
 
                         @if ($item->expires_at > SITETIME)
@@ -86,9 +94,7 @@
 
                 <div class="col-md-2">
                     @if ($item->price)
-                        <div class="float-end">
-                            <button type="button" class="btn btn-outline-info">{{ $item->price }} {{ setting('currency') }}</button>
-                        </div>
+                        <div class="text-md-end fs-4 fw-bold text-info text-nowrap">{{ $item->price }} {{ setting('currency') }}</div>
                     @endif
                 </div>
             </div>

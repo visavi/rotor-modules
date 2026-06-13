@@ -35,9 +35,7 @@
 
             <div class="col-md-2">
                 @if ($post->price)
-                    <div class="float-end">
-                        <button type="button" class="btn btn-outline-info">{{ $post->price }} {{ setting('currency') }}</button>
-                    </div>
+                    <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $post->price }} {{ setting('currency') }}</div>
                 @endif
             </div>
         </div>

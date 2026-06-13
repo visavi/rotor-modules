@@ -15,6 +15,7 @@ return [
     'phone'                    => 'Phone',
     'expires'                  => 'Expires',
     'expires_in'               => 'Expires through',
+    'contact_seller'           => 'Contact seller',
     'edit_category'            => 'Editing a category',
     'parent_category'          => 'Parent category',
     'edit_item'                => 'Editing an ad',
