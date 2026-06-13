@@ -21,6 +21,15 @@ Route::middleware('web')
         Route::get('/status', [AdvertController::class, 'status']);
     });
 
+/* Моя реклама (покупать может и гость, но редактировать только авторизованный владелец) */
+Route::middleware(['web', 'check.user'])
+    ->prefix('payments')
+    ->group(function () {
+        Route::get('/my', [AdvertController::class, 'my']);
+        Route::get('/my/edit/{id}', [AdvertController::class, 'edit']);
+        Route::post('/my/edit/{id}', [AdvertController::class, 'update']);
+    });
+
 /* Админка */
 Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')

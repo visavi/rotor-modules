@@ -14,6 +14,7 @@ use Illuminate\View\View;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
 use Modules\Payment\Requests\CalculateRequest;
+use Modules\Payment\Requests\MyAdvertRequest;
 use Modules\Payment\Requests\PayRequest;
 use Modules\Payment\Services\OrderService;
 use Modules\Payment\Services\PaymentService;
@@ -126,5 +127,66 @@ class AdvertController extends Controller
         }
 
         return view('payment::advert.status', compact('order'));
+    }
+
+    /**
+     * Моя реклама
+     */
+    public function my(): View
+    {
+        $adverts = PaidAdvert::query()
+            ->ownActive()
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Неоплаченные заказы, у которых страница оплаты ещё жива
+        $pendingOrders = Order::query()
+            ->where('user_id', auth()->id())
+            ->where('status', YooKassaService::PENDING)
+            ->whereNotNull('payment_url')
+            ->where('created_at', '>', now()->subSeconds((int) config('payment.confirmation_ttl')))
+            ->orderByDesc('id')
+            ->get();
+
+        return view('payment::advert/my', compact('adverts', 'pendingOrders'));
+    }
+
+    /**
+     * Редактирование своей рекламы
+     */
+    public function edit(int $id): View
+    {
+        $advert = PaidAdvert::query()->ownActive()->find($id);
+
+        if (! $advert) {
+            abort(404, __('payment::payments.paid_adverts.not_found'));
+        }
+
+        return view('payment::advert/edit', compact('advert'));
+    }
+
+    /**
+     * Сохранение своей рекламы
+     *
+     * Оплаченные опции заблокированы: нельзя включить цвет или жирность,
+     * если их не было при оплате, и добавить названия сверх оплаченных
+     */
+    public function update(MyAdvertRequest $request): RedirectResponse
+    {
+        $advert = $request->advert();
+        $validated = $request->validated();
+
+        $advert->update([
+            'site'  => $validated['site'],
+            'names' => array_values($validated['names']),
+            'color' => $advert->color ? ($validated['color'] ?? null) : $advert->color,
+            'bold'  => $advert->bold && $request->boolean('bold'),
+        ]);
+
+        clearCache('paidAdverts');
+
+        setFlash('success', __('payment::payments.paid_adverts.advert_saved'));
+
+        return redirect('/payments/my');
     }
 }

@@ -221,14 +221,138 @@ class PaymentSmokeTest extends ModuleTestCase
         ];
     }
 
+    public function testMyAdvertsGuestForbidden(): void
+    {
+        $this->get('/payments/my')->assertForbidden();
+    }
+
+    public function testMyAdverts(): void
+    {
+        $user = User::factory()->create();
+        $this->createAdvert($user);
+
+        $this->actingAs($user)
+            ->get('/payments/my')
+            ->assertOk()
+            ->assertSee('Test advert name');
+    }
+
+    public function testEditForeignAdvertNotFound(): void
+    {
+        $user = User::factory()->create();
+        $owner = User::factory()->create();
+        $advert = $this->createAdvert($owner);
+
+        $this->actingAs($user)->get('/payments/my/edit/' . $advert->id)->assertNotFound();
+    }
+
+    public function testUpdateAdvert(): void
+    {
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true]);
+
+        $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
+            'site'  => 'https://new-site.com',
+            'names' => ['New advert name'],
+            'color' => '#00ff00',
+            'bold'  => 0,
+        ])->assertRedirect('/payments/my');
+
+        $advert->refresh();
+        $this->assertSame('https://new-site.com', $advert->site);
+        $this->assertSame(['New advert name'], $advert->names);
+        $this->assertSame('#00ff00', $advert->color);
+        $this->assertFalse($advert->bold);
+    }
+
+    public function testUpdateCannotEnableUnpaidOptions(): void
+    {
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user);
+
+        $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
+            'site'  => 'https://example.com',
+            'names' => ['Test advert name'],
+            'color' => '#00ff00',
+            'bold'  => 1,
+        ])->assertRedirect('/payments/my');
+
+        $advert->refresh();
+        $this->assertEmpty($advert->color);
+        $this->assertFalse($advert->bold);
+    }
+
+    public function testUpdateCannotExceedPaidNames(): void
+    {
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user);
+
+        $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
+            'site'  => 'https://example.com',
+            'names' => ['First advert name', 'Second advert name'],
+        ])->assertSessionHasErrors('names');
+    }
+
+    /**
+     * Создает активную рекламу пользователя
+     */
+    private function createAdvert(User $user, array $attributes = []): PaidAdvert
+    {
+        return PaidAdvert::query()->create(array_merge([
+            'place'      => PaidAdvert::TOP,
+            'site'       => 'https://example.com',
+            'names'      => ['Test advert name'],
+            'color'      => null,
+            'bold'       => false,
+            'user_id'    => $user->id,
+            'created_at' => SITETIME,
+            'deleted_at' => SITETIME + 86400,
+        ], $attributes));
+    }
+
+    public function testStatusShowsContinuePaymentForFreshOrder(): void
+    {
+        $order = $this->createOrder(['payment_url' => 'https://yoomoney.ru/checkout/test-pay']);
+
+        $this->get('/payments/status?token=' . $order->token)
+            ->assertOk()
+            ->assertSee('https://yoomoney.ru/checkout/test-pay');
+    }
+
+    public function testStatusHidesContinuePaymentForExpiredOrder(): void
+    {
+        $order = $this->createOrder([
+            'payment_url' => 'https://yoomoney.ru/checkout/test-pay',
+            'created_at'  => now()->subHour(),
+        ]);
+
+        $this->get('/payments/status?token=' . $order->token)
+            ->assertOk()
+            ->assertDontSee('https://yoomoney.ru/checkout/test-pay');
+    }
+
+    public function testMyAdvertsShowsPendingOrder(): void
+    {
+        $user = User::factory()->create();
+        $this->createOrder([
+            'user_id'     => $user->id,
+            'payment_url' => 'https://yoomoney.ru/checkout/test-pay',
+        ]);
+
+        $this->actingAs($user)
+            ->get('/payments/my')
+            ->assertOk()
+            ->assertSee('https://yoomoney.ru/checkout/test-pay');
+    }
+
     /**
      * Создает заказ в статусе pending
      */
-    private function createOrder(): Order
+    private function createOrder(array $attributes = []): Order
     {
         $data = $this->advertData();
 
-        return Order::query()->create([
+        return Order::query()->create(array_merge([
             'user_id'     => null,
             'type'        => Order::TYPE_ADVERT,
             'amount'      => $data['prices']['total'],
@@ -239,6 +363,6 @@ class PaymentSmokeTest extends ModuleTestCase
             'email'       => $data['email'],
             'description' => $data['description'],
             'data'        => $data,
-        ]);
+        ], $attributes));
     }
 }

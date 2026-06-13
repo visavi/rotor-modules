@@ -2,6 +2,16 @@
 
 @section('title', 'Покупка рекламы')
 
+@section('header')
+    @if (getUser())
+        <div class="float-end">
+            <a class="btn btn-adaptive" href="/payments/my">{{ __('payment::payments.paid_adverts.my_title') }}</a>
+        </div>
+    @endif
+
+    <h1>{{ __('payment::payments.paid_adverts.create_advert') }}</h1>
+@stop
+
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">

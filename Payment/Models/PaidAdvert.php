@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Payment\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
@@ -74,6 +75,16 @@ class PaidAdvert extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
+    }
+
+    /**
+     * Активная реклама текущего пользователя
+     */
+    public function scopeOwnActive(Builder $query): Builder
+    {
+        return $query
+            ->where('user_id', auth()->id())
+            ->where('deleted_at', '>', SITETIME);
     }
 
     /**

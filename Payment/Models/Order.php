@@ -23,6 +23,7 @@ use Modules\Payment\Services\YooKassaService;
  * @property string          $status
  * @property string          $email
  * @property string          $description
+ * @property string|null     $payment_url
  * @property array           $data
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $updated_at
@@ -53,6 +54,16 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id')->withDefault();
+    }
+
+    /**
+     * Можно ли продолжить оплату: заказ не оплачен, а страница оплаты ещё жива
+     */
+    public function isPayable(): bool
+    {
+        return $this->status === YooKassaService::PENDING
+            && $this->payment_url
+            && $this->created_at->addSeconds((int) config('payment.confirmation_ttl'))->isFuture();
     }
 
     /**

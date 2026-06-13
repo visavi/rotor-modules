@@ -23,6 +23,10 @@
                 <p class="mb-2">{{ __('payment::payments.order_number') }}: {{ $order->id }}</p>
                 <p class="mb-2">{{ __('payment::payments.order_status') }}: {{ $order->statusName() }}</p>
                 <p class="fs-4">{{ __('payment::payments.order_amount') }}: <strong>{{ $order->amount }} {{ $order->currency }}</strong></p>
+
+                @if ($order->isPayable())
+                    <a class="btn btn-primary" href="{{ $order->payment_url }}" rel="nofollow">{{ __('payment::payments.paid_adverts.continue_payment') }}</a>
+                @endif
             </div>
         </div>
     </div>
