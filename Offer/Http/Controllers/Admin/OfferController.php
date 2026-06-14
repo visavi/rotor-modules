@@ -136,7 +136,9 @@ class OfferController extends Controller
                     'status' => strip_tags($offer->getStatus()->toHtml()),
                 ]);
 
-                $offer->user->sendMessage(null, $text);
+                if ($offer->user->exists) {
+                    $offer->user->sendMessage(null, $text);
+                }
 
                 setFlash('success', __('offer::offers.answer_success_added'));
 
