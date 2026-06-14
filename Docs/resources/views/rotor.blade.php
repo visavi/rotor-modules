@@ -10,18 +10,17 @@
             @if ($release)
                 <a class="rotor-badge" href="/rotor/releases">
                     <span class="rotor-badge__dot"></span>
-                    Новая версия {{ $release['tag_name'] }}
+                    {{ __('docs::rotor.new_version', ['version' => $release['tag_name']]) }}
                     <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             @endif
 
             <img src="/assets/modules/docs/rotor.png" alt="RotorCMS" class="rotor-hero__logo">
 
-            <h1 class="rotor-hero__title">Создайте свой первый сайт</h1>
+            <h1 class="rotor-hero__title">{{ __('docs::rotor.hero_title') }}</h1>
 
             <p class="rotor-hero__lead">
-                Лёгкий и быстрый движок для сообщества. Работает абсолютно на всех
-                бесплатных хостингах — без боли и лишних настроек.
+                {{ __('docs::rotor.hero_lead') }}
             </p>
 
             <div class="rotor-install">
@@ -37,7 +36,7 @@
 
             <div class="rotor-cta">
                 <a href="/docs" class="btn btn-primary btn-lg rotor-cta__primary">
-                    <i class="fa-solid fa-book-open me-1"></i> Документация
+                    <i class="fa-solid fa-book-open me-1"></i> {{ __('docs::rotor.documentation') }}
                 </a>
                 <a href="https://github.com/visavi/rotor" class="btn btn-lg rotor-cta__ghost" rel="noopener" target="_blank">
                     <i class="fab fa-github me-1"></i> GitHub
@@ -46,26 +45,24 @@
 
             <p class="rotor-meta">
                 @if ($release)
-                    Текущая версия <strong>{{ $release['tag_name'] }}</strong>
+                    {{ __('docs::rotor.current_version') }} <strong>{{ $release['tag_name'] }}</strong>
                     <span class="rotor-meta__sep">&middot;</span>
                 @endif
-                <a href="/rotor/releases">Последние версии</a>
+                <a href="/rotor/releases">{{ __('docs::rotor.releases') }}</a>
                 <span class="rotor-meta__sep">&middot;</span>
-                <a href="/rotor/commits">История изменений</a>
+                <a href="/rotor/commits">{{ __('docs::rotor.commits') }}</a>
             </p>
         </div>
     </section>
 
     <section class="rotor-features">
         @php
-            $features = [
-                ['icon' => 'fa-bolt',          'title' => 'Лёгкий и быстрый',  'text' => 'Минимум ресурсов, максимум скорости даже на слабом железе.'],
-                ['icon' => 'fa-server',        'title' => 'Любой хостинг',     'text' => 'Запускается даже на бесплатных тарифах без лишних требований.'],
-                ['icon' => 'fa-puzzle-piece',  'title' => 'Модульность',       'text' => 'Форум, блог, доска объявлений, галерея и десятки модулей.'],
-                ['icon' => 'fa-layer-group',   'title' => 'На базе Laravel',   'text' => 'Современный фундамент, понятная архитектура и экосистема.'],
-                ['icon' => 'fa-palette',       'title' => 'Гибкие темы',       'text' => 'Несколько готовых тем и простая кастомизация под себя.'],
-                ['icon' => 'fa-code-branch',   'title' => 'Открытый код',      'text' => 'Свободная разработка и развитие сообществом на GitHub.'],
-            ];
+            $icons = ['fa-bolt', 'fa-server', 'fa-puzzle-piece', 'fa-layer-group', 'fa-palette', 'fa-code-branch'];
+            $features = array_map(
+                static fn ($feature, $icon) => $feature + ['icon' => $icon],
+                __('docs::rotor.features'),
+                $icons
+            );
         @endphp
 
         <div class="row g-3 g-md-4">

@@ -112,7 +112,7 @@ setting('theme')  // возвращает имя текущей темы, нап
 
 ## Иконки
 
-Движок использует [Font Awesome 6](https://fontawesome.com/icons). Примеры:
+Движок использует [Font Awesome 7](https://fontawesome.com/icons). Примеры:
 
 ```blade
 <i class="fas fa-home"></i>
