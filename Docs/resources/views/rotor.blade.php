@@ -58,11 +58,10 @@
     <section class="rotor-features">
         @php
             $icons = ['fa-bolt', 'fa-server', 'fa-puzzle-piece', 'fa-layer-group', 'fa-palette', 'fa-code-branch'];
-            $features = array_map(
-                static fn ($feature, $icon) => $feature + ['icon' => $icon],
-                __('docs::rotor.features'),
-                $icons
-            );
+            $items = __('docs::rotor.features');
+            $features = is_array($items)
+                ? array_map(static fn ($feature, $icon) => $feature + ['icon' => $icon], $items, $icons)
+                : [];
         @endphp
 
         <div class="row g-3 g-md-4">

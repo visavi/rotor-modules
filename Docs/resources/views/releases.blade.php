@@ -127,7 +127,7 @@
         .rel-flag--latest { color: #fff; background: var(--bs-primary); }
         .rel-flag--pre { color: var(--bs-warning); border: 1px solid var(--bs-warning); }
 
-        .rel-card__body { flex: 1; min-width: 0; }
+        .rel-card__body { flex: 1; min-width: 0; overflow-wrap: anywhere; }
         .rel-card__title { font-size: 1.15rem; font-weight: 700; margin-bottom: .35rem; }
         .rel-card__title a { color: var(--bs-body-color); text-decoration: none; }
         .rel-card__title a:hover { color: var(--bs-primary); }
