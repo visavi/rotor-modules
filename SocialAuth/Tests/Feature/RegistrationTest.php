@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\SocialAuth\Tests\Feature;
 
+use App\Models\BlackList;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -262,6 +263,115 @@ class RegistrationTest extends ModuleTestCase
             'provider'    => 'google',
             'provider_id' => 'G-COMPLETE',
         ]);
+    }
+
+    public function testBlacklistedEmailFromProviderBlocksRegistration(): void
+    {
+        BlackList::query()->create([
+            'type'       => 'email',
+            'value'      => 'banned@example.com',
+            'user_id'    => 0,
+            'created_at' => SITETIME,
+        ]);
+
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-BAN',
+                'email'          => 'banned@example.com',
+                'verified_email' => true,
+                'name'           => 'Banned Guy',
+            ]),
+        ]);
+
+        $response = $this->hitCallback('google');
+
+        $response->assertRedirect('login');
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'banned@example.com']);
+        $this->assertDatabaseMissing('socials', ['provider_id' => 'G-BAN']);
+    }
+
+    public function testBlacklistedDomainFromProviderBlocksRegistration(): void
+    {
+        BlackList::query()->create([
+            'type'       => 'domain',
+            'value'      => 'spam.com',
+            'user_id'    => 0,
+            'created_at' => SITETIME,
+        ]);
+
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-DOMBAN',
+                'email'          => 'guy@spam.com',
+                'verified_email' => true,
+                'name'           => 'Spam Guy',
+            ]),
+        ]);
+
+        $response = $this->hitCallback('google');
+
+        $response->assertRedirect('login');
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'guy@spam.com']);
+        $this->assertDatabaseMissing('socials', ['provider_id' => 'G-DOMBAN']);
+    }
+
+    public function testBlacklistedEmailBlocksCompleteForm(): void
+    {
+        BlackList::query()->create([
+            'type'       => 'email',
+            'value'      => 'banned@example.com',
+            'user_id'    => 0,
+            'created_at' => SITETIME,
+        ]);
+
+        $response = $this->withoutMiddleware(PreventRequestForgery::class)
+            ->withSession(['social_pending' => [
+                'provider'    => 'google',
+                'provider_id' => 'G-BAN2',
+                'token'       => 'tok',
+                'name'        => 'Manual Mail',
+            ]])
+            ->post(route('social.complete.post'), ['email' => 'banned@example.com']);
+
+        // Блэклист email режется на уровне валидации CompleteRequest → возврат на форму с ошибкой
+        $response->assertRedirect(route('social.complete'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'banned@example.com']);
+        $this->assertDatabaseMissing('socials', ['provider_id' => 'G-BAN2']);
+    }
+
+    public function testBlacklistedLoginRegeneratesInsteadOfBlocking(): void
+    {
+        BlackList::query()->create([
+            'type'       => 'login',
+            'value'      => 'john-doe',
+            'user_id'    => 0,
+            'created_at' => SITETIME,
+        ]);
+
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-LOGIN',
+                'email'          => 'john@example.com',
+                'verified_email' => true,
+                'name'           => 'John Doe',
+            ]),
+        ]);
+
+        $response = $this->hitCallback('google');
+
+        $response->assertRedirect('/');
+        $this->assertAuthenticated();
+
+        $user = User::query()->where('email', 'john@example.com')->first();
+        $this->assertNotNull($user, 'Пользователь должен быть создан');
+        $this->assertSame('john-doe1', $user->login, 'Блэклист-логин должен перегенерироваться');
     }
 
     public function testInvalidStateRedirectsToLogin(): void

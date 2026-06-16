@@ -54,11 +54,24 @@ jobs:
               echo "[$MODULE] Release $TAG already exists"
             fi
 
+            CL_FILE="$MODULE/changelog.md"
+            [ -f "$CL_FILE" ] || CL_FILE="$MODULE/CHANGELOG.md"
+            CHANGELOG=""
+            if [ -f "$CL_FILE" ]; then
+              CHANGELOG=$(awk -v ver="$VERSION" '
+                /^##[[:space:]]+v?/ { if (found) exit; h=$2; sub(/^v/,"",h); if (h==ver) { found=1; next } }
+                found && (started || NF) { started=1; a[++n]=$0 }
+                END { while (n>0 && a[n] ~ /^[[:space:]]*$/) n--; for(i=1;i<=n;i++) print a[i] }
+              ' "$CL_FILE")
+            fi
+
             VERSION_ENTRY=$(jq -n \
-              --arg version  "$VERSION" \
-              --arg requires "$(get requires)" \
-              --arg url      "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
-              '{version:$version,requires:$requires,download_url:$url}')
+              --arg version   "$VERSION" \
+              --arg requires  "$(get requires)" \
+              --arg url       "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
+              --arg changelog "$CHANGELOG" \
+              '{version:$version,requires:$requires,download_url:$url}
+               + (if $changelog != "" then {changelog:$changelog} else {} end)')
 
             MODULES=$(jq \
               --arg mod      "$MODULE" \

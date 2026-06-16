@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\BlackList;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -258,6 +259,16 @@ class SocialAuthController extends Controller
 
         // Проверка занятости email
         if (! empty($oauthUser['email'])) {
+            if (BlackList::isBlacklisted('email', $oauthUser['email'])) {
+                return redirect('login')->with('danger', __('users.email_is_blacklisted'));
+            }
+
+            $domain = Str::substr(strrchr(strtolower($oauthUser['email']), '@'), 1);
+
+            if (BlackList::isBlacklisted('domain', $domain)) {
+                return redirect('login')->with('danger', __('users.domain_is_blacklisted'));
+            }
+
             $existing = User::query()->where('email', $oauthUser['email'])->first();
 
             if ($existing && ! setting('social_autolink_email')) {
@@ -380,8 +391,12 @@ class SocialAuthController extends Controller
         $base = $login;
         $i = 0;
 
-        // login = varchar(20): база подрезается под длину суффикса, чтобы сумма не превысила 20
-        while (User::query()->where('login', $login)->exists()) {
+        // login = varchar(20): база подрезается под длину суффикса, чтобы сумма не превысила 20.
+        // Блэклист-логин не блокирует регистрацию (логин автогенерится) — просто перегенерируется
+        while (
+            User::query()->where('login', $login)->exists()
+            || BlackList::isBlacklisted('login', $login)
+        ) {
             $i++;
             $suffix = (string) $i;
             $login = Str::substr($base, 0, 20 - strlen($suffix)) . $suffix;
