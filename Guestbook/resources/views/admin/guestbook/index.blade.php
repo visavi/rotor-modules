@@ -84,7 +84,10 @@
                         @endif
 
                         @if ($post->reply)
-                            <div class="text-danger">{{ __('guestbook::guestbook.answer') }}: {{ $post->getReply() }}</div>
+                            <div class="border-start border-danger border-3 ps-2 mt-2 p-1 bg-danger bg-opacity-10 rounded-end">
+                                <div class="small fw-bold text-danger mb-1"><i class="fa fa-reply me-1"></i>{{ __('guestbook::guestbook.answer') }}:</div>
+                                <div class="small" style="margin-bottom: -1rem">{{ $post->getReply() }}</div>
+                            </div>
                         @endif
 
                         <div class="small text-muted fst-italic mt-2">
