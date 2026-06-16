@@ -371,7 +371,7 @@ class SocialAuthController extends Controller
         $login = preg_replace('/[^a-z0-9\-]/', '-', $login);
         $login = preg_replace('/-+/', '-', $login);
         $login = trim($login, '-');
-        $login = Str::substr($login, 0, 16);
+        $login = Str::substr($login, 0, 20);
 
         if (strlen($login) < 3) {
             $login = 'user';
@@ -380,12 +380,11 @@ class SocialAuthController extends Controller
         $base = $login;
         $i = 0;
 
-        while (
-            User::query()->where('login', $login)->exists()
-            || strlen($login) < 3
-        ) {
+        // login = varchar(20): база подрезается под длину суффикса, чтобы сумма не превысила 20
+        while (User::query()->where('login', $login)->exists()) {
             $i++;
-            $login = $base . $i;
+            $suffix = (string) $i;
+            $login = Str::substr($base, 0, 20 - strlen($suffix)) . $suffix;
         }
 
         return $login;
