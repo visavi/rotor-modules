@@ -13,6 +13,11 @@ php artisan module:link
 Создаёт символические ссылки из `public/assets/modules/{module}` на `modules/{Module}/resources/assets`. Запускается автоматически при деплое.
 
 ```bash
+php artisan module:registry modules --base-url=https://example.com/modules -o registry.json
+```
+Собирает `registry.json` из локальных модулей (`module.php` + `changelog.md`) для публикации своего реестра. Подробнее — [Модули → Свой реестр](/docs/rotor-modules).
+
+```bash
 php artisan search:import
 ```
 Синхронизирует существующие записи БД с поисковым индексом. Запускать после первой установки или при сбое индекса.
