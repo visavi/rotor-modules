@@ -62,15 +62,7 @@ class TopicController extends Controller
 
         $posts = Post::query()
             ->where('topic_id', $topic->id)
-            ->when($user, static function (Builder $query) use ($user) {
-                $query->select('posts.*', 'polls.vote')
-                    ->leftJoin('polls', static function (JoinClause $join) use ($user) {
-                        $join->on('posts.id', 'polls.relate_id')
-                            ->where('polls.relate_type', Post::$morphName)
-                            ->where('polls.user_id', $user->id);
-                    });
-            })
-            ->with('files', 'user', 'editUser')
+            ->with('files', 'user', 'editUser', 'poll')
             ->orderBy('created_at')
             ->paginate(setting('forumpost'));
 

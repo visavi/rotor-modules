@@ -148,7 +148,7 @@
                             @endif
 
                             <div class="ms-2 flex-shrink-0">
-                                @include('app/_rating', ['model' => $data, 'vote' => $data->vote])
+                                @include('app/_rating', ['model' => $data, 'vote' => $data->poll?->vote])
                             </div>
                         </div>
                     </div>

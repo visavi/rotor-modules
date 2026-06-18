@@ -51,7 +51,7 @@
                         <i class="fa fa-file-alt"></i> <a href="{{ route('topics.topic', ['id' => $data->topic_id, 'pid' => $data->id]) }}" class="section-title">{{ $data->topic->title }}</a>
                     </div>
                     <div class="ms-2 flex-shrink-0">
-                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->poll?->vote])
                     </div>
                 </div>
 

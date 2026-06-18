@@ -100,7 +100,7 @@
         <i class="fa fa-comment"></i> {{ __('main.comments') }}: <span class="badge bg-adaptive">{{ $down->count_comments }}</span>
 
         <div class="my-2 d-flex align-items-center gap-1">{{ __('main.rating') }}:
-            @include('app/_rating', ['model' => $down, 'vote' => $down->vote])
+            @include('app/_rating', ['model' => $down, 'vote' => $down->poll?->vote])
         </div>
 
         {{ __('main.downloads') }}: <b>{{ $down->loads }}</b><br>

@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="ms-2 flex-shrink-0">
-                        @include('app/_rating', ['model' => $down, 'vote' => $down->vote ?? null])
+                        @include('app/_rating', ['model' => $down, 'vote' => $down->poll?->vote])
                     </div>
                 </div>
 

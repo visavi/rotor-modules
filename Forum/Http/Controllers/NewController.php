@@ -25,14 +25,7 @@ class NewController extends Controller
 
         $topics = Topic::query()
             ->orderBy(...$orderBy)
-            ->with(['forum', 'user', 'lastPost.user', 'lastPost' => function ($query) {
-                $query->select('posts.*', 'polls.vote')
-                    ->leftJoin('polls', function ($join) {
-                        $join->on('posts.id', 'polls.relate_id')
-                            ->where('polls.relate_type', Post::$morphName)
-                            ->where('polls.user_id', getUser('id'));
-                    });
-            }])
+            ->with('forum', 'user', 'lastPost.user')
             ->limit(1000)
             ->get();
 
@@ -53,20 +46,13 @@ class NewController extends Controller
         $order = $request->input('order', 'desc');
 
         [$sorting, $orderBy] = Post::getSorting($sort, $order);
-        $orderBy[0] = 'posts.' . $orderBy[0];
 
         $posts = Post::query()
-            ->select('posts.*', 'polls.vote')
-            ->leftJoin('polls', function ($join) {
-                $join->on('posts.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Post::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->when($period, static function (Builder $query) use ($period) {
-                return $query->where('posts.created_at', '>', strtotime('-' . $period . ' day', SITETIME));
+                return $query->where('created_at', '>', strtotime('-' . $period . ' day', SITETIME));
             })
             ->orderBy(...$orderBy)
-            ->with('topic', 'user')
+            ->with('topic', 'user', 'poll')
             ->limit(1000)
             ->get();
 

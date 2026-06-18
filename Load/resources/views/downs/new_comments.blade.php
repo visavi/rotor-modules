@@ -32,7 +32,7 @@
                                 <a href="#" onclick="return deleteComment(this)" data-rid="{{ $data->relate_id }}" data-id="{{ $data->id }}" data-type="{{ $data->relate->getMorphClass() }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             </span>
                         @endif
-                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->poll?->vote])
                     </div>
                 </div>
 

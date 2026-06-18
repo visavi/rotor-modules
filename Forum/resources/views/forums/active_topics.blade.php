@@ -29,17 +29,8 @@
 
         @foreach ($topics as $data)
             <div class="section mb-3 shadow">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <i class="fa {{ $data->getIcon() }} text-muted"></i>
-                        <a href="{{ route('topics.topic', ['id' => $data->id]) }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_posts }}</span>
-                    </div>
-                    @if ($data->lastPost)
-                        <div class="ms-2 flex-shrink-0">
-                            @include('app/_rating', ['model' => $data->lastPost, 'vote' => $data->lastPost->vote ?? null])
-                        </div>
-                    @endif
-                </div>
+                <i class="fa {{ $data->getIcon() }} text-muted"></i>
+                <a href="{{ route('topics.topic', ['id' => $data->id]) }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_posts }}</span>
 
                 {{ $data->pagination() }}
                 {{ __('forum::forums.forum') }}: <a href="{{ route('forums.forum', ['id' => $data->forum->id]) }}">{{ $data->forum->title }}</a><br>

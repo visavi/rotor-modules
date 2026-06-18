@@ -39,7 +39,7 @@
                                 <a href="{{ route('forums.active-delete', ['id' => $data->id]) }}" onclick="return deletePost(this)" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             </span>
                         @endif
-                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->poll?->vote])
                     </div>
                 </div>
 

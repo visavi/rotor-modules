@@ -39,11 +39,11 @@
                             </form>
                         </div>
                     @endif
-
-                    @if ($forum->description)
-                        <div class="section-description text-muted fst-italic small">{{ renderText($forum->description) }}</div>
-                    @endif
                 </div>
+
+                @if ($forum->description)
+                    <div class="section-description text-muted fst-italic small">{{ renderText($forum->description) }}</div>
+                @endif
 
                 <div class="section-content">
                     @if ($forum->children->isNotEmpty())

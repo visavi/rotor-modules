@@ -163,7 +163,7 @@
 
                     <div class="text-end">
                         <div class="d-flex justify-content-end">
-                            @include('app/_rating', ['model' => $post, 'vote' => $post->vote])
+                            @include('app/_rating', ['model' => $post, 'vote' => $post->poll?->vote])
                         </div>
 
                         @if (getUser())

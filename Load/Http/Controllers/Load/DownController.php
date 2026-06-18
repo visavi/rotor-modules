@@ -11,7 +11,6 @@ use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
 use App\Traits\HandlesComments;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,14 +35,8 @@ class DownController extends Controller
     public function view(int $id): View
     {
         $down = Down::query()
-            ->select('downs.*', 'polls.vote')
-            ->where('downs.id', $id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('downs.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Down::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
-            ->with('category.parent')
+            ->where('id', $id)
+            ->with('category.parent', 'poll')
             ->first();
 
         if (! $down) {

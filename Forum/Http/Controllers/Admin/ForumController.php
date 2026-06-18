@@ -383,14 +383,8 @@ class ForumController extends AdminController
         }
 
         $posts = Post::query()
-            ->select('posts.*', 'polls.vote')
             ->where('topic_id', $topic->id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('posts.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Post::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
-            ->with('files', 'user', 'editUser')
+            ->with('files', 'user', 'editUser', 'poll')
             ->orderBy('created_at')
             ->paginate(setting('forumpost'));
 

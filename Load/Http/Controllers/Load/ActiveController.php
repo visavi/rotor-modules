@@ -48,16 +48,10 @@ class ActiveController extends Controller
         }
 
         $downs = Down::query()
-            ->select('downs.*', 'polls.vote')
             ->active($active)
-            ->where('downs.user_id', $user->id)
-            ->leftJoin('polls', function ($join) {
-                $join->on('downs.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Down::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
-            ->orderByDesc('downs.created_at')
-            ->with('category', 'user')
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->with('category', 'user', 'poll')
             ->paginate(setting('downlist'))
             ->appends([
                 'user'   => $user->login,
@@ -85,17 +79,12 @@ class ActiveController extends Controller
         $user = $this->user;
 
         $comments = Comment::query()
-            ->select('comments.*', 'title', 'count_comments', 'polls.vote')
+            ->select('comments.*', 'title', 'count_comments')
             ->where('comments.relate_type', Down::$morphName)
             ->where('comments.user_id', $user->id)
             ->leftJoin('downs', 'comments.relate_id', 'downs.id')
-            ->leftJoin('polls', function ($join) {
-                $join->on('comments.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Comment::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->orderByDesc('comments.created_at')
-            ->with('user')
+            ->with('user', 'poll')
             ->paginate(setting('comments_per_page'))
             ->appends(['user' => $user->login]);
 

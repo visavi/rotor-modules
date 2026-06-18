@@ -46,19 +46,12 @@ class LoadController extends Controller
         $order = $request->input('order', 'desc');
 
         [$sorting, $orderBy] = Down::getSorting($sort, $order);
-        $orderBy[0] = 'downs.' . $orderBy[0];
 
         $downs = Down::query()
-            ->select('downs.*', 'polls.vote')
             ->active()
-            ->where('downs.category_id', $category->id)
-            ->leftJoin('polls', function ($join) {
-                $join->on('downs.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Down::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
+            ->where('category_id', $category->id)
             ->orderBy(...$orderBy)
-            ->with('user')
+            ->with('user', 'poll')
             ->paginate(setting('downlist'))
             ->appends(compact('sort', 'order'));
 

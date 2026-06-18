@@ -51,14 +51,7 @@ class ActiveController extends Controller
         $topics = Topic::query()
             ->where('user_id', $user->id)
             ->orderBy(...$orderBy)
-            ->with(['forum', 'user', 'lastPost.user', 'lastPost' => function ($query) {
-                $query->select('posts.*', 'polls.vote')
-                    ->leftJoin('polls', function ($join) {
-                        $join->on('posts.id', 'polls.relate_id')
-                            ->where('polls.relate_type', Post::$morphName)
-                            ->where('polls.user_id', getUser('id'));
-                    });
-            }])
+            ->with('forum', 'user', 'lastPost.user')
             ->paginate(setting('forumtem'))
             ->appends(['user' => $user->login, 'sort' => $sort, 'order' => $order]);
 
@@ -76,18 +69,11 @@ class ActiveController extends Controller
         $order = $request->input('order', 'desc');
 
         [$sorting, $orderBy] = Post::getSorting($sort, $order);
-        $orderBy[0] = 'posts.' . $orderBy[0];
 
         $posts = Post::query()
-            ->select('posts.*', 'polls.vote')
-            ->leftJoin('polls', function ($join) {
-                $join->on('posts.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Post::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
-            ->where('posts.user_id', $user->id)
+            ->where('user_id', $user->id)
             ->orderBy(...$orderBy)
-            ->with('topic', 'user')
+            ->with('topic', 'user', 'poll')
             ->paginate(setting('forumpost'))
             ->appends(['user' => $user->login, 'sort' => $sort, 'order' => $order]);
 
