@@ -11,6 +11,7 @@ Route::middleware('web')->group(function () {
             Route::get('/', 'index');
             Route::get('/releases', 'releases');
             Route::get('/commits', 'commits');
+            Route::get('/modules', 'modules');
         });
 
     Route::controller(DocsController::class)

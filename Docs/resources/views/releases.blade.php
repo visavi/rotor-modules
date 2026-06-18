@@ -46,21 +46,36 @@
                             </details>
                         @endif
 
+                        @php
+                            $assets = collect($release['assets'] ?? []);
+                            $lite = $assets->first(fn ($a) => str_contains($a['name'], 'lite'));
+                            $full = $assets->first(fn ($a) => ! str_contains($a['name'], 'lite'));
+                            $downloads = (int) $assets->sum('download_count');
+                        @endphp
+
                         <div class="rel-actions">
                             <a class="btn btn-sm btn-outline-secondary" href="{{ $release['html_url'] }}" rel="noopener" target="_blank">
                                 <i class="fab fa-github me-1"></i>{{ __('docs::rotor.release_page') }}
                             </a>
 
-                            @if (isset($release['assets'][0]))
-                                <a class="btn btn-sm btn-primary" href="{{ $release['assets'][0]['browser_download_url'] }}">
-                                    <i class="fas fa-download me-1"></i>{{ __('docs::rotor.download') }}
-                                    <span class="rel-asset__size">{{ formatSize($release['assets'][0]['size']) }}</span>
+                            @if ($full)
+                                <a class="btn btn-sm btn-primary" href="{{ $full['browser_download_url'] }}">
+                                    <i class="fas fa-download me-1"></i>{{ __('docs::rotor.download_full') }}
+                                    <span class="rel-asset__size">{{ formatSize($full['size']) }}</span>
                                 </a>
-                                @if (! empty($release['assets'][0]['download_count']))
-                                    <span class="rel-asset__count">
-                                        <i class="fas fa-arrow-down-long me-1"></i>{{ $release['assets'][0]['download_count'] }} {{ __('docs::rotor.downloads') }}
-                                    </span>
-                                @endif
+                            @endif
+
+                            @if ($lite)
+                                <a class="btn btn-sm btn-outline-primary" href="{{ $lite['browser_download_url'] }}">
+                                    <i class="fas fa-feather me-1"></i>{{ __('docs::rotor.download_lite') }}
+                                    <span class="rel-asset__size">{{ formatSize($lite['size']) }}</span>
+                                </a>
+                            @endif
+
+                            @if ($downloads > 0)
+                                <span class="rel-asset__count">
+                                    <i class="fas fa-arrow-down-long me-1"></i>{{ $downloads }} {{ __('docs::rotor.downloads') }}
+                                </span>
                             @endif
                         </div>
                     </div>
@@ -163,8 +178,17 @@
         .rel-asset__count { font-size: .82rem; color: var(--bs-secondary-color); }
 
         @media (max-width: 575.98px) {
-            .rel-card { flex-direction: column; gap: .85rem; }
-            .rel-card__aside { flex-direction: row; align-items: center; width: auto; }
+            .rel-feed { gap: .85rem; }
+            .rel-card { flex-direction: column; gap: .85rem; padding: 1rem; border-radius: .85rem; }
+            .rel-card__aside { flex-direction: row; align-items: center; flex-wrap: wrap; width: auto; gap: .5rem; }
+            .rel-card__title { font-size: 1.05rem; }
+
+            .rel-actions { gap: .5rem; }
+            /* Кнопки скачивания тянутся в ряд, ссылка на GitHub и счётчик — на всю ширину */
+            .rel-actions .btn-primary,
+            .rel-actions .btn-outline-primary { flex: 1 1 0; text-align: center; }
+            .rel-actions .btn-outline-secondary { flex: 1 1 100%; text-align: center; }
+            .rel-asset__count { flex: 1 1 100%; }
         }
     </style>
 @endpush

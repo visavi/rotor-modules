@@ -51,6 +51,8 @@
                 <a href="/rotor/releases">{{ __('docs::rotor.releases') }}</a>
                 <span class="rotor-meta__sep">&middot;</span>
                 <a href="/rotor/commits">{{ __('docs::rotor.commits') }}</a>
+                <span class="rotor-meta__sep">&middot;</span>
+                <a href="/rotor/modules">{{ __('docs::rotor.modules') }}</a>
             </p>
         </div>
     </section>

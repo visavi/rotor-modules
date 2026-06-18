@@ -4,7 +4,7 @@ return [
     'name'        => 'Документация',
     'description' => 'Документация RotorCMS',
     'info'        => '<p>Документация по установке, настройке и расширению RotorCMS</p>',
-    'version'     => '1.0.1',
+    'version'     => '1.0.2',
     'requires'    => '14.0.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
