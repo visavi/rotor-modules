@@ -37,8 +37,8 @@
                         </div>
                     </div>
 
-                    <div class="text-end section-action js-rating">
-                        <span class="badge bg-adaptive">{{ formatNum($down->rating) }}</span>
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $down, 'vote' => $down->vote ?? null])
                     </div>
                 </div>
 

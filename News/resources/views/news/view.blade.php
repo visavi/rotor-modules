@@ -75,15 +75,9 @@
                 <span class="avatar-micro">{{ $news->user->getAvatarImage() }}</span> {{ $news->user->getProfile() }} <small class="section-date text-muted fst-italic">{{ dateFixed($news->created_at) }}</small>
             </div>
 
-            <div class="js-rating">
+            <div class="d-flex align-items-center gap-1">
                 {{ __('main.rating') }}:
-                @if (getUser() && getUser('id') !== $news->user_id)
-                    <a class="post-rating-down{{ $news->vote === '-' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $news->id }}" data-type="{{ $news->getMorphClass() }}" data-vote="-"><i class="fas fa-arrow-down"></i></a>
-                @endif
-                <b>{{ formatNum($news->rating) }}</b>
-                @if (getUser() && getUser('id') !== $news->user_id)
-                    <a class="post-rating-up{{ $news->vote === '+' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $news->id }}" data-type="{{ $news->getMorphClass() }}" data-vote="+"><i class="fas fa-arrow-up"></i></a>
-                @endif
+                @include('app/_rating', ['model' => $news, 'vote' => $news->vote])
             </div>
         </div>
     </div>

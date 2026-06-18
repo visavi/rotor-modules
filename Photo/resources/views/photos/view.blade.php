@@ -59,14 +59,8 @@
                 </div>
             @endif
 
-            <div class="my-2 js-rating">{{ __('main.rating') }}:
-                @if (getUser() && getUser('id') !== $photo->user_id)
-                    <a class="post-rating-down<?= $photo->vote === '-' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $photo->id }}" data-type="{{ $photo->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-                @endif
-                <b>{{ formatNum($photo->rating) }}</b>
-                @if (getUser() && getUser('id') !== $photo->user_id)
-                    <a class="post-rating-up<?= $photo->vote === '+' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $photo->id }}" data-type="{{ $photo->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-                @endif
+            <div class="my-2 d-flex align-items-center gap-1">{{ __('main.rating') }}:
+                @include('app/_rating', ['model' => $photo, 'vote' => $photo->vote])
             </div>
 
                 {{ __('main.added') }}: {{ $photo->user->getProfile() }} <small class="section-date text-muted fst-italic">{{ dateFixed($photo->created_at) }}</small><br>

@@ -162,8 +162,12 @@
                     </div>
 
                     <div class="text-end">
+                        <div class="d-flex justify-content-end">
+                            @include('app/_rating', ['model' => $post, 'vote' => $post->vote])
+                        </div>
+
                         @if (getUser())
-                            <div class="section-action">
+                            <div class="js-actions">
                             @if (getUser('id') !== $post->user_id)
                                 <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
 
@@ -180,16 +184,6 @@
                             @endif
                             </div>
                         @endif
-
-                        <div class="section-action js-rating">
-                            @if (getUser() && getUser('id') !== $post->user_id)
-                                <a class="post-rating-down{{ $post->vote === '-' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $post->id }}" data-type="{{ $post->getMorphClass() }}" data-vote="-"><i class="fas fa-arrow-down"></i></a>
-                            @endif
-                            <b>{{ formatNum($post->rating) }}</b>
-                            @if (getUser() && getUser('id') !== $post->user_id)
-                                <a class="post-rating-up{{ $post->vote === '+' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $post->id }}" data-type="{{ $post->getMorphClass() }}" data-vote="+"><i class="fas fa-arrow-up"></i></a>
-                            @endif
-                        </div>
                     </div>
                 </div>
 

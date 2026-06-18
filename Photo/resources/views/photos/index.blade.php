@@ -57,14 +57,8 @@
                         </div>
                     </div>
 
-                    <div class="text-end section-action js-rating">
-                        @if (getUser() && getUser('id') !== $photo->user_id)
-                            <a class="post-rating-down<?= $photo->vote === '-' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $photo->id }}" data-type="{{ $photo->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-                        @endif
-                        <b>{{ formatNum($photo->rating) }}</b>
-                        @if (getUser() && getUser('id') !== $photo->user_id)
-                            <a class="post-rating-up<?= $photo->vote === '+' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $photo->id }}" data-type="{{ $photo->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-                        @endif
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $photo, 'vote' => $photo->vote])
                     </div>
                 </div>
 

@@ -22,14 +22,8 @@
             </div>
         </div>
 
-        <div class="text-end section-action js-rating">
-            @if (getUser() && getUser('id') !== $post->user_id)
-                <a class="post-rating-down<?= ($polls[$post->getMorphClass()][$post->id] ?? '') === '-' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $post->id }}" data-type="{{ $post->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-            @endif
-            <b>{{ formatNum($post->rating) }}</b>
-            @if (getUser() && getUser('id') !== $post->user_id)
-                <a class="post-rating-up<?=($polls[$post->getMorphClass()][$post->id] ?? '') === '+' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $post->id }}" data-type="{{ $post->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-            @endif
+        <div class="ms-2 flex-shrink-0">
+            @include('app/_rating', ['model' => $post, 'vote' => $polls[$post->getMorphClass()][$post->id] ?? null])
         </div>
     </div>
 

@@ -20,15 +20,20 @@
     @if ($comments->isNotEmpty())
         @foreach ($comments as $data)
             <div class="section mb-3 shadow">
-                <div class="section-title">
-                    <i class="fa fa-comment"></i>
-                    <a href="{{ route('downs.view', ['id' => $data->relate_id, 'cid' => $data->id]) }}">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_comments }}</span>
+                <div class="d-flex align-items-center mb-2">
+                    <div class="flex-grow-1">
+                        <i class="fa fa-comment"></i>
+                        <a href="{{ route('downs.view', ['id' => $data->relate_id, 'cid' => $data->id]) }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_comments }}</span>
+                    </div>
 
-                    @if (isAdmin())
-                        <div class="float-end">
-                            <a href="#" onclick="return deleteComment(this)" data-rid="{{ $data->relate_id }}" data-id="{{ $data->id }}" data-type="{{ $data->relate->getMorphClass() }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
-                        </div>
-                    @endif
+                    <div class="ms-2 flex-shrink-0 d-flex align-items-center">
+                        @if (isAdmin())
+                            <span class="js-actions me-1">
+                                <a href="#" onclick="return deleteComment(this)" data-rid="{{ $data->relate_id }}" data-id="{{ $data->id }}" data-type="{{ $data->relate->getMorphClass() }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                            </span>
+                        @endif
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                    </div>
                 </div>
 
                 <div class="section-content">

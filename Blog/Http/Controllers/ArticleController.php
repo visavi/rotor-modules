@@ -387,7 +387,7 @@ class ArticleController extends Controller
             ->select('articles.*', 'blogs.name')
             ->join('blogs', 'articles.category_id', 'blogs.id')
             ->orderByDesc('created_at')
-            ->with('user')
+            ->with('user', 'poll')
             ->paginate(setting('blogpost'));
 
         return view('blog::articles/tags_search', compact('articles', 'tag'));
@@ -435,7 +435,7 @@ class ArticleController extends Controller
         $articles = Article::query()
             ->active()
             ->orderBy(...$orderBy)
-            ->with('user', 'category')
+            ->with('user', 'category', 'poll')
             ->paginate(setting('blogpost'))
             ->appends(compact('sort', 'order'));
 
@@ -452,7 +452,7 @@ class ArticleController extends Controller
             ->where('relate_type', Article::$morphName)
             ->leftJoin('articles', 'comments.relate_id', 'articles.id')
             ->orderByDesc('comments.created_at')
-            ->with('user', 'relate')
+            ->with('user', 'relate', 'poll')
             ->paginate(setting('comments_per_page'));
 
         return view('blog::articles/new_comments', compact('comments'));
@@ -475,7 +475,7 @@ class ArticleController extends Controller
             ->active($active)
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
-            ->with('user')
+            ->with('user', 'poll')
             ->paginate(setting('blogpost'))
             ->appends(['user' => $user->login]);
 
@@ -504,7 +504,7 @@ class ArticleController extends Controller
             ->where('comments.user_id', $user->id)
             ->leftJoin('articles', 'comments.relate_id', 'articles.id')
             ->orderByDesc('comments.created_at')
-            ->with('user', 'relate')
+            ->with('user', 'relate', 'poll')
             ->paginate(setting('comments_per_page'))
             ->appends(['user' => $user->login]);
 

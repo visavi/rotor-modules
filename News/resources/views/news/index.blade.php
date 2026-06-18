@@ -38,14 +38,8 @@
                         </small>
                     </div>
 
-                    <div class="section-action js-rating">
-                        @if (getUser() && getUser('id') !== $data->user_id)
-                            <a class="post-rating-down{{ $data->vote === '-' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $data->id }}" data-type="{{ $data->getMorphClass() }}" data-vote="-"><i class="fas fa-arrow-down"></i></a>
-                        @endif
-                        <b>{{ formatNum($data->rating) }}</b>
-                        @if (getUser() && getUser('id') !== $data->user_id)
-                            <a class="post-rating-up{{ $data->vote === '+' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $data->id }}" data-type="{{ $data->getMorphClass() }}" data-vote="+"><i class="fas fa-arrow-up"></i></a>
-                        @endif
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote])
                     </div>
                 </div>
 

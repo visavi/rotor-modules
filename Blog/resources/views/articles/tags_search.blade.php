@@ -25,9 +25,14 @@
 
     @foreach ($articles as $article)
         <div class="section mb-3 shadow">
-            <div class="section-title">
-                <i class="fa fa-pencil-alt"></i>
-                <a href="{{ route('articles.view', ['slug' => $article->slug]) }}">{{ $article->title }}</a> <span class="badge bg-adaptive">{{ formatNum($article->rating) }}</span>
+            <div class="d-flex align-items-center mb-2">
+                <div class="flex-grow-1">
+                    <i class="fa fa-pencil-alt"></i>
+                    <a href="{{ route('articles.view', ['slug' => $article->slug]) }}" class="section-title">{{ $article->title }}</a>
+                </div>
+                <div class="ms-2 flex-shrink-0">
+                    @include('app/_rating', ['model' => $article, 'vote' => $article->poll?->vote])
+                </div>
             </div>
 
             <div class="section-content">

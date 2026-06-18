@@ -99,14 +99,8 @@
     <div class="section-body">
         <i class="fa fa-comment"></i> {{ __('main.comments') }}: <span class="badge bg-adaptive">{{ $down->count_comments }}</span>
 
-        <div class="my-2 js-rating">{{ __('main.rating') }}:
-            @if (getUser() && getUser('id') !== $down->user_id)
-                <a class="post-rating-down<?= $down->vote === '-' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $down->id }}" data-type="{{ $down->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-            @endif
-            <b>{{ formatNum($down->rating) }}</b>
-            @if (getUser() && getUser('id') !== $down->user_id)
-                <a class="post-rating-up<?= $down->vote === '+' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $down->id }}" data-type="{{ $down->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-            @endif
+        <div class="my-2 d-flex align-items-center gap-1">{{ __('main.rating') }}:
+            @include('app/_rating', ['model' => $down, 'vote' => $down->vote])
         </div>
 
         {{ __('main.downloads') }}: <b>{{ $down->loads }}</b><br>

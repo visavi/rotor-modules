@@ -89,8 +89,8 @@
                         </div>
                     </div>
 
-                    <div class="text-end section-action js-rating">
-                        <span class="badge bg-adaptive">{{ formatNum($data->rating) }}</span>
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
                     </div>
                 </div>
 

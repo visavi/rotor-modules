@@ -44,15 +44,9 @@
                 {{ $offer->getStatus() }}
             </div>
 
-            <div class="js-rating">
+            <div class="d-flex align-items-center gap-1">
                 {{ __('main.rating') }}:
-                @if (getUser() && getUser('id') !== $offer->user_id)
-                    <a class="post-rating-down{{ $offer->vote === '-' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $offer->id }}" data-type="{{ $offer->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-                @endif
-                <b>{{ formatNum($offer->rating) }}</b>
-                @if (getUser() && getUser('id') !== $offer->user_id)
-                    <a class="post-rating-up{{ $offer->vote === '+' ? ' active' : '' }}" href="#" onclick="return changeRating(this);" data-id="{{ $offer->id }}" data-type="{{ $offer->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-                @endif
+                @include('app/_rating', ['model' => $offer, 'vote' => $offer->vote])
             </div>
         </div>
     </div>

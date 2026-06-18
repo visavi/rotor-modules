@@ -29,23 +29,29 @@
 
         @foreach ($posts as $data)
             <div class="section mb-3 shadow">
-                <i class="fa fa-file-alt"></i> <b><a href="{{ route('topics.topic', ['id' => $data->topic_id, 'pid' => $data->id]) }}">{{ $data->topic->title }}</a></b>
-
-                @if (isAdmin())
-                    <a href="{{ route('forums.active-delete', ['id' => $data->id]) }}" class="float-end" onclick="return deletePost(this)" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times"></i></a>
-                @endif
-
-                <div class="section-message">
-                    {{ $data->getText() }}<br>
-
-                    @if (isAdmin())
-                        <div class="small text-muted fst-italic mt-2">({{ $data->brow }}, {{ $data->ip }})</div>
-                    @endif
+                <div class="d-flex align-items-center mb-2">
+                    <div class="flex-grow-1">
+                        <i class="fa fa-file-alt"></i> <a href="{{ route('topics.topic', ['id' => $data->topic_id, 'pid' => $data->id]) }}" class="section-title">{{ $data->topic->title }}</a>
+                    </div>
+                    <div class="ms-2 flex-shrink-0 d-flex align-items-center">
+                        @if (isAdmin())
+                            <span class="js-actions me-1">
+                                <a href="{{ route('forums.active-delete', ['id' => $data->id]) }}" onclick="return deletePost(this)" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                            </span>
+                        @endif
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                    </div>
                 </div>
 
-                {{ __('main.rating') }}: <span class="badge bg-adaptive">{{ formatNum($data->rating) }}</span><br>
+                <div class="section-message">
+                    {{ $data->getText() }}
+                </div>
+
                 {{ __('main.posted') }}: {{ $data->user->getName() }}
                 <small class="section-date text-muted fst-italic">{{ dateFixed($data->created_at) }}</small>
+                @if (isAdmin())
+                    <div class="small text-muted fst-italic mt-2">({{ $data->brow }}, {{ $data->ip }})</div>
+                @endif
             </div>
         @endforeach
     @else

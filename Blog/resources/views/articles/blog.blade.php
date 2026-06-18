@@ -89,23 +89,17 @@
             <div class="section mb-3 shadow">
                 <div class="section-header d-flex align-items-start">
                     <div class="flex-grow-1">
-                        <div class="section-title">
+                        <div>
                             <i class="fa fa-pencil-alt"></i>
-                            <a href="{{ route('articles.view', ['slug' => $article->slug]) }}">{{ $article->title }}</a>
+                            <a href="{{ route('articles.view', ['slug' => $article->slug]) }}" class="section-title">{{ $article->title }}</a>
                             @if ($article->isNew())
                                 <span class="badge text-bg-success">NEW</span>
                             @endif
                         </div>
                     </div>
 
-                    <div class="text-end section-action js-rating">
-                        @if (getUser() && getUser('id') !== $article->user_id)
-                            <a class="post-rating-down<?= $article->poll?->vote === '-' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $article->id }}" data-type="{{ $article->getMorphClass() }}" data-vote="-"><i class="fa fa-arrow-down"></i></a>
-                        @endif
-                        <b>{{ formatNum($article->rating) }}</b>
-                        @if (getUser() && getUser('id') !== $article->user_id)
-                            <a class="post-rating-up<?= $article->poll?->vote === '+' ? ' active' : '' ?>" href="#" onclick="return changeRating(this);" data-id="{{ $article->id }}" data-type="{{ $article->getMorphClass() }}" data-vote="+"><i class="fa fa-arrow-up"></i></a>
-                        @endif
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $article, 'vote' => $article->poll?->vote])
                     </div>
                 </div>
 

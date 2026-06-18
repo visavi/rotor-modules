@@ -46,19 +46,24 @@
     @if ($posts->isNotEmpty())
         @foreach ($posts as $data)
             <div class="section mb-3 shadow">
-                <i class="fa fa-file-alt"></i> <b><a href="{{ route('topics.topic', ['id' => $data->topic_id, 'pid' => $data->id]) }}">{{ $data->topic->title }}</a></b>
-                <span class="badge bg-adaptive">{{ $data->rating }}</span>
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <i class="fa fa-file-alt"></i> <a href="{{ route('topics.topic', ['id' => $data->topic_id, 'pid' => $data->id]) }}" class="section-title">{{ $data->topic->title }}</a>
+                    </div>
+                    <div class="ms-2 flex-shrink-0">
+                        @include('app/_rating', ['model' => $data, 'vote' => $data->vote ?? null])
+                    </div>
+                </div>
 
                 <div class="section-message">
-                    {{ $data->getText() }}<br>
-
-                    {{ __('main.posted') }}: {{ $data->user->getName() }}
-                    <small class="section-date text-muted fst-italic">{{ dateFixed($data->created_at) }}</small>
-
-                    @if (isAdmin())
-                        <div class="small text-muted fst-italic mt-2">({{ $data->brow }}, {{ $data->ip }})</div>
-                    @endif
+                    {{ $data->getText() }}
                 </div>
+
+                {{ __('main.posted') }}: {{ $data->user->getName() }}
+                <small class="section-date text-muted fst-italic">{{ dateFixed($data->created_at) }}</small>
+                @if (isAdmin())
+                    <div class="small text-muted fst-italic mt-2">({{ $data->brow }}, {{ $data->ip }})</div>
+                @endif
             </div>
         @endforeach
     @else
