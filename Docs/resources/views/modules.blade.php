@@ -39,14 +39,14 @@
                  data-search="{{ $searchText }}"
                  data-name="{{ mb_strtolower($info['name'] ?? $name) }}"
                  data-version="{{ $info['version'] ?? '0' }}">
-                <div class="section-title d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div>
-                        <i class="fas fa-plug text-muted"></i>
+                <div class="section-title d-flex align-items-center justify-content-between gap-2">
+                    <div class="text-break" style="min-width: 0">
+                        <i class="fas fa-cube text-muted"></i>
                         <span class="fw-bold">{{ $info['name'] ?? $name }}</span>
                         <small class="text-muted">({{ $name }})</small>
                     </div>
                     @if (! empty($info['download_url']))
-                        <a class="btn btn-sm btn-primary" href="{{ $info['download_url'] }}">
+                        <a class="btn btn-sm btn-primary text-nowrap flex-shrink-0" href="{{ $info['download_url'] }}">
                             <i class="fas fa-download me-1"></i>{{ __('main.download') }}
                             <span class="opacity-75">{{ $info['version'] ?? '' }}</span>
                         </a>

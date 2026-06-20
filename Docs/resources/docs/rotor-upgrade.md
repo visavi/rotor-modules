@@ -22,8 +22,8 @@ composer update visavi/rotor --stability=dev
 # 1. Применить новые миграции
 php artisan migrate
 
-# 2. Обновить символические ссылки модулей
-php artisan module:link
+# 2. Синхронизировать модули с ядром (симлинки + опубликованные файлы)
+php artisan module:sync
 
 # 3. Пересобрать CSS и JS
 npm ci
@@ -53,7 +53,7 @@ ROTOR_VERSION  // константа с текущей версией
 git pull origin master
 composer install --no-dev --optimize-autoloader
 php artisan migrate
-php artisan module:link
+php artisan module:sync
 npm ci && npm run build
 php artisan optimize:clear
 ```
@@ -66,7 +66,7 @@ php artisan optimize:clear
 vendor/bin/dep deploy production
 ```
 
-Deployer автоматически выполнит `composer install`, `npm run build`, `module:link` и переключит релиз без даунтайма.
+Deployer автоматически выполнит `composer install`, `npm run build`, `module:sync` и переключит релиз без даунтайма.
 
 ## Что проверить после обновления
 

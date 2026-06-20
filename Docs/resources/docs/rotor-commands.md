@@ -8,9 +8,9 @@ php artisan app:permission
 Устанавливает права на запись для директорий `storage`, `bootstrap/cache`, `public/uploads`, `public/assets/modules`.
 
 ```bash
-php artisan module:link
+php artisan module:sync
 ```
-Создаёт символические ссылки из `public/assets/modules/{module}` на `modules/{Module}/resources/assets`. Запускается автоматически при деплое.
+Синхронизирует активные модули с ядром: создаёт символические ссылки `public/assets/modules/{module}` → `modules/{Module}/resources/assets`, перепубликует файлы из секции `publish` и сбрасывает кеш модулей. Запускается автоматически при деплое и обновлении ядра.
 
 ```bash
 php artisan module:registry modules --base-url=https://example.com/modules -o registry.json

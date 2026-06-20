@@ -64,7 +64,7 @@ nano /var/www/rotor/shared/.env
 2. Запускает `npm ci && npm run build`
 3. Выполняет `composer install --no-dev`
 4. Запускает миграции `php artisan migrate --force`
-5. Создаёт ссылки модулей `php artisan module:link`
+5. Синхронизирует модули `php artisan module:sync`
 6. Переключает `current` на новый релиз
 7. Перезагружает PHP-FPM
 
@@ -91,7 +91,7 @@ cd /var/www/rotor
 git pull origin master
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
-php artisan module:link
+php artisan module:sync
 npm ci && npm run build
 php artisan optimize
 sudo systemctl reload php8.3-fpm
