@@ -63,7 +63,7 @@
 
                                 @if ($file->isAudio())
                                     <div>
-                                        <audio src="{{ $file->path }}" class="img-fluid rounded" preload="metadata" controls></audio>
+                                        <audio src="{{ $file->path }}" class="w-100 rounded" preload="metadata" controls></audio>
                                     </div>
                                 @endif
 
