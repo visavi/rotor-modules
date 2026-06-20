@@ -5,7 +5,7 @@ return [
     'expires'       => 'Expires',
     'expired'       => 'Expired',
     'color'         => 'Colour',
-    'bold'          => 'Thumbnail',
+    'bold'          => 'Bold text',
     'total_links'   => 'Total Links',
     'empty_links'   => 'There are no sponsored links yet!',
     'link'          => 'Website address',
@@ -22,7 +22,7 @@ return [
     'edit_advert' => 'Link editing',
 
     'advert_closed'         => 'The display and placement of advertising is prohibited by the site administration!',
-    'advert_point'          => 'To purchase advertising you need to type: point!',
+    'advert_point'          => 'To purchase advertising you need to earn :point!',
     'advert_not_seats'      => 'There are currently no free places to advertise!',
     'advert_already_posted' => 'You have already advertised, it is forbidden to add several sites in a row!',
     'advert_not_money'      => 'You don\'t have enough money to buy ads!',

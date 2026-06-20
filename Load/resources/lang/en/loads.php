@@ -31,7 +31,7 @@ return [
     'confirm_publish_down'   => 'Are you sure you want to publish this download?',
     'confirm_unpublish_down' => 'Are you sure you want to remove this download from publication?',
     'parent_load'            => 'Parent section',
-    'create_load'            => 'Create Partition',
+    'create_load'            => 'Create section',
     'new_publications'       => 'New publications',
     'files_images'           => 'Files / Images',
     'add_link'               => 'Add link',

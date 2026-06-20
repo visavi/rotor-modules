@@ -11,7 +11,7 @@ return [
     'all_transfers'              => 'All transfers',
     'outgoing'                   => 'Sent',
     'incoming'                   => 'Received',
-    'empty_transfers'            => 'History of cash transactions yet!',
+    'empty_transfers'            => 'No transaction history yet!',
     'transfer_wrong_amount'      => 'Transfer is impossible, the wrong amount is indicated!',
     'transfer_not_money'         => 'Not enough money to transfer such an amount!',
     'transfer_yourself'          => 'It is forbidden to transfer money to yourself!',

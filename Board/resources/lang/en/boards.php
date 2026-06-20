@@ -14,7 +14,7 @@ return [
     'price'                    => 'Price',
     'phone'                    => 'Phone',
     'expires'                  => 'Expires',
-    'expires_in'               => 'Expires through',
+    'expires_in'               => 'Expires in',
     'contact_seller'           => 'Contact seller',
     'edit_category'            => 'Editing a category',
     'parent_category'          => 'Parent category',
