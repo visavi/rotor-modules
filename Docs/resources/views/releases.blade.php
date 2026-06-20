@@ -48,8 +48,8 @@
 
                         @php
                             $assets = collect($release['assets'] ?? []);
-                            $lite = $assets->first(fn ($a) => str_contains($a['name'], 'lite'));
-                            $full = $assets->first(fn ($a) => ! str_contains($a['name'], 'lite'));
+                            $upgrade = $assets->first(fn ($a) => str_contains($a['name'], 'upgrade'));
+                            $full = $assets->first(fn ($a) => ! str_contains($a['name'], 'upgrade'));
                             $downloads = (int) $assets->sum('download_count');
                         @endphp
 
@@ -65,10 +65,10 @@
                                 </a>
                             @endif
 
-                            @if ($lite)
-                                <a class="btn btn-sm btn-outline-primary" href="{{ $lite['browser_download_url'] }}">
-                                    <i class="fas fa-feather me-1"></i>{{ __('docs::rotor.download_lite') }}
-                                    <span class="rel-asset__size">{{ formatSize($lite['size']) }}</span>
+                            @if ($upgrade)
+                                <a class="btn btn-sm btn-outline-primary" href="{{ $upgrade['browser_download_url'] }}">
+                                    <i class="fas fa-feather me-1"></i>{{ __('docs::rotor.download_upgrade') }}
+                                    <span class="rel-asset__size">{{ formatSize($upgrade['size']) }}</span>
                                 </a>
                             @endif
 
