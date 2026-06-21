@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'empty_categories'         => 'Категорее исчо ни созданы!',
+    'empty_stickers'           => 'Стекеры ни найдены!',
+    'total_stickers'           => 'Фсиво стекераф',
+    'upload'                   => 'Загрузеть',
+    'confirm_delete_category'  => 'Ты уверен что хочеш удалеть эту категорею?',
+    'confirm_delete_sticker'   => 'Ты уверен что хочеш удалеть этат стекер?',
+    'create_sticker'           => 'Дабауленее стекера',
+    'category'                 => 'Категорея',
+    'sticker_code'             => 'Код стекера',
+    'valid_sticker_code'       => 'Разрешены буквы, цифры, падчёркеванее и дефис!',
+    'edit_category'            => 'Радактераванее категорее',
+    'edit_sticker'             => 'Радактераванее стекера',
+    'category_not_exist'       => 'Этай категорее ни сущиствуит!',
+    'sticker_not_exist'        => 'Этава стекера ни сущиствуит!',
+    'category_success_created' => 'Новая категорея успешно создана!',
+    'category_success_changed' => 'Категорея успешно изменена!',
+    'category_has_stickers'    => 'Ф этай категорее есь стекеры!',
+    'category_success_deleted' => 'Категорея успешно удалена!',
+    'sticker_length'           => 'Слишкам длиный иле короткей код стекера!',
+    'sticker_exists'           => 'Стекер с этим кодам уже есь ф спиське!',
+    'sticker_success_created'  => 'Стекер успешно загружен!',
+    'sticker_success_changed'  => 'Стекер успешно изменён!',
+    'sticker_success_deleted'  => 'Стекер успешно удалён!',
+];
