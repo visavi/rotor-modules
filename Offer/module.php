@@ -6,7 +6,7 @@ use Modules\Offer\Models\Offer;
 return [
     'name'        => 'Предложения и проблемы',
     'description' => 'Модуль предложений и проблем',
-    'version'     => '1.0.1',
+    'version'     => '1.0.2',
     'requires'    => '14.0.1',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

@@ -67,7 +67,7 @@
 
                             @if ($upgrade)
                                 <a class="btn btn-sm btn-outline-primary" href="{{ $upgrade['browser_download_url'] }}">
-                                    <i class="fas fa-feather me-1"></i>{{ __('docs::rotor.download_upgrade') }}
+                                    <i class="fas fa-rotate me-1"></i>{{ __('docs::rotor.download_upgrade') }}
                                     <span class="rel-asset__size">{{ formatSize($upgrade['size']) }}</span>
                                 </a>
                             @endif
@@ -184,9 +184,10 @@
             .rel-card__title { font-size: 1.05rem; }
 
             .rel-actions { gap: .5rem; }
-            /* Кнопки скачивания тянутся в ряд, ссылка на GitHub и счётчик — на всю ширину */
+            /* На узких экранах кнопки разной длины текста ломались на разное число строк
+               из-за flex: 1 1 0 — высота расходилась. Полная ширина убирает перенос. */
             .rel-actions .btn-primary,
-            .rel-actions .btn-outline-primary { flex: 1 1 0; text-align: center; }
+            .rel-actions .btn-outline-primary,
             .rel-actions .btn-outline-secondary { flex: 1 1 100%; text-align: center; }
             .rel-asset__count { flex: 1 1 100%; }
         }
