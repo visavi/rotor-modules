@@ -105,10 +105,15 @@ if (! function_exists('recentPhotos')) {
 }
 
 if (! function_exists('getCalendar')) {
-    function getCalendar(int $time = SITETIME): HtmlString
+    function getCalendar(?string $period = null): HtmlString
     {
+        if ($period === null) {
+            $query = request()->query('calendar');
+            $period = is_string($query) ? $query : null;
+        }
+
         $calendar = new Calendar();
 
-        return new HtmlString($calendar->getCalendar($time));
+        return new HtmlString($calendar->getCalendar($period));
     }
 }

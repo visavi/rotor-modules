@@ -4,19 +4,15 @@
 
 @section('content')
     @foreach ($newses as $news)
-        @php
-            $newsText = absolutizeUrls((string) $news->getText());
-        @endphp
-
         <item>
             <title>{{ $news->title }}</title>
             <link>{{ route('news.view', ['id' => $news->id]) }}</link>
-            <description>{{ $newsText }}</description>
+            <description>{{ $news->getShareText() }}</description>
             <dc:creator>{{ $news->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $news->created_at) }}</pubDate>
             <category>{{ __('news::news.news') }}</category>
             <guid>{{ route('news.view', ['id' => $news->id]) }}</guid>
-            @if ($enclosure = $news->getMedia()->first())
+            @if ($enclosure = $news->getDetachedMedia()->first())
                 <enclosure url="{{ $enclosure->getUrl() }}" length="{{ $enclosure->size }}" type="{{ $enclosure->mime_type }}" />
             @endif
         </item>

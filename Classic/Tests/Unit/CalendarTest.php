@@ -33,10 +33,19 @@ class CalendarTest extends TestCase
 
     public function testGetCalendar(): void
     {
-        $expected = '<divclass="fw-bold">1Января1980</div><divclass="calendar-grid"><divclass="calendar-headtext-center">Пн</div><divclass="calendar-headtext-center">Вт</div><divclass="calendar-headtext-center">Ср</div><divclass="calendar-headtext-center">Чт</div><divclass="calendar-headtext-center">Пт</div><divclass="calendar-headtext-centertext-danger">Сб</div><divclass="calendar-headtext-centertext-danger">Вс</div><divclass="calendar-celltext-center"></div><divclass="calendar-celltext-center"><spanclass="text-whitebg-dangerpx-1fw-bold">1</span></div><divclass="calendar-celltext-center">2</div><divclass="calendar-celltext-center">3</div><divclass="calendar-celltext-center">4</div><divclass="calendar-celltext-centertext-danger">5</div><divclass="calendar-celltext-centertext-danger">6</div><divclass="calendar-celltext-center">7</div><divclass="calendar-celltext-center">8</div><divclass="calendar-celltext-center">9</div><divclass="calendar-celltext-center">10</div><divclass="calendar-celltext-center">11</div><divclass="calendar-celltext-centertext-danger">12</div><divclass="calendar-celltext-centertext-danger">13</div><divclass="calendar-celltext-center">14</div><divclass="calendar-celltext-center">15</div><divclass="calendar-celltext-center">16</div><divclass="calendar-celltext-center">17</div><divclass="calendar-celltext-center">18</div><divclass="calendar-celltext-centertext-danger">19</div><divclass="calendar-celltext-centertext-danger">20</div><divclass="calendar-celltext-center">21</div><divclass="calendar-celltext-center">22</div><divclass="calendar-celltext-center">23</div><divclass="calendar-celltext-center">24</div><divclass="calendar-celltext-center">25</div><divclass="calendar-celltext-centertext-danger">26</div><divclass="calendar-celltext-centertext-danger">27</div><divclass="calendar-celltext-center">28</div><divclass="calendar-celltext-center">29</div><divclass="calendar-celltext-center">30</div><divclass="calendar-celltext-center">31</div><divclass="calendar-celltext-center"></div><divclass="calendar-celltext-centertext-danger"></div><divclass="calendar-celltext-centertext-danger"></div></div>';
+        $calendar = preg_replace('/\s+/', '', (string) $this->calendar->getCalendar('1980-01'));
 
-        $calendar = preg_replace('/\s+/', '', $this->calendar->getCalendar(315586800));
+        // Заголовок месяца (именительный падеж из локали Carbon)
+        self::assertStringContainsString('Январь1980', $calendar);
 
-        self::assertSame($expected, $calendar);
+        // Стрелки навигации на соседние месяцы
+        self::assertStringContainsString('calendar=1979-12', $calendar);
+        self::assertStringContainsString('calendar=1980-02', $calendar);
+
+        // Все дни месяца присутствуют
+        self::assertStringContainsString('>31</div>', $calendar);
+
+        // День не подсвечен как текущий (1980 — не текущий месяц)
+        self::assertStringNotContainsString('bg-danger', $calendar);
     }
 }

@@ -6,7 +6,7 @@ use Modules\Load\Models\Down;
 return [
     'name'        => 'Загрузки',
     'description' => 'Загрузки и файлы',
-    'version'     => '1.0.3',
+    'version'     => '1.0.4',
     'requires'    => '14.0.1',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

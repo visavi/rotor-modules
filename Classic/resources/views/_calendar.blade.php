@@ -1,4 +1,9 @@
-<div class="fw-bold">{{ dateFixed($time, 'j F Y') }}</div>
+<div class="calendar">
+<div class="calendar-nav">
+    <a href="{{ request()->fullUrlWithQuery(['calendar' => $prev]) }}">‹</a>
+    <span>{{ $monthLabel }}</span>
+    <a href="{{ request()->fullUrlWithQuery(['calendar' => $next]) }}">›</a>
+</div>
 <div class="calendar-grid">
     <div class="calendar-head text-center">{{ __('main.mo') }}</div>
     <div class="calendar-head text-center">{{ __('main.tu') }}</div>
@@ -10,13 +15,13 @@
 
     @foreach ($calendar as $week)
         @foreach ($week as $keyDay => $valDay)
-            @if ($date['day'] === $valDay)
-                <div class="calendar-cell text-center"><span class="text-white bg-danger px-1 fw-bold">{{ $valDay }}</span></div>
+            @if ($currentDay === $valDay)
+                <div class="calendar-cell calendar-today">{{ $valDay }}</div>
                 @continue
             @endif
 
             @if (isset($newsIds[$valDay]) && Route::has('news.view'))
-                <div class="calendar-cell text-center"><a href="{{ route('news.view', ['id' => $newsIds[$valDay]]) }}"><span class="text-white bg-success px-1 fw-bold">{{ $valDay }}</span></a></div>
+                <div class="calendar-cell calendar-news"><a href="{{ route('news.view', ['id' => $newsIds[$valDay]]) }}">{{ $valDay }}</a></div>
                 @continue
             @endif
 
@@ -28,4 +33,5 @@
             <div class="calendar-cell text-center">{{ $valDay ?: '' }}</div>
         @endforeach
     @endforeach
+</div>
 </div>

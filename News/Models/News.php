@@ -104,6 +104,14 @@ class News extends Model
     }
 
     /**
+     * Get text for share (RSS, API)
+     */
+    public function getShareText(): string
+    {
+        return absolutizeUrls((string) renderHtml($this->text));
+    }
+
+    /**
      * Возвращает иконку в зависимости от статуса
      */
     public function getIcon(): string

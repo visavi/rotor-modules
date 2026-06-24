@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4
+- Текст для RSS/API вынесен в метод модели `getShareText()` (`absolutizeUrls(renderHtml())`); rss-шаблон переведён на него
+
 ## 1.0.3
 - Исправлены переводы (en, ua)
 

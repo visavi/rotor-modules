@@ -154,6 +154,14 @@ class Down extends Model
     }
 
     /**
+     * Get text for share (RSS, API)
+     */
+    public function getShareText(): string
+    {
+        return absolutizeUrls((string) renderHtml($this->text));
+    }
+
+    /**
      * Is new file
      */
     public function isNew(): bool

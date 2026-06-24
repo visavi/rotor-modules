@@ -4,12 +4,10 @@
 
 @section('content')
     @foreach ($downs as $down)
-        <?php $downText = absolutizeUrls((string) $down->getText()); ?>
-
         <item>
             <title>{{ $down->title }}</title>
             <link>{{ route('downs.view', ['id' => $down->id]) }}</link>
-            <description>{{ $downText }}</description>
+            <description>{{ $down->getShareText() }}</description>
             <dc:creator>{{ $down->user->getName() }}</dc:creator>
             <pubDate>{{ date('r', $down->created_at) }}</pubDate>
             <category>{{ __('load::loads.loads') }}</category>

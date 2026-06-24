@@ -208,6 +208,14 @@ class Article extends Model
     }
 
     /**
+     * Get text for share (RSS, API)
+     */
+    public function getShareText(): string
+    {
+        return absolutizeUrls((string) renderHtml($this->text));
+    }
+
+    /**
      * Удаление статьи и загруженных файлов
      */
     public function delete(): ?bool
