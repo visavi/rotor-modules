@@ -10,7 +10,7 @@ if (! function_exists('statsNews')) {
             $total = News::query()->count();
 
             $totalNew = News::query()
-                ->where('created_at', '>', strtotime('-1 day', SITETIME))
+                ->where('created_at', '>', now()->subDay())
                 ->count();
 
             return formatShortNum($total) . ($totalNew ? '/+' . $totalNew : '');

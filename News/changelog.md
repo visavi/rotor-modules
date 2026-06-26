@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+- `created_at` переведён с int-timestamp на `datetime` (миграция-конверсия через PHP/Carbon, сохраняет исторический DST), добавлено `updated_at`
+- Модель на авто-timestamps Eloquent (`$timestamps`), `created_at`/`updated_at` кастуются в Carbon
+- Чтения переведены с int на Carbon: RSS `pubDate`, sitemap `lastmod`, статистика «за день»
+- Требуется ядро 14.0.3
+
 ## 1.0.3
 - Текст для RSS/API вынесен в метод модели `getShareText()` (`absolutizeUrls(renderHtml())`); rss-шаблон переведён на него
 - RSS enclosure: `getMedia()` → `getDetachedMedia()` (только не привязанные к тексту файлы)

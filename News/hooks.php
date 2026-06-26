@@ -16,7 +16,7 @@ Registry::sitemap('news', static function () {
         foreach ($newses as $news) {
             $locs[] = [
                 'loc'     => route('news.view', ['id' => $news->id]),
-                'lastmod' => gmdate('c', $news->created_at),
+                'lastmod' => $news->created_at->format('c'),
             ];
         }
 

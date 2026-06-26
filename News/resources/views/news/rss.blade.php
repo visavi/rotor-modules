@@ -9,7 +9,7 @@
             <link>{{ route('news.view', ['id' => $news->id]) }}</link>
             <description>{{ $news->getShareText() }}</description>
             <dc:creator>{{ $news->user->getName() }}</dc:creator>
-            <pubDate>{{ date('r', $news->created_at) }}</pubDate>
+            <pubDate>{{ $news->created_at->format('r') }}</pubDate>
             <category>{{ __('news::news.news') }}</category>
             <guid>{{ route('news.view', ['id' => $news->id]) }}</guid>
             @if ($enclosure = $news->getDetachedMedia()->first())

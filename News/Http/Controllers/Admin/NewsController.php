@@ -95,12 +95,11 @@ class NewsController extends AdminController
 
             if ($validator->isValid()) {
                 $news = News::query()->create([
-                    'user_id'    => getUser('id'),
-                    'title'      => $title,
-                    'text'       => $text,
-                    'closed'     => $closed,
-                    'top'        => $top,
-                    'created_at' => SITETIME,
+                    'user_id' => getUser('id'),
+                    'title'   => $title,
+                    'text'    => $text,
+                    'closed'  => $closed,
+                    'top'     => $top,
                 ]);
 
                 $files->update(['relate_id' => $news->id]);

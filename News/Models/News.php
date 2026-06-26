@@ -16,6 +16,7 @@ use App\Traits\FileableTrait;
 use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,14 +24,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 /**
- * @property int    $id
- * @property string $title
- * @property string $text
- * @property int    $user_id
- * @property int    $created_at
- * @property int    $count_comments
- * @property bool   $closed
- * @property int    $top
+ * @property int                  $id
+ * @property string               $title
+ * @property string               $text
+ * @property int                  $user_id
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property int                  $count_comments
+ * @property bool                 $closed
+ * @property int                  $top
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
  * @property-read Collection<int, File>    $files
@@ -40,17 +42,12 @@ use Illuminate\Support\HtmlString;
 class News extends Model
 {
     use CommentableTrait;
-    use PollableTrait;
-    use FileableTrait;
     use ConvertVideoTrait;
     use FeedableTrait;
+    use FileableTrait;
+    use PollableTrait;
     use SearchableTrait;
     use UploadTrait;
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.

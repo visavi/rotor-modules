@@ -38,8 +38,8 @@ class Calendar
         $newsIds = [];
         if (isset(Module::getEnabledModules()['News'])) {
             $news = News::query()
-                ->where('created_at', '>=', $startMonth)
-                ->where('created_at', '<', $endMonth)
+                ->where('created_at', '>=', date('Y-m-d H:i:s', $startMonth))
+                ->where('created_at', '<', date('Y-m-d H:i:s', $endMonth))
                 ->get();
 
             foreach ($news as $data) {
