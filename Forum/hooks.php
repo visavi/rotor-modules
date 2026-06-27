@@ -32,7 +32,7 @@ Registry::sitemap('topics', function (): array {
         foreach ($topics as $topic) {
             $locs[] = [
                 'loc'     => route('topics.topic', ['id' => $topic->id]),
-                'lastmod' => gmdate('c', $topic->created_at),
+                'lastmod' => $topic->created_at->format('c'),
             ];
         }
 

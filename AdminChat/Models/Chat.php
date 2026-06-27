@@ -6,6 +6,7 @@ namespace Modules\AdminChat\Models;
 
 use App\Casts\HtmlCast;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
@@ -13,22 +14,17 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Chat
  *
- * @property int    $id
- * @property int    $user_id
- * @property string $text
- * @property string $ip
- * @property string $brow
- * @property int    $created_at
- * @property int    $edit_user_id
- * @property int    $updated_at
+ * @property int                  $id
+ * @property int                  $user_id
+ * @property string               $text
+ * @property string               $ip
+ * @property string               $brow
+ * @property CarbonImmutable      $created_at
+ * @property int                  $edit_user_id
+ * @property CarbonImmutable|null $updated_at
  */
 class Chat extends Model
 {
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
-
     /**
      * The attributes that aren't mass assignable.
      */

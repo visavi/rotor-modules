@@ -10,7 +10,7 @@
                 <link>{{ route('topics.topic', ['id' => $topic->id]) }}</link>
                 <description>{{ $topic->lastPost->getShareText() }}</description>
                 <dc:creator>{{ $topic->lastPost->user->getName() }}</dc:creator>
-                <pubDate>{{ date('r', $topic->updated_at) }}</pubDate>
+                <pubDate>{{ $topic->updated_at?->format('r') }}</pubDate>
                 <category>{{ __('forum::forums.topics') }}</category>
                 <guid>{{ route('topics.topic', ['id' => $topic->id]) }}</guid>
                 @foreach ($topic->lastPost->getMedia() as $file)

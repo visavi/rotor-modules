@@ -6,6 +6,7 @@ namespace Modules\Forum\Models;
 
 use App\Models\Poll;
 use App\Traits\PollableTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,15 +16,15 @@ use Illuminate\Support\Facades\DB;
 /**
  * Class Vote
  *
- * @property int    $id
- * @property string $title
- * @property int    $count
- * @property int    $created_at
- * @property int    $topic_id
- * @property array  $getAnswers
- * @property int    $max
- * @property int    $sum
- * @property array  $voted
+ * @property int             $id
+ * @property string          $title
+ * @property int             $count
+ * @property CarbonImmutable $created_at
+ * @property int             $topic_id
+ * @property array           $getAnswers
+ * @property int             $max
+ * @property int             $sum
+ * @property array           $voted
  * @property-read Topic                       $topic
  * @property-read ?Poll                       $poll
  * @property-read Collection<int, VoteAnswer> $answers
@@ -32,10 +33,11 @@ use Illuminate\Support\Facades\DB;
 class Vote extends Model
 {
     use PollableTrait;
+
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -46,6 +48,16 @@ class Vote extends Model
      * Morph name
      */
     public static string $morphName = 'votes';
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+        ];
+    }
 
     /**
      * Возвращает топик

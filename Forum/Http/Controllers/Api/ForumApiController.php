@@ -129,12 +129,11 @@ class ForumApiController extends Controller
         $uploadedFiles = $request->file('files', []);
 
         $post = Post::query()->create([
-            'topic_id'   => $topic->id,
-            'user_id'    => $user->id,
-            'text'       => $msg,
-            'created_at' => SITETIME,
-            'ip'         => getIp(),
-            'brow'       => getBrowser(),
+            'topic_id' => $topic->id,
+            'user_id'  => $user->id,
+            'text'     => $msg,
+            'ip'       => getIp(),
+            'brow'     => getBrowser(),
         ]);
 
         foreach ($uploadedFiles as $file) {
@@ -193,17 +192,15 @@ class ForumApiController extends Controller
             'forum_id'   => $forum->id,
             'title'      => antimat($validated['title']),
             'user_id'    => $user->id,
-            'created_at' => SITETIME,
-            'updated_at' => SITETIME,
+            'updated_at' => now(),
         ]);
 
         $post = Post::query()->create([
-            'topic_id'   => $topic->id,
-            'user_id'    => $user->id,
-            'text'       => antimat($validated['text']),
-            'created_at' => SITETIME,
-            'ip'         => getIp(),
-            'brow'       => getBrowser(),
+            'topic_id' => $topic->id,
+            'user_id'  => $user->id,
+            'text'     => antimat($validated['text']),
+            'ip'       => getIp(),
+            'brow'     => getBrowser(),
         ]);
 
         foreach ($request->file('files', []) as $file) {
@@ -215,9 +212,8 @@ class ForumApiController extends Controller
         if (! empty($validated['question']) && ! empty($validated['answers'])) {
             $answers = array_unique(array_diff($validated['answers'], ['']));
             $poll = Vote::query()->create([
-                'title'      => $validated['question'],
-                'topic_id'   => $topic->id,
-                'created_at' => SITETIME,
+                'title'    => $validated['question'],
+                'topic_id' => $topic->id,
             ]);
 
             $prepareAnswers = array_map(static fn ($answer) => ['vote_id' => $poll->id, 'answer' => $answer], $answers);

@@ -446,7 +446,6 @@ class ForumController extends AdminController
                 $post->update([
                     'text'         => $msg,
                     'edit_user_id' => getUser('id'),
-                    'updated_at'   => SITETIME,
                 ]);
 
                 setFlash('success', __('main.message_edited_success'));

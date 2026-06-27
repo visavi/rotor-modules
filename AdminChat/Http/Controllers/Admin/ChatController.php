@@ -37,7 +37,7 @@ class ChatController extends AdminController
                 $post = Chat::query()->orderByDesc('created_at')->first();
 
                 if ($post
-                    && $post->created_at + 1800 > SITETIME
+                    && $post->created_at->gt(now()->subMinutes(30))
                     && $user->id === $post->user_id
                     && (Str::length($msg) + Str::length($post->text) <= 1500)
                 ) {
@@ -46,11 +46,10 @@ class ChatController extends AdminController
                     ]);
                 } else {
                     Chat::query()->create([
-                        'user_id'    => $user->id,
-                        'text'       => $msg,
-                        'ip'         => getIp(),
-                        'brow'       => getBrowser(),
-                        'created_at' => SITETIME,
+                        'user_id' => $user->id,
+                        'text'    => $msg,
+                        'ip'      => getIp(),
+                        'brow'    => getBrowser(),
                     ]);
                 }
 
@@ -91,7 +90,7 @@ class ChatController extends AdminController
             abort(200, __('main.message_deleted'));
         }
 
-        if ($post->created_at + 600 < SITETIME) {
+        if ($post->created_at->lt(now()->subMinutes(10))) {
             abort(200, __('main.editing_impossible'));
         }
 
@@ -104,7 +103,6 @@ class ChatController extends AdminController
                 $post->update([
                     'text'         => $msg,
                     'edit_user_id' => $user->id,
-                    'updated_at'   => SITETIME,
                 ]);
 
                 setFlash('success', __('main.message_edited_success'));

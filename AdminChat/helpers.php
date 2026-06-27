@@ -10,7 +10,7 @@ if (! function_exists('statsChat')) {
             $total = Chat::query()->count();
 
             $totalNew = Chat::query()
-                ->where('created_at', '>', strtotime('-1 day', SITETIME))
+                ->where('created_at', '>', now()->subDay())
                 ->count();
 
             return formatShortNum($total) . ($totalNew ? '/+' . $totalNew : '');
@@ -21,6 +21,7 @@ if (! function_exists('statsChat')) {
 if (! function_exists('statsNewChat')) {
     function statsNewChat(): int
     {
-        return Chat::query()->max('created_at') ?? 0;
+        // Маркер «докуда админ дочитал» — id последнего сообщения (монотонный, без дат)
+        return Chat::query()->max('id') ?? 0;
     }
 }

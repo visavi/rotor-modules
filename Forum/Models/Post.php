@@ -14,6 +14,7 @@ use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,16 +24,16 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Post
  *
- * @property int    $id
- * @property int    $topic_id
- * @property int    $user_id
- * @property string $text
- * @property int    $rating
- * @property int    $created_at
- * @property string $ip
- * @property string $brow
- * @property int    $edit_user_id
- * @property int    $updated_at
+ * @property int                  $id
+ * @property int                  $topic_id
+ * @property int                  $user_id
+ * @property string               $text
+ * @property int                  $rating
+ * @property CarbonImmutable      $created_at
+ * @property string               $ip
+ * @property string               $brow
+ * @property int                  $edit_user_id
+ * @property CarbonImmutable|null $updated_at
  * @property-read User             $user
  * @property-read Collection<int, File> $files
  * @property-read Collection<int, Poll> $polls
@@ -48,11 +49,6 @@ class Post extends Model
     use SearchableTrait;
     use SortableTrait;
     use UploadTrait;
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.
@@ -94,8 +90,10 @@ class Post extends Model
     protected function casts(): array
     {
         return [
-            'user_id' => 'int',
-            'text'    => HtmlCast::class,
+            'user_id'    => 'int',
+            'text'       => HtmlCast::class,
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

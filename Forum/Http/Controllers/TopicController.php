@@ -163,7 +163,7 @@ class TopicController extends Controller
 
             if (
                 $post
-                && $post->created_at + 600 > SITETIME
+                && $post->created_at->gt(now()->subMinutes(10))
                 && $user->id === $post->user_id
                 && setting('forum_merge_posts')
                 && $countFiles + $post->files->count() <= setting('maxfiles')
@@ -172,12 +172,11 @@ class TopicController extends Controller
                 $post->update(['text' => $post->text . PHP_EOL . $msg]);
             } else {
                 $post = Post::query()->create([
-                    'topic_id'   => $topic->id,
-                    'user_id'    => $user->id,
-                    'text'       => $msg,
-                    'created_at' => SITETIME,
-                    'ip'         => getIp(),
-                    'brow'       => getBrowser(),
+                    'topic_id' => $topic->id,
+                    'user_id'  => $user->id,
+                    'text'     => $msg,
+                    'ip'       => getIp(),
+                    'brow'     => getBrowser(),
                 ]);
             }
 
@@ -189,6 +188,9 @@ class TopicController extends Controller
 
             $flood->saveState();
             sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
+
+            // count_posts увеличил обсервер на своём инстансе — освежаем для расчёта страницы
+            $topic->refresh();
 
             setFlash('success', __('main.message_added_success'));
         } else {
@@ -374,7 +376,6 @@ class TopicController extends Controller
                     $post->update([
                         'text'         => $msg,
                         'edit_user_id' => $user->id,
-                        'updated_at'   => SITETIME,
                     ]);
                 }
 
@@ -452,7 +453,7 @@ class TopicController extends Controller
             abort(200, __('forum::forums.posts_edited_curators'));
         }
 
-        if (! $isModer && $post->created_at + 600 < SITETIME) {
+        if (! $isModer && $post->created_at->lt(now()->subMinutes(10))) {
             abort(200, __('main.editing_impossible'));
         }
 
@@ -466,7 +467,6 @@ class TopicController extends Controller
                 $post->update([
                     'text'         => antimat($msg),
                     'edit_user_id' => $user->id,
-                    'updated_at'   => SITETIME,
                 ]);
 
                 setFlash('success', __('main.message_edited_success'));

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.5
+- Поля дат тем, сообщений и голосований (`posts`/`topics`/`votes`: `created_at`/`updated_at`) переведены с int (unix-таймстамп) на `DATETIME` (исторически-корректная конверсия таймзон, пересоздание составных индексов)
+- Миграция разбита на 3 независимых файла (posts/topics/votes) — устойчивость к частичному сбою; конверсия батч-транзакциями (быстро на больших таблицах)
+- Сравнения/арифметика дат переведены на Carbon/`now()`; включены авто-таймстампы вместо `$timestamps = false`: `Post` — полный авто (created_at + updated_at = время правки); `Topic`/`Vote` — `const UPDATED_AT = null` (created_at авто, `Topic.updated_at` остаётся ручным — время последнего поста и ключ сортировки активных тем; у `Vote` колонки updated_at нет). Свежий пост теперь имеет `updated_at = created_at` (раньше null), на «изменено» в UI не влияет (маркер = `edit_user_id`)
+- Запись в `feeds` нормализована (`created_at->getTimestamp()`)
+- ⚠️ На проде из-за размера `posts` миграцию запускать вручную через CLI (`php artisan migrate --path=modules/Forum/database/migrations`), не веб-кнопкой «Применить обновление» — иначе таймаут HTTP-запроса
+- Требует ядро 14.0.3
+
 ## 1.0.4
 - Текст для RSS/API вынесен в метод модели `getShareText()` (`absolutizeUrls(renderHtml())`); rss-шаблон переведён на него
 

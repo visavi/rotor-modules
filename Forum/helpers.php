@@ -13,7 +13,7 @@ if (! function_exists('statsForum')) {
             $posts = Post::query()->count();
 
             $totalNew = Post::query()
-                ->where('created_at', '>', strtotime('-1 day', SITETIME))
+                ->where('created_at', '>', now()->subDay())
                 ->count();
 
             return formatShortNum($topics) . '/' . formatShortNum($posts) . ($totalNew ? '/+' . $totalNew : '');

@@ -133,17 +133,15 @@ class ForumController extends Controller
                     'forum_id'   => $forum->id,
                     'title'      => $title,
                     'user_id'    => getUser('id'),
-                    'created_at' => SITETIME,
-                    'updated_at' => SITETIME,
+                    'updated_at' => now(),
                 ]);
 
                 $post = Post::query()->create([
-                    'topic_id'   => $topic->id,
-                    'user_id'    => getUser('id'),
-                    'text'       => $msg,
-                    'created_at' => SITETIME,
-                    'ip'         => getIp(),
-                    'brow'       => getBrowser(),
+                    'topic_id' => $topic->id,
+                    'user_id'  => getUser('id'),
+                    'text'     => $msg,
+                    'ip'       => getIp(),
+                    'brow'     => getBrowser(),
                 ]);
 
                 $files->update(['relate_id' => $post->id]);
@@ -151,9 +149,8 @@ class ForumController extends Controller
                 // Создание голосования
                 if ($vote) {
                     $vote = Vote::query()->create([
-                        'title'      => $question,
-                        'topic_id'   => $topic->id,
-                        'created_at' => SITETIME,
+                        'title'    => $question,
+                        'topic_id' => $topic->id,
                     ]);
 
                     $prepareAnswers = [];

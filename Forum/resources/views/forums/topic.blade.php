@@ -176,7 +176,7 @@
                                 <a href="#" onclick="return sendComplaint(this)" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
-                            @if ($topic->isModer || (getUser('id') === $post->user_id && $post->created_at + 600 > SITETIME))
+                            @if ($topic->isModer || (getUser('id') === $post->user_id && $post->created_at->gt(now()->subMinutes(10))))
                                 <a href="{{ route('posts.edit', ['id' => $post->id, 'page' => $posts->currentPage()]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                                 @if ($topic->isModer)
                                     <input type="checkbox" class="form-check-input" name="del[]" value="{{ $post->id }}">

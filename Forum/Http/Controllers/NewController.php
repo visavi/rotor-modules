@@ -49,7 +49,7 @@ class NewController extends Controller
 
         $posts = Post::query()
             ->when($period, static function (Builder $query) use ($period) {
-                return $query->where('created_at', '>', strtotime('-' . $period . ' day', SITETIME));
+                return $query->where('created_at', '>', now()->subDays($period));
             })
             ->orderBy(...$orderBy)
             ->with('topic', 'user', 'poll')

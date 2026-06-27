@@ -7,6 +7,7 @@ namespace Modules\Forum\Models;
 use App\Models\User;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,22 +19,22 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Topic
  *
- * @property int         $id
- * @property int         $forum_id
- * @property string      $title
- * @property int         $user_id
- * @property int         $closed
- * @property int         $locked
- * @property int         $count_posts
- * @property int         $visits
- * @property int         $updated_at
- * @property int         $created_at
- * @property string|null $moderators
- * @property string      $note
- * @property int         $last_post_id
- * @property int         $close_user_id
- * @property int|null    $bookmark_posts
- * @property bool        $isModer
+ * @property int                  $id
+ * @property int                  $forum_id
+ * @property string               $title
+ * @property int                  $user_id
+ * @property int                  $closed
+ * @property int                  $locked
+ * @property int                  $count_posts
+ * @property int                  $visits
+ * @property CarbonImmutable|null $updated_at
+ * @property CarbonImmutable      $created_at
+ * @property string|null          $moderators
+ * @property string               $note
+ * @property int                  $last_post_id
+ * @property int                  $close_user_id
+ * @property int|null             $bookmark_posts
+ * @property bool                 $isModer
  * @property-read User                      $user
  * @property-read Post                      $lastPost
  * @property-read Forum                     $forum
@@ -48,9 +49,9 @@ class Topic extends Model
     use SortableTrait;
 
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -93,9 +94,11 @@ class Topic extends Model
     protected function casts(): array
     {
         return [
-            'user_id' => 'int',
-            'closed'  => 'bool',
-            'locked'  => 'bool',
+            'user_id'    => 'int',
+            'closed'     => 'bool',
+            'locked'     => 'bool',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
