@@ -25,7 +25,7 @@ class BoardDeactivation extends Command
     {
         Item::query()
             ->active()
-            ->where('expires_at', '<', SITETIME)
+            ->where('expires_at', '<', now())
             ->each(function ($item) {
                 $item->category->decrement('count_items');
                 $item->update([

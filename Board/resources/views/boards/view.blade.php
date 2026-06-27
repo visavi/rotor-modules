@@ -46,7 +46,7 @@
 @stop
 
 @section('content')
-    @if ($item->expires_at <= SITETIME)
+    @if ($item->expires_at->lte(now()))
         <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
     @endif
 
@@ -86,8 +86,8 @@
 
                         <i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }} / {{ dateFixed($item->updated_at) }}<br>
 
-                        @if ($item->expires_at > SITETIME)
-                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at - SITETIME) }}
+                        @if ($item->expires_at->gt(now()))
+                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - SITETIME) }}
                         @endif
                     </div>
                 </div>

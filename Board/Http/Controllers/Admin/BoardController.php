@@ -41,7 +41,7 @@ class BoardController extends AdminController
             ->when($board, static function (Builder $query) use ($board) {
                 return $query->where('board_id', $board->id);
             })
-            ->where('expires_at', '>', SITETIME)
+            ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)
             ->with('category', 'user', 'files')
             ->paginate(setting('boards_per_page'))

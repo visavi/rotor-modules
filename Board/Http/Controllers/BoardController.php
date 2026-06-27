@@ -42,7 +42,7 @@ class BoardController extends Controller
             ->when($board, static function (Builder $query) use ($board) {
                 return $query->where('board_id', $board->id);
             })
-            ->where('expires_at', '>', SITETIME)
+            ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)
             ->with('category', 'user', 'files')
             ->paginate(setting('boards_per_page'))
@@ -69,7 +69,7 @@ class BoardController extends Controller
             abort(404, __('board::boards.item_not_exist'));
         }
 
-        if ($item->expires_at <= SITETIME && getUser() && getUser('id') !== $item->user_id) {
+        if ($item->expires_at->lte(now()) && getUser() && getUser('id') !== $item->user_id) {
             abort(200, __('board::boards.item_not_active'));
         }
 
@@ -126,9 +126,9 @@ class BoardController extends Controller
                     'user_id'    => $user->id,
                     'price'      => $price,
                     'phone'      => $phone,
-                    'created_at' => SITETIME,
-                    'updated_at' => SITETIME,
-                    'expires_at' => strtotime('+' . setting('boards_period') . ' days', SITETIME),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'expires_at' => now()->addDays((int) setting('boards_period')),
                 ]);
 
                 $item->category->increment('count_items');
@@ -243,20 +243,22 @@ class BoardController extends Controller
         $validator->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
 
         if ($validator->isValid()) {
-            if ($item->expires_at > SITETIME) {
+            if ($item->expires_at->gt(now())) {
                 $status = __('board::boards.item_success_unpublished');
                 $item->update([
-                    'expires_at' => SITETIME,
+                    'expires_at' => now(),
                 ]);
 
                 $item->category->decrement('count_items');
             } else {
                 $status = __('board::boards.item_success_published');
-                $expired = strtotime('+' . setting('boards_period') . ' days', $item->updated_at) <= SITETIME;
+                $period = (int) setting('boards_period');
+
+                $expired = $item->updated_at->addDays($period)->lte(now());
 
                 $item->update([
-                    'expires_at' => strtotime('+' . setting('boards_period') . ' days', SITETIME),
-                    'updated_at' => $expired ? SITETIME : $item->updated_at,
+                    'expires_at' => now()->addDays($period),
+                    'updated_at' => $expired ? now() : $item->updated_at,
                 ]);
 
                 $item->category->increment('count_items');
@@ -324,12 +326,12 @@ class BoardController extends Controller
         $otherType = $type === 'active' ? '<=' : '>';
         $otherCount = Item::query()
             ->where('user_id', $user->id)
-            ->where('expires_at', $otherType, SITETIME)
+            ->where('expires_at', $otherType, now())
             ->count();
 
         $items = Item::query()
             ->where('user_id', $user->id)
-            ->where('expires_at', $whereType, SITETIME)
+            ->where('expires_at', $whereType, now())
             ->orderBy(...$orderBy)
             ->with('category', 'user', 'files')
             ->paginate(setting('boards_per_page'))

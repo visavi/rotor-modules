@@ -19,7 +19,7 @@
 @stop
 
 @section('content')
-    @if ($item->expires_at > SITETIME)
+    @if ($item->expires_at->gt(now()))
         <div class="alert alert-info">{{ __('board::boards.expires') }}: {{ dateFixed($item->expires_at) }}</div>
     @else
         <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>

@@ -8,8 +8,8 @@ if (! function_exists('statsBoard')) {
     function statsBoard(): string
     {
         return Cache::remember('statBoards', 900, static function () {
-            $stat = formatShortNum(Item::query()->where('expires_at', '>', SITETIME)->count());
-            $totalNew = Item::query()->where('updated_at', '>', strtotime('-1 day', SITETIME))->count();
+            $stat = formatShortNum(Item::query()->where('expires_at', '>', now())->count());
+            $totalNew = Item::query()->where('updated_at', '>', now()->subDay())->count();
 
             return formatShortNum($stat) . ($totalNew ? '/+' . $totalNew : '');
         });
@@ -21,7 +21,7 @@ if (! function_exists('recentBoards')) {
     {
         $items = Cache::remember('recentBoards', 600, static function () use ($show) {
             return Item::query()
-                ->where('expires_at', '>', SITETIME)
+                ->where('expires_at', '>', now())
                 ->orderByDesc('created_at')
                 ->limit($show)
                 ->get();

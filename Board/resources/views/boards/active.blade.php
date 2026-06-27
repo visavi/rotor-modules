@@ -69,8 +69,8 @@
                                         <small class="section-date text-muted fst-italic">{{ dateFixed($item->created_at) }}</small>
                                         <br>
 
-                                        @if ($item->expires_at > SITETIME)
-                                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at - SITETIME) }}
+                                        @if ($item->expires_at->gt(now()))
+                                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - SITETIME) }}
                                         @else
                                             <span class="badge bg-danger">{{ __('board::boards.item_not_active') }}</span>
                                         @endif

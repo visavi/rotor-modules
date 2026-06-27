@@ -13,6 +13,7 @@ use App\Traits\FileableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,29 +25,29 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Item
  *
- * @property int    $id
- * @property int    $board_id
- * @property string $title
- * @property string $text
- * @property int    $user_id
- * @property int    $price
- * @property string $phone
- * @property int    $created_at
- * @property int    $updated_at
- * @property int    $expires_at
- * @property bool   $active
- * @property int    $visits
+ * @property int             $id
+ * @property int             $board_id
+ * @property string          $title
+ * @property string          $text
+ * @property int             $user_id
+ * @property int             $price
+ * @property string          $phone
+ * @property bool            $active
+ * @property int             $visits
+ * @property CarbonImmutable $created_at
+ * @property CarbonImmutable $updated_at
+ * @property CarbonImmutable $expires_at
  * @property-read User                  $user
  * @property-read Board                 $category
  * @property-read Collection<int, File> $files
  */
 class Item extends Model
 {
-    use FileableTrait;
+    use ConvertVideoTrait;
     use FeedableTrait;
+    use FileableTrait;
     use SearchableTrait;
     use SortableTrait;
-    use ConvertVideoTrait;
     use UploadTrait;
 
     /**
@@ -80,9 +81,12 @@ class Item extends Model
     protected function casts(): array
     {
         return [
-            'active'  => 'bool',
-            'user_id' => 'int',
-            'text'    => HtmlCast::class,
+            'active'     => 'bool',
+            'user_id'    => 'int',
+            'text'       => HtmlCast::class,
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 

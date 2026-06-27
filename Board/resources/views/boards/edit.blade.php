@@ -19,13 +19,13 @@
 @stop
 
 @section('content')
-    @if ($item->expires_at > SITETIME)
+    @if ($item->expires_at->gt(now()))
         <div class="alert alert-info">{{ __('board::boards.expires') }}: {{ dateFixed($item->expires_at) }}</div>
     @else
         <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
     @endif
 
-    @if ($item->expires_at > SITETIME)
+    @if ($item->expires_at->gt(now()))
         <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('board::boards.confirm_unpublish_item') }}')">
             @csrf
             <button class="btn btn-link p-0">{{ __('main.unpublish') }}</button>
