@@ -107,11 +107,10 @@ class PhotoController extends Controller
 
             if ($validator->isValid()) {
                 $photo = Photo::query()->create([
-                    'user_id'    => $user->id,
-                    'title'      => $title,
-                    'text'       => antimat($text),
-                    'created_at' => SITETIME,
-                    'closed'     => $closed,
+                    'user_id' => $user->id,
+                    'title'   => $title,
+                    'text'    => antimat($text),
+                    'closed'  => $closed,
                 ]);
 
                 File::query()

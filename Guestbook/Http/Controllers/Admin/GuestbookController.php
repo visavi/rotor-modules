@@ -50,7 +50,6 @@ class GuestbookController extends AdminController
                 $post->update([
                     'text'         => antimat($msg),
                     'edit_user_id' => getUser('id'),
-                    'updated_at'   => SITETIME,
                 ]);
 
                 return redirect()

@@ -8,7 +8,7 @@ if (! function_exists('statsPhotos')) {
     {
         return Cache::remember('statPhotos', 900, static function () {
             $stat = Photo::query()->count();
-            $totalNew = Photo::query()->where('created_at', '>', strtotime('-1 day', SITETIME))->count();
+            $totalNew = Photo::query()->where('created_at', '>', now()->subDay())->count();
 
             return formatShortNum($stat) . ($totalNew ? '/+' . $totalNew : '');
         });

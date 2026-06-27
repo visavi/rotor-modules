@@ -82,7 +82,6 @@ class GuestbookController extends Controller
                 'brow'       => getBrowser(),
                 'guest_name' => $guestName,
                 'active'     => $active,
-                'created_at' => SITETIME,
             ]);
 
             if ($user) {
@@ -125,7 +124,7 @@ class GuestbookController extends Controller
             abort(404, __('main.message_not_found'));
         }
 
-        if ($post->created_at + 600 < SITETIME) {
+        if ($post->created_at->lt(now()->subMinutes(10))) {
             abort(200, __('main.editing_impossible'));
         }
 
@@ -136,7 +135,6 @@ class GuestbookController extends Controller
                 $post->update([
                     'text'         => antimat($msg),
                     'edit_user_id' => $user->id,
-                    'updated_at'   => SITETIME,
                 ]);
 
                 return redirect()

@@ -70,7 +70,7 @@
                         </div>
                     @endif
 
-                    @if ($post->created_at + 600 > SITETIME && getUser() && getUser('id') === $post->user_id)
+                    @if ($post->created_at->gt(now()->subMinutes(10)) && getUser() && getUser('id') === $post->user_id)
                         <div class="js-actions">
                             <a href="{{ route('guestbook.edit', ['id' => $post->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                         </div>

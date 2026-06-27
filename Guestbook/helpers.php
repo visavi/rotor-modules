@@ -11,7 +11,7 @@ if (! function_exists('statsGuestbook')) {
 
             $totalNew = Guestbook::query()
                 ->active()
-                ->where('created_at', '>', strtotime('-1 day', SITETIME))
+                ->where('created_at', '>', now()->subDay())
                 ->count();
 
             return formatShortNum($total) . ($totalNew ? '/+' . $totalNew : '');

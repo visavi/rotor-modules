@@ -11,6 +11,7 @@ use App\Traits\ConvertVideoTrait;
 use App\Traits\FileableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,16 +21,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 /**
- * @property int    $id
- * @property int    $user_id
- * @property string $text
- * @property string $ip
- * @property string $brow
- * @property int    $created_at
- * @property string $reply
- * @property int    $edit_user_id
- * @property bool   $active
- * @property int    $updated_at
+ * @property int                  $id
+ * @property int                  $user_id
+ * @property string               $text
+ * @property string               $ip
+ * @property string               $brow
+ * @property string               $reply
+ * @property int                  $edit_user_id
+ * @property bool                 $active
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User                  $user
  * @property-read Collection<int, File> $files
  */
@@ -44,11 +45,6 @@ class Guestbook extends Model
      * The table associated with the model.
      */
     protected $table = 'guestbook';
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.

@@ -17,6 +17,7 @@ use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,14 +27,15 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Photo
  *
- * @property int    $id
- * @property int    $user_id
- * @property string $title
- * @property string $text
- * @property int    $created_at
- * @property int    $rating
- * @property bool   $closed
- * @property int    $count_comments
+ * @property int                  $id
+ * @property int                  $user_id
+ * @property string               $title
+ * @property string               $text
+ * @property int                  $rating
+ * @property bool                 $closed
+ * @property int                  $count_comments
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
  * @property-read Collection<int, File>    $files
@@ -43,18 +45,13 @@ use Illuminate\Support\HtmlString;
 class Photo extends Model
 {
     use CommentableTrait;
-    use PollableTrait;
-    use FileableTrait;
     use ConvertVideoTrait;
     use FeedableTrait;
+    use FileableTrait;
+    use PollableTrait;
     use SearchableTrait;
     use SortableTrait;
     use UploadTrait;
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.
