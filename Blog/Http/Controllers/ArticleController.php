@@ -175,7 +175,6 @@ class ArticleController extends Controller
                     'title'        => $title,
                     'slug'         => $title,
                     'text'         => $text,
-                    'created_at'   => SITETIME,
                     'draft'        => $isDraft,
                     'active'       => $isActive,
                     'published_at' => isAdmin() && $isDelay ? $published : null,

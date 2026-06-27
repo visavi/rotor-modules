@@ -41,7 +41,8 @@ use Illuminate\Support\Str;
  * @property int              $rating
  * @property int              $visits
  * @property int              $count_comments
- * @property int              $created_at
+ * @property CarbonImmutable  $created_at
+ * @property ?CarbonImmutable $updated_at
  * @property bool             $active
  * @property bool             $draft
  * @property ?CarbonImmutable $published_at
@@ -62,11 +63,6 @@ class Article extends Model
     use SortableTrait;
     use ConvertVideoTrait;
     use UploadTrait;
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.
@@ -188,7 +184,7 @@ class Article extends Model
      */
     public function isNew(): bool
     {
-        return $this->created_at > strtotime('-3 day');
+        return $this->created_at->gt(now()->subDays(3));
     }
 
     /**

@@ -9,7 +9,7 @@
             <link>{{ route('articles.view', ['slug' => $article->slug]) }}</link>
             <description>{{ $article->getShareText() }}</description>
             <dc:creator>{{ $article->user->getName() }}</dc:creator>
-            <pubDate>{{ date('r', $article->created_at) }}</pubDate>
+            <pubDate>{{ $article->created_at->format('r') }}</pubDate>
             <category>{{ __('blog::blogs.blogs') }}</category>
             <guid>{{ route('articles.view', ['slug' => $article->slug]) }}</guid>
             @foreach ($article->getMedia() as $file)

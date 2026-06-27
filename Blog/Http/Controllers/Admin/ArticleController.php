@@ -306,7 +306,7 @@ class ArticleController extends AdminController
         $article->update([
             'active'     => $active,
             'draft'      => false,
-            'created_at' => SITETIME,
+            'created_at' => now(),
         ]);
 
         if ($active) {

@@ -31,7 +31,7 @@ class BlogActivation extends Command
                 $item->category->increment('count_articles');
                 $item->update([
                     'active'     => true,
-                    'created_at' => strtotime($item->published_at),
+                    'created_at' => $item->published_at,
                 ]);
             });
 

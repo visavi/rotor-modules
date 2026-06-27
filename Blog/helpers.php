@@ -8,7 +8,7 @@ if (! function_exists('statsBlog')) {
     {
         return Cache::remember('statArticles', 900, static function () {
             $stat = Article::query()->active()->count();
-            $totalNew = Article::query()->active()->where('created_at', '>', strtotime('-1 day', SITETIME))->count();
+            $totalNew = Article::query()->active()->where('created_at', '>', now()->subDay())->count();
 
             return formatShortNum($stat) . ($totalNew ? '/+' . $totalNew : '');
         });

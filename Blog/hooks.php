@@ -18,7 +18,7 @@ Registry::sitemap('articles', static function () {
         foreach ($articles as $article) {
             $locs[] = [
                 'loc'     => route('articles.view', ['slug' => $article->slug]),
-                'lastmod' => gmdate('c', $article->created_at),
+                'lastmod' => $article->created_at->format('c'),
             ];
         }
 

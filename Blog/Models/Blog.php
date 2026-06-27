@@ -73,7 +73,7 @@ class Blog extends Model
         return $this->hasOne(Article::class, 'category_id')
             ->active()
             ->selectRaw('category_id, count(*) as count_articles')
-            ->where('created_at', '>', strtotime('-3 day', SITETIME))
+            ->where('created_at', '>', now()->subDays(3))
             ->groupBy('category_id');
     }
 
