@@ -75,7 +75,6 @@ class TransferController extends Controller
                     'recipient_id' => $this->user->id,
                     'text'         => $comment,
                     'total'        => $money,
-                    'created_at'   => SITETIME,
                 ]);
             });
 

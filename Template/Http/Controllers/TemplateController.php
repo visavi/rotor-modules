@@ -46,10 +46,9 @@ class TemplateController extends Controller
         ]);
 
         Template::query()->create([
-            'user_id'    => $request->user()->id,
-            'title'      => $data['title'],
-            'text'       => $data['text'],
-            'created_at' => SITETIME,
+            'user_id' => $request->user()->id,
+            'title'   => $data['title'],
+            'text'    => $data['text'],
         ]);
 
         clearCache('statTemplate');

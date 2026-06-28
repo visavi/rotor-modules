@@ -6,8 +6,8 @@ use Modules\Wall\Observers\WallObserver;
 return [
     'name'        => 'Стена сообщений',
     'description' => 'Стена сообщений пользователя',
-    'version'     => '1.0.1',
-    'requires'    => '14.0.1',
+    'version'     => '1.0.2',
+    'requires'    => '14.0.3',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

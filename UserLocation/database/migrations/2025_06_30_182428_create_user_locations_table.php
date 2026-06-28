@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->integer('user_id');
             $table->string('path');
             $table->string('title');
-            $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('created_at')->nullable();
         });
     }
 

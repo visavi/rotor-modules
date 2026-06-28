@@ -6,25 +6,26 @@ namespace Modules\Transfer\Models;
 
 use App\Casts\HtmlCast;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Transfer
  *
- * @property int    $id
- * @property int    $user_id
- * @property int    $recipient_id
- * @property string $text
- * @property int    $total
- * @property int    $created_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property int             $recipient_id
+ * @property string          $text
+ * @property int             $total
+ * @property CarbonImmutable $created_at
  */
 class Transfer extends Model
 {
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

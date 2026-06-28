@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Modules\UserLocation\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Date;
 
 /**
  * Class UserLocation
  *
- * @property int    $id
- * @property int    $user_id
- * @property string $path
- * @property string $title
- * @property Date   $created_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property string          $path
+ * @property string          $title
+ * @property CarbonImmutable $created_at
  */
 class UserLocation extends Model
 {

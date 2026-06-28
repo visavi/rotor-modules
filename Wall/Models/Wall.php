@@ -6,23 +6,24 @@ namespace Modules\Wall\Models;
 
 use App\Casts\HtmlCast;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int    $id
- * @property int    $user_id
- * @property int    $author_id
- * @property string $text
- * @property int    $created_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property int             $author_id
+ * @property string          $text
+ * @property CarbonImmutable $created_at
  * @property-read User $user
  */
 class Wall extends Model
 {
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

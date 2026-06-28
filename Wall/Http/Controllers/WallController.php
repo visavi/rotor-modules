@@ -59,10 +59,9 @@ class WallController extends Controller
 
             if ($validator->isValid()) {
                 Wall::query()->create([
-                    'user_id'    => $user->id,
-                    'author_id'  => getUser('id'),
-                    'text'       => antimat($msg),
-                    'created_at' => SITETIME,
+                    'user_id'   => $user->id,
+                    'author_id' => getUser('id'),
+                    'text'      => antimat($msg),
                 ]);
 
                 $flood->saveState();

@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Modules\Surprise\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Surprise
  *
- * @property int $id
- * @property int $user_id
- * @property int $year
- * @property int $created_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property int             $year
+ * @property CarbonImmutable $created_at
  */
 class Surprise extends Model
 {
@@ -29,9 +30,9 @@ class Surprise extends Model
     protected $table = 'surprise';
 
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

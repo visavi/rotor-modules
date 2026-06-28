@@ -6,28 +6,24 @@ namespace Modules\Template\Models;
 
 use App\Casts\HtmlCast;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
 
 /**
- * @property int    $id
- * @property int    $user_id
- * @property string $title
- * @property string $text
- * @property int    $created_at
+ * @property int             $id
+ * @property int             $user_id
+ * @property string          $title
+ * @property string          $text
+ * @property CarbonImmutable $created_at
  */
 class Template extends Model
 {
     /**
-     * The table associated with the model.
+     * The name of the "updated at" column.
      */
-    protected $table = 'templates';
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

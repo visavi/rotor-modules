@@ -47,6 +47,12 @@ class SurpriseController extends Controller
         $user->increment('posrating', $rating);
         $user->update(['rating' => $user->posrating - $user->negrating]);
 
+        // Фиксируем выдачу за этот год — иначе проверка existSurprise всегда пуста
+        Surprise::query()->create([
+            'user_id' => $user->id,
+            'year'    => $year,
+        ]);
+
         $text = __('surprise::surprise.notice_text', [
             'year'   => $year,
             'point'  => plural($point, setting('scorename')),
