@@ -87,7 +87,6 @@ class PaidAdvertController extends AdminController
                     'color'      => $color,
                     'bold'       => $bold,
                     'comment'    => $comment,
-                    'created_at' => SITETIME,
                     'deleted_at' => $term,
                 ]);
 

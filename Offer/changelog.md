@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+- Поля дат (`offers.created_at`/`updated_at`) переведены с int (unix-таймстамп) на `DATETIME` (исторически-корректная конверсия таймзон, пересоздание индекса `created_at`)
+- `$timestamps = false` заменён на `const UPDATED_AT = null`: created_at заполняется авто, а updated_at (время правки/официального ответа) остаётся ручным — чтобы инкременты `count_comments`/`rating` не сбивали дату ответа
+- Сравнения/запись дат переведены на Carbon/`now()`, убран ручной `created_at => SITETIME`
+- Требует ядро 14.0.3
+
 ## 1.0.2
 - Исправлен перевод (ua)
 

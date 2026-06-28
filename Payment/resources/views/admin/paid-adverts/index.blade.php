@@ -38,7 +38,7 @@
                         <span class="badge bg-info">{{ count($data->names) }}</span>
                     @endif
 
-                    @if ($data->deleted_at < SITETIME)
+                    @if ($data->deleted_at?->lt(now()))
                         <span class="badge bg-danger">{{ __('payment::payments.paid_adverts.expired') }}</span>
                     @endif
                     <div class="float-end">

@@ -22,8 +22,7 @@ class PaymentService
             'color'      => $order->data['color'],
             'bold'       => $order->data['bold'],
             'comment'    => $order->data['description'] . ' #' . $order->id . ' ' . $order->data['comment'],
-            'created_at' => SITETIME,
-            'deleted_at' => strtotime('+' . $order->data['term'] . ' days', SITETIME),
+            'deleted_at' => now()->addDays((int) $order->data['term']),
         ]);
 
         clearCache('paidAdverts');

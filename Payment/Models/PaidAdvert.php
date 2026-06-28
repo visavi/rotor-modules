@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Payment\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,15 +16,15 @@ use Illuminate\Support\HtmlString;
 /**
  * Class PaidAdvert
  *
- * @property int      $id
- * @property string   $place
- * @property string   $site
- * @property array    $names
- * @property string   $color
- * @property bool     $bold
- * @property int|null $user_id
- * @property int      $created_at
- * @property int      $deleted_at
+ * @property int             $id
+ * @property string          $place
+ * @property string          $site
+ * @property array           $names
+ * @property string          $color
+ * @property bool            $bold
+ * @property int|null        $user_id
+ * @property CarbonImmutable $created_at
+ * @property CarbonImmutable $deleted_at
  */
 class PaidAdvert extends Model
 {
@@ -53,16 +54,17 @@ class PaidAdvert extends Model
     protected function casts(): array
     {
         return [
-            'bold'    => 'bool',
-            'names'   => 'array',
-            'user_id' => 'int',
+            'bold'       => 'bool',
+            'names'      => 'array',
+            'user_id'    => 'int',
+            'deleted_at' => 'datetime',
         ];
     }
 
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -84,7 +86,7 @@ class PaidAdvert extends Model
     {
         return $query
             ->where('user_id', auth()->id())
-            ->where('deleted_at', '>', SITETIME);
+            ->where('deleted_at', '>', now());
     }
 
     /**
@@ -114,7 +116,7 @@ class PaidAdvert extends Model
     public static function statAdverts(): array
     {
         return Cache::remember('paidAdverts', 3600, static function () {
-            $data = self::query()->where('deleted_at', '>', SITETIME)->orderBy('created_at')->get();
+            $data = self::query()->where('deleted_at', '>', now())->orderBy('created_at')->get();
 
             $links = [];
             if ($data->isNotEmpty()) {

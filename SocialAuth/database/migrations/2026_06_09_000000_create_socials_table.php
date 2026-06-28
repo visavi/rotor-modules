@@ -16,7 +16,7 @@ return new class extends Migration {
                 $table->string('provider', 20);
                 $table->string('provider_id', 100);
                 $table->text('token')->nullable();
-                $table->timestamp('created_at')->useCurrent();
+                $table->dateTime('created_at')->nullable();
 
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->unique(['provider', 'provider_id']);

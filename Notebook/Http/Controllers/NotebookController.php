@@ -52,10 +52,7 @@ class NotebookController extends Controller
             $validator->length($msg, 0, 10000, ['msg' => __('validator.text_long')], false);
 
             if ($validator->isValid()) {
-                $this->note->fill([
-                    'text'       => $msg,
-                    'created_at' => SITETIME,
-                ])->save();
+                $this->note->fill(['text' => $msg])->save();
 
                 setFlash('success', __('main.record_saved_success'));
             } else {

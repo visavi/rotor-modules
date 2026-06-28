@@ -15,7 +15,7 @@
 
 @section('content')
     @if ($advert->id)
-        @if ($advert->deleted_at > SITETIME)
+        @if ($advert->deleted_at?->gt(now()))
             <div class="alert alert-success">
                 {{ __('payment::payments.paid_adverts.expires') }}: {{ dateFixed($advert->deleted_at) }}
             </div>

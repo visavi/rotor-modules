@@ -86,9 +86,8 @@ class IndexController extends Controller
                     $lottery->increment('amount', $ticketPrice);
 
                     $lottery->lotteryUsers()->create([
-                        'user_id'    => $user->id,
-                        'number'     => $number,
-                        'created_at' => SITETIME,
+                        'user_id' => $user->id,
+                        'number'  => $number,
                     ]);
                 }
             );

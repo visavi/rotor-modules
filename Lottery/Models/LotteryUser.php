@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace Modules\Lottery\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class LotteryUser
  *
- * @property int $id
- * @property int $lottery_id
- * @property int $user_id
- * @property int $number
- * @property int $created_at
+ * @property int             $id
+ * @property int             $lottery_id
+ * @property int             $user_id
+ * @property int             $number
+ * @property CarbonImmutable $created_at
  * @property-read User $user
  */
 class LotteryUser extends Model
 {
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

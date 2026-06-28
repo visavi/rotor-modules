@@ -97,13 +97,12 @@ class OfferController extends Controller
                 $text = antimat($text);
 
                 $offer = Offer::query()->create([
-                    'type'       => $type,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'user_id'    => $user->id,
-                    'rating'     => 1,
-                    'status'     => 'wait',
-                    'created_at' => SITETIME,
+                    'type'    => $type,
+                    'title'   => $title,
+                    'text'    => $text,
+                    'user_id' => $user->id,
+                    'rating'  => 1,
+                    'status'  => 'wait',
                 ]);
 
                 $flood->saveState();
@@ -160,7 +159,7 @@ class OfferController extends Controller
                     'type'       => $type,
                     'title'      => $title,
                     'text'       => $text,
-                    'updated_at' => SITETIME,
+                    'updated_at' => now(),
                 ]);
 
                 setFlash('success', __('main.record_changed_success'));

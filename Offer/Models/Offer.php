@@ -13,6 +13,7 @@ use App\Traits\FeedableTrait;
 use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,19 +21,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 
 /**
- * @property int    $id
- * @property string $type
- * @property string $title
- * @property string $text
- * @property int    $user_id
- * @property int    $rating
- * @property int    $created_at
- * @property string $status
- * @property int    $count_comments
- * @property bool   $closed
- * @property string $reply
- * @property int    $reply_user_id
- * @property int    $updated_at
+ * @property int                  $id
+ * @property string               $type
+ * @property string               $title
+ * @property string               $text
+ * @property int                  $user_id
+ * @property int                  $rating
+ * @property string               $status
+ * @property int                  $count_comments
+ * @property bool                 $closed
+ * @property string               $reply
+ * @property int                  $reply_user_id
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
  * @property-read Collection<int, Poll>    $polls
@@ -74,9 +75,12 @@ class Offer extends Model
     ];
 
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
+     *
+     * updated_at = время правки/ответа, ставится вручную. Авто-таймстамп отключён,
+     * чтобы инкременты count_comments/rating не сбивали дату официального ответа.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -116,10 +120,11 @@ class Offer extends Model
     protected function casts(): array
     {
         return [
-            'user_id' => 'int',
-            'closed'  => 'bool',
-            'text'    => HtmlCast::class,
-            'reply'   => HtmlCast::class,
+            'user_id'    => 'int',
+            'closed'     => 'bool',
+            'text'       => HtmlCast::class,
+            'reply'      => HtmlCast::class,
+            'updated_at' => 'datetime',
         ];
     }
 

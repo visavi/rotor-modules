@@ -83,7 +83,7 @@ class OfferController extends Controller
                     'title'      => $title,
                     'text'       => $text,
                     'closed'     => $closed,
-                    'updated_at' => SITETIME,
+                    'updated_at' => now(),
                 ]);
 
                 setFlash('success', __('main.record_changed_success'));
@@ -126,7 +126,7 @@ class OfferController extends Controller
                     'reply_user_id' => getUser('id'),
                     'status'        => $status,
                     'closed'        => $closed,
-                    'updated_at'    => SITETIME,
+                    'updated_at'    => now(),
                 ]);
 
                 $text = textNotice('offer_reply', [

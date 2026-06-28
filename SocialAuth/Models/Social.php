@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
  */
 class Social extends Model
 {
-    public const UPDATED_AT = null;
+    public const ?string UPDATED_AT = null;
 
     public const array PROVIDERS = [
         'google' => ['name' => 'Google', 'icon' => 'fab fa-google fa-2x', 'color' => '#4285F4'],

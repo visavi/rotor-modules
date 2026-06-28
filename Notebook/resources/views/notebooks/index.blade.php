@@ -24,7 +24,7 @@
         </div>
 
         <p class="text-muted fst-italic">
-            {{ __('notebook::notebooks.last_edited') }}: {{ dateFixed($note->created_at) }}
+            {{ __('notebook::notebooks.last_edited') }}: {{ dateFixed($note->updated_at) }}
         </p>
     @else
         {{ showError(__('notebook::notebooks.empty_note')) }}
