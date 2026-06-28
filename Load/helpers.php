@@ -12,7 +12,7 @@ if (! function_exists('statsLoad')) {
 
             $totalNew = Down::query()
                 ->active()
-                ->where('created_at', '>', strtotime('-1 day', SITETIME))
+                ->where('created_at', '>', now()->subDay())
                 ->count();
 
             return formatShortNum($totalLoads) . ($totalNew ? '/+' . $totalNew : '');

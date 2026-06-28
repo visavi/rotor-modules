@@ -329,10 +329,11 @@ class LoadController extends AdminController
 
         $active = $down->active ^ 1;
 
+        // created_at сбрасываем намеренно: при публикации загрузка всплывает как новая
+        // (списки и сортировка по created_at); updated_at проставит авто-таймстамп
         $down->update([
             'active'     => $active,
-            'updated_at' => SITETIME,
-            'created_at' => SITETIME,
+            'created_at' => now(),
         ]);
 
         if ($active) {

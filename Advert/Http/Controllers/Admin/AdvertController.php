@@ -20,7 +20,7 @@ class AdvertController extends AdminController
     {
         $records = Advert::query()
             ->where('type', Advert::TYPE_USER)
-            ->where('deleted_at', '>', SITETIME)
+            ->where('deleted_at', '>', now())
             ->orderByDesc('deleted_at')
             ->with('user')
             ->paginate(setting('rekuserpost'));

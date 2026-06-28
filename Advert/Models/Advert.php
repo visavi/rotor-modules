@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Advert\Models;
 
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
@@ -12,15 +13,15 @@ use Illuminate\Support\Facades\Cache;
 /**
  * Class Advert
  *
- * @property int    $id
- * @property string $site
- * @property string $name
- * @property string $color
- * @property int    $bold
- * @property string $type
- * @property int    $user_id
- * @property int    $created_at
- * @property int    $deleted_at
+ * @property int             $id
+ * @property string          $site
+ * @property string          $name
+ * @property string          $color
+ * @property int             $bold
+ * @property string          $type
+ * @property int             $user_id
+ * @property CarbonImmutable $created_at
+ * @property CarbonImmutable $deleted_at
  */
 class Advert extends Model
 {
@@ -28,9 +29,9 @@ class Advert extends Model
     public const string TYPE_ADMIN = 'admin';
 
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.
@@ -43,7 +44,8 @@ class Advert extends Model
     protected function casts(): array
     {
         return [
-            'user_id' => 'int',
+            'user_id'    => 'int',
+            'deleted_at' => 'datetime',
         ];
     }
 
@@ -67,7 +69,7 @@ class Advert extends Model
         return Cache::remember('adverts', 1800, static function () {
             $data = self::query()
                 ->where('type', self::TYPE_USER)
-                ->where('deleted_at', '>', SITETIME)
+                ->where('deleted_at', '>', now())
                 ->get();
 
             if ($data->isEmpty()) {
@@ -103,7 +105,7 @@ class Advert extends Model
         return Cache::remember('adminAdverts', 1800, static function () {
             $data = self::query()
                 ->where('type', self::TYPE_ADMIN)
-                ->where('deleted_at', '>', SITETIME)
+                ->where('deleted_at', '>', now())
                 ->get();
 
             $links = [];

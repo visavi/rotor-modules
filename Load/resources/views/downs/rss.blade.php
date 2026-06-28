@@ -9,7 +9,7 @@
             <link>{{ route('downs.view', ['id' => $down->id]) }}</link>
             <description>{{ $down->getShareText() }}</description>
             <dc:creator>{{ $down->user->getName() }}</dc:creator>
-            <pubDate>{{ date('r', $down->created_at) }}</pubDate>
+            <pubDate>{{ $down->created_at->format('r') }}</pubDate>
             <category>{{ __('load::loads.loads') }}</category>
             <guid>{{ route('downs.view', ['id' => $down->id]) }}</guid>
             @foreach ($down->getMedia() as $file)

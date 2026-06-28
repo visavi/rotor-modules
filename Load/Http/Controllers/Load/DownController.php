@@ -118,7 +118,6 @@ class DownController extends Controller
                     'title'       => $title,
                     'text'        => $text,
                     'user_id'     => $user->id,
-                    'created_at'  => SITETIME,
                     'active'      => isAdmin(User::ADMIN),
                     'links'       => $links ? array_values($links) : null,
                 ]);

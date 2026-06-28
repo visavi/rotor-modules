@@ -50,8 +50,7 @@ class AdminAdvertController extends AdminController
                     'bold'       => $bold,
                     'type'       => Advert::TYPE_ADMIN,
                     'user_id'    => getUser('id'),
-                    'created_at' => SITETIME,
-                    'deleted_at' => SITETIME + 7 * 86400,
+                    'deleted_at' => now()->addDays(7),
                 ]);
 
             clearCache('adminAdverts');

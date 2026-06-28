@@ -15,7 +15,7 @@
 @section('content')
     <div class="section-form mb-3 shadow">
         @if ($advert->id)
-            @if ($advert->deleted_at > SITETIME)
+            @if ($advert->deleted_at?->gt(now()))
                 <div class="alert alert-success">
                     {{ __('advert::adverts.expires') }}: {{ dateFixed($advert->deleted_at) }}
                 </div>

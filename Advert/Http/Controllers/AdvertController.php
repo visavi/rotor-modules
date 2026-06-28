@@ -41,7 +41,7 @@ class AdvertController extends Controller
     {
         $adverts = Advert::query()
             ->where('type', Advert::TYPE_USER)
-            ->where('deleted_at', '>', SITETIME)
+            ->where('deleted_at', '>', now())
             ->orderByDesc('deleted_at')
             ->with('user')
             ->paginate(setting('rekuserpost'));
@@ -58,7 +58,7 @@ class AdvertController extends Controller
             abort(200, __('advert::adverts.advert_point', ['point' => plural(50, setting('scorename'))]));
         }
 
-        Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', SITETIME)->delete();
+        Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', now())->delete();
 
         $total = Advert::query()->where('type', Advert::TYPE_USER)->count();
         if ($total >= setting('rekusertotal')) {
@@ -107,8 +107,7 @@ class AdvertController extends Controller
                     'bold'       => $bold,
                     'type'       => Advert::TYPE_USER,
                     'user_id'    => $this->user->id,
-                    'created_at' => SITETIME,
-                    'deleted_at' => strtotime('+' . setting('rekusertime') . ' hours', SITETIME),
+                    'deleted_at' => now()->addHours((int) setting('rekusertime')),
                 ]);
 
                 $this->user->decrement('money', $price);

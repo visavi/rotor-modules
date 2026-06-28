@@ -63,7 +63,7 @@ class IndexController extends Controller
                 ->gte(getUser('money'), $gift->price, __('gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
-                GiftsUser::query()->where('deleted_at', '<', SITETIME)->delete();
+                GiftsUser::query()->where('deleted_at', '<', now())->delete();
 
                 $msg = antimat($msg);
 
@@ -75,8 +75,7 @@ class IndexController extends Controller
                         'user_id'      => $user->id,
                         'send_user_id' => getUser('id'),
                         'text'         => $msg,
-                        'created_at'   => SITETIME,
-                        'deleted_at'   => strtotime('+' . Gift::getConfig('gift_days') . 'days', SITETIME),
+                        'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
                     ]);
                 });
 
@@ -108,7 +107,7 @@ class IndexController extends Controller
 
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)
-            ->where('deleted_at', '>', SITETIME)
+            ->where('deleted_at', '>', now())
             ->orderByDesc('created_at')
             ->with('gift', 'user', 'sendUser')
             ->get();

@@ -17,7 +17,7 @@ Registry::sitemap('downs', static function () {
         foreach ($downs as $down) {
             $locs[] = [
                 'loc'     => route('downs.view', ['id' => $down->id]),
-                'lastmod' => gmdate('c', $down->created_at),
+                'lastmod' => $down->created_at->format('c'),
             ];
         }
 

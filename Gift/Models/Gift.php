@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace Modules\Gift\Models;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Gift
  *
- * @property int    $id
- * @property string $name
- * @property string $path
- * @property int    $price
- * @property int    $created_at
+ * @property int             $id
+ * @property string          $name
+ * @property string          $path
+ * @property int             $price
+ * @property CarbonImmutable $created_at
  */
 class Gift extends Model
 {
     /**
-     * Indicates if the model should be timestamped.
+     * The name of the "updated at" column.
      */
-    public $timestamps = false;
+    public const ?string UPDATED_AT = null;
 
     /**
      * The attributes that aren't mass assignable.

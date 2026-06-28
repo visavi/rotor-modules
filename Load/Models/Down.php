@@ -18,6 +18,7 @@ use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,18 +30,18 @@ use Illuminate\Support\HtmlString;
 /**
  * Class Down
  *
- * @property int    $id
- * @property int    $category_id
- * @property string $title
- * @property string $text
- * @property int    $user_id
- * @property int    $created_at
- * @property int    $count_comments
- * @property int    $rating
- * @property int    $loads
- * @property bool   $active
- * @property array  $links
- * @property int    $updated_at
+ * @property int                  $id
+ * @property int                  $category_id
+ * @property string               $title
+ * @property string               $text
+ * @property int                  $user_id
+ * @property int                  $count_comments
+ * @property int                  $rating
+ * @property int                  $loads
+ * @property bool                 $active
+ * @property array                $links
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable|null $updated_at
  * @property-read User                       $user
  * @property-read Collection<int, File>      $files
  * @property-read Collection<int, Comment>   $comments
@@ -50,20 +51,15 @@ use Illuminate\Support\HtmlString;
  */
 class Down extends Model
 {
-    use CommentableTrait;
-    use PollableTrait;
-    use FileableTrait;
     use AddFileToArchiveTrait;
+    use CommentableTrait;
     use ConvertVideoTrait;
     use FeedableTrait;
+    use FileableTrait;
+    use PollableTrait;
     use SearchableTrait;
     use SortableTrait;
     use UploadTrait;
-
-    /**
-     * Indicates if the model should be timestamped.
-     */
-    public $timestamps = false;
 
     /**
      * The attributes that aren't mass assignable.
@@ -166,7 +162,7 @@ class Down extends Model
      */
     public function isNew(): bool
     {
-        return $this->created_at > strtotime('-3 day');
+        return $this->created_at->gt(now()->subDays(3));
     }
 
     /**
