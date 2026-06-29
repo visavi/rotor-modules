@@ -15,8 +15,8 @@ return new class extends Migration {
                 $table->ipAddress('ip');
                 $table->string('brow', 25);
                 $table->integer('edit_user_id')->nullable();
-                $table->integer('updated_at')->nullable();
-                $table->integer('created_at');
+                $table->dateTime('updated_at')->nullable();
+                $table->dateTime('created_at');
 
                 $table->index('created_at');
             });

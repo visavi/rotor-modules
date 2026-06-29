@@ -12,7 +12,7 @@ return new class extends Migration {
                 $table->increments('id');
                 $table->integer('user_id');
                 $table->year('year');
-                $table->integer('created_at');
+                $table->dateTime('created_at');
 
                 $table->index('user_id');
             });

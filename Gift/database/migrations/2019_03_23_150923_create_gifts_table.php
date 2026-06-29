@@ -18,7 +18,7 @@ return new class extends Migration {
                 $table->string('name', 50)->nullable();
                 $table->string('path', 100);
                 $table->integer('price')->default(0);
-                $table->integer('created_at');
+                $table->dateTime('created_at');
             });
         }
     }

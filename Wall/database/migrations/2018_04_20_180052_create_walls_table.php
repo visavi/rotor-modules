@@ -13,7 +13,7 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->integer('author_id');
                 $table->text('text');
-                $table->integer('created_at');
+                $table->dateTime('created_at');
 
                 $table->index('user_id');
                 $table->index('created_at');

@@ -2,13 +2,17 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::getColumnType('news', 'created_at') === 'datetime') {
+            return;
+        }
+
         Schema::table('news', function (Blueprint $table) {
             $table->dateTime('created_at_dt')->nullable();
             $table->dateTime('updated_at')->nullable();
@@ -22,7 +26,7 @@ return new class extends Migration {
         DB::table('news')->select('id', 'created_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('news')->where('id', $row->id)->update([
-                    'created_at_dt' => Carbon::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
+                    'created_at_dt' => Date::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
                 ]);
             }
         });
@@ -34,6 +38,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        if (Schema::getColumnType('news', 'created_at') !== 'datetime') {
+            return;
+        }
+
         Schema::table('news', fn (Blueprint $table) => $table->integer('created_at_int')->nullable());
 
         $tz = config('app.timezone');
@@ -41,7 +49,7 @@ return new class extends Migration {
         DB::table('news')->select('id', 'created_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('news')->where('id', $row->id)->update([
-                    'created_at_int' => Carbon::parse($row->created_at, $tz)->getTimestamp(),
+                    'created_at_int' => Date::parse($row->created_at, $tz)->getTimestamp(),
                 ]);
             }
         });

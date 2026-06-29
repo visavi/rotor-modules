@@ -21,7 +21,8 @@ return new class extends Migration {
                 $table->boolean('active')->default(true);
                 $table->boolean('draft')->default(false);
                 $table->timestamp('published_at')->nullable();
-                $table->integer('created_at');
+                $table->dateTime('created_at');
+                $table->dateTime('updated_at')->nullable();
 
                 $table->index('category_id');
                 $table->index('user_id');

@@ -2,13 +2,17 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::getColumnType('items', 'created_at') === 'datetime') {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->dateTime('created_at_dt')->nullable();
             $table->dateTime('updated_at_dt')->nullable();
@@ -23,9 +27,9 @@ return new class extends Migration {
         DB::table('items')->select('id', 'created_at', 'updated_at', 'expires_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('items')->where('id', $row->id)->update([
-                    'created_at_dt' => Carbon::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
-                    'updated_at_dt' => Carbon::createFromTimestamp($row->updated_at, $tz)->format('Y-m-d H:i:s'),
-                    'expires_at_dt' => Carbon::createFromTimestamp($row->expires_at, $tz)->format('Y-m-d H:i:s'),
+                    'created_at_dt' => Date::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
+                    'updated_at_dt' => Date::createFromTimestamp($row->updated_at, $tz)->format('Y-m-d H:i:s'),
+                    'expires_at_dt' => Date::createFromTimestamp($row->expires_at, $tz)->format('Y-m-d H:i:s'),
                 ]);
             }
         });
@@ -49,6 +53,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        if (Schema::getColumnType('items', 'created_at') !== 'datetime') {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->integer('created_at_int')->nullable();
             $table->integer('updated_at_int')->nullable();
@@ -60,9 +68,9 @@ return new class extends Migration {
         DB::table('items')->select('id', 'created_at', 'updated_at', 'expires_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('items')->where('id', $row->id)->update([
-                    'created_at_int' => Carbon::parse($row->created_at, $tz)->getTimestamp(),
-                    'updated_at_int' => Carbon::parse($row->updated_at, $tz)->getTimestamp(),
-                    'expires_at_int' => Carbon::parse($row->expires_at, $tz)->getTimestamp(),
+                    'created_at_int' => Date::parse($row->created_at, $tz)->getTimestamp(),
+                    'updated_at_int' => Date::parse($row->updated_at, $tz)->getTimestamp(),
+                    'expires_at_int' => Date::parse($row->expires_at, $tz)->getTimestamp(),
                 ]);
             }
         });

@@ -16,8 +16,8 @@ return new class extends Migration {
                 $table->boolean('bold')->default(false);
                 $table->string('type', 10)->default('user');
                 $table->integer('user_id');
-                $table->integer('created_at');
-                $table->integer('deleted_at')->nullable();
+                $table->dateTime('created_at');
+                $table->dateTime('deleted_at')->nullable();
             });
         }
     }

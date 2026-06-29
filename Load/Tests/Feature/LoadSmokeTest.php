@@ -45,7 +45,7 @@ class LoadSmokeTest extends ModuleTestCase
             'text'        => 'Test down text',
             'user_id'     => $this->user->id,
             'active'      => true,
-            'created_at'  => SITETIME,
+            'created_at'  => now()->timestamp,
         ]);
 
         $this->get(route('downs.view', ['id' => $down->id]))->assertOk();

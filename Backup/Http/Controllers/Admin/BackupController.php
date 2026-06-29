@@ -24,7 +24,7 @@ class BackupController extends AdminController
             set_time_limit(600);
         }
 
-        $this->date = date('d-M-Y_H-i-s', SITETIME);
+        $this->date = now()->format('d-M-Y_H-i-s');
     }
 
     /**

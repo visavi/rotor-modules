@@ -67,7 +67,7 @@ class CheckerController extends AdminController
 
         foreach ($files as $file) {
             try {
-                $state[] = $file->getRelativePathname() . ' / ' . dateFixed($file->getMTime(), 'd.m.y H:i:s', true) . ' / ' . formatSize($file->getSize());
+                $state[] = $file->getRelativePathname() . ' / ' . dateFixed(\Illuminate\Support\Carbon::createFromTimestamp($file->getMTime()), 'd.m.y H:i:s', true) . ' / ' . formatSize($file->getSize());
             } catch (\RuntimeException) {
                 // пропускаем недоступные файлы (битые симлинки)
             }

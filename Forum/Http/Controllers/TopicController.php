@@ -527,7 +527,6 @@ class TopicController extends Controller
                 'relate_id'   => $vote->id,
                 'user_id'     => $user->id,
                 'vote'        => $answer->answer,
-                'created_at'  => SITETIME,
             ]);
 
             setFlash('success', __('forum::forums.vote_success'));

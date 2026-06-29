@@ -12,6 +12,8 @@ return new class extends Migration {
             $table->integer('user_id');
             $table->string('path');
             $table->string('title');
+            $table->string('ip', 45)->nullable();
+            $table->string('brow', 25)->nullable();
             $table->dateTime('created_at')->nullable();
         });
     }

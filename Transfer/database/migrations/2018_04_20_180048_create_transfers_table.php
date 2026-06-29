@@ -14,7 +14,7 @@ return new class extends Migration {
                 $table->integer('recipient_id');
                 $table->text('text');
                 $table->integer('total')->default(0);
-                $table->integer('created_at');
+                $table->dateTime('created_at');
 
                 $table->index('user_id');
                 $table->index('recipient_id');

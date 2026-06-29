@@ -73,7 +73,7 @@
                         <i class="fa fa-file"></i>
                         <b><a href="/admin/files/edit?path={{ $path }}&amp;file={{ basename($file, '.blade.php') }}">{{ $file }}</a></b> ({{ $size }})<br>
                         {{ __('page_editor::files.lines') }}: {{ $string }} /
-                        {{ __('page_editor::files.changed') }}: {{ dateFixed(filemtime(resource_path('views/' . $path . $fileName))) }}
+                        {{ __('page_editor::files.changed') }}: {{ dateFixed(\Illuminate\Support\Carbon::createFromTimestamp(filemtime(resource_path('views/' . $path . $fileName)))) }}
                     </li>
                 @endif
             @endforeach

@@ -87,7 +87,7 @@
                         <i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }} / {{ dateFixed($item->updated_at) }}<br>
 
                         @if ($item->expires_at->gt(now()))
-                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - SITETIME) }}
+                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}
                         @endif
                     </div>
                 </div>

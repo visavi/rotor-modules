@@ -70,7 +70,7 @@ class PaidAdvertController extends AdminController
                 ->url($site, ['site' => __('validator.url')])
                 ->length($site, 5, 100, ['site' => __('validator.url_text')])
                 ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, SITETIME, ['term' => __('payment::payments.paid_adverts.term_invalid')])
+                ->gt($term, now()->timestamp, ['term' => __('payment::payments.paid_adverts.term_invalid')])
                 ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
                 ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
 
@@ -133,7 +133,7 @@ class PaidAdvertController extends AdminController
                 ->url($site, ['site' => __('validator.url')])
                 ->length($site, 5, 100, ['site' => __('validator.url_text')])
                 ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, SITETIME, ['term' => __('payment::payments.paid_adverts.term_invalid')])
+                ->gt($term, now()->timestamp, ['term' => __('payment::payments.paid_adverts.term_invalid')])
                 ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
                 ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
 

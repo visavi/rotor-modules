@@ -17,7 +17,7 @@ return new class extends Migration {
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->create([
                 'name'       => $categoryName,
-                'created_at' => SITETIME,
+                'created_at' => now(),
             ]);
 
             $stickers = array_map('basename', glob(base_path('modules/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}'), GLOB_BRACE));

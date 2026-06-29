@@ -15,8 +15,8 @@ return new class extends Migration {
             'text'       => __('transfer::transfers.notice_text'),
             'user_id'    => 1,
             'protect'    => 1,
-            'created_at' => time(),
-            'updated_at' => time(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

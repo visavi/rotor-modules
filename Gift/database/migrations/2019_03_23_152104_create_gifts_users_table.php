@@ -19,8 +19,8 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->integer('send_user_id')->nullable();
                 $table->text('text')->nullable();
-                $table->integer('created_at');
-                $table->integer('deleted_at');
+                $table->dateTime('created_at');
+                $table->dateTime('deleted_at');
             });
         }
     }

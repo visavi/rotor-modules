@@ -24,7 +24,7 @@ if (! function_exists('statsNewsDate')) {
         $newsDate = Cache::remember('statNewsDate', 900, static function () {
             $news = News::query()->orderByDesc('created_at')->first();
 
-            return $news->created_at ?? 0;
+            return $news->created_at ?? null;
         });
 
         return $newsDate ? dateFixed($newsDate, 'd.m.Y') : '0';

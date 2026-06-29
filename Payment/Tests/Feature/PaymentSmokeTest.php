@@ -321,8 +321,8 @@ class PaymentSmokeTest extends ModuleTestCase
             'color'      => null,
             'bold'       => false,
             'user_id'    => $user->id,
-            'created_at' => SITETIME,
-            'deleted_at' => SITETIME + 86400,
+            'created_at' => now()->timestamp,
+            'deleted_at' => now()->addDay()->timestamp,
         ], $attributes));
     }
 

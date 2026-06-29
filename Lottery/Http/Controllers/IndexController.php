@@ -113,7 +113,7 @@ class IndexController extends Controller
             ->orderByDesc('day')
             ->first();
 
-        if ($lottery && $lottery->day !== date('Y-m-d', SITETIME)) {
+        if ($lottery && $lottery->day !== now()->format('Y-m-d')) {
             // Search winners
             $winners = $lottery->lotteryUsers()
                 ->where('number', $lottery->number)
@@ -133,10 +133,10 @@ class IndexController extends Controller
             }
         }
 
-        if (! $lottery || $lottery->day !== date('Y-m-d', SITETIME)) {
+        if (! $lottery || $lottery->day !== now()->format('Y-m-d')) {
             // Update lottery
             Lottery::query()->create([
-                'day'    => date('Y-m-d', SITETIME),
+                'day'    => now()->format('Y-m-d'),
                 'amount' => $amount,
                 'number' => mt_rand($range[0], $range[1]),
             ]);

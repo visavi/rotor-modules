@@ -2,13 +2,17 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::getColumnType('articles', 'created_at') === 'datetime') {
+            return;
+        }
+
         Schema::table('articles', function (Blueprint $table) {
             // без after() — новые колонки добавляются в конец таблицы (как в стандартном Laravel)
             $table->dateTime('created_at_dt')->nullable();
@@ -23,7 +27,7 @@ return new class extends Migration {
         DB::table('articles')->select('id', 'created_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('articles')->where('id', $row->id)->update([
-                    'created_at_dt' => Carbon::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
+                    'created_at_dt' => Date::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
                 ]);
             }
         });
@@ -35,6 +39,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        if (Schema::getColumnType('articles', 'created_at') !== 'datetime') {
+            return;
+        }
+
         Schema::table('articles', fn (Blueprint $table) => $table->integer('created_at_int')->nullable());
 
         $tz = config('app.timezone');
@@ -42,7 +50,7 @@ return new class extends Migration {
         DB::table('articles')->select('id', 'created_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('articles')->where('id', $row->id)->update([
-                    'created_at_int' => Carbon::parse($row->created_at, $tz)->getTimestamp(),
+                    'created_at_int' => Date::parse($row->created_at, $tz)->getTimestamp(),
                 ]);
             }
         });

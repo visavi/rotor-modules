@@ -68,9 +68,9 @@ class BoardSmokeTest extends ModuleTestCase
             'title'      => 'Test item',
             'text'       => 'Test item text',
             'user_id'    => $this->user->id,
-            'created_at' => SITETIME,
-            'updated_at' => SITETIME,
-            'expires_at' => SITETIME + 86400,
+            'created_at' => now()->timestamp,
+            'updated_at' => now()->timestamp,
+            'expires_at' => now()->addDay()->timestamp,
         ]);
 
         $this->get(route('items.view', ['id' => $item->id]))->assertOk();

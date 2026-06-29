@@ -27,7 +27,7 @@ class GuestbookControllerTest extends ModuleTestCase
             'text'       => 'Test text message',
             'ip'         => '127.0.0.1',
             'brow'       => 'Chrome 60.0',
-            'created_at' => SITETIME,
+            'created_at' => now()->timestamp,
         ]);
 
         $getGuest = Guestbook::query()->find($guest->id);

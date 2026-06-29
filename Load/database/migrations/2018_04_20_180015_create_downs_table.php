@@ -19,8 +19,8 @@ return new class extends Migration {
                 $table->integer('loads')->default(0);
                 $table->boolean('active')->default(false);
                 $table->json('links')->nullable();
-                $table->integer('updated_at')->nullable();
-                $table->integer('created_at');
+                $table->dateTime('updated_at')->nullable();
+                $table->dateTime('created_at');
 
                 $table->index('category_id');
                 $table->index('created_at');

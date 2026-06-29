@@ -18,7 +18,7 @@ class SurpriseController extends Controller
         $money = mt_rand(10000, 50000);
         $point = mt_rand(150, 250);
         $rating = mt_rand(3, 10);
-        $year = date('Y', strtotime('+3 days', SITETIME));
+        $year = now()->addDays(3)->format('Y');
 
         if (! $user = getUser()) {
             abort(403, __('main.not_authorized'));

@@ -1,5 +1,7 @@
 <?php
 
 return [
-    'title' => 'Кто-где',
+    'title'           => 'Кто-где',
+    'last_page'       => 'Последняя страница',
+    'empty_locations' => 'Список пуст',
 ];

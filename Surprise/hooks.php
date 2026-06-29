@@ -9,7 +9,7 @@ Hook::add('navbarStart', static function () {
         return null;
     }
 
-    if (strtotime(date('d.m.Y')) > strtotime(date('03.01.Y', strtotime('+3 days', SITETIME)))) {
+    if (strtotime(date('d.m.Y')) > strtotime(now()->addDays(3)->format('03.01.Y'))) {
         return null;
     }
 

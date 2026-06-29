@@ -20,7 +20,7 @@ return new class extends Migration {
                 'name'       => '',
                 'path'       => '/assets/modules/gifts/' . $gift,
                 'price'      => mt_rand(1, 10) * 100,
-                'created_at' => SITETIME,
+                'created_at' => now(),
             ];
         }
 

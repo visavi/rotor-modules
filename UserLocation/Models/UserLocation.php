@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int             $user_id
  * @property string          $path
  * @property string          $title
+ * @property string|null     $ip
+ * @property string|null     $brow
  * @property CarbonImmutable $created_at
  */
 class UserLocation extends Model

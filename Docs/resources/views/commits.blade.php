@@ -30,7 +30,7 @@
                         <div class="cmt-item__meta">
                             <a class="cmt-item__author" href="{{ $commit['author']['html_url'] ?? '#' }}">{{ $commit['author']['login'] ?? $commit['commit']['author']['name'] }}</a>
                             <span class="cmt-item__sep">&middot;</span>
-                            <span class="cmt-item__date">{{ dateFixed(strtotime($commit['commit']['author']['date'])) }}</span>
+                            <span class="cmt-item__date">{{ dateFixed(\Illuminate\Support\Facades\Date::parse($commit['commit']['author']['date'])) }}</span>
                             <a class="cmt-item__sha" href="{{ $commit['html_url'] }}" rel="noopener" target="_blank">
                                 <i class="fas fa-code-commit me-1"></i>{{ substr($commit['sha'], 0, 7) }}
                             </a>

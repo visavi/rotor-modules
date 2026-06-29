@@ -271,7 +271,7 @@ class RegistrationTest extends ModuleTestCase
             'type'       => 'email',
             'value'      => 'banned@example.com',
             'user_id'    => 0,
-            'created_at' => SITETIME,
+            'created_at' => now()->timestamp,
         ]);
 
         Http::fake([
@@ -298,7 +298,7 @@ class RegistrationTest extends ModuleTestCase
             'type'       => 'domain',
             'value'      => 'spam.com',
             'user_id'    => 0,
-            'created_at' => SITETIME,
+            'created_at' => now()->timestamp,
         ]);
 
         Http::fake([
@@ -325,7 +325,7 @@ class RegistrationTest extends ModuleTestCase
             'type'       => 'email',
             'value'      => 'banned@example.com',
             'user_id'    => 0,
-            'created_at' => SITETIME,
+            'created_at' => now()->timestamp,
         ]);
 
         $response = $this->withoutMiddleware(PreventRequestForgery::class)
@@ -351,7 +351,7 @@ class RegistrationTest extends ModuleTestCase
             'type'       => 'login',
             'value'      => 'john-doe',
             'user_id'    => 0,
-            'created_at' => SITETIME,
+            'created_at' => now()->timestamp,
         ]);
 
         Http::fake([

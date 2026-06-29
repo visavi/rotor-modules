@@ -45,7 +45,7 @@ class BlogSmokeTest extends ModuleTestCase
             'title'       => 'Test article',
             'slug'        => 'test-article',
             'text'        => 'Test article text',
-            'created_at'  => SITETIME,
+            'created_at'  => now()->timestamp,
         ]);
 
         $this->get(route('articles.view', ['slug' => $article->slug]))->assertOk();

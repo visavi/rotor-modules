@@ -48,7 +48,7 @@ class ForumSmokeTest extends ModuleTestCase
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
             'count_posts' => 0,
-            'created_at'  => SITETIME,
+            'created_at'  => now()->timestamp,
         ]);
 
         $this->get(route('topics.topic', ['id' => $topic->id]))->assertOk();

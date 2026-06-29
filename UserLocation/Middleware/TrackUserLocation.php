@@ -40,6 +40,8 @@ class TrackUserLocation
                 ], [
                     'path'       => Str::substr($uri, 0, 191),
                     'title'      => Str::substr($pageTitle, 0, 191),
+                    'ip'         => getIp(),
+                    'brow'       => getBrowser(),
                     'created_at' => now(),
                 ]);
             }

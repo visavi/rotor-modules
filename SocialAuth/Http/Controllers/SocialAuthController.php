@@ -340,8 +340,7 @@ class SocialAuthController extends Controller
             'language'   => setting('language'),
             'money'      => setting('registermoney'),
             'subscribe'  => Str::random(32),
-            'updated_at' => SITETIME,
-            'created_at' => SITETIME,
+            'updated_at' => now(),
         ]);
 
         Social::query()->create([

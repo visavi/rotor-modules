@@ -21,8 +21,8 @@ return new class extends Migration {
                 $table->integer('visits')->default(0);
                 $table->integer('last_post_id')->nullable();
                 $table->integer('close_user_id')->nullable();
-                $table->integer('updated_at')->nullable();
-                $table->integer('created_at');
+                $table->dateTime('updated_at')->nullable();
+                $table->dateTime('created_at');
 
                 $table->index(['count_posts', 'updated_at']);
                 $table->index(['user_id', 'updated_at']);

@@ -18,7 +18,7 @@ return new class extends Migration {
                 $table->integer('lottery_id');
                 $table->integer('user_id');
                 $table->smallInteger('number');
-                $table->integer('created_at');
+                $table->dateTime('created_at');
             });
         }
     }

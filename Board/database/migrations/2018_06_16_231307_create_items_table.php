@@ -18,9 +18,9 @@ return new class extends Migration {
                 $table->string('phone', 15)->nullable();
                 $table->boolean('active')->default(true);
                 $table->integer('visits')->default(0);
-                $table->integer('created_at');
-                $table->integer('updated_at');
-                $table->integer('expires_at');
+                $table->dateTime('created_at');
+                $table->dateTime('updated_at');
+                $table->dateTime('expires_at');
 
                 $table->index('board_id');
                 $table->index('expires_at');

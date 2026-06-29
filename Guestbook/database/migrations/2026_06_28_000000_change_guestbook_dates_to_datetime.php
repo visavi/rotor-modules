@@ -2,13 +2,17 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::getColumnType('guestbook', 'created_at') === 'datetime') {
+            return;
+        }
+
         Schema::table('guestbook', function (Blueprint $table) {
             $table->dateTime('created_at_dt')->nullable();
             $table->dateTime('updated_at_dt')->nullable();
@@ -22,8 +26,8 @@ return new class extends Migration {
         DB::table('guestbook')->select('id', 'created_at', 'updated_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('guestbook')->where('id', $row->id)->update([
-                    'created_at_dt' => Carbon::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
-                    'updated_at_dt' => $row->updated_at ? Carbon::createFromTimestamp($row->updated_at, $tz)->format('Y-m-d H:i:s') : null,
+                    'created_at_dt' => Date::createFromTimestamp($row->created_at, $tz)->format('Y-m-d H:i:s'),
+                    'updated_at_dt' => $row->updated_at ? Date::createFromTimestamp($row->updated_at, $tz)->format('Y-m-d H:i:s') : null,
                 ]);
             }
         });
@@ -47,6 +51,10 @@ return new class extends Migration {
 
     public function down(): void
     {
+        if (Schema::getColumnType('guestbook', 'created_at') !== 'datetime') {
+            return;
+        }
+
         Schema::table('guestbook', function (Blueprint $table) {
             $table->integer('created_at_int')->nullable();
             $table->integer('updated_at_int')->nullable();
@@ -57,8 +65,8 @@ return new class extends Migration {
         DB::table('guestbook')->select('id', 'created_at', 'updated_at')->orderBy('id')->chunkById(2000, function ($rows) use ($tz) {
             foreach ($rows as $row) {
                 DB::table('guestbook')->where('id', $row->id)->update([
-                    'created_at_int' => Carbon::parse($row->created_at, $tz)->getTimestamp(),
-                    'updated_at_int' => $row->updated_at ? Carbon::parse($row->updated_at, $tz)->getTimestamp() : null,
+                    'created_at_int' => Date::parse($row->created_at, $tz)->getTimestamp(),
+                    'updated_at_int' => $row->updated_at ? Date::parse($row->updated_at, $tz)->getTimestamp() : null,
                 ]);
             }
         });

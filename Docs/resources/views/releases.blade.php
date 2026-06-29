@@ -36,7 +36,7 @@
                             <img class="rel-meta__avatar rounded-circle" src="{{ $release['author']['avatar_url'] }}" alt="{{ $release['author']['login'] }}">
                             <a class="rel-meta__author" href="{{ $release['author']['html_url'] }}">{{ $release['author']['login'] }}</a>
                             <span class="rel-meta__sep">&middot;</span>
-                            <span class="rel-meta__date">{{ dateFixed(strtotime($release['created_at'])) }}</span>
+                            <span class="rel-meta__date">{{ dateFixed(\Illuminate\Support\Facades\Date::parse($release['created_at'])) }}</span>
                         </div>
 
                         @if ($release['body'])

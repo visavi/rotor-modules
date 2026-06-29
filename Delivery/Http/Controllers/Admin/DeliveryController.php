@@ -34,7 +34,7 @@ class DeliveryController extends AdminController
 
             // Рассылка активным пользователям, которые посещали сайт менее недели назад
             if ($type === 2) {
-                $users = User::query()->where('updated_at', '>', strtotime('-1 week', SITETIME))->get();
+                $users = User::query()->where('updated_at', '>', now()->subWeek())->get();
             }
 
             // Рассылка администрации

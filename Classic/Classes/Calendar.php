@@ -19,7 +19,7 @@ class Calendar
      */
     public function getCalendar(?string $period = null): View
     {
-        [$curDay, $curMonth, $curYear] = array_map('intval', explode('.', dateFixed(SITETIME, 'j.n.Y', true)));
+        [$curDay, $curMonth, $curYear] = array_map('intval', explode('.', dateFixed(now(), 'j.n.Y', true)));
 
         $month = $curMonth;
         $year = $curYear;

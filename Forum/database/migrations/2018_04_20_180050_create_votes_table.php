@@ -12,7 +12,7 @@ return new class extends Migration {
                 $table->increments('id');
                 $table->string('title');
                 $table->integer('count')->default(0);
-                $table->integer('created_at');
+                $table->dateTime('created_at');
                 $table->integer('topic_id')->nullable();
             });
         }

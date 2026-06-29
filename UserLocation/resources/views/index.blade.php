@@ -21,6 +21,9 @@
             <div class="section-body">
                 <span class="avatar-micro">{{ $location->user->getAvatarImage() }}</span> {{ $location->user->getProfile() }}
                 <small class="section-date text-muted fst-italic">{{ dateFixed($location->created_at) }}</small>
+                @if (isAdmin())
+                    <div class="small text-muted fst-italic mt-2">{{ $location->brow }}, {{ $location->ip }}</div>
+                @endif
             </div>
         </div>
 

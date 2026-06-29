@@ -17,8 +17,8 @@ return new class extends Migration {
                 $table->string('color', 10)->nullable();
                 $table->boolean('bold')->default(false);
                 $table->string('comment')->nullable();
-                $table->integer('created_at');
-                $table->integer('deleted_at')->nullable();
+                $table->dateTime('created_at');
+                $table->dateTime('deleted_at')->nullable();
             });
         }
     }

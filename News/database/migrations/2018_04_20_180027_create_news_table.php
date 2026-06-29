@@ -17,7 +17,8 @@ return new class extends Migration {
                 $table->boolean('closed')->default(false);
                 $table->boolean('top')->default(false);
                 $table->integer('rating')->default(0);
-                $table->integer('created_at');
+                $table->dateTime('created_at');
+                $table->dateTime('updated_at')->nullable();
 
                 $table->index('created_at');
             });

@@ -12,7 +12,7 @@ return new class extends Migration {
                 $table->increments('id');
                 $table->integer('user_id');
                 $table->text('text');
-                $table->integer('created_at');
+                $table->dateTime('created_at');
 
                 $table->unique('user_id');
             });

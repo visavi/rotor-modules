@@ -70,7 +70,7 @@
                                         <br>
 
                                         @if ($item->expires_at->gt(now()))
-                                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - SITETIME) }}
+                                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}
                                         @else
                                             <span class="badge bg-danger">{{ __('board::boards.item_not_active') }}</span>
                                         @endif
