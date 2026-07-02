@@ -7,7 +7,7 @@ return [
     'name'        => 'Загрузки',
     'description' => 'Загрузки и файлы',
     'version'     => '1.0.5',
-    'requires'    => '14.0.3',
+    'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

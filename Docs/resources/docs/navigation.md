@@ -4,6 +4,7 @@
     - [Обновление](/docs/rotor-upgrade)
     - [Деплой](/docs/rotor-deploy)
     - [Модули](/docs/rotor-modules)
+    - [Версионирование и совместимость](/docs/rotor-versioning)
     - [Реестр модулей](/docs/rotor-module-registry)
     - [Интеграция с ядром](/docs/rotor-module-integration)
     - [Хуки](/docs/rotor-hooks)

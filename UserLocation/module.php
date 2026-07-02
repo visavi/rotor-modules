@@ -11,7 +11,7 @@ return [
 <pre class="code"><code>&lt;a href="/locations"&gt;Кто-где&lt;/a&gt;</code></pre>
 INFO,
     'version'  => '1.0.1',
-    'requires' => '14.0.3',
+    'requires' => '14.1.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

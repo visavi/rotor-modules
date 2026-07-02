@@ -7,7 +7,7 @@ return [
     'name'        => 'Новости',
     'description' => 'Новостной раздел сайта с комментариями, RSS и поиском',
     'version'     => '1.0.4',
-    'requires'    => '14.0.3',
+    'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

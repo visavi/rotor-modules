@@ -1,8 +1,17 @@
 name: Update Registry
 
+# Переиспользуемый воркфлоу: rotor-languages (и будущие репозитории модулей)
+# вызывают его через workflow_call — релизы и registry.json создаются
+# в вызывающем репозитории (GITHUB_TOKEN и github.repository — его)
 on:
   push:
     branches: [master]
+  workflow_call:
+    inputs:
+      registry-name:
+        description: Название реестра в registry.json
+        type: string
+        default: Official Rotor Modules
 
 jobs:
   build:
@@ -17,6 +26,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          REGISTRY_NAME: ${{ inputs.registry-name || 'Official Rotor Modules' }}
         run: |
           CHANGED=0
           MODULES="[]"
@@ -73,6 +83,10 @@ jobs:
               '{version:$version,requires:$requires,download_url:$url}
                + (if $changelog != "" then {changelog:$changelog} else {} end)')
 
+            # Версии: численная сортировка по убыванию и чистка затенённых — клиент берёт
+            # самую новую версию с requires не выше своего ядра, поэтому версия достижима,
+            # только если её requires строго ниже, чем у всех более новых.
+            # Остаётся «фронтир»: по одной новейшей версии на каждую линию ядра
             MODULES=$(jq \
               --arg mod      "$MODULE" \
               --arg name     "$(get name)" \
@@ -82,6 +96,14 @@ jobs:
               --arg homepage "$(get homepage)" \
               --argjson ver  "$VERSION_ENTRY" \
               '
+              def verkey: split(".") | map(tonumber? // 0);
+              def prune_shadowed:
+                sort_by(.version | verkey) | reverse
+                | reduce .[] as $v ({kept: [], min: null};
+                    (($v.requires // "") | if . == "" then "0" else . end | verkey) as $r
+                    | if .min == null or $r < .min then {kept: (.kept + [$v]), min: $r} else . end)
+                | .kept;
+
               if any(.[]; .module == $mod) then
                 map(
                   if .module == $mod then
@@ -94,8 +116,7 @@ jobs:
                       homepage:    $homepage,
                       versions: (
                         [(.versions // [])[] | select(.version != $ver.version)] + [$ver]
-                        | sort_by(.version)
-                        | reverse
+                        | prune_shadowed
                       )
                     }
                   else . end
@@ -127,7 +148,7 @@ jobs:
             exit 0
           fi
 
-          jq --argjson m "$MODULES" '.modules = $m' <<< '{"name":"Official Rotor Modules","modules":[]}' > registry.json
+          jq -n --arg name "$REGISTRY_NAME" --argjson m "$MODULES" '{name: $name, modules: $m}' > registry.json
           echo "Generated registry.json with $(jq length <<< "$MODULES") modules"
 
           gh release delete registry --yes 2>/dev/null || true
@@ -135,3 +156,22 @@ jobs:
             --title "Registry" \
             --notes "Auto-generated module registry" \
             --latest=false
+
+          # Чистка затенённых архивов с отсрочкой на один цикл публикации:
+          # держим всё, на что ссылается прошлый registry.json (/tmp/registry.json) —
+          # его ещё могут держать протухающие кеши сайтов (~1 час). Осиротевший
+          # релиз удаляется только следующим прогоном. Git-теги остаются —
+          # архив всегда можно пересобрать из исходников
+          KEEP=$(cat registry.json /tmp/registry.json 2>/dev/null \
+            | jq -r '.modules[]?.versions[]?.download_url // empty' \
+            | sed -E 's|.*/releases/download/([^/]+)/.*|\1|' | sort -u)
+
+          if [ -n "$KEEP" ]; then
+            for TAG in $(gh release list --limit 1000 --json tagName --jq '.[].tagName'); do
+              [ "$TAG" = "registry" ] && continue
+              if ! grep -qxF "$TAG" <<< "$KEEP"; then
+                echo "Deleting shadowed release $TAG"
+                gh release delete "$TAG" --yes
+              fi
+            done
+          fi
