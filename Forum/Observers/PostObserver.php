@@ -40,7 +40,7 @@ class PostObserver
 
         Feed::query()->updateOrInsert(
             ['relate_type' => 'topics', 'relate_id' => $post->topic_id],
-            ['created_at' => $post->created_at->getTimestamp()]
+            ['created_at' => $post->created_at]
         );
 
         cache()->increment('feed_version');
@@ -58,11 +58,17 @@ class PostObserver
         $topic->forum->decrement('count_posts');
 
         // Обновляем created_at в feeds на время нового последнего поста
-        $freshTopic = $topic->fresh();
-        if ($freshTopic->last_post_id) {
+        $lastPost = Post::query()
+            ->where('topic_id', $topic->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $topic->update(['last_post_id' => $lastPost->id ?? 0]);
+
+        if ($lastPost) {
             Feed::query()->updateOrInsert(
                 ['relate_type' => 'topics', 'relate_id' => $topic->id],
-                ['created_at' => $freshTopic->lastPost->created_at->getTimestamp()]
+                ['created_at' => $lastPost->created_at]
             );
         } else {
             Feed::query()->where('relate_type', 'topics')->where('relate_id', $topic->id)->delete();
