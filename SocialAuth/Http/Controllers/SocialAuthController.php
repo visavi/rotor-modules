@@ -7,6 +7,7 @@ namespace Modules\SocialAuth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\BlackList;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +77,7 @@ class SocialAuthController extends Controller
                 $token = $oauthProvider->getToken($code);
                 $oauthUser = $oauthProvider->getUser($token);
             }
-        } catch (RuntimeException $e) {
+        } catch (ConnectionException|RuntimeException $e) {
             report($e);
 
             $fallback = Auth::check() ? redirect()->route('social.accounts') : redirect('login');

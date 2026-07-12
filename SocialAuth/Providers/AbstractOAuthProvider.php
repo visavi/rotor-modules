@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\SocialAuth\Providers;
 
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -59,11 +60,19 @@ abstract class AbstractOAuthProvider
     }
 
     /**
+     * HTTP-клиент с таймаутами — OAuth-провайдер может быть недоступен с хостинга
+     */
+    protected function http(): PendingRequest
+    {
+        return Http::connectTimeout(5)->timeout(10);
+    }
+
+    /**
      * Обменивает код авторизации на access token
      */
     public function getToken(string $code): string
     {
-        $response = Http::asForm()
+        $response = $this->http()->asForm()
             ->post($this->getTokenUrl(), $this->getTokenParams($code));
 
         if ($response->failed()) {
@@ -96,6 +105,6 @@ abstract class AbstractOAuthProvider
      */
     protected function fetchUser(string $token): Response
     {
-        return Http::withToken($token)->get($this->getUserUrl());
+        return $this->http()->withToken($token)->get($this->getUserUrl());
     }
 }

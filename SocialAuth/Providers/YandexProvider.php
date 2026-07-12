@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Providers;
 
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 class YandexProvider extends AbstractOAuthProvider
 {
@@ -45,7 +44,7 @@ class YandexProvider extends AbstractOAuthProvider
 
     protected function fetchUser(string $token): Response
     {
-        return Http::withHeaders(['Authorization' => 'OAuth ' . $token])
+        return $this->http()->withHeaders(['Authorization' => 'OAuth ' . $token])
             ->get($this->getUserUrl());
     }
 

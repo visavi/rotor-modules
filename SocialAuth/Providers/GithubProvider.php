@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Providers;
 
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 class GithubProvider extends AbstractOAuthProvider
@@ -40,7 +39,7 @@ class GithubProvider extends AbstractOAuthProvider
 
     public function getToken(string $code): string
     {
-        $response = Http::asForm()
+        $response = $this->http()->asForm()
             ->withHeaders(['Accept' => 'application/json'])
             ->post($this->getTokenUrl(), $this->getTokenParams($code));
 
@@ -60,7 +59,7 @@ class GithubProvider extends AbstractOAuthProvider
 
     protected function fetchUser(string $token): Response
     {
-        return Http::withToken($token)
+        return $this->http()->withToken($token)
             ->withHeaders([
                 'Accept'     => 'application/vnd.github.v3+json',
                 'User-Agent' => config('app.name'),
@@ -90,7 +89,7 @@ class GithubProvider extends AbstractOAuthProvider
 
     private function fetchVerifiedEmail(string $token): ?string
     {
-        $response = Http::withToken($token)
+        $response = $this->http()->withToken($token)
             ->withHeaders([
                 'Accept'     => 'application/vnd.github.v3+json',
                 'User-Agent' => config('app.name'),

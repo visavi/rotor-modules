@@ -167,15 +167,6 @@
         .rel-spoiler { margin-bottom: .85rem; }
         .rel-spoiler summary { cursor: pointer; color: var(--bs-primary); font-size: .9rem; }
         .rel-spoiler__inner { margin-top: .5rem; font-size: .92rem; color: var(--bs-secondary-color); }
-        .markdown-body :is(h1, h2, h3, h4) { font-size: 1rem; font-weight: 700; margin: .85rem 0 .4rem; color: var(--bs-body-color); }
-        .markdown-body ul, .markdown-body ol { padding-left: 1.25rem; margin-bottom: .5rem; }
-        .markdown-body li { margin-bottom: .2rem; }
-        .markdown-body p { margin-bottom: .5rem; }
-        .markdown-body code { font-size: .85em; padding: .1rem .35rem; border-radius: .3rem; background: var(--bs-tertiary-bg); }
-        .markdown-body pre { padding: .75rem; border-radius: .5rem; background: var(--bs-tertiary-bg); overflow-x: auto; }
-        .markdown-body pre code { padding: 0; background: none; }
-        .markdown-body a { color: var(--bs-primary); }
-        .markdown-body :last-child { margin-bottom: 0; }
 
         .rel-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
         .rel-asset__size { opacity: .75; font-size: .8rem; margin-left: .25rem; }

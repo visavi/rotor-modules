@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Providers;
 
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 class VkProvider extends AbstractOAuthProvider
@@ -69,7 +68,7 @@ class VkProvider extends AbstractOAuthProvider
             $params['device_id'] = $deviceId;
         }
 
-        $response = Http::asForm()->post($this->getTokenUrl(), $params);
+        $response = $this->http()->asForm()->post($this->getTokenUrl(), $params);
 
         if ($response->failed()) {
             throw new RuntimeException('VK token request failed: ' . $response->body());
@@ -91,7 +90,7 @@ class VkProvider extends AbstractOAuthProvider
 
     protected function fetchUser(string $token): Response
     {
-        return Http::asForm()->post($this->getUserUrl(), [
+        return $this->http()->asForm()->post($this->getUserUrl(), [
             'access_token' => $token,
             'client_id'    => setting('social_vk_client_id'),
         ]);
