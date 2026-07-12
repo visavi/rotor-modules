@@ -3,7 +3,7 @@
 return [
     'name'        => 'Шаблон',
     'description' => 'Минимальный модуль-шаблон для создания новых модулей',
-    'version'     => '1.0.1',
+    'version'     => '1.0.2',
     'requires'    => '14.1.0',
     'author'      => 'Автор модуля',
     'email'       => 'admin@visavi.net',

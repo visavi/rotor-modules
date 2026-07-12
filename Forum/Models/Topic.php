@@ -256,7 +256,7 @@ class Topic extends Model
     {
         $lastPost = Post::query()
             ->where('topic_id', $this->id)
-            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
             ->first();
 
         $countPosts = Post::query()->where('topic_id', $this->id)->count();

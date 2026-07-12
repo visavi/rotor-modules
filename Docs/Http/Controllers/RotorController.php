@@ -36,7 +36,7 @@ class RotorController extends Controller
      */
     public function releases(): View
     {
-        $releases = $this->githubService->getLatestReleases();
+        $releases = paginate($this->githubService->getLatestReleases(), 10);
 
         return view('docs::releases', compact('releases'));
     }

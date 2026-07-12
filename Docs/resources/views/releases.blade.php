@@ -13,7 +13,7 @@
 @stop
 
 @section('content')
-    @if ($releases)
+    @if ($releases->isNotEmpty())
         <div class="rel-feed">
             @foreach ($releases as $i => $release)
                 <article class="rel-card{{ $i === 0 ? ' rel-card--latest' : '' }}">
@@ -81,6 +81,10 @@
                     </div>
                 </article>
             @endforeach
+        </div>
+
+        <div class="mt-3">
+            {{ $releases->links() }}
         </div>
     @else
         <div class="alert alert-warning">
