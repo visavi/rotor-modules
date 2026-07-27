@@ -40,6 +40,10 @@
         {{ __('main.new') }}:
         <a href="{{ route('topics.index') }}" class="badge bg-adaptive">{{ __('forum::forums.topics') }}</a>
         <a href="{{ route('posts.index') }}" class="badge bg-adaptive">{{ __('forum::forums.posts') }}</a>
+
+        <div class="mt-2">
+            <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('forums.rss') }}">{{ __('main.rss') }}</a>
+        </div>
     </div>
 
     @if ($forums->isNotEmpty())
@@ -95,5 +99,4 @@
         {{ showError(__('forum::forums.empty_forums')) }}
     @endif
 
-    <a href="{{ route('forums.rss') }}">{{ __('main.rss') }}</a><br>
 @stop

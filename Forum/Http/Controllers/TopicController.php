@@ -6,6 +6,7 @@ namespace Modules\Forum\Http\Controllers;
 
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
+use App\Models\Feed;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Poll;
@@ -170,6 +171,14 @@ class TopicController extends Controller
                 && (Str::length($msg) + Str::length($post->text) <= setting('forum_text_max'))
             ) {
                 $post->update(['text' => $post->text . PHP_EOL . $msg]);
+
+                // Склейка не проходит через PostObserver::created — освежаем ленту вручную
+                Feed::query()->updateOrInsert(
+                    ['relate_type' => 'topics', 'relate_id' => $topic->id],
+                    ['created_at' => now()]
+                );
+
+                cache()->increment('feed_version');
             } else {
                 $post = Post::query()->create([
                     'topic_id' => $topic->id,
