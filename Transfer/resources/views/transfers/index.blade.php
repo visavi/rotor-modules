@@ -24,20 +24,20 @@
                 @else
                     <div class="mb-3{{ hasError('user') }}">
                         <label for="inputUser" class="form-label">{{ __('main.user_login') }}:</label>
-                        <input name="user" class="form-control" id="inputUser" maxlength="20" placeholder="{{ __('main.user_login') }}" value="{{ getInput('user') }}" required>
+                        <input name="user" class="form-control" id="inputUser" maxlength="20" placeholder="{{ __('main.user_login') }}" value="{{ old('user') }}" required>
                         <div class="invalid-feedback">{{ textError('user') }}</div>
                     </div>
                 @endif
 
                 <div class="mb-3{{ hasError('money') }}">
                     <label for="inputMoney" class="form-label">{{ __('main.amount') }}:</label>
-                    <input name="money" class="form-control" id="inputMoney" placeholder="{{ __('main.amount') }}" value="{{ getInput('money') }}" required>
+                    <input name="money" class="form-control" id="inputMoney" placeholder="{{ __('main.amount') }}" value="{{ old('money') }}" required>
                     <div class="invalid-feedback">{{ textError('money') }}</div>
                 </div>
 
                 <div class="mb-3{{ hasError('msg') }}">
                     <label for="msg" class="form-label">{{ __('main.comment') }}:</label>
-                    <textarea class="form-control tiptap" maxlength="{{ setting('comment_text_max') }}" id="msg" rows="5" name="msg" placeholder="{{ __('main.comment') }}">{{ getInput('msg') }}</textarea>
+                    <textarea class="form-control tiptap" maxlength="{{ setting('comment_text_max') }}" id="msg" rows="5" name="msg" placeholder="{{ __('main.comment') }}">{{ old('msg') }}</textarea>
                     <div class="invalid-feedback">{{ textError('msg') }}</div>
                     <span class="js-textarea-counter"></span>
                 </div>

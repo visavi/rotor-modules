@@ -226,7 +226,7 @@
                     @csrf
                     <div class="mb-3{{ hasError('msg') }}">
                         <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                        <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ getInput('msg') }}</textarea>
+                        <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ old('msg') }}</textarea>
                         <div class="invalid-feedback">{{ textError('msg') }}</div>
                         <span class="js-textarea-counter"></span>
                     </div>

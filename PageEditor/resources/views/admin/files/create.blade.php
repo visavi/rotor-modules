@@ -25,7 +25,7 @@
                         @csrf
                         <div class="mb-3{{ hasError('dirname') }}">
                             <label for="dirname" class="form-label">{{ __('page_editor::files.directory_name') }}:</label>
-                            <input type="text" class="form-control" id="dirname" name="dirname" maxlength="30" value="{{ getInput('dirname') }}" required>
+                            <input type="text" class="form-control" id="dirname" name="dirname" maxlength="30" value="{{ old('dirname') }}" required>
                             <div class="invalid-feedback">{{ textError('dirname') }}</div>
                         </div>
 
@@ -40,7 +40,7 @@
                         @csrf
                         <div class="mb-3{{ hasError('filename') }}">
                             <label for="filename" class="form-label">{{ __('page_editor::files.file_name') }}:</label>
-                            <input type="text" class="form-control" id="filename" name="filename" maxlength="30" value="{{ getInput('filename') }}" required>
+                            <input type="text" class="form-control" id="filename" name="filename" maxlength="30" value="{{ old('filename') }}" required>
                             <div class="invalid-feedback">{{ textError('filename') }}</div>
                         </div>
 

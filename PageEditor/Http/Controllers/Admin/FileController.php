@@ -89,13 +89,13 @@ class FileController extends Controller
             if ($validator->isValid()) {
                 file_put_contents(resource_path('views/' . $this->path . $file . '.blade.php'), $msg);
 
-                setFlash('success', __('page_editor::files.file_success_saved'));
-
-                return redirect('admin/files/edit?path=' . $this->path . '&file=' . $this->file);
+                return redirect('admin/files/edit?path=' . $this->path . '&file=' . $this->file)
+                    ->with('success', __('page_editor::files.file_success_saved'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/files/edit?path=' . $this->path . '&file=' . $this->file)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $contest = file_get_contents(resource_path('views/' . $path . $file . '.blade.php'));
@@ -134,9 +134,8 @@ class FileController extends Controller
                     file_put_contents(resource_path('views/' . $this->path . $fileName . '.blade.php'), '');
                     chmod(resource_path('views/' . $this->path . $fileName . '.blade.php'), 0644);
 
-                    setFlash('success', __('page_editor::files.file_success_created'));
-
-                    return redirect('admin/files/edit?path=' . $this->path . '&file=' . $filename);
+                    return redirect('admin/files/edit?path=' . $this->path . '&file=' . $filename)
+                        ->with('success', __('page_editor::files.file_success_created'));
                 }
 
                 $old = umask(0);
@@ -151,8 +150,9 @@ class FileController extends Controller
                 return redirect('admin/files?path=' . $this->path . $dirName)->with(...$flash);
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/files/create?path=' . $this->path)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('page_editor::admin/files/create', ['path' => $this->path]);
@@ -181,18 +181,20 @@ class FileController extends Controller
             $validator->regex($dirname, '|^[a-z0-9_\-]+$|', __('page_editor::files.directory_invalid'));
         }
 
-        if ($validator->isValid()) {
-            if ($filename) {
-                unlink(resource_path('views/' . $this->path . $fileName . '.blade.php'));
-                setFlash('success', __('page_editor::files.file_success_deleted'));
-            } else {
-                deleteDir(resource_path('views/' . $this->path . $dirName));
-                setFlash('success', __('page_editor::files.directory_success_deleted'));
-            }
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect('admin/files?path=' . $this->path)
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect('admin/files?path=' . $this->path);
+        if ($filename) {
+            unlink(resource_path('views/' . $this->path . $fileName . '.blade.php'));
+            $status = __('page_editor::files.file_success_deleted');
+        } else {
+            deleteDir(resource_path('views/' . $this->path . $dirName));
+            $status = __('page_editor::files.directory_success_deleted');
+        }
+
+        return redirect('admin/files?path=' . $this->path)
+            ->with('success', $status);
     }
 }

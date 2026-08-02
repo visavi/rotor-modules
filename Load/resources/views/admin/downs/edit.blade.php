@@ -21,7 +21,7 @@
             <div class="mb-3{{ hasError('parent') }}">
                 <label for="parent" class="form-label">{{ __('load::loads.parent_load') }}</label>
 
-                <?php $inputParent = (int) getInput('parent', $load->parent_id); ?>
+                <?php $inputParent = (int) old('parent', $load->parent_id); ?>
 
                 <select class="form-select" id="parent" name="parent">
                     <option value="0">---</option>
@@ -38,19 +38,19 @@
 
             <div class="mb-3{{ hasError('name') }}">
                 <label for="name" class="form-label">{{ __('main.title') }}:</label>
-                <input class="form-control" name="name" id="name" maxlength="{{ setting('down_category_max') }}" value="{{ getInput('name', $load->name) }}" required>
+                <input class="form-control" name="name" id="name" maxlength="{{ setting('down_category_max') }}" value="{{ old('name', $load->name) }}" required>
                 <div class="invalid-feedback">{{ textError('name') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('sort') }}">
                 <label for="sort" class="form-label">{{ __('main.position') }}:</label>
-                <input type="number" class="form-control" name="sort" id="sort" maxlength="3" value="{{ getInput('sort', $load->sort) }}" required>
+                <input type="number" class="form-control" name="sort" id="sort" maxlength="3" value="{{ old('sort', $load->sort) }}" required>
                 <div class="invalid-feedback">{{ textError('sort') }}</div>
             </div>
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed', $load->closed) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $load->closed) ? ' checked' : '' }}>
                 <label for="closed" class="form-check-label">{{ __('main.close') }}</label>
             </div>
 

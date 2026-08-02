@@ -20,7 +20,7 @@
             <div class="mb-3{{ hasError('parent') }}">
                 <label for="parent" class="form-label">{{ __('forum::forums.parent_forum') }}</label>
 
-                <?php $inputParent = (int) getInput('parent', $forum->parent_id); ?>
+                <?php $inputParent = (int) old('parent', $forum->parent_id); ?>
 
                 <select class="form-select" id="parent" name="parent">
                     <option value="0">–––</option>
@@ -36,25 +36,25 @@
 
             <div class="mb-3{{ hasError('title') }}">
                 <label for="title" class="form-label">{{ __('forum::forums.forum') }}:</label>
-                <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_category_max') }}" value="{{ getInput('title', $forum->title) }}" required>
+                <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_category_max') }}" value="{{ old('title', $forum->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('description') }}">
                 <label for="description" class="form-label">{{ __('main.description') }}:</label>
-                <textarea class="form-control" id="description" maxlength="{{ setting('forum_description_max') }}" name="description" rows="3">{{ getInput('description', $forum->description) }}</textarea>
+                <textarea class="form-control" id="description" maxlength="{{ setting('forum_description_max') }}" name="description" rows="3">{{ old('description', $forum->description) }}</textarea>
                 <div class="invalid-feedback">{{ textError('description') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('sort') }}">
                 <label for="sort" class="form-label">{{ __('main.position') }}:</label>
-                <input type="number" class="form-control" name="sort" id="sort" maxlength="2" value="{{ getInput('sort', $forum->sort) }}" required>
+                <input type="number" class="form-control" name="sort" id="sort" maxlength="2" value="{{ old('sort', $forum->sort) }}" required>
                 <div class="invalid-feedback">{{ textError('sort') }}</div>
             </div>
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed', $forum->closed) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $forum->closed) ? ' checked' : '' }}>
                 <label class="form-check-label" for="closed">{{ __('main.close') }}</label>
             </div>
 

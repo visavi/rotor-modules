@@ -109,13 +109,13 @@ class BackupController extends AdminController
 
                 $this->fclose($fp, $method);
 
-                setFlash('success', __('backup::backup.database_success_saved'));
-
-                return redirect('admin/backups');
+                return redirect('admin/backups')
+                    ->with('success', __('backup::backup.database_success_saved'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/backups/create')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $tables = DB::select('SHOW TABLE STATUS');
@@ -143,15 +143,15 @@ class BackupController extends AdminController
             ->regex($file, '#^[\w\-]+\.(sql\.)?(gz|bz2|sql)$#i', __('backup::backup.invalid_backup_name'))
             ->true($fullPath !== false && is_file($fullPath), __('backup::backup.backup_not_exist'));
 
-        if ($validator->isValid()) {
-            unlink($fullPath);
-
-            setFlash('success', __('backup::backup.backup_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect('admin/backups')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect('admin/backups');
+        unlink($fullPath);
+
+        return redirect('admin/backups')
+            ->with('success', __('backup::backup.backup_success_deleted'));
     }
 
     /**

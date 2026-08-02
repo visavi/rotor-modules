@@ -25,7 +25,7 @@
                 @csrf
                 <div class="mb-3{{ hasError('bet') }}">
                     <label for="bet" class="form-label">Ваша ставка:</label>
-                    <input class="form-control" name="bet" id="bet" value="{{ getInput('bet') }}" required>
+                    <input class="form-control" name="bet" id="bet" value="{{ old('bet') }}" required>
                     <div class="invalid-feedback">{{ textError('bet') }}</div>
                 </div>
 

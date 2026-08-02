@@ -96,8 +96,9 @@ class PaidAdvertController extends AdminController
                     ->with('success', __('main.record_added_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/paid-adverts/create?place=' . $place)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('payment::admin/paid-adverts/create', compact('advert', 'places', 'place'));
@@ -158,8 +159,9 @@ class PaidAdvertController extends AdminController
                     ->with('success', __('main.record_saved_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/paid-adverts/edit/' . $advert->id . '?place=' . $place)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('payment::admin/paid-adverts/edit', compact('advert', 'places', 'place'));
@@ -179,8 +181,8 @@ class PaidAdvertController extends AdminController
         $advert->delete();
 
         clearCache('paidAdverts');
-        setFlash('success', __('main.record_deleted_success'));
 
-        return redirect('admin/paid-adverts?place=' . $advert->place);
+        return redirect('admin/paid-adverts?place=' . $advert->place)
+            ->with('success', __('main.record_deleted_success'));
     }
 }

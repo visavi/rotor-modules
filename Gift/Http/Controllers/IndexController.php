@@ -82,13 +82,13 @@ class IndexController extends Controller
                 $message = 'Пользователь @' . getUser('login') . ' отправил вам подарок!' . PHP_EOL . '[img]' . $gift->path . '[/img] ' . $msg . PHP_EOL . '[url=/gifts/' . $user->login . ']Мои подарки[/url]';
                 $user->sendMessage(null, $message);
 
-                setFlash('success', __('gift::gifts.gift_sent'));
-
-                return redirect('gifts');
+                return redirect('gifts')
+                    ->with('success', __('gift::gifts.gift_sent'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('gifts/send/' . $gift->id . '?user=' . $request->input('user'))
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('gift::send', compact('gift', 'user'));

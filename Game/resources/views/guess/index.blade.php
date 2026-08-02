@@ -20,7 +20,7 @@
             @csrf
             <div class="mb-3{{ hasError('guess') }}">
                 <label for="guess" class="form-label">Введите число:</label>
-                <input class="form-control" name="guess" id="guess" value="{{ getInput('guess') }}" required>
+                <input class="form-control" name="guess" id="guess" value="{{ old('guess') }}" required>
                 <div class="invalid-feedback">{{ textError('guess') }}</div>
             </div>
 

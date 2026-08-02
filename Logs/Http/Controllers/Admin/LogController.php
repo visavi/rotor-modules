@@ -31,8 +31,7 @@ class LogController extends AdminController
     {
         Log::query()->truncate();
 
-        setFlash('success', __('logs::logs.success_cleared'));
-
-        return redirect()->route('admin.logs.index');
+        return redirect()->route('admin.logs.index')
+            ->with('success', __('logs::logs.success_cleared'));
     }
 }

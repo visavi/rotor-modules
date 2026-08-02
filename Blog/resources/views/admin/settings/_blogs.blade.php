@@ -23,37 +23,37 @@
     @csrf
     <div class="mb-3{{ hasError('sets[blogpost]') }}">
         <label for="blogpost" class="form-label">{{ __('blog::blogs.settings_blogs_per_page') }}:</label>
-        <input type="number" class="form-control" id="blogpost" name="sets[blogpost]" maxlength="2" value="{{ getInput('sets.blogpost', $settings['blogpost']) }}" required>
+        <input type="number" class="form-control" id="blogpost" name="sets[blogpost]" maxlength="2" value="{{ old('sets.blogpost', $settings['blogpost']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[blogpost]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[bloggroup]') }}">
         <label for="bloggroup" class="form-label">{{ __('blog::blogs.settings_blogs_groups') }}:</label>
-        <input type="number" class="form-control" id="bloggroup" name="sets[bloggroup]" maxlength="2" value="{{ getInput('sets.bloggroup', $settings['bloggroup']) }}" required>
+        <input type="number" class="form-control" id="bloggroup" name="sets[bloggroup]" maxlength="2" value="{{ old('sets.bloggroup', $settings['bloggroup']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[bloggroup]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[blog_point]') }}">
         <label for="blog_point" class="form-label">{{ __('blog::blogs.settings_blog_point') }}:</label>
-        <input type="number" class="form-control" id="blog_point" name="sets[blog_point]" maxlength="2" value="{{ getInput('sets.blog_point', $settings['blog_point']) }}" required>
+        <input type="number" class="form-control" id="blog_point" name="sets[blog_point]" maxlength="2" value="{{ old('sets.blog_point', $settings['blog_point']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[blog_point]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[blog_money]') }}">
         <label for="blog_money" class="form-label">{{ __('blog::blogs.settings_blog_money') }}:</label>
-        <input type="number" class="form-control" id="blog_money" name="sets[blog_money]" maxlength="2" value="{{ getInput('sets.blog_money', $settings['blog_money']) }}" required>
+        <input type="number" class="form-control" id="blog_money" name="sets[blog_money]" maxlength="2" value="{{ old('sets.blog_money', $settings['blog_money']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[blog_money]') }}</div>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[blog_create]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[blog_create]" id="blog_create"{{ getInput('sets.blog_create', $settings['blog_create']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[blog_create]" id="blog_create"{{ old('sets.blog_create', $settings['blog_create']) ? ' checked' : '' }}>
         <label class="form-check-label" for="blog_create">{{ __('blog::blogs.settings_blogs_publish') }}</label>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[article_moderation]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[article_moderation]" id="article_moderation"{{ getInput('sets.article_moderation', $settings['article_moderation']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[article_moderation]" id="article_moderation"{{ old('sets.article_moderation', $settings['article_moderation']) ? ' checked' : '' }}>
         <label class="form-check-label" for="article_moderation">{{ __('blog::blogs.settings_blog_moderation') }}</label>
     </div>
 
@@ -113,7 +113,7 @@
 
     <div class="mb-3{{ hasError('sets[feed_articles_rating]') }}">
         <label for="feed_articles_rating" class="form-label">{{ __('blog::blogs.feed_articles_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_articles_rating" name="sets[feed_articles_rating]" maxlength="2" value="{{ getInput('sets.feed_articles_rating', $settings['feed_articles_rating']) }}" required>
+        <input type="number" class="form-control" id="feed_articles_rating" name="sets[feed_articles_rating]" maxlength="2" value="{{ old('sets.feed_articles_rating', $settings['feed_articles_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_articles_rating]') }}</div>
     </div>
 

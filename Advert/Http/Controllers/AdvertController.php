@@ -113,13 +113,14 @@ class AdvertController extends Controller
                 $this->user->decrement('money', $price);
 
                 clearCache('adverts');
-                setFlash('success', __('advert::adverts.advert_success_posted'));
 
-                return redirect('adverts');
+                return redirect('adverts')
+                    ->with('success', __('advert::adverts.advert_success_posted'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('adverts/create')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('advert::adverts/create');

@@ -27,14 +27,14 @@
             @csrf
             <div class="mb-3{{ hasError('title') }}">
                 <label for="inputTitle" class="form-label">{{ __('forum::forums.topic') }}:</label>
-                <input name="title" type="text" class="form-control" id="inputTitle"  maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forum::forums.topic') }}" value="{{ getInput('title', $topic->title) }}" required>
+                <input name="title" type="text" class="form-control" id="inputTitle"  maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forum::forums.topic') }}" value="{{ old('title', $topic->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             @if ($post)
                 <div class="mb-3{{ hasError('msg') }}">
                     <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ getInput('msg', $post->text) }}</textarea>
+                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ old('msg', $post->text) }}</textarea>
                     <div class="invalid-feedback">{{ textError('msg') }}</div>
                     <span class="js-textarea-counter"></span>
                 </div>
@@ -43,7 +43,7 @@
             @if ($vote)
                 <div class="mb-3{{ hasError('question') }}">
                     <label for="question" class="form-label">{{ __('forum::forums.question') }}:</label>
-                    <input class="form-control" name="question" id="question" maxlength="100" value="{{ getInput('question', $vote->title) }}" required>
+                    <input class="form-control" name="question" id="question" maxlength="100" value="{{ old('question', $vote->title) }}" required>
                     <div class="invalid-feedback">{{ textError('question') }}</div>
                 </div>
 

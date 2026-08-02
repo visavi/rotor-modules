@@ -36,7 +36,9 @@ class TemplateController extends Controller
         if ($template) {
             $template->delete();
             clearCache('statTemplate');
-            setFlash('success', __('template::template.record_deleted'));
+
+            return redirect()->route('admin.template.index')
+                ->with('success', __('template::template.record_deleted'));
         }
 
         return redirect()->route('admin.template.index');

@@ -19,13 +19,13 @@
             @csrf
             <div class="mb-3{{ hasError('title') }}">
                 <label for="title" class="form-label">{{ __('main.title') }}:</label>
-                <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('news_title_max') }}" value="{{ getInput('title') }}" placeholder="{{ __('main.title') }}" required>
+                <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('news_title_max') }}" value="{{ old('title') }}" placeholder="{{ __('main.title') }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('text') }}">
                 <label for="text" class="form-label">{{ __('main.text') }}:</label>
-                <textarea class="form-control tiptap" data-relate-type="{{ \Modules\News\Models\News::$morphName }}" data-relate-id="0" maxlength="{{ setting('news_text_max') }}" id="text" rows="10" name="text" placeholder="{{ __('main.text') }}" required>{{ getInput('text') }}</textarea>
+                <textarea class="form-control tiptap" data-relate-type="{{ \Modules\News\Models\News::$morphName }}" data-relate-id="0" maxlength="{{ setting('news_text_max') }}" id="text" rows="10" name="text" placeholder="{{ __('main.text') }}" required>{{ old('text') }}</textarea>
                 <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
@@ -37,13 +37,13 @@
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed') ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed') ? ' checked' : '' }}>
                 <label for="closed" class="form-check-label">{{ __('main.close_comments') }}</label>
             </div>
 
             <div class="form-check">
                 <input type="hidden" value="0" name="top">
-                <input type="checkbox" class="form-check-input" value="1" name="top" id="top"{{ getInput('top') ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="top" id="top"{{ old('top') ? ' checked' : '' }}>
                 <label for="top" class="form-check-label">{{ __('news::news.pin_top') }}</label>
             </div>
 

@@ -53,8 +53,7 @@ class TemplateController extends Controller
 
         clearCache('statTemplate');
 
-        setFlash('success', __('template::template.record_added'));
-
-        return redirect()->route('template.index');
+        return redirect()->route('template.index')
+            ->with('success', __('template::template.record_added'));
     }
 }

@@ -107,13 +107,13 @@ class OfferController extends Controller
 
                 $flood->saveState();
 
-                setFlash('success', __('main.record_added_success'));
-
-                return redirect()->route('offers.view', ['id' => $offer->id]);
+                return redirect()->route('offers.view', ['id' => $offer->id])
+                    ->with('success', __('main.record_added_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('offers.create', ['type' => $type])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('offer::offers/create', compact('type'));
@@ -162,13 +162,13 @@ class OfferController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                setFlash('success', __('main.record_changed_success'));
-
-                return redirect()->route('offers.view', ['id' => $offer->id]);
+                return redirect()->route('offers.view', ['id' => $offer->id])
+                    ->with('success', __('main.record_changed_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('offers.edit', ['id' => $offer->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('offer::offers/edit', compact('offer'));

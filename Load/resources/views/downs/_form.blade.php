@@ -15,13 +15,13 @@
 
     <div class="mb-3{{ hasError('title') }}">
         <label for="title" class="form-label">{{ __('load::loads.down_title') }}:</label>
-        <input class="form-control" name="title" id="title" maxlength="{{ setting('down_title_max') }}" value="{{ getInput('title', $down->title) }}" required>
+        <input class="form-control" name="title" id="title" maxlength="{{ setting('down_title_max') }}" value="{{ old('title', $down->title) }}" required>
         <div class="invalid-feedback">{{ textError('title') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('text') }}">
         <label for="text" class="form-label">{{ __('load::loads.down_text') }}:</label>
-        <textarea class="form-control tiptap" data-relate-type="{{ $down->getMorphClass() }}" data-relate-id="{{ $down->id ?? 0 }}" id="text" name="text" rows="5" maxlength="{{ setting('down_text_max') }}">{{ getInput('text', $down->text) }}</textarea>
+        <textarea class="form-control tiptap" data-relate-type="{{ $down->getMorphClass() }}" data-relate-id="{{ $down->id ?? 0 }}" id="text" name="text" rows="5" maxlength="{{ setting('down_text_max') }}">{{ old('text', $down->text) }}</textarea>
         <div class="invalid-feedback">{{ textError('text') }}</div>
         <span class="js-textarea-counter"></span>
     </div>
@@ -30,7 +30,7 @@
         <a class="mb-3 ms-3 float-end js-links-add" href="#">{{ __('load::loads.add_link') }}</a>
     @endif
 
-    @php $links = array_values(array_diff((array) getInput('links', $down->links), [''])); @endphp
+    @php $links = array_values(array_diff((array) old('links', $down->links), [''])); @endphp
     @if (setting('down_allow_links'))
         <div class="mb-3{{ hasError('links') }}">
             <div class="js-links-list">

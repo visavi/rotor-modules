@@ -25,32 +25,32 @@
             @csrf
             <div class="mb-3{{ hasError('title') }}">
                 <label for="title" class="form-label">{{ __('forum::forums.topic') }}:</label>
-                <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_title_max') }}" value="{{ getInput('title', $topic->title) }}" required>
+                <input class="form-control" name="title" id="title" maxlength="{{ setting('forum_title_max') }}" value="{{ old('title', $topic->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('note') }}">
                 <label for="note" class="form-label">{{ __('forum::forums.note') }}:</label>
-                <textarea class="form-control" id="note" maxlength="{{ setting('forum_note_max') }}" name="note" rows="3">{{ getInput('note', $topic->note) }}</textarea>
+                <textarea class="form-control" id="note" maxlength="{{ setting('forum_note_max') }}" name="note" rows="3">{{ old('note', $topic->note) }}</textarea>
                 <div class="invalid-feedback">{{ textError('note') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('moderators') }}">
                 <label for="moderators" class="form-label">{{ __('forum::forums.topic_curators') }}:</label>
-                <input class="form-control" name="moderators" id="moderators" maxlength="100" value="{{ getInput('moderators', $topic->moderators) }}">
+                <input class="form-control" name="moderators" id="moderators" maxlength="100" value="{{ old('moderators', $topic->moderators) }}">
                 <span class="text-muted fst-italic">{{ __('forum::forums.curators_note') }}</span>
                 <div class="invalid-feedback">{{ textError('moderators') }}</div>
             </div>
 
             <div class="form-check">
                 <input type="hidden" value="0" name="locked">
-                <input type="checkbox" class="form-check-input" value="1" name="locked" id="locked"{{ getInput('locked', $topic->locked) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="locked" id="locked"{{ old('locked', $topic->locked) ? ' checked' : '' }}>
                 <label class="form-check-label" for="locked">{{ __('main.lock') }}</label>
             </div>
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed', $topic->closed) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $topic->closed) ? ' checked' : '' }}>
                 <label class="form-check-label" for="closed">{{ __('main.close') }}</label>
             </div>
 

@@ -134,9 +134,8 @@ class SocialAuthController extends Controller
         }
 
         if (! setting('social_' . $provider . '_enabled')) {
-            setFlash('danger', __('social_auth::social_auth.provider_disabled'));
-
-            return redirect()->route('social.accounts');
+            return redirect()->route('social.accounts')
+                ->with('danger', __('social_auth::social_auth.provider_disabled'));
         }
 
         return $this->redirectToProvider($oauthProvider, $request);
@@ -156,9 +155,8 @@ class SocialAuthController extends Controller
             ->where('provider', $provider)
             ->delete();
 
-        setFlash('success', __('social_auth::social_auth.unlinked'));
-
-        return redirect()->route('social.accounts');
+        return redirect()->route('social.accounts')
+            ->with('success', __('social_auth::social_auth.unlinked'));
     }
 
     /**
@@ -237,9 +235,8 @@ class SocialAuthController extends Controller
             ->first();
 
         if ($existing && $existing->user_id !== $user->id) {
-            setFlash('danger', __('social_auth::social_auth.already_linked_other'));
-
-            return redirect()->route('social.accounts');
+            return redirect()->route('social.accounts')
+                ->with('danger', __('social_auth::social_auth.already_linked_other'));
         }
 
         Social::query()->updateOrCreate(
@@ -247,9 +244,8 @@ class SocialAuthController extends Controller
             ['provider_id' => $providerId, 'token' => $token]
         );
 
-        setFlash('success', __('social_auth::social_auth.linked'));
-
-        return redirect()->route('social.accounts');
+        return redirect()->route('social.accounts')
+            ->with('success', __('social_auth::social_auth.linked'));
     }
 
     private function registerUser(string $provider, string $providerId, string $token, array $oauthUser, Request $request): RedirectResponse

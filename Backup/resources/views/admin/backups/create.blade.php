@@ -22,7 +22,7 @@
                 @csrf
                 <input type="checkbox" class="form-check-input" id="all" onchange="var o=this.form.elements;for(var i=0;i&lt;o.length;i++)o[i].checked=this.checked"> <b><label for="all" class="form-label">{{ __('main.select_all') }}</label></b>
 
-                <?php $sheets = getInput('sheets', []); ?>
+                <?php $sheets = old('sheets', []); ?>
                 @foreach ($tables as $data)
                     <?php $checked = in_array($data->Name, $sheets, true) ? ' checked' : ''; ?>
 
@@ -34,7 +34,7 @@
                     </div>
                 @endforeach
 
-                <?php $inputMethod = getInput('method', 'gzip'); ?>
+                <?php $inputMethod = old('method', 'gzip'); ?>
 
                 <br>
                 <div class="mb-3{{ hasError('method') }}">
@@ -56,7 +56,7 @@
                     <div class="invalid-feedback">{{ textError('method') }}</div>
                 </div>
 
-                <?php $inputLevel = (int) getInput('level', 7); ?>
+                <?php $inputLevel = (int) old('level', 7); ?>
 
                 <div class="mb-3">
                     <label for="level" class="form-label">{{ __('backup::backup.compress_ratio') }}:</label>

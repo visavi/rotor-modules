@@ -56,7 +56,7 @@
         <form action="{{ route('admin.boards.create') }}" method="post">
             @csrf
             <div class="input-group{{ hasError('name') }}">
-                <input type="text" class="form-control" id="name" name="name" maxlength="{{ setting('board_category_max') }}" value="{{ getInput('name') }}" placeholder="{{ __('board::boards.category') }}" required>
+                <input type="text" class="form-control" id="name" name="name" maxlength="{{ setting('board_category_max') }}" value="{{ old('name') }}" placeholder="{{ __('board::boards.category') }}" required>
                 <button class="btn btn-primary">{{ __('main.create') }}</button>
             </div>
             <div class="invalid-feedback">{{ textError('name') }}</div>

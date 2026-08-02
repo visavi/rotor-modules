@@ -59,13 +59,14 @@ class PhotoController extends AdminController
                 ]);
 
                 clearCache(['statPhotos', 'recentPhotos']);
-                setFlash('success', __('photo::photos.photo_success_edited'));
 
-                return redirect()->route('admin.photos.index', ['page' => $page]);
+                return redirect()->route('admin.photos.index', ['page' => $page])
+                    ->with('success', __('photo::photos.photo_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.photos.edit', ['id' => $photo->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('photo::admin/photos/edit', compact('photo', 'page'));
@@ -91,9 +92,9 @@ class PhotoController extends AdminController
         $photo->delete();
 
         clearCache(['statPhotos', 'recentPhotos']);
-        setFlash('success', __('photo::photos.photo_success_deleted'));
 
-        return redirect()->route('admin.photos.index', ['page' => $page]);
+        return redirect()->route('admin.photos.index', ['page' => $page])
+            ->with('success', __('photo::photos.photo_success_deleted'));
     }
 
     /**

@@ -59,15 +59,13 @@ class BlackjackController extends Controller
 
             $this->user->decrement('money', $bet);
 
-            setFlash('success', 'Ставка сделана!');
-
-            return redirect('games/blackjack/game');
+            return redirect('games/blackjack/game')
+                ->with('success', 'Ставка сделана!');
         }
 
-        setInput($request->all());
-        setFlash('danger', $validator->getErrors());
-
-        return redirect('games/blackjack');
+        return redirect('games/blackjack')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**
@@ -79,9 +77,8 @@ class BlackjackController extends Controller
         $case = in_array($input, ['take', 'end'], true) ? $input : null;
 
         if ($request->session()->missing('blackjack.bet')) {
-            setFlash('danger', 'Необходимо сделать ставку!');
-
-            return redirect('games/blackjack');
+            return redirect('games/blackjack')
+                ->with('danger', 'Необходимо сделать ставку!');
         }
 
         $scores = $this->takeCard($request->session(), $case);

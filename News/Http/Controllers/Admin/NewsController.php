@@ -60,13 +60,14 @@ class NewsController extends AdminController
                 ]);
 
                 clearCache(['statNews', 'pinnedNews']);
-                setFlash('success', __('news::news.news_success_edited'));
 
-                return redirect()->route('news.view', ['id' => $news->id]);
+                return redirect()->route('news.view', ['id' => $news->id])
+                    ->with('success', __('news::news.news_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.news.edit', ['id' => $news->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('news::admin/news/edit', compact('news', 'page'));
@@ -105,13 +106,14 @@ class NewsController extends AdminController
                 $files->update(['relate_id' => $news->id]);
 
                 clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
-                setFlash('success', __('news::news.news_success_added'));
 
-                return redirect()->route('news.view', ['id' => $news->id]);
+                return redirect()->route('news.view', ['id' => $news->id])
+                    ->with('success', __('news::news.news_success_added'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.news.create')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $files = $files->orderBy('created_at')->get();
@@ -150,8 +152,7 @@ class NewsController extends AdminController
 
         $news->delete();
 
-        setFlash('success', __('news::news.news_success_deleted'));
-
-        return redirect()->route('admin.news.index', ['page' => $page]);
+        return redirect()->route('admin.news.index', ['page' => $page])
+            ->with('success', __('news::news.news_success_deleted'));
     }
 }

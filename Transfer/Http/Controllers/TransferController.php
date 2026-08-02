@@ -78,12 +78,12 @@ class TransferController extends Controller
                 ]);
             });
 
-            setFlash('success', __('transfer::transfers.transfer_success_completed'));
-        } else {
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('transfers')
+                ->with('success', __('transfer::transfers.transfer_success_completed'));
         }
 
-        return redirect('transfers');
+        return redirect('transfers')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 }

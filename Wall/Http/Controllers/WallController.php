@@ -67,11 +67,13 @@ class WallController extends Controller
                 $flood->saveState();
                 sendNotify($msg, route('walls.index', ['login' => $user->login], absolute: false), __('wall::walls.wall_posts_login', ['login' => $user->getName()], setting('language')));
 
-                setFlash('success', __('main.record_added_success'));
-            } else {
-                setInput($request->all());
-                setFlash('danger', $validator->getErrors());
+                return redirect('walls/' . $user->login)
+                    ->with('success', __('main.record_added_success'));
             }
+
+            return redirect('walls/' . $user->login)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return redirect('walls/' . $user->login);

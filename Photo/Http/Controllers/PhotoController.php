@@ -122,13 +122,13 @@ class PhotoController extends Controller
                 clearCache(['statPhotos', 'recentPhotos']);
                 $flood->saveState();
 
-                setFlash('success', __('photo::photos.photo_success_uploaded'));
-
-                return redirect()->route('photos.view', ['id' => $photo->id]);
+                return redirect()->route('photos.view', ['id' => $photo->id])
+                    ->with('success', __('photo::photos.photo_success_uploaded'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('photos.create')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $files = File::query()
@@ -176,13 +176,13 @@ class PhotoController extends Controller
                     'closed' => $closed,
                 ]);
 
-                setFlash('success', __('photo::photos.photo_success_edited'));
-
-                return redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page]);
+                return redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page])
+                    ->with('success', __('photo::photos.photo_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('photos.edit', ['id' => $photo->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $checked = $photo->closed ? ' checked' : '';
@@ -209,15 +209,15 @@ class PhotoController extends Controller
 
         $validator->empty($photo->count_comments, __('photo::photos.photo_has_comments'));
 
-        if ($validator->isValid()) {
-            $photo->delete();
+        $redirect = redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page]);
 
-            setFlash('success', __('photo::photos.photo_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return $redirect->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page]);
+        $photo->delete();
+
+        return $redirect->with('success', __('photo::photos.photo_success_deleted'));
     }
 
     /**

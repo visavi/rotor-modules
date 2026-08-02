@@ -19,17 +19,17 @@
             @csrf
             <div class="mb-3{{ hasError('site') }}">
                 <label for="site" class="form-label">{{ __('advert::adverts.link') }}:</label>
-                <input class="form-control" id="site" name="site" type="text" value="{{ getInput('site', $link->site) }}" maxlength="50" required>
+                <input class="form-control" id="site" name="site" type="text" value="{{ old('site', $link->site) }}" maxlength="50" required>
                 <div class="invalid-feedback">{{ textError('site') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('name') }}">
                 <label for="name" class="form-label">{{ __('advert::adverts.name') }}:</label>
-                <input class="form-control" id="name" name="name" type="text" maxlength="35" value="{{ getInput('name', $link->name) }}" required>
+                <input class="form-control" id="name" name="name" type="text" maxlength="35" value="{{ old('name', $link->name) }}" required>
                 <div class="invalid-feedback">{{ textError('name') }}</div>
             </div>
 
-            <?php $color = getInput('color', $link->color); ?>
+            <?php $color = old('color', $link->color); ?>
             <div class="col-sm-4 mb-3{{ hasError('color') }}">
                 <label for="color" class="form-label">{{ __('advert::adverts.color') }}:</label>
                 <div class="input-group">
@@ -41,7 +41,7 @@
 
             <div class="form-check">
                 <input type="hidden" value="0" name="bold">
-                <input type="checkbox" class="form-check-input" value="1" name="bold" id="bold"{{ getInput('bold', $link->bold) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="bold" id="bold"{{ old('bold', $link->bold) ? ' checked' : '' }}>
                 <label class="form-check-label" for="bold">{{ __('advert::adverts.bold') }}</label>
             </div>
 

@@ -82,7 +82,7 @@
             <form action="{{ route('admin.forums.create') }}" method="post">
                 @csrf
                 <div class="input-group{{ hasError('title') }}">
-                    <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('forum_category_max') }}" value="{{ getInput('title') }}" placeholder="{{ __('forum::forums.forum') }}" required>
+                    <input type="text" class="form-control" id="title" name="title" maxlength="{{ setting('forum_category_max') }}" value="{{ old('title') }}" placeholder="{{ __('forum::forums.forum') }}" required>
                     <button class="btn btn-primary">{{ __('forum::forums.create_forum') }}</button>
                 </div>
                 <div class="invalid-feedback">{{ textError('title') }}</div>

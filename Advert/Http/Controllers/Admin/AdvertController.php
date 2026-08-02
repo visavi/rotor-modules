@@ -61,13 +61,14 @@ class AdvertController extends AdminController
                 ]);
 
                 clearCache('adverts');
-                setFlash('success', __('main.record_changed_success'));
 
-                return redirect('admin/adverts?page=' . $page);
+                return redirect('admin/adverts?page=' . $page)
+                    ->with('success', __('main.record_changed_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/adverts/edit/' . $link->id . '?page=' . $page)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('advert::admin/adverts/edit', compact('link', 'page'));
@@ -83,15 +84,16 @@ class AdvertController extends AdminController
 
         $validator->true($del, __('validator.deletion'));
 
-        if ($validator->isValid()) {
-            Advert::query()->whereIn('id', $del)->delete();
-
-            clearCache('adverts');
-            setFlash('success', __('main.records_deleted_success'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect('admin/adverts?page=' . $page)
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect('admin/adverts?page=' . $page);
+        Advert::query()->whereIn('id', $del)->delete();
+
+        clearCache('adverts');
+
+        return redirect('admin/adverts?page=' . $page)
+            ->with('success', __('main.records_deleted_success'));
     }
 }

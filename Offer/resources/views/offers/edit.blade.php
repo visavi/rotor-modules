@@ -19,7 +19,7 @@
             <div class="mb-3{{ hasError('type') }}">
                 <label for="types" class="form-label">{{ __('offer::offers.i_want_to') }}</label>
 
-                <?php $inputType = getInput('type', $offer->type); ?>
+                <?php $inputType = old('type', $offer->type); ?>
                 <select class="form-select" name="type" id="type">
                     <option value="offer"{{ $inputType === 'offer' ? ' selected' : '' }}>{{ __('offer::offers.suggest_idea') }}</option>
                     <option value="issue"{{ $inputType === 'issue' ? ' selected' : '' }}>{{ __('offer::offers.report_problem') }}</option>
@@ -30,13 +30,13 @@
 
             <div class="mb-3{{ hasError('title') }}">
                 <label for="inputTitle" class="form-label">{{ __('main.title') }}:</label>
-                <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('offer_title_max') }}" value="{{ getInput('title', $offer->title) }}" required>
+                <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('offer_title_max') }}" value="{{ old('title', $offer->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('text') }}">
                 <label for="text" class="form-label">{{ __('main.text') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('offer_text_max') }}" id="text" rows="5" name="text" required>{{ getInput('text', $offer->text) }}</textarea>
+                <textarea class="form-control tiptap" maxlength="{{ setting('offer_text_max') }}" id="text" rows="5" name="text" required>{{ old('text', $offer->text) }}</textarea>
                 <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 

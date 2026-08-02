@@ -56,10 +56,9 @@ class GuessNumberController extends Controller
             ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
-
-            return redirect('games/guess');
+            return redirect('games/guess')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         if ($request->session()->missing('guess.number')) {

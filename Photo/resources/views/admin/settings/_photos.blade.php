@@ -23,19 +23,19 @@
     @csrf
     <div class="mb-3{{ hasError('sets[fotolist]') }}">
         <label for="fotolist" class="form-label">{{ __('photo::photos.settings_photos_per_page') }}:</label>
-        <input type="number" class="form-control" id="fotolist" name="sets[fotolist]" maxlength="2" value="{{ getInput('sets.fotolist', $settings['fotolist']) }}" required>
+        <input type="number" class="form-control" id="fotolist" name="sets[fotolist]" maxlength="2" value="{{ old('sets.fotolist', $settings['fotolist']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[fotolist]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[photogroup]') }}">
         <label for="photogroup" class="form-label">{{ __('photo::photos.settings_photos_groups') }}:</label>
-        <input type="number" class="form-control" id="photogroup" name="sets[photogroup]" maxlength="2" value="{{ getInput('sets.photogroup', $settings['photogroup']) }}" required>
+        <input type="number" class="form-control" id="photogroup" name="sets[photogroup]" maxlength="2" value="{{ old('sets.photogroup', $settings['photogroup']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[photogroup]') }}</div>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[photos_create]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[photos_create]" id="photos_create"{{ getInput('sets.photos_create', $settings['photos_create']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[photos_create]" id="photos_create"{{ old('sets.photos_create', $settings['photos_create']) ? ' checked' : '' }}>
         <label class="form-check-label" for="photos_create">{{ __('photo::photos.settings_photos_create') }}</label>
     </div>
 
@@ -71,7 +71,7 @@
 
     <div class="mb-3{{ hasError('sets[feed_photos_rating]') }}">
         <label for="feed_photos_rating" class="form-label">{{ __('photo::photos.feed_photos_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_photos_rating" name="sets[feed_photos_rating]" maxlength="2" value="{{ getInput('sets.feed_photos_rating', $settings['feed_photos_rating']) }}" required>
+        <input type="number" class="form-control" id="feed_photos_rating" name="sets[feed_photos_rating]" maxlength="2" value="{{ old('sets.feed_photos_rating', $settings['feed_photos_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_photos_rating]') }}</div>
     </div>
 

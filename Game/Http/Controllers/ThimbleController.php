@@ -57,9 +57,8 @@ class ThimbleController extends Controller
         }
 
         if (! $thimble) {
-            setFlash('danger', 'Необходимо выбрать один из наперстков!');
-
-            return redirect('games/thimbles/choice');
+            return redirect('games/thimbles/choice')
+                ->with('danger', 'Необходимо выбрать один из наперстков!');
         }
 
         $results = [

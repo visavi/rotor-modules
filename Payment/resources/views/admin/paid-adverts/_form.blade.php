@@ -3,7 +3,7 @@
     <div class="mb-3{{ hasError('place') }}">
         <label for="place" class="form-label">{{ __('payment::payments.paid_adverts.place') }}:</label>
 
-        <?php $inputPlace = getInput('place', $place ?? $advert->place); ?>
+        <?php $inputPlace = old('place', $place ?? $advert->place); ?>
         <select class="form-select" name="place" id="place">
             @foreach ($places as $place)
                 <?php $selected = ($place === $inputPlace) ? ' selected' : ''; ?>
@@ -15,13 +15,13 @@
 
     <div class="mb-3{{ hasError('site') }}">
         <label for="site" class="form-label">{{ __('payment::payments.paid_adverts.link') }}:</label>
-        <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('payment::payments.paid_adverts.link') }}" value="{{ getInput('site', $advert->site) }}" required>
+        <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('payment::payments.paid_adverts.link') }}" value="{{ old('site', $advert->site) }}" required>
         <div class="invalid-feedback">{{ textError('site') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('names') }}">
         <div class="js-advert-list">
-            <?php $names = array_values(array_diff((array) getInput('names', $advert->names), [''])) ?>
+            <?php $names = array_values(array_diff((array) old('names', $advert->names), [''])) ?>
 
             @for ($i = 0; $i < max(1, count($names)); $i++)
                 @if ($i === 0)
@@ -41,7 +41,7 @@
         <div class="invalid-feedback">{{ textError('names') }}</div>
     </div>
 
-    <?php $color = getInput('color', $advert->color); ?>
+    <?php $color = old('color', $advert->color); ?>
     <div class="col-sm-4 mb-3{{ hasError('color') }}">
         <label for="color" class="form-label">{{ __('payment::payments.paid_adverts.color') }}:</label>
         <div class="input-group">
@@ -53,19 +53,19 @@
 
     <div class="form-check">
         <input type="hidden" value="0" name="bold">
-        <input type="checkbox" class="form-check-input js-bold" value="1" name="bold" id="bold"{{ getInput('bold', $advert->bold) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input js-bold" value="1" name="bold" id="bold"{{ old('bold', $advert->bold) ? ' checked' : '' }}>
         <label class="form-check-label" for="bold">{{ __('payment::payments.paid_adverts.bold') }}</label>
     </div>
 
     <div class="col-sm-4 mb-3{{ hasError('term') }}">
         <label for="term" class="form-label">{{ __('payment::payments.paid_adverts.term') }}:</label>
-        <input class="form-control" type="datetime-local" name="term" id="term" value="{{ getInput('term', dateFixed($advert->deleted_at, 'Y-m-d\TH:i')) }}" required>
+        <input class="form-control" type="datetime-local" name="term" id="term" value="{{ old('term', dateFixed($advert->deleted_at, 'Y-m-d\TH:i')) }}" required>
         <div class="invalid-feedback">{{ textError('term') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('comment') }}">
         <label for="message" class="form-label">{{ __('main.comment') }}:</label>
-        <textarea class="form-control" id="comment" rows="5" name="comment">{{ getInput('comment', $advert->comment) }}</textarea>
+        <textarea class="form-control" id="comment" rows="5" name="comment">{{ old('comment', $advert->comment) }}</textarea>
         <div class="invalid-feedback">{{ textError('comment') }}</div>
     </div>
 

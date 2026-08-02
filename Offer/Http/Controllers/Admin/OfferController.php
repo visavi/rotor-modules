@@ -86,13 +86,13 @@ class OfferController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                setFlash('success', __('main.record_changed_success'));
-
-                return redirect()->route('admin.offers.view', ['id' => $offer->id]);
+                return redirect()->route('admin.offers.view', ['id' => $offer->id])
+                    ->with('success', __('main.record_changed_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.offers.edit', ['id' => $offer->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('offer::admin/offers/edit', compact('offer'));
@@ -140,13 +140,13 @@ class OfferController extends Controller
                     $offer->user->sendMessage(null, $text);
                 }
 
-                setFlash('success', __('offer::offers.answer_success_added'));
-
-                return redirect()->route('admin.offers.view', ['id' => $offer->id]);
+                return redirect()->route('admin.offers.view', ['id' => $offer->id])
+                    ->with('success', __('offer::offers.answer_success_added'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.offers.reply', ['id' => $offer->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $statuses = Offer::STATUSES;
@@ -181,18 +181,18 @@ class OfferController extends Controller
 
         $validator->true($del, __('validator.deletion'));
 
-        if ($validator->isValid()) {
-            $offers = Offer::query()->whereIn('id', $del)->get();
+        $redirect = redirect()->route('admin.offers.index', ['type' => $type, 'page' => $page]);
 
-            $offers->each(static function (Offer $offer) {
-                $offer->delete();
-            });
-
-            setFlash('success', __('main.records_deleted_success'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return $redirect->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.offers.index', ['type' => $type, 'page' => $page]);
+        $offers = Offer::query()->whereIn('id', $del)->get();
+
+        $offers->each(static function (Offer $offer) {
+            $offer->delete();
+        });
+
+        return $redirect->with('success', __('main.records_deleted_success'));
     }
 }

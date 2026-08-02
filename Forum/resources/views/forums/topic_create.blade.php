@@ -32,19 +32,19 @@
 
             <div class="mb-3{{ hasError('title') }}">
                 <label for="inputTitle" class="form-label">{{ __('forum::forums.topic') }}:</label>
-                <input name="title" class="form-control" id="inputTitle" maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forum::forums.topic') }}" value="{{ getInput('title') }}" required>
+                <input name="title" class="form-control" id="inputTitle" maxlength="{{ setting('forum_title_max') }}" placeholder="{{ __('forum::forums.topic') }}" value="{{ old('title') }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('msg') }}">
                 <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" required>{{ getInput('msg') }}</textarea>
+                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" required>{{ old('msg') }}</textarea>
                 <div class="invalid-feedback">{{ textError('msg') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 
             @php
-                $checkVote = (bool) getInput('vote');
+                $checkVote = (bool) old('vote');
                 $checked = $checkVote ? ' checked' : '';
                 $display = $checkVote ? '' : ' style="display: none"';
             @endphp
@@ -62,7 +62,7 @@
                 <div class="mb-3{{ hasError('question') }}">
 
                     <label for="inputQuestion" class="form-label">{{ __('forum::forums.question') }}:</label>
-                    <input type="text" name="question" class="form-control" id="inputQuestion" value="{{ getInput('question') }}" maxlength="100">
+                    <input type="text" name="question" class="form-control" id="inputQuestion" value="{{ old('question') }}" maxlength="100">
                     <div class="invalid-feedback">{{ textError('question') }}</div>
                 </div>
 

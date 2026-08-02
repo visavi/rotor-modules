@@ -56,7 +56,7 @@ class BoardSmokeTest extends ModuleTestCase
             ->post(route('board.settings.update'))
             ->assertRedirect(route('boards.index'));
 
-        self::assertSame(__('settings.settings_empty'), session('flash.danger'));
+        self::assertSame(__('settings.settings_empty'), session('danger'));
     }
 
     public function testItem(): void

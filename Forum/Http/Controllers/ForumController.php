@@ -167,13 +167,13 @@ class ForumController extends Controller
                 clearCache(['statForums', 'recentTopics']);
                 $flood->saveState();
 
-                setFlash('success', __('forum::forums.topic_success_created'));
-
-                return redirect()->route('topics.topic', ['id' => $topic->id]);
+                return redirect()->route('topics.topic', ['id' => $topic->id])
+                    ->with('success', __('forum::forums.topic_success_created'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('forums.create', ['fid' => $fid])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $files = $files->get();

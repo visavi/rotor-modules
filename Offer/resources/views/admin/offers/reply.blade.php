@@ -20,14 +20,14 @@
             @csrf
             <div class="mb-3{{ hasError('reply') }}">
                 <label for="reply" class="form-label">{{ __('offer::offers.answer') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('offer_reply_max') }}" id="reply" rows="5" name="reply" required>{{ getInput('reply', $offer->reply) }}</textarea>
+                <textarea class="form-control tiptap" maxlength="{{ setting('offer_reply_max') }}" id="reply" rows="5" name="reply" required>{{ old('reply', $offer->reply) }}</textarea>
                 <div class="invalid-feedback">{{ textError('reply') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('status') }}">
                 <label for="status" class="form-label">{{ __('offer::offers.status') }}:</label>
 
-                <?php $inputStatus = getInput('status', $offer->status); ?>
+                <?php $inputStatus = old('status', $offer->status); ?>
                 <select class="form-select" name="status" id="status">
                     @foreach ($statuses as $status)
                         <?php $selected = ($status === $inputStatus) ? ' selected' : ''; ?>
@@ -40,7 +40,7 @@
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed', $offer->closed) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $offer->closed) ? ' checked' : '' }}>
                 <label class="form-check-label" for="closed">{{ __('main.close_comments') }}</label>
             </div>
 

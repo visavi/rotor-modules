@@ -185,8 +185,7 @@ class AdvertController extends Controller
 
         clearCache('paidAdverts');
 
-        setFlash('success', __('payment::payments.paid_adverts.advert_saved'));
-
-        return redirect('/payments/my');
+        return redirect('/payments/my')
+            ->with('success', __('payment::payments.paid_adverts.advert_saved'));
     }
 }

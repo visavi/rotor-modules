@@ -17,7 +17,7 @@
     @csrf
     <div class="mb-3{{ hasError('sets[postnews]') }}">
         <label for="postnews" class="form-label">{{ __('news::news.news_per_page') }}:</label>
-        <input type="number" class="form-control" id="postnews" name="sets[postnews]" maxlength="2" value="{{ getInput('sets.postnews', $settings['postnews']) }}" required>
+        <input type="number" class="form-control" id="postnews" name="sets[postnews]" maxlength="2" value="{{ old('sets.postnews', $settings['postnews']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[postnews]') }}</div>
     </div>
 
@@ -47,13 +47,13 @@
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[feed_news_show]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_news_show]" id="feed_news_show"{{ getInput('sets.feed_news_show', $settings['feed_news_show']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_news_show]" id="feed_news_show"{{ old('sets.feed_news_show', $settings['feed_news_show']) ? ' checked' : '' }}>
         <label class="form-check-label" for="feed_news_show">{{ __('news::news.feed_news_show') }}</label>
     </div>
 
     <div class="mb-3{{ hasError('sets[feed_news_rating]') }}">
         <label for="feed_news_rating" class="form-label">{{ __('news::news.feed_news_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_news_rating" name="sets[feed_news_rating]" maxlength="2" value="{{ getInput('sets.feed_news_rating', $settings['feed_news_rating']) }}" required>
+        <input type="number" class="form-control" id="feed_news_rating" name="sets[feed_news_rating]" maxlength="2" value="{{ old('sets.feed_news_rating', $settings['feed_news_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_news_rating]') }}</div>
     </div>
 

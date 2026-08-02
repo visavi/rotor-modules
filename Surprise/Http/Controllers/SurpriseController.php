@@ -62,8 +62,7 @@ class SurpriseController extends Controller
 
         $user->sendMessage(null, $text);
 
-        setFlash('success', __('surprise::surprise.success_received'));
-
-        return redirect('/');
+        return redirect('/')
+            ->with('success', __('surprise::surprise.success_received'));
     }
 }

@@ -52,10 +52,9 @@ class SafeController extends Controller
         $validator->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
 
         if (! $validator->isValid()) {
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
-
-            return redirect('games/safe');
+            return redirect('games/safe')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         if ($request->session()->missing('safe.cipher')) {

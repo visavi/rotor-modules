@@ -93,15 +93,13 @@ class BoardController extends AdminController
                 'sort' => $max,
             ]);
 
-            setFlash('success', __('board::boards.category_success_created'));
-
-            return redirect()->route('admin.boards.edit', ['id' => $board->id]);
+            return redirect()->route('admin.boards.edit', ['id' => $board->id])
+                ->with('success', __('board::boards.category_success_created'));
         }
 
-        setInput($request->all());
-        setFlash('danger', $validator->getErrors());
-
-        return redirect()->route('admin.boards.categories');
+        return redirect()->route('admin.boards.categories')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**
@@ -141,13 +139,13 @@ class BoardController extends AdminController
                     'closed'    => $closed,
                 ]);
 
-                setFlash('success', __('board::boards.category_success_edited'));
-
-                return redirect()->route('admin.boards.categories');
+                return redirect()->route('admin.boards.categories')
+                    ->with('success', __('board::boards.category_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.boards.edit', ['id' => $board->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $boards = $board->getChildren();
@@ -177,15 +175,15 @@ class BoardController extends AdminController
             $validator->addError(__('board::boards.category_has_items'));
         }
 
-        if ($validator->isValid()) {
-            $board->delete();
-
-            setFlash('success', __('board::boards.category_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.boards.categories')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.boards.categories');
+        $board->delete();
+
+        return redirect()->route('admin.boards.categories')
+            ->with('success', __('board::boards.category_success_deleted'));
     }
 
     /**
@@ -233,13 +231,14 @@ class BoardController extends AdminController
                 ]);
 
                 clearCache(['statBoards', 'recentBoards']);
-                setFlash('success', __('board::boards.item_success_edited'));
 
-                return redirect()->route('admin.items.edit', ['id' => $item->id]);
+                return redirect()->route('admin.items.edit', ['id' => $item->id])
+                    ->with('success', __('board::boards.item_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.items.edit', ['id' => $item->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $boards = $item->category->getChildren();
@@ -262,9 +261,9 @@ class BoardController extends AdminController
         $item->category->decrement('count_items');
 
         clearCache(['statBoards', 'recentBoards']);
-        setFlash('success', __('board::boards.item_success_deleted'));
 
-        return redirect()->route('admin.boards.index', ['id' => $item->board_id]);
+        return redirect()->route('admin.boards.index', ['id' => $item->board_id])
+            ->with('success', __('board::boards.item_success_deleted'));
     }
 
     /**

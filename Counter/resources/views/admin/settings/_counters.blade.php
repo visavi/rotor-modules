@@ -29,7 +29,7 @@
         __('counter::counters.hits_hosts'),
         __('counter::counters.hits_all_hosts_all'),
     ];
-    $inputCounter = (int) getInput('sets.incount', $settings['incount']);
+    $inputCounter = (int) old('sets.incount', $settings['incount']);
     ?>
     <div class="mb-3{{ hasError('sets[incount]') }}">
         <label for="incount" class="form-label">{{ __('counter::counters.counters_enable') }}:</label>

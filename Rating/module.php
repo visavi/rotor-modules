@@ -3,7 +3,7 @@
 return [
     'name'        => 'Репутация',
     'description' => 'Репутация пользователей с голосованием и историей',
-    'version'     => '1.0.0',
+    'version'     => '1.0.1',
     'requires'    => '14.1.2',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

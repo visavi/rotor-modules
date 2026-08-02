@@ -21,13 +21,13 @@
     @csrf
     <div class="mb-3{{ hasError('sets[postoffers]') }}">
         <label for="postoffers" class="form-label">{{ __('offer::offers.offers_per_page') }}:</label>
-        <input type="number" class="form-control" id="postoffers" name="sets[postoffers]" maxlength="2" value="{{ getInput('sets.postoffers', $settings['postoffers']) }}" required>
+        <input type="number" class="form-control" id="postoffers" name="sets[postoffers]" maxlength="2" value="{{ old('sets.postoffers', $settings['postoffers']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[postoffers]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[addofferspoint]') }}">
         <label for="addofferspoint" class="form-label">{{ __('offer::offers.offers_points') }}:</label>
-        <input type="number" class="form-control" id="addofferspoint" name="sets[addofferspoint]" maxlength="4" value="{{ getInput('sets.addofferspoint', $settings['addofferspoint']) }}" required>
+        <input type="number" class="form-control" id="addofferspoint" name="sets[addofferspoint]" maxlength="4" value="{{ old('sets.addofferspoint', $settings['addofferspoint']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[addofferspoint]') }}</div>
     </div>
 
@@ -75,7 +75,7 @@
 
     <div class="mb-3">
         <label for="feed_offers_rating" class="form-label">{{ __('offer::offers.feed_offers_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_offers_rating" name="sets[feed_offers_rating]" maxlength="2" value="{{ getInput('sets.feed_offers_rating', $settings['feed_offers_rating'] ?? -5) }}">
+        <input type="number" class="form-control" id="feed_offers_rating" name="sets[feed_offers_rating]" maxlength="2" value="{{ old('sets.feed_offers_rating', $settings['feed_offers_rating'] ?? -5) }}">
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>

@@ -60,13 +60,13 @@ class DeliveryController extends AdminController
                     $user->sendMessage(null, $msg);
                 }
 
-                setFlash('success', __('delivery::delivery.success_sent'));
-
-                return redirect('admin/delivery');
+                return redirect('admin/delivery')
+                    ->with('success', __('delivery::delivery.success_sent'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/delivery')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('delivery::admin/delivery/index');

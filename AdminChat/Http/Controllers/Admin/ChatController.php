@@ -56,13 +56,13 @@ class ChatController extends AdminController
                 clearCache('statChat');
                 sendNotify($msg, route('admin.chats.index', absolute: false), __('admin_chat::admin_chat.admin_chat', locale: setting('language')));
 
-                setFlash('success', __('main.message_added_success'));
-
-                return redirect('admin/chats');
+                return redirect('admin/chats')
+                    ->with('success', __('main.message_added_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/chats')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $posts = Chat::query()
@@ -105,13 +105,13 @@ class ChatController extends AdminController
                     'edit_user_id' => $user->id,
                 ]);
 
-                setFlash('success', __('main.message_edited_success'));
-
-                return redirect('admin/chats?page=' . $page);
+                return redirect('admin/chats?page=' . $page)
+                    ->with('success', __('main.message_edited_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.chats.edit', ['id' => $post->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('admin_chat::admin/chats/edit', compact('post', 'page'));
@@ -124,14 +124,14 @@ class ChatController extends AdminController
     {
         $validator->true(isAdmin(User::BOSS), __('main.page_only_admins'));
 
-        if ($validator->isValid()) {
-            Chat::query()->truncate();
-
-            setFlash('success', __('admin_chat::admin_chat.success_cleared'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.chats.index')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.chats.index');
+        Chat::query()->truncate();
+
+        return redirect()->route('admin.chats.index')
+            ->with('success', __('admin_chat::admin_chat.success_cleared'));
     }
 }

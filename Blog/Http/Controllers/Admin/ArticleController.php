@@ -59,15 +59,13 @@ class ArticleController extends AdminController
                 'sort' => $max,
             ]);
 
-            setFlash('success', __('blog::blogs.category_success_created'));
-
-            return redirect()->route('admin.blogs.edit', ['id' => $category->id]);
+            return redirect()->route('admin.blogs.edit', ['id' => $category->id])
+                ->with('success', __('blog::blogs.category_success_created'));
         }
 
-        setInput($request->all());
-        setFlash('danger', $validator->getErrors());
-
-        return redirect()->route('admin.blogs.index');
+        return redirect()->route('admin.blogs.index')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**
@@ -105,13 +103,13 @@ class ArticleController extends AdminController
                     'closed'    => $closed,
                 ]);
 
-                setFlash('success', __('blog::blogs.category_success_edited'));
-
-                return redirect()->route('admin.blogs.index');
+                return redirect()->route('admin.blogs.index')
+                    ->with('success', __('blog::blogs.category_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.blogs.edit', ['id' => $category->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('blog::admin/articles/edit', compact('categories', 'category'));
@@ -139,15 +137,15 @@ class ArticleController extends AdminController
             $validator->addError(__('blog::blogs.articles_in_category'));
         }
 
-        if ($validator->isValid()) {
-            $category->delete();
-
-            setFlash('success', __('blog::blogs.category_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.blogs.index')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.blogs.index');
+        $category->delete();
+
+        return redirect()->route('admin.blogs.index')
+            ->with('success', __('blog::blogs.category_success_deleted'));
     }
 
     /**
@@ -259,8 +257,9 @@ class ArticleController extends AdminController
                     ->with('success', $flash);
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.articles.edit', ['id' => $article->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $categories = $article->category->getChildren();
@@ -285,9 +284,8 @@ class ArticleController extends AdminController
 
         clearCache('tagCloud');
 
-        setFlash('success', __('blog::blogs.article_success_deleted'));
-
-        return redirect()->route('admin.blogs.blog', ['id' => $article->category_id, 'page' => $page]);
+        return redirect()->route('admin.blogs.blog', ['id' => $article->category_id, 'page' => $page])
+            ->with('success', __('blog::blogs.article_success_deleted'));
     }
 
     /**

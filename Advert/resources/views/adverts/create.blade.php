@@ -20,17 +20,17 @@
             @csrf
             <div class="mb-3{{ hasError('site') }}">
                 <label for="site" class="form-label">{{ __('advert::adverts.link') }}:</label>
-                <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('advert::adverts.link') }}" value="{{ getInput('site') }}" required>
+                <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('advert::adverts.link') }}" value="{{ old('site') }}" required>
                 <div class="invalid-feedback">{{ textError('site') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('name') }}">
                 <label for="name" class="form-label">{{ __('advert::adverts.name') }}:</label>
-                <input name="name" class="form-control" id="name" maxlength="35" placeholder="{{ __('advert::adverts.name') }}" value="{{ getInput('name') }}" required>
+                <input name="name" class="form-control" id="name" maxlength="35" placeholder="{{ __('advert::adverts.name') }}" value="{{ old('name') }}" required>
                 <div class="invalid-feedback">{{ textError('name') }}</div>
             </div>
 
-            <?php $color = getInput('color'); ?>
+            <?php $color = old('color'); ?>
             <div class="col-sm-4 mb-3{{ hasError('color') }}">
                 <label for="color" class="form-label">{{ __('advert::adverts.color') }}:</label>
                 <div class="input-group">
@@ -42,7 +42,7 @@
 
             <div class="form-check">
                 <input type="hidden" value="0" name="bold">
-                <input type="checkbox" class="form-check-input js-bold" value="1" name="bold" id="bold"{{ getInput('bold') ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input js-bold" value="1" name="bold" id="bold"{{ old('bold') ? ' checked' : '' }}>
                 <label class="form-check-label" for="bold">{{ __('advert::adverts.bold') }}</label>
             </div>
 

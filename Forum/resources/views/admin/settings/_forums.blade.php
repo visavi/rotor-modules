@@ -17,25 +17,25 @@
     @csrf
     <div class="mb-3{{ hasError('sets[forumtem]') }}">
         <label for="forumtem" class="form-label">{{ __('forum::forums.topics_per_page') }}:</label>
-        <input type="number" class="form-control" id="forumtem" name="sets[forumtem]" maxlength="2" value="{{ getInput('sets.forumtem', $settings['forumtem']) }}" required>
+        <input type="number" class="form-control" id="forumtem" name="sets[forumtem]" maxlength="2" value="{{ old('sets.forumtem', $settings['forumtem']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[forumtem]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[forumpost]') }}">
         <label for="forumpost" class="form-label">{{ __('forum::forums.posts_per_page') }}:</label>
-        <input type="number" class="form-control" id="forumpost" name="sets[forumpost]" maxlength="2" value="{{ getInput('sets.forumpost', $settings['forumpost']) }}" required>
+        <input type="number" class="form-control" id="forumpost" name="sets[forumpost]" maxlength="2" value="{{ old('sets.forumpost', $settings['forumpost']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[forumpost]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[forum_point]') }}">
         <label for="forum_point" class="form-label">{{ __('forum::forums.forum_point') }}:</label>
-        <input type="number" class="form-control" id="forum_point" name="sets[forum_point]" maxlength="2" value="{{ getInput('sets.forum_point', $settings['forum_point']) }}" required>
+        <input type="number" class="form-control" id="forum_point" name="sets[forum_point]" maxlength="2" value="{{ old('sets.forum_point', $settings['forum_point']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[forum_point]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[forum_money]') }}">
         <label for="forum_money" class="form-label">{{ __('forum::forums.forum_money') }}:</label>
-        <input type="number" class="form-control" id="forum_money" name="sets[forum_money]" maxlength="2" value="{{ getInput('sets.forum_money', $settings['forum_money']) }}" required>
+        <input type="number" class="form-control" id="forum_money" name="sets[forum_money]" maxlength="2" value="{{ old('sets.forum_money', $settings['forum_money']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[forum_money]') }}</div>
     </div>
 
@@ -101,13 +101,13 @@
 
     <div class="mb-3{{ hasError('sets[editforumpoint]') }}">
         <label for="editforumpoint" class="form-label">{{ __('forum::forums.editforumpoint') }}:</label>
-        <input type="number" class="form-control" id="editforumpoint" name="sets[editforumpoint]" maxlength="6" value="{{ getInput('sets.editforumpoint', $settings['editforumpoint']) }}" required>
+        <input type="number" class="form-control" id="editforumpoint" name="sets[editforumpoint]" maxlength="6" value="{{ old('sets.editforumpoint', $settings['editforumpoint']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[editforumpoint]') }}</div>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[forum_merge_posts]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[forum_merge_posts]" id="forum_merge_posts"{{ getInput('sets.forum_merge_posts', $settings['forum_merge_posts']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[forum_merge_posts]" id="forum_merge_posts"{{ old('sets.forum_merge_posts', $settings['forum_merge_posts']) ? ' checked' : '' }}>
         <label class="form-check-label" for="forum_merge_posts">{{ __('forum::forums.forum_merge_posts') }}</label>
     </div>
 
@@ -119,7 +119,7 @@
 
     <div class="mb-3{{ hasError('sets[feed_topics_rating]') }}">
         <label for="feed_topics_rating" class="form-label">{{ __('forum::forums.feed_topics_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_topics_rating" name="sets[feed_topics_rating]" maxlength="4" value="{{ getInput('sets.feed_topics_rating', $settings['feed_topics_rating']) }}" required>
+        <input type="number" class="form-control" id="feed_topics_rating" name="sets[feed_topics_rating]" maxlength="4" value="{{ old('sets.feed_topics_rating', $settings['feed_topics_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_topics_rating]') }}</div>
     </div>
 

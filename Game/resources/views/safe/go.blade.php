@@ -40,19 +40,19 @@
                     @csrf
                     <div class="mb-3 row{{ hasError('bet') }}">
                         <div class="col-1">
-                            <input class="form-control" name="code0" maxlength="1" value="{{ getInput('code0', $hack[0] === $safe['cipher'][0] ? $safe['cipher'][0] : '') }}" required>
+                            <input class="form-control" name="code0" maxlength="1" value="{{ old('code0', $hack[0] === $safe['cipher'][0] ? $safe['cipher'][0] : '') }}" required>
                         </div>
                         <div class="col-1">
-                            <input class="form-control" name="code1" maxlength="1" value="{{ getInput('code1', $hack[1] === $safe['cipher'][1] ? $safe['cipher'][1] : '') }}" required>
+                            <input class="form-control" name="code1" maxlength="1" value="{{ old('code1', $hack[1] === $safe['cipher'][1] ? $safe['cipher'][1] : '') }}" required>
                         </div>
                         <div class="col-1">
-                            <input class="form-control" name="code2" maxlength="1" value="{{ getInput('code2', $hack[2] === $safe['cipher'][2] ? $safe['cipher'][2] : '') }}" required>
+                            <input class="form-control" name="code2" maxlength="1" value="{{ old('code2', $hack[2] === $safe['cipher'][2] ? $safe['cipher'][2] : '') }}" required>
                         </div>
                         <div class="col-1">
-                            <input class="form-control" name="code3" maxlength="1" value="{{ getInput('code3', $hack[3] === $safe['cipher'][3] ? $safe['cipher'][3] : '') }}" required>
+                            <input class="form-control" name="code3" maxlength="1" value="{{ old('code3', $hack[3] === $safe['cipher'][3] ? $safe['cipher'][3] : '') }}" required>
                         </div>
                         <div class="col-1">
-                            <input class="form-control" name="code4" maxlength="1" value="{{ getInput('code4', $hack[4] === $safe['cipher'][4] ? $safe['cipher'][4] : '') }}" required>
+                            <input class="form-control" name="code4" maxlength="1" value="{{ old('code4', $hack[4] === $safe['cipher'][4] ? $safe['cipher'][4] : '') }}" required>
                         </div>
                     </div>
                     <button class="btn btn-primary">Ломать сейф</button>

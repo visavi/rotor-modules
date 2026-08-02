@@ -23,37 +23,37 @@
     @csrf
     <div class="mb-3{{ hasError('sets[downlist]') }}">
         <label for="downlist" class="form-label">{{ __('load::loads.loads_per_page') }}:</label>
-        <input type="number" class="form-control" id="downlist" name="sets[downlist]" maxlength="2" value="{{ getInput('sets.downlist', $settings['downlist']) }}" required>
+        <input type="number" class="form-control" id="downlist" name="sets[downlist]" maxlength="2" value="{{ old('sets.downlist', $settings['downlist']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[downlist]') }}</div>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[downupload]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[downupload]" id="downupload"{{ getInput('sets.downupload', $settings['downupload']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[downupload]" id="downupload"{{ old('sets.downupload', $settings['downupload']) ? ' checked' : '' }}>
         <label for="downupload" class="form-check-label">{{ __('load::loads.loads_files_allow') }}</label>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[down_guest_download]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[down_guest_download]" id="down_guest_download"{{ getInput('sets.down_guest_download', $settings['down_guest_download']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[down_guest_download]" id="down_guest_download"{{ old('sets.down_guest_download', $settings['down_guest_download']) ? ' checked' : '' }}>
         <label for="down_guest_download" class="form-check-label">{{ __('load::loads.loads_guests_download_allow') }}</label>
     </div>
 
     <div class="form-check mb-3">
         <input type="hidden" value="0" name="sets[down_allow_links]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[down_allow_links]" id="down_allow_links"{{ getInput('sets.down_allow_links', $settings['down_allow_links']) ? ' checked' : '' }}>
+        <input type="checkbox" class="form-check-input" value="1" name="sets[down_allow_links]" id="down_allow_links"{{ old('sets.down_allow_links', $settings['down_allow_links']) ? ' checked' : '' }}>
         <label for="down_allow_links" class="form-check-label">{{ __('load::loads.down_allow_links') }}</label>
     </div>
 
     <div class="mb-3{{ hasError('sets[down_point]') }}">
         <label for="down_point" class="form-label">{{ __('load::loads.down_point') }}:</label>
-        <input type="number" class="form-control" id="down_point" name="sets[down_point]" maxlength="2" value="{{ getInput('sets.down_point', $settings['down_point']) }}" required>
+        <input type="number" class="form-control" id="down_point" name="sets[down_point]" maxlength="2" value="{{ old('sets.down_point', $settings['down_point']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[down_point]') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets[down_money]') }}">
         <label for="down_money" class="form-label">{{ __('load::loads.down_money') }}:</label>
-        <input type="number" class="form-control" id="down_money" name="sets[down_money]" maxlength="2" value="{{ getInput('sets.down_money', $settings['down_money']) }}" required>
+        <input type="number" class="form-control" id="down_money" name="sets[down_money]" maxlength="2" value="{{ old('sets.down_money', $settings['down_money']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[down_money]') }}</div>
     </div>
 
@@ -109,14 +109,14 @@
         <label class="form-label">{{ __('load::loads.feed_downs_show') }}:</label>
         <div class="form-check">
             <input type="hidden" value="0" name="sets[feed_downs_show]">
-            <input type="checkbox" class="form-check-input" value="1" name="sets[feed_downs_show]" id="feed_downs_show"{{ getInput('sets.feed_downs_show', $settings['feed_downs_show']) ? ' checked' : '' }}>
+            <input type="checkbox" class="form-check-input" value="1" name="sets[feed_downs_show]" id="feed_downs_show"{{ old('sets.feed_downs_show', $settings['feed_downs_show']) ? ' checked' : '' }}>
             <label for="feed_downs_show" class="form-check-label">{{ __('load::loads.feed_downs_show') }}</label>
         </div>
     </div>
 
     <div class="mb-3{{ hasError('sets[feed_downs_rating]') }}">
         <label for="feed_downs_rating" class="form-label">{{ __('load::loads.feed_downs_rating') }}:</label>
-        <input type="number" class="form-control" id="feed_downs_rating" name="sets[feed_downs_rating]" value="{{ getInput('sets.feed_downs_rating', $settings['feed_downs_rating']) }}" required>
+        <input type="number" class="form-control" id="feed_downs_rating" name="sets[feed_downs_rating]" value="{{ old('sets.feed_downs_rating', $settings['feed_downs_rating']) }}" required>
         <div class="invalid-feedback">{{ textError('sets[feed_downs_rating]') }}</div>
     </div>
 

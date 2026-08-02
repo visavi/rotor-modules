@@ -47,11 +47,11 @@ class SocialAuthSettingController extends Controller
         clearCache('settings');
 
         if ($errors) {
-            setFlash('warning', $errors);
-        } else {
-            setFlash('success', __('social_auth::social_auth.settings_saved'));
+            return redirect()->route('social_auth.settings')
+                ->with('warning', $errors);
         }
 
-        return redirect()->route('social_auth.settings');
+        return redirect()->route('social_auth.settings')
+            ->with('success', __('social_auth::social_auth.settings_saved'));
     }
 }

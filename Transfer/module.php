@@ -3,7 +3,7 @@
 return [
     'name'        => 'Денежные переводы',
     'description' => 'Переводы денег между пользователями',
-    'version'     => '1.0.2',
+    'version'     => '1.0.3',
     'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

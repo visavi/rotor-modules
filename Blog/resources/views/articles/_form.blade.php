@@ -3,7 +3,7 @@
     <div class="mb-3{{ hasError('cid') }}">
         <label for="inputCategory" class="form-label">{{ __('blog::blogs.blog') }}</label>
 
-        <?php $inputCategory = (int) getInput('cid', $article->category_id ?? $cid); ?>
+        <?php $inputCategory = (int) old('cid', $article->category_id ?? $cid); ?>
         <select class="form-select" id="inputCategory" name="cid">
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}"{{ ($inputCategory === $category->id && ! $category->closed) ? ' selected' : '' }}{{ $category->closed ? ' disabled' : '' }}>
@@ -16,18 +16,18 @@
 
     <div class="mb-3{{ hasError('title') }}">
         <label for="inputTitle" class="form-label">{{ __('blog::blogs.name') }}:</label>
-        <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('blog_title_max') }}" value="{{ getInput('title', $article->title) }}" required>
+        <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('blog_title_max') }}" value="{{ old('title', $article->title) }}" required>
         <div class="invalid-feedback">{{ textError('title') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('text') }}">
         <label for="text" class="form-label">{{ __('blog::blogs.article') }}:</label>
-        <textarea class="form-control tiptap" data-relate-type="{{ $article->getMorphClass() }}" data-relate-id="{{ $article->id ?? 0 }}" maxlength="{{ setting('blog_text_max') }}" id="text" rows="5" name="text" required>{{ getInput('text', $article->text) }}</textarea>
+        <textarea class="form-control tiptap" data-relate-type="{{ $article->getMorphClass() }}" data-relate-id="{{ $article->id ?? 0 }}" maxlength="{{ setting('blog_text_max') }}" id="text" rows="5" name="text" required>{{ old('text', $article->text) }}</textarea>
         <div class="invalid-feedback">{{ textError('text') }}</div>
         <span class="js-textarea-counter"></span>
     </div>
 
-    <?php $inputTags = getInput('tags', $article->tags->pluck('name') ?? []); ?>
+    <?php $inputTags = old('tags', $article->tags->pluck('name') ?? []); ?>
     <div class="mb-3{{ hasError('tags') }}">
         <label for="tags" class="form-label">{{ __('blog::blogs.tags') }}:</label>
         <select class="form-select input-tag" id="tags" name="tags[]" multiple required>

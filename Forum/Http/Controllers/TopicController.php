@@ -152,65 +152,72 @@ class TopicController extends Controller
         $post = Post::query()->where('topic_id', $topic->id)->orderByDesc('id')->first();
         $validator->notEqual($msg, $post->text ?? '', ['msg' => __('forum::forums.post_repeat')]);
 
-        if ($validator->isValid()) {
-            $msg = antimat($msg);
-
-            $countFiles = File::query()
-                ->where('relate_type', Post::$morphName)
-                ->where('relate_id', 0)
-                ->where('user_id', $user->id)
-                ->orderBy('created_at')
-                ->count();
-
-            if (
-                $post
-                && $post->created_at->gt(now()->subMinutes(10))
-                && $user->id === $post->user_id
-                && setting('forum_merge_posts')
-                && $countFiles + $post->files->count() <= setting('maxfiles')
-                && (Str::length($msg) + Str::length($post->text) <= setting('forum_text_max'))
-            ) {
-                $post->update(['text' => $post->text . PHP_EOL . $msg]);
-
-                // Склейка не проходит через PostObserver::created — освежаем ленту вручную
-                Feed::query()->updateOrInsert(
-                    ['relate_type' => 'topics', 'relate_id' => $topic->id],
-                    ['created_at' => now()]
-                );
-
-                cache()->increment('feed_version');
-            } else {
-                $post = Post::query()->create([
-                    'topic_id' => $topic->id,
-                    'user_id'  => $user->id,
-                    'text'     => $msg,
-                    'ip'       => getIp(),
-                    'brow'     => getBrowser(),
-                ]);
-            }
-
-            File::query()
-                ->where('relate_type', Post::$morphName)
-                ->where('relate_id', 0)
-                ->where('user_id', $user->id)
-                ->update(['relate_id' => $post->id]);
-
-            $flood->saveState();
-            sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
-
-            // count_posts увеличил обсервер на своём инстансе — освежаем для расчёта страницы
-            $topic->refresh();
-
-            setFlash('success', __('main.message_added_success'));
-        } else {
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $this->lastPage($topic)])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
-        $page = ceil($topic->count_posts / setting('forumpost'));
-        $page = $page > 1 ? $page : null;
+        $msg = antimat($msg);
 
-        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page]);
+        $countFiles = File::query()
+            ->where('relate_type', Post::$morphName)
+            ->where('relate_id', 0)
+            ->where('user_id', $user->id)
+            ->orderBy('created_at')
+            ->count();
+
+        if (
+            $post
+            && $post->created_at->gt(now()->subMinutes(10))
+            && $user->id === $post->user_id
+            && setting('forum_merge_posts')
+            && $countFiles + $post->files->count() <= setting('maxfiles')
+            && (Str::length($msg) + Str::length($post->text) <= setting('forum_text_max'))
+        ) {
+            $post->update(['text' => $post->text . PHP_EOL . $msg]);
+
+            // Склейка не проходит через PostObserver::created — освежаем ленту вручную
+            Feed::query()->updateOrInsert(
+                ['relate_type' => 'topics', 'relate_id' => $topic->id],
+                ['created_at' => now()]
+            );
+
+            cache()->increment('feed_version');
+        } else {
+            $post = Post::query()->create([
+                'topic_id' => $topic->id,
+                'user_id'  => $user->id,
+                'text'     => $msg,
+                'ip'       => getIp(),
+                'brow'     => getBrowser(),
+            ]);
+        }
+
+        File::query()
+            ->where('relate_type', Post::$morphName)
+            ->where('relate_id', 0)
+            ->where('user_id', $user->id)
+            ->update(['relate_id' => $post->id]);
+
+        $flood->saveState();
+        sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
+
+        // count_posts увеличил обсервер на своём инстансе — освежаем для расчёта страницы
+        $topic->refresh();
+
+        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $this->lastPage($topic)])
+            ->with('success', __('main.message_added_success'));
+    }
+
+    /**
+     * Возвращает номер последней страницы темы (null для первой)
+     */
+    private function lastPage(Topic $topic): ?int
+    {
+        $page = (int) ceil($topic->count_posts / setting('forumpost'));
+
+        return $page > 1 ? $page : null;
     }
 
     /**
@@ -236,19 +243,19 @@ class TopicController extends Controller
             ->empty($topic->closed, __('forum::forums.topic_closed'))
             ->equal($topic->isModerator($user), true, __('forum::forums.posts_deleted_curators'));
 
-        if ($validator->isValid()) {
-            $posts = Post::query()->whereIn('id', $del)->get();
-
-            $posts->each(static function (Post $post) {
-                $post->delete();
-            });
-
-            setFlash('success', __('main.messages_deleted_success'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page]);
+        $posts = Post::query()->whereIn('id', $del)->get();
+
+        $posts->each(static function (Post $post) {
+            $post->delete();
+        });
+
+        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page])
+            ->with('success', __('main.messages_deleted_success'));
     }
 
     /**
@@ -268,18 +275,18 @@ class TopicController extends Controller
             ->equal($topic->user_id, $user->id, __('forum::forums.topic_not_author'))
             ->empty($topic->closed, __('forum::forums.topic_closed'));
 
-        if ($validator->isValid()) {
-            $topic->update([
-                'closed'        => 1,
-                'close_user_id' => getUser('id'),
-            ]);
-
-            setFlash('success', __('forum::forums.topic_success_closed'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('topics.topic', ['id' => $topic->id])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('topics.topic', ['id' => $topic->id]);
+        $topic->update([
+            'closed'        => 1,
+            'close_user_id' => getUser('id'),
+        ]);
+
+        return redirect()->route('topics.topic', ['id' => $topic->id])
+            ->with('success', __('forum::forums.topic_success_closed'));
     }
 
     /**
@@ -299,18 +306,18 @@ class TopicController extends Controller
             ->equal($topic->close_user_id, $user->id, __('forum::forums.topic_opened_author'))
             ->notEmpty($topic->closed, __('forum::forums.topic_already_open'));
 
-        if ($validator->isValid()) {
-            $topic->update([
-                'closed'        => 0,
-                'close_user_id' => null,
-            ]);
-
-            setFlash('success', __('forum::forums.topic_success_opened'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('topics.topic', ['id' => $topic->id])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('topics.topic', ['id' => $topic->id]);
+        $topic->update([
+            'closed'        => 0,
+            'close_user_id' => null,
+        ]);
+
+        return redirect()->route('topics.topic', ['id' => $topic->id])
+            ->with('success', __('forum::forums.topic_success_opened'));
     }
 
     /**
@@ -416,13 +423,13 @@ class TopicController extends Controller
                     }
                 }
 
-                setFlash('success', __('forum::forums.topic_success_changed'));
-
-                return redirect()->route('topics.topic', ['id' => $topic->id]);
+                return redirect()->route('topics.topic', ['id' => $topic->id])
+                    ->with('success', __('forum::forums.topic_success_changed'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('topics.edit', ['id' => $topic->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         if ($vote) {
@@ -478,13 +485,13 @@ class TopicController extends Controller
                     'edit_user_id' => $user->id,
                 ]);
 
-                setFlash('success', __('main.message_edited_success'));
-
-                return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => $page]);
+                return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => $page])
+                    ->with('success', __('main.message_edited_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('posts.edit', ['id' => $post->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('forum::forums/topic_edit_post', compact('post', 'page'));
@@ -527,22 +534,22 @@ class TopicController extends Controller
             $validator->notEmpty($answer, __('forum::forums.vote_answer_not_found'));
         }
 
-        if ($validator->isValid()) {
-            $vote->increment('count');
-            $answer->increment('result');
-
-            Poll::query()->create([
-                'relate_type' => Vote::$morphName,
-                'relate_id'   => $vote->id,
-                'user_id'     => $user->id,
-                'vote'        => $answer->answer,
-            ]);
-
-            setFlash('success', __('forum::forums.vote_success'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page]);
+        $vote->increment('count');
+        $answer->increment('result');
+
+        Poll::query()->create([
+            'relate_type' => Vote::$morphName,
+            'relate_id'   => $vote->id,
+            'user_id'     => $user->id,
+            'vote'        => $answer->answer,
+        ]);
+
+        return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
+            ->with('success', __('forum::forums.vote_success'));
     }
 }

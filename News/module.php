@@ -6,7 +6,7 @@ use Modules\News\Models\News;
 return [
     'name'        => 'Новости',
     'description' => 'Новостной раздел сайта с комментариями, RSS и поиском',
-    'version'     => '1.0.4',
+    'version'     => '1.0.5',
     'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

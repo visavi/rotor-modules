@@ -20,13 +20,13 @@
             @csrf
             <div class="mb-3{{ hasError('title') }}">
                 <label for="title" class="form-label">{{ __('photo::photos.name') }}:</label>
-                <input class="form-control" id="title" name="title" type="text" value="{{ getInput('title', $photo->title) }}" maxlength="{{ setting('photo_title_max') }}" required>
+                <input class="form-control" id="title" name="title" type="text" value="{{ old('title', $photo->title) }}" maxlength="{{ setting('photo_title_max') }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('text') }}">
                 <label for="text" class="form-label">{{ __('photo::photos.description') }}:</label>
-                <textarea id="text" class="form-control tiptap" maxlength="{{ setting('photo_text_max') }}" cols="25" rows="5" name="text">{{ getInput('text', $photo->text) }}</textarea>
+                <textarea id="text" class="form-control tiptap" maxlength="{{ setting('photo_text_max') }}" cols="25" rows="5" name="text">{{ old('text', $photo->text) }}</textarea>
                 <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
@@ -34,7 +34,7 @@
 
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
-                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ getInput('closed', $photo->closed) ? ' checked' : '' }}>
+                <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $photo->closed) ? ' checked' : '' }}>
                 <label class="form-check-label" for="closed">{{ __('main.close_comments') }}</label>
             </div>
 

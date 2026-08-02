@@ -57,15 +57,13 @@ class ForumController extends AdminController
                 'sort'  => $max,
             ]);
 
-            setFlash('success', __('forum::forums.forum_success_created'));
-
-            return redirect()->route('admin.forums.edit', ['id' => $forum->id]);
+            return redirect()->route('admin.forums.edit', ['id' => $forum->id])
+                ->with('success', __('forum::forums.forum_success_created'));
         }
 
-        setInput($request->all());
-        setFlash('danger', $validator->getErrors());
-
-        return redirect()->route('admin.forums.index');
+        return redirect()->route('admin.forums.index')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**
@@ -108,13 +106,13 @@ class ForumController extends AdminController
                     'closed'      => $closed,
                 ]);
 
-                setFlash('success', __('forum::forums.forum_success_edited'));
-
-                return redirect()->route('admin.forums.index');
+                return redirect()->route('admin.forums.index')
+                    ->with('success', __('forum::forums.forum_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.forums.edit', ['id' => $forum->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $forums = $forum->getChildren();
@@ -144,15 +142,15 @@ class ForumController extends AdminController
             $validator->addError(__('forum::forums.forum_has_topics'));
         }
 
-        if ($validator->isValid()) {
-            $forum->delete();
-
-            setFlash('success', __('forum::forums.forum_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.forums.index')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.forums.index');
+        $forum->delete();
+
+        return redirect()->route('admin.forums.index')
+            ->with('success', __('forum::forums.forum_success_deleted'));
     }
 
     /**
@@ -240,13 +238,14 @@ class ForumController extends AdminController
                 ]);
 
                 clearCache(['statForums', 'recentTopics']);
-                setFlash('success', __('forum::forums.topic_success_edited'));
 
-                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id]);
+                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
+                    ->with('success', __('forum::forums.topic_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.topics.edit', ['id' => $topic->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('forum::admin/forums/edit_topic', compact('topic'));
@@ -286,13 +285,13 @@ class ForumController extends AdminController
                 $topic->forum->restatement();
                 $oldTopic->forum->restatement();
 
-                setFlash('success', __('forum::forums.topic_success_moved'));
-
-                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id]);
+                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
+                    ->with('success', __('forum::forums.topic_success_moved'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.topics.move', ['id' => $topic->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $forums = $topic->forum->getChildren();
@@ -313,6 +312,8 @@ class ForumController extends AdminController
             abort(404, __('forum::forums.topic_not_exist'));
         }
 
+        $redirect = redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page]);
+
         switch ($request->input('type')) {
             case 'closed':
                 $topic->update([
@@ -320,8 +321,7 @@ class ForumController extends AdminController
                     'close_user_id' => getUser('id'),
                 ]);
 
-                setFlash('success', __('forum::forums.topic_success_closed'));
-                break;
+                return $redirect->with('success', __('forum::forums.topic_success_closed'));
 
             case 'open':
                 $topic->update([
@@ -329,24 +329,21 @@ class ForumController extends AdminController
                     'close_user_id' => null,
                 ]);
 
-                setFlash('success', __('forum::forums.topic_success_opened'));
-                break;
+                return $redirect->with('success', __('forum::forums.topic_success_opened'));
 
             case 'locked':
                 $topic->update(['locked' => 1]);
-                setFlash('success', __('forum::forums.topic_success_pinned'));
-                break;
+
+                return $redirect->with('success', __('forum::forums.topic_success_pinned'));
 
             case 'unlocked':
                 $topic->update(['locked' => 0]);
-                setFlash('success', __('forum::forums.topic_success_unpinned'));
-                break;
+
+                return $redirect->with('success', __('forum::forums.topic_success_unpinned'));
 
             default:
-                setFlash('danger', __('main.action_not_selected'));
+                return $redirect->with('danger', __('main.action_not_selected'));
         }
-
-        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page]);
     }
 
     /**
@@ -366,9 +363,9 @@ class ForumController extends AdminController
         $topic->forum->restatement();
 
         clearCache(['statForums', 'recentTopics']);
-        setFlash('success', __('forum::forums.topic_success_deleted'));
 
-        return redirect()->route('admin.forums.forum', ['id' => $topic->forum->id, 'page' => $page]);
+        return redirect()->route('admin.forums.forum', ['id' => $topic->forum->id, 'page' => $page])
+            ->with('success', __('forum::forums.topic_success_deleted'));
     }
 
     /**
@@ -448,13 +445,13 @@ class ForumController extends AdminController
                     'edit_user_id' => getUser('id'),
                 ]);
 
-                setFlash('success', __('main.message_edited_success'));
-
-                return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => $page]);
+                return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => $page])
+                    ->with('success', __('main.message_edited_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.posts.edit', ['id' => $post->id, 'page' => $page])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('forum::admin/forums/edit_post', compact('post', 'page'));
@@ -477,23 +474,23 @@ class ForumController extends AdminController
 
         $validator->true($del, __('validator.deletion'));
 
-        if ($validator->isValid()) {
-            $posts = Post::query()
-                ->whereIn('id', $del)
-                ->get();
-
-            $posts->each(static function (Post $post) {
-                $post->delete();
-            });
-
-            // Обновление счетчиков
-            $topic->restatement();
-
-            setFlash('success', __('main.messages_deleted_success'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page]);
+        $posts = Post::query()
+            ->whereIn('id', $del)
+            ->get();
+
+        $posts->each(static function (Post $post) {
+            $post->delete();
+        });
+
+        // Обновление счетчиков
+        $topic->restatement();
+
+        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page])
+            ->with('success', __('main.messages_deleted_success'));
     }
 }

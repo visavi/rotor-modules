@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+- Контроллеры переведены с устаревших `setFlash()`/`setInput()` на `redirect()->with()` и `->withInput()->withErrors()`: ошибки валидации отдаются редиректом (PRG), обновление страницы после ошибки не отправляет форму повторно
+- Вьюхи переведены с устаревшего `getInput()` на стандартный `old()`
+
 ## 1.0.3
 - `created_at` переведён с int-timestamp на `datetime` (миграция-конверсия через PHP/Carbon, сохраняет исторический DST), добавлено `updated_at`
 - Модель на авто-timestamps Eloquent (`$timestamps`), `created_at`/`updated_at` кастуются в Carbon

@@ -140,13 +140,14 @@ class DownController extends Controller
                 }
 
                 $flood->saveState();
-                setFlash('success', __('load::loads.down_added_success'));
 
-                return redirect()->route('downs.view', ['id' => $down->id]);
+                return redirect()->route('downs.view', ['id' => $down->id])
+                    ->with('success', __('load::loads.down_added_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('downs.create', ['category' => $cid])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $down = new Down();
@@ -224,13 +225,14 @@ class DownController extends Controller
                 ]);
 
                 clearCache(['statLoads', 'recentDowns']);
-                setFlash('success', __('load::loads.down_edited_success'));
 
-                return redirect()->route('downs.view', ['id' => $down->id]);
+                return redirect()->route('downs.view', ['id' => $down->id])
+                    ->with('success', __('load::loads.down_edited_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('downs.edit', ['id' => $down->id, 'category' => $cid])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $categories = $down->category->getChildren();
@@ -260,15 +262,14 @@ class DownController extends Controller
 
         $validator->true(file_exists(public_path($file->path)), __('load::loads.down_not_exist'));
 
-        if ($validator->isValid()) {
-            Reader::countingStat($down);
-
-            return response()->download(public_path($file->path), $file->name);
+        if (! $validator->isValid()) {
+            return redirect()->route('downs.view', ['id' => $down->id])
+                ->withErrors($validator->getErrors());
         }
 
-        setFlash('danger', $validator->getErrors());
+        Reader::countingStat($down);
 
-        return redirect()->route('downs.view', ['id' => $down->id]);
+        return response()->download(public_path($file->path), $file->name);
     }
 
     /**
@@ -292,15 +293,14 @@ class DownController extends Controller
 
         $validator->true($down->links[$linkId] ?? false, __('load::loads.down_not_exist'));
 
-        if ($validator->isValid()) {
-            Reader::countingStat($down);
-
-            return response()->redirectTo($down->links[$linkId]);
+        if (! $validator->isValid()) {
+            return redirect()->route('downs.view', ['id' => $down->id])
+                ->withErrors($validator->getErrors());
         }
 
-        setFlash('danger', $validator->getErrors());
+        Reader::countingStat($down);
 
-        return redirect()->route('downs.view', ['id' => $down->id]);
+        return response()->redirectTo($down->links[$linkId]);
     }
 
     /**

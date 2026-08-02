@@ -49,7 +49,7 @@
             <div class="mb-3{{ hasError('bid') }}">
                 <label for="inputCategory" class="form-label">{{ __('board::boards.category') }}</label>
 
-                <?php $inputCategory = (int) getInput('bid', $item->board_id); ?>
+                <?php $inputCategory = (int) old('bid', $item->board_id); ?>
                 <select class="form-select" id="inputCategory" name="bid">
                     @foreach ($boards as $data)
                         <option value="{{ $data->id }}"{{ ($inputCategory === $data->id && ! $data->closed) ? ' selected' : '' }}{{ $data->closed ? ' disabled' : '' }}>
@@ -62,25 +62,25 @@
 
             <div class="mb-3{{ hasError('title') }}">
                 <label for="inputTitle" class="form-label">{{ __('board::boards.name') }}:</label>
-                <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('board_title_max') }}" value="{{ getInput('title', $item->title) }}" required>
+                <input type="text" class="form-control" id="inputTitle" name="title" maxlength="{{ setting('board_title_max') }}" value="{{ old('title', $item->title) }}" required>
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('text') }}">
                 <label for="text" class="form-label">{{ __('board::boards.text') }}:</label>
-                <textarea class="form-control tiptap" data-relate-type="{{ $item->getMorphClass() }}" data-relate-id="{{ $item->id }}" maxlength="{{ setting('board_text_max') }}" id="text" rows="5" name="text" required>{{ getInput('text', $item->text) }}</textarea>
+                <textarea class="form-control tiptap" data-relate-type="{{ $item->getMorphClass() }}" data-relate-id="{{ $item->id }}" maxlength="{{ setting('board_text_max') }}" id="text" rows="5" name="text" required>{{ old('text', $item->text) }}</textarea>
                 <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('price') }}">
                 <label for="inputPrice" class="form-label">{{ __('board::boards.price') }}:</label>
-                <input type="text" class="form-control" id="inputPrice" name="price" value="{{ getInput('price', $item->price) }}" required>
+                <input type="text" class="form-control" id="inputPrice" name="price" value="{{ old('price', $item->price) }}" required>
                 <div class="invalid-feedback">{{ textError('price') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('phone') }}">
                 <label for="inputPhone" class="form-label">{{ __('board::boards.phone') }}:</label>
-                <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ getInput('phone', $item->phone) }}">
+                <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ old('phone', $item->phone) }}">
                 <div class="invalid-feedback">{{ textError('phone') }}</div>
             </div>
 

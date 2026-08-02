@@ -30,25 +30,25 @@
 
         <div class="mb-3{{ hasError('title') }}">
             <label for="inputTitle" class="form-label">{{ __('board::boards.name') }}:</label>
-            <input class="form-control" id="inputTitle" maxlength="{{ setting('board_title_max') }}" name="title" value="{{ getInput('title') }}" required>
+            <input class="form-control" id="inputTitle" maxlength="{{ setting('board_title_max') }}" name="title" value="{{ old('title') }}" required>
             <div class="invalid-feedback">{{ textError('title') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('text') }}">
             <label for="text" class="form-label">{{ __('board::boards.text') }}:</label>
-            <textarea class="form-control tiptap" data-relate-type="{{ Modules\Board\Models\Item::$morphName }}" data-relate-id="0" maxlength="{{ setting('board_text_max') }}" id="text" rows="10" name="text" required>{{ getInput('text') }}</textarea>
+            <textarea class="form-control tiptap" data-relate-type="{{ Modules\Board\Models\Item::$morphName }}" data-relate-id="0" maxlength="{{ setting('board_text_max') }}" id="text" rows="10" name="text" required>{{ old('text') }}</textarea>
             <div class="invalid-feedback">{{ textError('text') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('price') }}">
             <label for="inputPrice" class="form-label">{{ __('board::boards.price') }} {{ setting('currency') }}:</label>
-            <input class="form-control" id="inputPrice" name="price" value="{{ getInput('price') }}" required>
+            <input class="form-control" id="inputPrice" name="price" value="{{ old('price') }}" required>
             <div class="invalid-feedback">{{ textError('price') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('phone') }}">
             <label for="inputPhone" class="form-label">{{ __('board::boards.phone') }}:</label>
-            <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ getInput('phone', getUser('phone')) }}">
+            <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ old('phone', getUser('phone')) }}">
             <div class="invalid-feedback">{{ textError('phone') }}</div>
         </div>
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+- Контроллеры переведены с устаревших `setFlash()`/`setInput()` на `redirect()->with()` и `->withInput()->withErrors()`: ошибки валидации отдаются редиректом (PRG), обновление страницы после ошибки не отправляет форму повторно
+- Вьюхи переведены с устаревшего `getInput()` на стандартный `old()`
+
 ## 1.0.2
 - Поле `transfers.created_at` переведено с int (unix-таймстамп) на `DATETIME` (исторически-корректная конверсия таймзон, пересоздание индекса `created_at`)
 - `$timestamps = false` заменён на `const UPDATED_AT = null` (updated_at-колонки нет, created_at заполняется авто), убран ручной `SITETIME`

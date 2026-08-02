@@ -54,13 +54,13 @@ class NotebookController extends Controller
             if ($validator->isValid()) {
                 $this->note->fill(['text' => $msg])->save();
 
-                setFlash('success', __('main.record_saved_success'));
-            } else {
-                setInput($request->all());
-                setFlash('danger', $validator->getErrors());
+                return redirect()->route('notebooks.index')
+                    ->with('success', __('main.record_saved_success'));
             }
 
-            return redirect()->route('notebooks.index');
+            return redirect()->route('notebooks.edit')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('notebook::notebooks/edit', ['note' => $this->note]);

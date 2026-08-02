@@ -1,7 +1,7 @@
 <div class="mb-3{{ hasError('answers') }}">
     <div class="js-answer-list">
         @php
-            $answers = array_diff((array) getInput('answers', $vote->getAnswers ?? []), ['']);
+            $answers = array_diff((array) old('answers', $vote->getAnswers ?? []), ['']);
             $answers = array_pad(array_unique($answers), 2, '');
         @endphp
 

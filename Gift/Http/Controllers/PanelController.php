@@ -29,13 +29,13 @@ class PanelController extends AdminController
                     Gift::query()->where('id', $id)->update(['price' => $price]);
                 }
 
-                setFlash('success', __('gift::gifts.prices_saved'));
-
-                return redirect('admin/gifts');
+                return redirect('admin/gifts')
+                    ->with('success', __('gift::gifts.prices_saved'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('admin/gifts')
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $gifts = Gift::query()
@@ -55,14 +55,14 @@ class PanelController extends AdminController
         $gift = GiftsUser::query()->find($id);
         $validator->notEmpty($gift, __('gift::gifts.gift_not_found'));
 
-        if ($validator->isValid()) {
-            $gift->delete();
-
-            setFlash('success', __('gift::gifts.gift_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect('gifts/' . $login)
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect('gifts/' . $login);
+        $gift->delete();
+
+        return redirect('gifts/' . $login)
+            ->with('success', __('gift::gifts.gift_deleted'));
     }
 }

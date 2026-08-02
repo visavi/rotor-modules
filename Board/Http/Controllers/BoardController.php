@@ -142,13 +142,13 @@ class BoardController extends Controller
                 clearCache(['statBoards', 'recentBoards']);
                 $flood->saveState();
 
-                setFlash('success', __('board::boards.item_success_added'));
-
-                return redirect()->route('items.view', ['id' => $item->id]);
+                return redirect()->route('items.view', ['id' => $item->id])
+                    ->with('success', __('board::boards.item_success_added'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('items.create', ['bid' => $bid])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $files = File::query()
@@ -211,13 +211,14 @@ class BoardController extends Controller
                 ]);
 
                 clearCache(['statBoards', 'recentBoards']);
-                setFlash('success', __('board::boards.item_success_edited'));
 
-                return redirect()->route('items.view', ['id' => $item->id]);
+                return redirect()->route('items.view', ['id' => $item->id])
+                    ->with('success', __('board::boards.item_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('items.edit', ['id' => $item->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $boards = $item->category->getChildren();
@@ -242,34 +243,34 @@ class BoardController extends Controller
 
         $validator->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
 
-        if ($validator->isValid()) {
-            if ($item->expires_at->gt(now())) {
-                $status = __('board::boards.item_success_unpublished');
-                $item->update([
-                    'expires_at' => now(),
-                ]);
-
-                $item->category->decrement('count_items');
-            } else {
-                $status = __('board::boards.item_success_published');
-                $period = (int) setting('boards_period');
-
-                $expired = $item->updated_at->addDays($period)->lte(now());
-
-                $item->update([
-                    'expires_at' => now()->addDays($period),
-                    'updated_at' => $expired ? now() : $item->updated_at,
-                ]);
-
-                $item->category->increment('count_items');
-            }
-
-            setFlash('success', $status);
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('items.edit', ['id' => $item->id])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('items.edit', ['id' => $item->id]);
+        if ($item->expires_at->gt(now())) {
+            $status = __('board::boards.item_success_unpublished');
+            $item->update([
+                'expires_at' => now(),
+            ]);
+
+            $item->category->decrement('count_items');
+        } else {
+            $status = __('board::boards.item_success_published');
+            $period = (int) setting('boards_period');
+
+            $expired = $item->updated_at->addDays($period)->lte(now());
+
+            $item->update([
+                'expires_at' => now()->addDays($period),
+                'updated_at' => $expired ? now() : $item->updated_at,
+            ]);
+
+            $item->category->increment('count_items');
+        }
+
+        return redirect()->route('items.edit', ['id' => $item->id])
+            ->with('success', $status);
     }
 
     /**
@@ -289,18 +290,19 @@ class BoardController extends Controller
 
         $validator->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
 
-        if ($validator->isValid()) {
-            $item->delete();
-
-            $item->category->decrement('count_items');
-
-            clearCache(['statBoards', 'recentBoards']);
-            setFlash('success', __('board::boards.item_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('boards.index', ['id' => $item->board_id])
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('boards.index', ['id' => $item->board_id]);
+        $item->delete();
+
+        $item->category->decrement('count_items');
+
+        clearCache(['statBoards', 'recentBoards']);
+
+        return redirect()->route('boards.index', ['id' => $item->board_id])
+            ->with('success', __('board::boards.item_success_deleted'));
     }
 
     /**

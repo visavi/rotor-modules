@@ -42,8 +42,7 @@ class CacheController extends AdminController
             refreshCaches();
         }
 
-        setFlash('success', __('caches::caches.success_cleared'));
-
-        return redirect()->route('admin.caches.index', ['type' => $type]);
+        return redirect()->route('admin.caches.index', ['type' => $type])
+            ->with('success', __('caches::caches.success_cleared'));
     }
 }

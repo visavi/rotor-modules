@@ -97,17 +97,17 @@ class BookmarkController extends Controller
 
         $validator->notEmpty($topicIds, __('forum::forums.bookmarks_missing'));
 
-        if ($validator->isValid()) {
-            Bookmark::query()
-                ->whereIn('topic_id', intar($request->input('del')))
-                ->where('user_id', getUser('id'))
-                ->delete();
+        $redirect = redirect()->route('forums.bookmarks', ['page' => int($request->input('page'))]);
 
-            setFlash('success', __('forum::forums.bookmarks_selected_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return $redirect->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('forums.bookmarks', ['page' => int($request->input('page'))]);
+        Bookmark::query()
+            ->whereIn('topic_id', $topicIds)
+            ->where('user_id', getUser('id'))
+            ->delete();
+
+        return $redirect->with('success', __('forum::forums.bookmarks_selected_deleted'));
     }
 }

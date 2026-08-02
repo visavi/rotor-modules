@@ -92,13 +92,13 @@ class RatingController extends Controller
                 $message = textNotice('rating', ['login' => $this->user->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
                 $user->sendMessage(null, $message);
 
-                setFlash('success', __('rating::ratings.reputation_success_changed'));
-
-                return redirect('users/' . $user->login);
+                return redirect('users/' . $user->login)
+                    ->with('success', __('rating::ratings.reputation_success_changed'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('users/' . $user->login . '/rating?vote=' . $vote)
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         return view('rating::index', compact('user', 'vote'));

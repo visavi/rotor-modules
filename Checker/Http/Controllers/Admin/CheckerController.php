@@ -41,9 +41,8 @@ class CheckerController extends AdminController
 
         Storage::disk('local')->put($this->filename, json_encode($files));
 
-        setFlash('success', __('checker::checker.success_crawled'));
-
-        return redirect('admin/checkers');
+        return redirect('admin/checkers')
+            ->with('success', __('checker::checker.success_crawled'));
     }
 
     /**

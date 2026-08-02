@@ -56,15 +56,13 @@ class LoadController extends AdminController
                 'sort' => $max,
             ]);
 
-            setFlash('success', __('load::loads.load_success_created'));
-
-            return redirect()->route('admin.loads.edit', ['id' => $load->id]);
+            return redirect()->route('admin.loads.edit', ['id' => $load->id])
+                ->with('success', __('load::loads.load_success_created'));
         }
 
-        setInput($request->all());
-        setFlash('danger', $validator->getErrors());
-
-        return redirect()->route('admin.loads.index');
+        return redirect()->route('admin.loads.index')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**
@@ -100,13 +98,13 @@ class LoadController extends AdminController
                     'closed'    => $closed,
                 ]);
 
-                setFlash('success', __('load::loads.load_success_edited'));
-
-                return redirect()->route('admin.loads.index');
+                return redirect()->route('admin.loads.index')
+                    ->with('success', __('load::loads.load_success_edited'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.loads.edit', ['id' => $load->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $loads = $load->getChildren();
@@ -136,15 +134,15 @@ class LoadController extends AdminController
             $validator->addError(__('load::loads.load_has_downs'));
         }
 
-        if ($validator->isValid()) {
-            $load->delete();
-
-            setFlash('success', __('load::loads.load_success_deleted'));
-        } else {
-            setFlash('danger', $validator->getErrors());
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.loads.index')
+                ->withErrors($validator->getErrors());
         }
 
-        return redirect()->route('admin.loads.index');
+        $load->delete();
+
+        return redirect()->route('admin.loads.index')
+            ->with('success', __('load::loads.load_success_deleted'));
     }
 
     /**
@@ -261,13 +259,14 @@ class LoadController extends AdminController
                 }
 
                 clearCache(['statLoads', 'recentDowns']);
-                setFlash('success', __('load::loads.down_edited_success'));
 
-                return redirect()->route('admin.downs.edit', ['id' => $down->id]);
+                return redirect()->route('admin.downs.edit', ['id' => $down->id])
+                    ->with('success', __('load::loads.down_edited_success'));
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('admin.downs.edit', ['id' => $down->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $categories = $down->category->getChildren();
@@ -297,9 +296,9 @@ class LoadController extends AdminController
         $down->delete();
 
         clearCache(['statLoads', 'recentDowns']);
-        setFlash('success', __('load::loads.down_success_deleted'));
 
-        return redirect()->route('admin.loads.load', ['id' => $down->category_id]);
+        return redirect()->route('admin.loads.load', ['id' => $down->category_id])
+            ->with('success', __('load::loads.down_success_deleted'));
     }
 
     /**
@@ -355,8 +354,8 @@ class LoadController extends AdminController
         $down->user->sendMessage(null, $text);
 
         clearCache(['statLoads', 'recentDowns']);
-        setFlash('success', $status);
 
-        return redirect()->route('admin.downs.edit', ['id' => $down->id]);
+        return redirect()->route('admin.downs.edit', ['id' => $down->id])
+            ->with('success', $status);
     }
 }

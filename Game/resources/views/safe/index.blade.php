@@ -32,19 +32,19 @@
             @csrf
             <div class="mb-3 row{{ hasError('code') }}">
                 <div class="col-1">
-                    <input class="form-control" name="code0" maxlength="1" value="{{ getInput('code0') }}" required>
+                    <input class="form-control" name="code0" maxlength="1" value="{{ old('code0') }}" required>
                 </div>
                 <div class="col-1">
-                    <input class="form-control" name="code1" maxlength="1" value="{{ getInput('code1') }}" required>
+                    <input class="form-control" name="code1" maxlength="1" value="{{ old('code1') }}" required>
                 </div>
                 <div class="col-1">
-                    <input class="form-control" name="code2" maxlength="1" value="{{ getInput('code2') }}" required>
+                    <input class="form-control" name="code2" maxlength="1" value="{{ old('code2') }}" required>
                 </div>
                 <div class="col-1">
-                    <input class="form-control" name="code3" maxlength="1" value="{{ getInput('code3') }}" required>
+                    <input class="form-control" name="code3" maxlength="1" value="{{ old('code3') }}" required>
                 </div>
                 <div class="col-1">
-                    <input class="form-control" name="code4" maxlength="1" value="{{ getInput('code4') }}" required>
+                    <input class="form-control" name="code4" maxlength="1" value="{{ old('code4') }}" required>
                 </div>
             </div>
             <button class="btn btn-primary">Ломать сейф</button>

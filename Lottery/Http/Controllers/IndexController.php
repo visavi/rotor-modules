@@ -92,13 +92,13 @@ class IndexController extends Controller
                 }
             );
 
-            setFlash('success', __('lottery::lottery.ticket_success_purchased'));
-        } else {
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect('lottery')
+                ->with('success', __('lottery::lottery.ticket_success_purchased'));
         }
 
-        return redirect('lottery');
+        return redirect('lottery')
+            ->withInput()
+            ->withErrors($validator->getErrors());
     }
 
     /**

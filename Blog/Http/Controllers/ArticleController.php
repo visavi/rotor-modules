@@ -196,8 +196,9 @@ class ArticleController extends Controller
                     ->with('success', $flash);
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('blogs.create', ['cid' => $cid])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $article = new Article();
@@ -288,8 +289,9 @@ class ArticleController extends Controller
                     ->with('success', $flash);
             }
 
-            setInput($request->all());
-            setFlash('danger', $validator->getErrors());
+            return redirect()->route('articles.edit', ['id' => $article->id])
+                ->withInput()
+                ->withErrors($validator->getErrors());
         }
 
         $categories = $article->category->getChildren();
