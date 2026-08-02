@@ -5,7 +5,7 @@ use Modules\Guestbook\Models\Guestbook;
 return [
     'name'        => 'Гостевая книга',
     'description' => 'Гостевая книга сайта с поддержкой модерации и ответов от администратора',
-    'version'     => '1.0.3',
+    'version'     => '1.0.4',
     'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

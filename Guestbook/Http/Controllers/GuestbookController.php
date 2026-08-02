@@ -10,6 +10,7 @@ use App\Models\File;
 use App\Models\Flood;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
 use Modules\Guestbook\Models\Guestbook;
 
@@ -90,6 +91,8 @@ class GuestbookController extends Controller
                     ->where('relate_id', 0)
                     ->where('user_id', $user->id)
                     ->update(['relate_id' => $guestbook->id]);
+            } else {
+                Cookie::queue('guest_name', $guestName, 525600);
             }
 
             clearCache('statGuestbook');

@@ -1,10 +1,12 @@
+@use('Illuminate\Support\Facades\Cookie')
+
 @if (getUser())
     <div class="section-form mb-3 shadow">
         <form action="{{ route('guestbook.create') }}" method="post">
             @csrf
             <div class="mb-3{{ hasError('msg') }}">
                 <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Guestbook\Models\Guestbook::$morphName }}" data-relate-id="0" placeholder="{{ __('main.message') }}" required>{{ getInput('msg') }}</textarea>
+                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Guestbook\Models\Guestbook::$morphName }}" data-relate-id="0" placeholder="{{ __('main.message') }}" required>{{ old('msg') }}</textarea>
                 <div class="invalid-feedback">{{ textError('msg') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
@@ -24,13 +26,13 @@
             @csrf
             <div class="mb-3{{ hasError('guest_name') }}">
                 <label for="inputName" class="form-label">{{ __('users.name') }}:</label>
-                <input class="form-control" id="inputName" name="guest_name" maxlength="20" value="{{ getInput('guest_name') }}">
+                <input class="form-control" id="inputName" name="guest_name" maxlength="20" value="{{ old('guest_name', Cookie::get('guest_name')) }}">
                 <div class="invalid-feedback">{{ textError('guest_name') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('msg') }}">
                 <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control" id="msg" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="msg" placeholder="{{ __('main.message') }}" required>{{ getInput('msg') }}</textarea>
+                <textarea class="form-control" id="msg" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="msg" placeholder="{{ __('main.message') }}" required>{{ old('msg') }}</textarea>
                 <div class="invalid-feedback">{{ textError('msg') }}</div>
             </div>
 
