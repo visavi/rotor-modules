@@ -31,7 +31,7 @@
             @csrf
             <div class="mb-3{{ hasError('reply') }}">
                 <label for="reply" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="reply" rows="5" name="reply" required>{{ getInput('reply', $post->reply) }}</textarea>
+                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="reply" rows="5" name="reply" required>{{ old('reply', $post->reply) }}</textarea>
                 <div class="invalid-feedback">{{ textError('reply') }}</div>
             </div>
 
