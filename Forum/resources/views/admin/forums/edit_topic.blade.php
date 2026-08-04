@@ -35,9 +35,14 @@
                 <div class="invalid-feedback">{{ textError('note') }}</div>
             </div>
 
+            <?php $inputCurators = old('moderators', $topic->moderators ? explode(',', $topic->moderators) : []); ?>
             <div class="mb-3{{ hasError('moderators') }}">
                 <label for="moderators" class="form-label">{{ __('forum::forums.topic_curators') }}:</label>
-                <input class="form-control" name="moderators" id="moderators" maxlength="100" value="{{ old('moderators', $topic->moderators) }}">
+                <select class="form-select input-user" id="moderators" name="moderators[]" multiple data-server="{{ route('search-users') }}" data-value-field="login" data-label-field="login">
+                    @foreach ($inputCurators as $curator)
+                        <option value="{{ $curator }}" selected>{{ $curator }}</option>
+                    @endforeach
+                </select>
                 <span class="text-muted fst-italic">{{ __('forum::forums.curators_note') }}</span>
                 <div class="invalid-feedback">{{ textError('moderators') }}</div>
             </div>

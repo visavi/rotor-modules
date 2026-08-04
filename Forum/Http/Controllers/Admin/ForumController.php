@@ -22,6 +22,11 @@ use Modules\Forum\Models\Vote;
 class ForumController extends AdminController
 {
     /**
+     * Максимальное количество кураторов темы
+     */
+    public const int MAX_CURATORS = 10;
+
+    /**
      * Главная страница
      */
     public function index(): View
@@ -209,29 +214,25 @@ class ForumController extends AdminController
         if ($request->isMethod('post')) {
             $title = $request->input('title');
             $note = $request->input('note');
-            $moderators = (string) $request->input('moderators');
+            $moderators = array_filter((array) $request->input('moderators', []), static fn ($login) => is_string($login) && $login !== '');
             $locked = empty($request->input('locked')) ? 0 : 1;
             $closed = empty($request->input('closed')) ? 0 : 1;
             $closeUserId = $closed ? getUser('id') : null;
 
+            $curators = User::query()->whereIn('login', $moderators)->pluck('login');
+            $missing = array_diff($moderators, $curators->all());
+
             $validator
                 ->length($title, setting('forum_title_min'), setting('forum_title_max'), ['title' => __('validator.text')])
-                ->length($note, setting('forum_note_min'), setting('forum_note_max'), ['note' => __('validator.text_long')]);
-
-            $moderators = preg_split('/\s*,\s*/', trim($moderators, ','), -1, PREG_SPLIT_NO_EMPTY);
-
-            foreach ($moderators as $moderator) {
-                if (! getUserByLogin($moderator)) {
-                    $validator->addError(['moderator' => __('validator.user_login', ['login' => $moderator])]);
-                    break;
-                }
-            }
+                ->length($note, setting('forum_note_min'), setting('forum_note_max'), ['note' => __('validator.text_long')])
+                ->empty($missing, ['moderators' => __('validator.user_login', ['login' => implode(', ', $missing)])])
+                ->lte(count($moderators), self::MAX_CURATORS, ['moderators' => __('forum::forums.curators_limit', ['limit' => self::MAX_CURATORS])]);
 
             if ($validator->isValid()) {
                 $topic->update([
                     'title'         => $title,
                     'note'          => $note,
-                    'moderators'    => implode(',', $moderators),
+                    'moderators'    => $curators->implode(','),
                     'locked'        => $locked,
                     'closed'        => $closed,
                     'close_user_id' => $closeUserId,
