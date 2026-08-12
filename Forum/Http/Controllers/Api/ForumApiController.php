@@ -66,7 +66,10 @@ class ForumApiController extends Controller
      */
     public function topics(int $id, Request $request): JsonResource
     {
-        $topic = Topic::query()->find($id);
+        // Раздел нужен клиенту для хлебных крошек, lastTopic — для полей ForumResource
+        $topic = Topic::query()
+            ->with('forum.parent', 'forum.lastTopic.lastPost.user')
+            ->find($id);
 
         if (! $topic) {
             abort(404, __('forum::forums.topic_not_exist'));

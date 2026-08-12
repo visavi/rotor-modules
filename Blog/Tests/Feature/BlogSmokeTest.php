@@ -48,6 +48,6 @@ class BlogSmokeTest extends ModuleTestCase
             'created_at'  => now()->timestamp,
         ]);
 
-        $this->get(route('articles.view', ['slug' => $article->slug]))->assertOk();
+        $this->get($article->getViewUrl())->assertOk();
     }
 }

@@ -16,6 +16,9 @@ class ForumResource extends JsonResource
         return [
             'id'                   => $this->id,
             'parent_id'            => $this->parent_id,
+            // Родительский раздел отдаётся вложенным, когда связь загружена
+            // (у корневых разделов связь возвращает пустую модель-заглушку)
+            'parent'               => $this->whenLoaded('parent', fn () => $this->parent->id ? self::make($this->parent) : null),
             'sort'                 => $this->sort,
             'title'                => e($this->title),
             'description'          => e($this->description),

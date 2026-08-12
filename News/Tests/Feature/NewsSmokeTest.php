@@ -36,6 +36,6 @@ class NewsSmokeTest extends ModuleTestCase
             'created_at' => now()->timestamp,
         ]);
 
-        $this->get(route('news.view', ['id' => $news->id]))->assertOk();
+        $this->get($news->getViewUrl())->assertOk();
     }
 }

@@ -153,6 +153,14 @@ class Offer extends Model
     }
 
     /**
+     * Ссылка на страницу записи
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        return route('offers.view', ['id' => $this->id], $absolute);
+    }
+
+    /**
      * Get reply
      */
     public function getReply(): HtmlString

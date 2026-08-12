@@ -16,9 +16,35 @@ Registry::mediaType(string $morphName);               // тип принимае
 Registry::ratingType(string $morphName);              // тип поддерживает рейтинг
 Registry::spamType(string $morphName);                // тип — источник жалоб на спам (метка берётся из labelTypes)
 Registry::label(string $morphName, string $label);    // отображаемое название типа
-Registry::feed(string $class, array $config);         // запись в ленте: ['view' => '', 'with' => [], 'scope' => ?Closure, 'poll' => ?Closure]
+Registry::feed(string $class, array $config);         // запись в ленте, ключи конфига — ниже
 Registry::search(string $class, string $view, array $with = []); // полнотекстовый поиск
 ```
+
+### Конфигурация ленты
+
+| Ключ | Тип | Назначение |
+|---|---|---|
+| `view` | string | Шаблон записи для ленты сайта |
+| `with` | array | Eager-загрузки |
+| `scope` | ?Closure | Условия видимости записи (активность, срок), при необходимости join |
+| `poll` | ?Closure | Возвращает `[$morphName, $id]`, если голосование привязано к связанной записи |
+| `source` | ?Closure | Модель-носитель контента, если она отличается от записи ленты (тема форума → последний пост) |
+| `api` | ?Closure | Доп. поля записи в `/api/feed`, возвращает массив |
+
+Без `source` запись остаётся в ленте сайта, но в API отдаётся полями самой записи.
+
+### Ссылка на запись
+
+Ссылку на свою страницу модель отдаёт сама — метод используют `/api/feed`, уведомления, RSS и вёрстка:
+
+```php
+public function getViewUrl(bool $absolute = true): string
+{
+    return route('news.view', ['id' => $this->id], $absolute);
+}
+```
+
+Метод необязателен: без него запись придёт в API с `url: null`.
 
 Соответствие ключей `module.php` методам Registry:
 

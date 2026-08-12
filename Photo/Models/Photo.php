@@ -118,6 +118,14 @@ class Photo extends Model
     }
 
     /**
+     * Ссылка на страницу записи
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        return route('photos.view', ['id' => $this->id], $absolute);
+    }
+
+    /**
      * Удаление фото и загруженных файлов
      */
     public function delete(): ?bool

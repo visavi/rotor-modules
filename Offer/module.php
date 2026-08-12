@@ -16,7 +16,11 @@ return [
         Offer::class => [
             'label'  => __('offer::offers.section'),
             'search' => ['view' => 'offer::search/_offers'],
-            'feed'   => ['with' => ['user'], 'view' => 'offer::feeds/_offers'],
+            'feed'   => [
+                'with' => ['user'],
+                'view' => 'offer::feeds/_offers',
+                'api'  => fn (Offer $post): array => ['offer_type' => $post->type, 'status' => $post->status],
+            ],
             'rating' => true,
         ],
     ],

@@ -160,6 +160,14 @@ class Item extends Model
     }
 
     /**
+     * Ссылка на страницу записи
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        return route('items.view', ['id' => $this->id], $absolute);
+    }
+
+    /**
      * Удаление объявления и загруженных файлов
      */
     public function delete(): ?bool

@@ -21,6 +21,7 @@ return [
                 'with'  => ['user', 'files', 'category.parent'],
                 'view'  => 'board::feeds/_items',
                 'scope' => fn ($query) => $query->where('active', true)->where('expires_at', '>', now()),
+                'api'   => fn (Item $post): array => ['price' => $post->price, 'phone' => $post->phone],
             ],
             'upload' => 'media',
         ],

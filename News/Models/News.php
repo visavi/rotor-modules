@@ -101,6 +101,14 @@ class News extends Model
     }
 
     /**
+     * Ссылка на страницу записи
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        return route('news.view', ['id' => $this->id], $absolute);
+    }
+
+    /**
      * Get text for share (RSS, API)
      */
     public function getShareText(): string

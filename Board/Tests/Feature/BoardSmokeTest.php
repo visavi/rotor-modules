@@ -73,6 +73,6 @@ class BoardSmokeTest extends ModuleTestCase
             'expires_at' => now()->addDay()->timestamp,
         ]);
 
-        $this->get(route('items.view', ['id' => $item->id]))->assertOk();
+        $this->get($item->getViewUrl())->assertOk();
     }
 }

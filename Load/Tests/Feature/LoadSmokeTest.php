@@ -48,6 +48,6 @@ class LoadSmokeTest extends ModuleTestCase
             'created_at'  => now()->timestamp,
         ]);
 
-        $this->get(route('downs.view', ['id' => $down->id]))->assertOk();
+        $this->get($down->getViewUrl())->assertOk();
     }
 }

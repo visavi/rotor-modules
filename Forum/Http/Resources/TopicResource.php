@@ -15,6 +15,9 @@ class TopicResource extends JsonResource
     {
         return [
             'id'                   => $this->id,
+            'forum_id'             => $this->forum_id,
+            // Раздел отдаётся вложенным, когда связь загружена (сообщения темы)
+            'forum'                => ForumResource::make($this->whenLoaded('forum')),
             'title'                => e($this->title),
             'login'                => $this->user->login,
             'name'                 => $this->user->getName(),

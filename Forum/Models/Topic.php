@@ -159,6 +159,16 @@ class Topic extends Model
     }
 
     /**
+     * Ссылка на страницу темы, при наличии — сразу на последнее сообщение
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        $params = array_filter(['id' => $this->id, 'pid' => $this->last_post_id]);
+
+        return route('topics.topic', $params, $absolute);
+    }
+
+    /**
      * Проверяет, является ли пользователь модератором темы
      */
     public function isModerator(User $user): bool

@@ -204,6 +204,14 @@ class Article extends Model
     }
 
     /**
+     * Ссылка на страницу записи
+     */
+    public function getViewUrl(bool $absolute = true): string
+    {
+        return route('articles.view', ['slug' => $this->slug], $absolute);
+    }
+
+    /**
      * Get text for share (RSS, API)
      */
     public function getShareText(): string

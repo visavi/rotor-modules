@@ -24,6 +24,8 @@ return [
                 'with'  => ['lastPost.user', 'lastPost.files', 'forum.parent'],
                 'view'  => 'forum::feeds/_topics',
                 'scope' => fn ($query) => $query->leftJoin('posts', 'topics.last_post_id', '=', 'posts.id'),
+                // Текст, автор и файлы записи ленты берутся из последнего сообщения темы
+                'source' => fn (Topic $topic): Post => $topic->lastPost,
                 // В ленте голосование идёт за последний пост темы, а не за саму тему
                 'poll' => fn (Topic $topic): ?array => $topic->last_post_id
                     ? [Post::$morphName, $topic->last_post_id]
