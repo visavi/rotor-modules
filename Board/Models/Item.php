@@ -168,6 +168,34 @@ class Item extends Model
     }
 
     /**
+     * Путь до раздела записи
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        $breadcrumbs = [
+            ['title' => __('board::boards.boards'), 'url' => route('boards.index', [], $absolute)],
+        ];
+
+        if ($this->category->parent->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->parent->name,
+                'url'   => route('boards.index', ['id' => $this->category->parent->id], $absolute),
+            ];
+        }
+
+        if ($this->category->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->name,
+                'url'   => route('boards.index', ['id' => $this->category->id], $absolute),
+            ];
+        }
+
+        return $breadcrumbs;
+    }
+
+    /**
      * Удаление объявления и загруженных файлов
      */
     public function delete(): ?bool

@@ -57,6 +57,22 @@ class FeedApiTest extends ModuleTestCase
         $this->assertStringContainsString('Последнее сообщение темы', $response->json('data.0.text'));
     }
 
+    public function testFeedReturnsBreadcrumbs(): void
+    {
+        $parent = Forum::query()->create(['title' => 'Parent forum']);
+        [$topic] = $this->createTopicInFeed();
+        $topic->forum->update(['parent_id' => $parent->id]);
+
+        $response = $this->get('/api/feed');
+
+        $response->assertOk();
+        $response->assertJsonPath('data.0.breadcrumbs.0.title', __('forum::forums.forums'));
+        $response->assertJsonPath('data.0.breadcrumbs.0.url', route('forums.index'));
+        $response->assertJsonPath('data.0.breadcrumbs.1.title', 'Parent forum');
+        $response->assertJsonPath('data.0.breadcrumbs.2.title', 'Test forum');
+        $response->assertJsonPath('data.0.breadcrumbs.2.url', route('forums.forum', ['id' => $topic->forum_id]));
+    }
+
     public function testFeedVoteIsNullForGuest(): void
     {
         [, $post] = $this->createTopicInFeed();

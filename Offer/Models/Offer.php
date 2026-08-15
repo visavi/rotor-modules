@@ -161,6 +161,22 @@ class Offer extends Model
     }
 
     /**
+     * Путь до раздела записи
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        return [
+            ['title' => __('offer::offers.section'), 'url' => route('offers.index', [], $absolute)],
+            [
+                'title' => $this->type === 'offer' ? __('offer::offers.offers') : __('offer::offers.problems'),
+                'url'   => route('offers.index', ['type' => $this->type], $absolute),
+            ],
+        ];
+    }
+
+    /**
      * Get reply
      */
     public function getReply(): HtmlString

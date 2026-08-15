@@ -46,6 +46,33 @@ public function getViewUrl(bool $absolute = true): string
 
 Метод необязателен: без него запись придёт в API с `url: null`.
 
+### Путь до раздела
+
+Хлебные крошки записи модель тоже отдаёт сама — их использует `/api/feed`, чтобы клиент показал раздел и мог в него перейти:
+
+```php
+/**
+ * @return array<int, array{title: string, url: string}>
+ */
+public function getBreadcrumbs(bool $absolute = true): array
+{
+    $breadcrumbs = [
+        ['title' => __('blog::blogs.blogs'), 'url' => route('blogs.index', [], $absolute)],
+    ];
+
+    if ($this->category) {
+        $breadcrumbs[] = [
+            'title' => $this->category->name,
+            'url'   => route('blogs.blog', ['id' => $this->category->id], $absolute),
+        ];
+    }
+
+    return $breadcrumbs;
+}
+```
+
+Порядок — от корня раздела к записи, сама запись в крошки не входит. Категорию нужно указать в ключе `with` конфига ленты, иначе будет запрос на каждую запись. Метод необязателен: без него в API придёт `breadcrumbs: []`.
+
 Соответствие ключей `module.php` методам Registry:
 
 | Ключ в `models` | Метод Registry |

@@ -158,6 +158,34 @@ class Down extends Model
     }
 
     /**
+     * Путь до раздела записи
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        $breadcrumbs = [
+            ['title' => __('load::loads.loads'), 'url' => route('loads.index', [], $absolute)],
+        ];
+
+        if ($this->category->parent->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->parent->name,
+                'url'   => route('loads.load', ['id' => $this->category->parent->id], $absolute),
+            ];
+        }
+
+        if ($this->category->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->name,
+                'url'   => route('loads.load', ['id' => $this->category->id], $absolute),
+            ];
+        }
+
+        return $breadcrumbs;
+    }
+
+    /**
      * Get text for share (RSS, API)
      */
     public function getShareText(): string

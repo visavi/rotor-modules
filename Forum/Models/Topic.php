@@ -169,6 +169,34 @@ class Topic extends Model
     }
 
     /**
+     * Путь до раздела темы
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        $breadcrumbs = [
+            ['title' => __('forum::forums.forums'), 'url' => route('forums.index', [], $absolute)],
+        ];
+
+        if ($this->forum->parent->id) {
+            $breadcrumbs[] = [
+                'title' => $this->forum->parent->title,
+                'url'   => route('forums.forum', ['id' => $this->forum->parent->id], $absolute),
+            ];
+        }
+
+        if ($this->forum->id) {
+            $breadcrumbs[] = [
+                'title' => $this->forum->title,
+                'url'   => route('forums.forum', ['id' => $this->forum->id], $absolute),
+            ];
+        }
+
+        return $breadcrumbs;
+    }
+
+    /**
      * Проверяет, является ли пользователь модератором темы
      */
     public function isModerator(User $user): bool

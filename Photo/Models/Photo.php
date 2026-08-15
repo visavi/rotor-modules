@@ -126,6 +126,18 @@ class Photo extends Model
     }
 
     /**
+     * Путь до раздела записи
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        return [
+            ['title' => __('photo::photos.photos'), 'url' => route('photos.index', [], $absolute)],
+        ];
+    }
+
+    /**
      * Удаление фото и загруженных файлов
      */
     public function delete(): ?bool

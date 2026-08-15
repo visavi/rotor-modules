@@ -212,6 +212,34 @@ class Article extends Model
     }
 
     /**
+     * Путь до раздела записи
+     *
+     * @return array<int, array{title: string, url: string}>
+     */
+    public function getBreadcrumbs(bool $absolute = true): array
+    {
+        $breadcrumbs = [
+            ['title' => __('blog::blogs.blogs'), 'url' => route('blogs.index', [], $absolute)],
+        ];
+
+        if ($this->category->parent->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->parent->name,
+                'url'   => route('blogs.blog', ['id' => $this->category->parent->id], $absolute),
+            ];
+        }
+
+        if ($this->category->id) {
+            $breadcrumbs[] = [
+                'title' => $this->category->name,
+                'url'   => route('blogs.blog', ['id' => $this->category->id], $absolute),
+            ];
+        }
+
+        return $breadcrumbs;
+    }
+
+    /**
      * Get text for share (RSS, API)
      */
     public function getShareText(): string
