@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Photo\Http\Controllers\Admin\PhotoController as AdminPhotoController;
 use Modules\Photo\Http\Controllers\Admin\PhotoSettingController;
+use Modules\Photo\Http\Controllers\Api\PhotoApiController;
 use Modules\Photo\Http\Controllers\PhotoController;
 
 /* Редиректы */
@@ -51,4 +52,13 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/photo-settings', 'index')->name('settings');
                 Route::post('/photo-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: гость смотрит фото, авторизованный получает ещё и свой голос
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/photos', [PhotoApiController::class, 'index']);
+        Route::get('/photos/{id}', [PhotoApiController::class, 'view']);
     });

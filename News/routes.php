@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\News\Http\Controllers\Admin\NewsController as AdminNewsController;
 use Modules\News\Http\Controllers\Admin\NewsSettingController;
+use Modules\News\Http\Controllers\Api\NewsApiController;
 use Modules\News\Http\Controllers\NewsController;
 
 /* Редиректы */
@@ -45,4 +46,13 @@ Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
                 Route::get('/news-settings', 'index')->name('settings');
                 Route::post('/news-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: гость читает новость, авторизованный получает ещё и свой голос
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/news', [NewsApiController::class, 'index']);
+        Route::get('/news/{id}', [NewsApiController::class, 'view']);
     });

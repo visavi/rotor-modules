@@ -50,6 +50,7 @@ use Illuminate\Support\Str;
  * @property-read Collection<int, File>    $files
  * @property-read Collection<int, Comment> $comments
  * @property-read Collection<int, Poll>    $polls
+ * @property-read Collection<int, Tag>     $tags
  * @property-read Poll                     $poll
  * @property-read Blog                     $category
  */

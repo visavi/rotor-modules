@@ -6,7 +6,7 @@ use Modules\Offer\Models\Offer;
 return [
     'name'        => 'Предложения и проблемы',
     'description' => 'Модуль предложений и проблем',
-    'version'     => '1.0.4',
+    'version'     => '1.1.0',
     'requires'    => '14.1.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
@@ -21,6 +21,7 @@ return [
                 'view' => 'offer::feeds/_offers',
                 'api'  => fn (Offer $post): array => ['offer_type' => $post->type, 'status' => $post->status],
             ],
+            'upload' => 'media',
             'rating' => true,
         ],
     ],

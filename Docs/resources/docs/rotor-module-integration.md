@@ -33,6 +33,8 @@ Registry::search(string $class, string $view, array $with = []); // полнот
 
 Без `source` запись остаётся в ленте сайта, но в API отдаётся полями самой записи.
 
+Связь `files` указывать в `with` не нужно: ядро добавляет её само, если модель использует `FileableTrait`. Иначе забытый ключ молча оставлял бы записи в `/api/feed` без вложений.
+
 ### Ссылка на запись
 
 Ссылку на свою страницу модель отдаёт сама — метод используют `/api/feed`, уведомления, RSS и вёрстка:
@@ -72,6 +74,45 @@ public function getBreadcrumbs(bool $absolute = true): array
 ```
 
 Порядок — от корня раздела к записи, сама запись в крошки не входит. Категорию нужно указать в ключе `with` конфига ленты, иначе будет запрос на каждую запись. Метод необязателен: без него в API придёт `breadcrumbs: []`.
+
+### API раздела
+
+Свои API-роуты модуль объявляет в `routes.php` под группой `api`. Токен для чтения делать обязательным не нужно — лента публична, и переход из неё не должен упираться в 401:
+
+```php
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/offers/{id}', [OfferApiController::class, 'view']);
+    });
+```
+
+Запись отдаётся вместе с комментариями: `data` — страница комментариев, сама запись уходит в `additional`. Комментарии готовит трейт ядра `HandlesApiComments`, он же обрабатывает `per_page`, `page` и `order`:
+
+```php
+use App\Traits\HandlesApiComments;
+
+return CommentResource::collection($this->apiComments($offer, $request))
+    ->additional(['offer' => OfferResource::make($offer)]);
+```
+
+Комментарии приходят плоским списком с `parent_id` и `depth` — дерево собирает клиент, иначе пагинация резала бы ветки ответов. Удалённые остаются заглушкой с `deleted: true`.
+
+Голос текущего пользователя подмешивается в запрос записи join'ом по `polls` — в ресурсе он ложится в `vote.value`, а `vote.type` и `vote.id` клиент отправляет в `POST /api/rating`.
+
+Список раздела отдаётся тем же ресурсом, что и одиночная запись, — клиент получает одинаковую структуру везде. Параметры `per_page`, `page` и `order` разбирает трейт `HandlesApiPagination` (входит в `HandlesApiComments`), сортировку берите из `getSorting()` модели, чтобы набор полей совпадал с сайтом:
+
+```php
+[, $orderBy] = Article::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
+
+$articles = Article::query()
+    ->active()
+    ->when($request->integer('category_id'), static fn ($query, $id) => $query->where('category_id', $id))
+    ->orderBy(...$orderBy)
+    ->paginate($this->apiPerPage($request));
+```
+
+Если раздел построен на категориях, добавьте и их список — клиенту нужно из чего строить навигацию.
 
 Соответствие ключей `module.php` методам Registry:
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Blog\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use Modules\Blog\Http\Controllers\Admin\BlogSettingController;
+use Modules\Blog\Http\Controllers\Api\ArticleApiController;
 use Modules\Blog\Http\Controllers\ArticleController;
 
 /* Редиректы */
@@ -82,4 +83,14 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/blog-settings', 'index')->name('settings');
                 Route::post('/blog-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: гость читает статью, авторизованный получает ещё и свой голос
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/articles', [ArticleApiController::class, 'index']);
+        Route::get('/articles/{slug}', [ArticleApiController::class, 'view']);
+        Route::get('/blogs', [ArticleApiController::class, 'categories']);
     });

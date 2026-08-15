@@ -31,6 +31,7 @@ use Illuminate\Support\HtmlString;
  * @property CarbonImmutable      $created_at
  * @property CarbonImmutable|null $updated_at
  * @property int                  $count_comments
+ * @property int                  $rating
  * @property bool                 $closed
  * @property int                  $top
  * @property-read User                     $user

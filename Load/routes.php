@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Load\Http\Controllers\Admin\LoadController as AdminLoadController;
 use Modules\Load\Http\Controllers\Admin\LoadSettingController;
+use Modules\Load\Http\Controllers\Api\DownApiController;
 use Modules\Load\Http\Controllers\Load\ActiveController;
 use Modules\Load\Http\Controllers\Load\DownController;
 use Modules\Load\Http\Controllers\Load\LoadController;
@@ -85,4 +86,14 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
         /* Настройки */
         Route::get('/load-settings', [LoadSettingController::class, 'index'])->name('load.settings');
         Route::post('/load-settings', [LoadSettingController::class, 'update'])->name('load.settings.update');
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: гость читает загрузку, авторизованный получает ещё и свой голос
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/downs', [DownApiController::class, 'index']);
+        Route::get('/downs/{id}', [DownApiController::class, 'view']);
+        Route::get('/loads', [DownApiController::class, 'categories']);
     });

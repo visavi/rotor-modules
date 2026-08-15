@@ -6,6 +6,7 @@ namespace Modules\Offer\Http\Controllers;
 
 use App\Classes\Validator;
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\Flood;
 use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
@@ -105,6 +106,13 @@ class OfferController extends Controller
                     'status'  => 'wait',
                 ]);
 
+                // Файлы загружаются до создания записи, привязываем их к ней
+                File::query()
+                    ->where('relate_type', Offer::$morphName)
+                    ->where('relate_id', 0)
+                    ->where('user_id', $user->id)
+                    ->update(['relate_id' => $offer->id]);
+
                 $flood->saveState();
 
                 return redirect()->route('offers.view', ['id' => $offer->id])
@@ -116,7 +124,14 @@ class OfferController extends Controller
                 ->withErrors($validator->getErrors());
         }
 
-        return view('offer::offers/create', compact('type'));
+        $files = File::query()
+            ->where('relate_type', Offer::$morphName)
+            ->where('relate_id', 0)
+            ->where('user_id', $user->id)
+            ->orderBy('created_at')
+            ->get();
+
+        return view('offer::offers/create', compact('type', 'files'));
     }
 
     /**

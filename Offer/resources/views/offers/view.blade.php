@@ -31,6 +31,10 @@
 @section('content')
     <div class="section mb-3 shadow">
         <div class="section-content">
+            @if ($offer->getDetachedMedia()->isNotEmpty())
+                @include('app/_media_slider', ['model' => $offer, 'files' => $offer->getDetachedMedia()])
+            @endif
+
             <div class="section-message">
                 {{ $offer->getText() }}
             </div>

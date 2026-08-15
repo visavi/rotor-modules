@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Offer\Http\Controllers\Admin\OfferController as AdminOfferController;
 use Modules\Offer\Http\Controllers\Admin\OfferSettingController;
+use Modules\Offer\Http\Controllers\Api\OfferApiController;
 use Modules\Offer\Http\Controllers\OfferController;
 
 /* Редиректы */
@@ -46,4 +47,13 @@ Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
                 Route::get('/offer-settings', 'index')->name('settings');
                 Route::post('/offer-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: гость читает запись, авторизованный получает ещё и свой голос
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/offers', [OfferApiController::class, 'index']);
+        Route::get('/offers/{id}', [OfferApiController::class, 'view']);
     });

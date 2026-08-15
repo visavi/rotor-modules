@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Board\Http\Controllers\Admin\BoardController as AdminBoardController;
 use Modules\Board\Http\Controllers\Admin\BoardSettingController;
+use Modules\Board\Http\Controllers\Api\ItemApiController;
 use Modules\Board\Http\Controllers\BoardController;
 
 /* Категории объявлений */
@@ -59,4 +60,14 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/board-settings', 'index')->name('settings');
                 Route::post('/board-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Токен необязателен: объявления читают и гости
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/items', [ItemApiController::class, 'index']);
+        Route::get('/items/{id}', [ItemApiController::class, 'view']);
+        Route::get('/boards', [ItemApiController::class, 'categories']);
     });

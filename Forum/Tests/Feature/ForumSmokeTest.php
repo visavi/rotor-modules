@@ -77,4 +77,29 @@ class ForumSmokeTest extends ModuleTestCase
             // У корневого раздела родителя нет
             ->assertJsonPath('topic.forum.parent', null);
     }
+
+    public function testApiReadingIsOpenForGuests(): void
+    {
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 0,
+            'created_at'  => now(),
+        ]);
+
+        $this->getJson('/api/forums')->assertOk();
+        $this->getJson('/api/forums/' . $forum->id)->assertOk();
+        $this->getJson('/api/topics/' . $topic->id)->assertOk();
+    }
+
+    public function testApiWritingRequiresToken(): void
+    {
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $this->postJson('/api/forums/' . $forum->id, ['title' => 'New topic', 'text' => 'Text'])
+            ->assertStatus(400);
+    }
 }

@@ -111,12 +111,19 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
     });
 
 /* ---- API роуты ---- */
-Route::middleware(['api', 'check.token'])
+// Чтение открыто гостю, как и на сайте
+Route::middleware(['api', 'check.token.optional'])
     ->prefix('api')
     ->group(function () {
         Route::get('/forums', [ForumApiController::class, 'categoryForums']);
         Route::get('/forums/{id}', [ForumApiController::class, 'forums']);
-        Route::post('/forums/{id}', [ForumApiController::class, 'createTopic']);
         Route::get('/topics/{id}', [ForumApiController::class, 'topics']);
+    });
+
+// Писать может только авторизованный
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/forums/{id}', [ForumApiController::class, 'createTopic']);
         Route::post('/topics/{id}', [ForumApiController::class, 'createPost']);
     });

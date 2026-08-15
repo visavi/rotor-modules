@@ -10,7 +10,7 @@ use Modules\Forum\Observers\TopicObserver;
 return [
     'name'        => 'Форум',
     'description' => 'Форум с темами и сообщениями',
-    'version'     => '1.0.8',
+    'version'     => '1.0.9',
     'requires'    => '14.2.2',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

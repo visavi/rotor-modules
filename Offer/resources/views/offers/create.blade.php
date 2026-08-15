@@ -39,6 +39,11 @@
                     <div class="invalid-feedback">{{ textError('text') }}</div>
                 </div>
 
+                @include('app/_upload_media', [
+                    'model' => Modules\Offer\Models\Offer::getModel(),
+                    'files' => $files,
+                ])
+
                 <button class="btn btn-primary">{{ __('main.add') }}</button>
             </form>
         </div>

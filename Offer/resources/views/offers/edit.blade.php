@@ -40,6 +40,8 @@
                 <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
+            @include('app/_upload_media', ['model' => $offer])
+
             <button class="btn btn-primary">{{ __('main.change') }}</button>
         </form>
     </div>

@@ -6,13 +6,16 @@ namespace Modules\Offer\Models;
 
 use App\Casts\HtmlCast;
 use App\Models\Comment;
+use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
 use App\Traits\CommentableTrait;
 use App\Traits\FeedableTrait;
+use App\Traits\FileableTrait;
 use App\Traits\PollableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
+use App\Traits\UploadTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -36,6 +39,7 @@ use Illuminate\Support\HtmlString;
  * @property CarbonImmutable|null $updated_at
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
+ * @property-read Collection<int, File>    $files
  * @property-read Collection<int, Poll>    $polls
  * @property-read Poll                     $poll
  * @property-read User                     $replyUser
@@ -43,10 +47,12 @@ use Illuminate\Support\HtmlString;
 class Offer extends Model
 {
     use CommentableTrait;
-    use PollableTrait;
     use FeedableTrait;
+    use FileableTrait;
+    use PollableTrait;
     use SearchableTrait;
     use SortableTrait;
+    use UploadTrait;
 
     public const string DONE = 'done';
     public const string WAIT = 'wait';
@@ -91,6 +97,11 @@ class Offer extends Model
      * Morph name
      */
     public static string $morphName = 'offers';
+
+    /**
+     * Директория загрузки файлов
+     */
+    public string $uploadPath = '/uploads/offers';
 
     /**
      * Возвращает поля участвующие в поиске
@@ -209,6 +220,10 @@ class Offer extends Model
 
             $this->comments->each(static function (Comment $comment) {
                 $comment->delete();
+            });
+
+            $this->files->each(static function (File $file) {
+                $file->delete();
             });
 
             return parent::delete();

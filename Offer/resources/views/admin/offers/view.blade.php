@@ -30,6 +30,10 @@
                 <a href="{{ route('admin.offers.reply', ['id' => $offer->id]) }}" onclick="return confirm('{{ __('offer::offers.confirm_delete') }}')" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fas fa-times text-muted"></i></a>
             </div>
 
+            @if ($offer->getDetachedMedia()->isNotEmpty())
+                @include('app/_media_slider', ['model' => $offer, 'files' => $offer->getDetachedMedia()])
+            @endif
+
             <div class="section-message">
                 {{ $offer->getText() }}
             </div>
