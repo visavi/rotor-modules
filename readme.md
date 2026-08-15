@@ -279,7 +279,7 @@ class MyModel extends \Illuminate\Database\Eloquent\Model
 Хук может быть строкой или callable. Callable получает аргументы из `@hook(...)` и возвращает свой HTML-фрагмент (или `null`/`''` если ничего не добавлять). Все фрагменты склеиваются в порядке убывания `priority`.
 
 ```php
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Статичная строка
 Hook::add('sidebarMenuEnd', '<li><a href="/page">Текст</a></li>');
@@ -307,7 +307,7 @@ Hook::add('sidebarMenuEnd', static fn () => '<li>...</li>', 10);
 ### Registry
 
 ```php
-use App\Classes\Registry;
+use App\Support\Registry;
 use Modules\MyModule\Models\MyModel;
 
 // Жалобы — обработчик клика на «пожаловаться»

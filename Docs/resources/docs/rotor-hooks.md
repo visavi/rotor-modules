@@ -11,7 +11,7 @@
 ## Регистрация хука
 
 ```php
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Строка — вставляется как есть
 Hook::add('head', '<link rel="stylesheet" href="/assets/my.css">');

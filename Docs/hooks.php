@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 use App\Services\GithubService;
 
 // Добавляем ссылку в меню сайта
