@@ -24,7 +24,8 @@ class SurpriseController extends Controller
             abort(403, __('main.not_authorized'));
         }
 
-        if (strtotime(date('d.m.Y')) > strtotime('03.01' . '.' . $year)) {
+        // Подарок открыт по третье января включительно, дальше сезон закрыт
+        if (now()->gt(now()->setDate((int) $year, 1, 3)->endOfDay())) {
             abort(200, __('surprise::surprise.date_receipt'));
         }
 
