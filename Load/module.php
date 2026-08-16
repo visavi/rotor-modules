@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\File;
 use Illuminate\Support\Facades\DB;
 use Modules\Load\Models\Down;
+use Modules\Load\Observers\FileObserver;
 
 return [
     'name'        => 'Загрузки',
@@ -22,6 +24,10 @@ return [
             // Файлы на модерации в счётчик не идут
             'stat' => static fn (): int => Down::query()->where('active', true)->count(),
         ],
+    ],
+
+    'observers' => [
+        File::class => FileObserver::class,
     ],
 
     'actions' => [

@@ -126,11 +126,10 @@ class FeedApiTest extends ModuleTestCase
         $forum = Forum::query()->create(['title' => 'Test forum']);
 
         $topic = Topic::query()->create([
-            'forum_id'    => $forum->id,
-            'title'       => 'Test topic',
-            'user_id'     => $this->user->id,
-            'count_posts' => 1,
-            'created_at'  => now(),
+            'forum_id'   => $forum->id,
+            'title'      => 'Test topic',
+            'user_id'    => $this->user->id,
+            'created_at' => now(),
         ]);
 
         $post = Post::query()->create([
@@ -143,10 +142,12 @@ class FeedApiTest extends ModuleTestCase
 
         $topic->update(['last_post_id' => $post->id]);
 
-        Feed::query()->insert([
+        // Запись в ленте заводит наблюдатель темы, как на сайте
+        Feed::query()->updateOrInsert([
             'relate_type' => Topic::$morphName,
             'relate_id'   => $topic->id,
-            'created_at'  => $topic->created_at,
+        ], [
+            'created_at' => $topic->created_at,
         ]);
 
         return [$topic, $post];

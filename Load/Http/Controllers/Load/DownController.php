@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
+use Modules\Load\Services\ZipMap;
 use Modules\Load\Services\ZipTree;
 use Symfony\Component\HttpFoundation\Response;
 use ZipArchive;
@@ -28,6 +29,11 @@ class DownController extends Controller
      * Модель для комментариев
      */
     protected string $commentableModelClass = Down::class;
+
+    /**
+     * Сколько браузер держит картинку из архива
+     */
+    private const int ZIP_CACHE_MAX_AGE = 86400;
 
     /**
      * Просмотр загрузки
@@ -329,19 +335,8 @@ class DownController extends Controller
     {
         [$down, $file, $archive] = $this->openZipFile($id, $fid);
 
-        $flat = [];
-        for ($i = 0; $i < $archive->count(); $i++) {
-            $stat = $archive->statIndex($i);
-            $isDir = str_ends_with($stat['name'], '/');
-
-            $flat[] = [
-                'index' => $stat['index'],
-                'name'  => $stat['name'],
-                'size'  => $stat['size'],
-                'isDir' => $isDir,
-                'ext'   => $isDir ? '' : getExtension($stat['name']),
-            ];
-        }
+        // Обход всех записей архива идёт один раз на файл, дальше из кеша
+        $flat = ZipMap::entries($file, $archive);
 
         $archive->close();
 
@@ -358,7 +353,14 @@ class DownController extends Controller
      */
     public function zipView(int $id, int $fid, int $zid): View|Response
     {
-        [$down, $file, $archive] = $this->openZipFile($id, $fid);
+        [$down, $file] = $this->findZipFile($id, $fid);
+
+        // Индексы перебирают боты — известный по карте промах архив не открывает
+        if (ZipMap::has($file, $zid) === false) {
+            abort(200, __('load::loads.file_not_read'));
+        }
+
+        $archive = $this->openArchive($file);
 
         $content = $archive->getFromIndex($zid);
         $document = $archive->statIndex($zid);
@@ -385,10 +387,15 @@ class DownController extends Controller
         }
 
         if ($isImage) {
+            // Содержимое архива неизменно: повторный запрос картинки браузер
+            // и кеширующий прокси закрывают сами, не доходя до php
             return response($content)
                 ->header('Content-Type', $mime)
                 ->header('Content-Length', (string) strlen($content))
-                ->header('Content-Disposition', 'inline; filename="' . $document['name'] . '"');
+                ->header('Content-Disposition', 'inline; filename="' . $document['name'] . '"')
+                ->setPublic()
+                ->setMaxAge(self::ZIP_CACHE_MAX_AGE)
+                ->setEtag(md5($file->id . ':' . $zid . ':' . $document['crc']));
         }
 
         if (! mb_check_encoding($content, 'utf-8')) {
@@ -402,6 +409,18 @@ class DownController extends Controller
      * Открывает zip-архив и возвращает загрузку, файл и архив
      */
     private function openZipFile(int $id, int $fid): array
+    {
+        [$down, $file] = $this->findZipFile($id, $fid);
+
+        return [$down, $file, $this->openArchive($file)];
+    }
+
+    /**
+     * Находит загрузку и её архив, не открывая сам файл
+     *
+     * @return array{Down, File}
+     */
+    private function findZipFile(int $id, int $fid): array
     {
         $down = Down::query()->find($id);
         if (! $down) {
@@ -421,11 +440,20 @@ class DownController extends Controller
             abort(200, __('load::loads.archive_only_zip'));
         }
 
+        return [$down, $file];
+    }
+
+    /**
+     * Открывает архив на чтение
+     */
+    private function openArchive(File $file): ZipArchive
+    {
         $archive = new ZipArchive();
+
         if ($archive->open(public_path($file->path), ZipArchive::RDONLY) !== true) {
             abort(200, __('load::loads.archive_not_open'));
         }
 
-        return [$down, $file, $archive];
+        return $archive;
     }
 }

@@ -35,8 +35,9 @@ class ArticleObserver
 
         if ($article->wasChanged('active')) {
             $user = $article->user;
-            $pointAmount = setting('blog_point');
-            $moneyAmount = setting('blog_money');
+            // Настройки может не быть — модуль ставят раньше, чем задают его настройки
+            $pointAmount = (int) setting('blog_point');
+            $moneyAmount = (int) setting('blog_money');
 
             if ($article->active) {
                 $user->increment('point', $pointAmount);

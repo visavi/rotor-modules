@@ -18,8 +18,9 @@ class PostObserver
         $topic = $post->topic;
         $forum = $topic->forum;
 
-        $post->user->increment('point', setting('forum_point'));
-        $post->user->increment('money', setting('forum_money'));
+        // Настройки может не быть — модуль ставят раньше, чем задают его настройки
+        $post->user->increment('point', (int) setting('forum_point'));
+        $post->user->increment('money', (int) setting('forum_money'));
 
         $topic->increment('count_posts');
         $topic->update([
