@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\UserField\Models;
 
-use App\Classes\HtmlSanitizer;
+use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

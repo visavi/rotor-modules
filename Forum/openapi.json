@@ -1,0 +1,541 @@
+{
+    "paths": {
+        "/forums": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Разделы форума",
+                "operationId": "getForumCategories",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Forum"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/forums/{id}": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Темы форума",
+                "operationId": "getForumTopics",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Topic"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        },
+                                        "forum": {
+                                            "$ref": "#/components/schemas/Forum"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Форум не найден"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Создать тему в разделе форума",
+                "operationId": "createTopic",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Название темы"
+                                    },
+                                    "text": {
+                                        "type": "string",
+                                        "description": "Текст сообщения"
+                                    },
+                                    "question": {
+                                        "type": "string",
+                                        "description": "Вопрос голосования (необязательно)"
+                                    },
+                                    "answers[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "Варианты ответов голосования (минимум 2, максимум 10)"
+                                    },
+                                    "files[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "description": "Прикреплённые файлы (необязательно)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Тема создана",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "topic": {
+                                            "$ref": "#/components/schemas/Topic"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Форум не найден"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации (форум закрыт, флуд, неверная длина)"
+                    }
+                }
+            }
+        },
+        "/topics/{id}": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Посты темы",
+                "operationId": "getTopicPosts",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Post"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        },
+                                        "topic": {
+                                            "$ref": "#/components/schemas/Topic"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Тема не найдена"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Создать пост в теме",
+                "operationId": "createPost",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "text"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "type": "string",
+                                        "description": "Текст поста"
+                                    },
+                                    "files[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "description": "Прикреплённые файлы (необязательно)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Пост создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "post": {
+                                            "$ref": "#/components/schemas/Post"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Тема не найдена"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации (тема закрыта, флуд, повтор текста)"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Forum": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "description": "ID родительского раздела (0 — корневой)"
+                    },
+                    "parent": {
+                        "description": "Родительский раздел, приходит только когда связь загружена; null у корневых",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Forum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sort": {
+                        "type": "integer",
+                        "description": "Порядок сортировки"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Название форума"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            null
+                        ],
+                        "description": "Короткое описание форума"
+                    },
+                    "closed": {
+                        "type": "boolean",
+                        "description": "Раздел закрыт для новых тем"
+                    },
+                    "count_topics": {
+                        "type": "integer"
+                    },
+                    "count_posts": {
+                        "type": "integer"
+                    },
+                    "last_topic_id": {
+                        "type": [
+                            "integer",
+                            null
+                        ]
+                    },
+                    "last_topic_title": {
+                        "type": [
+                            "string",
+                            null
+                        ]
+                    },
+                    "last_post_user_login": {
+                        "type": [
+                            "string",
+                            null
+                        ]
+                    },
+                    "last_post_user_name": {
+                        "type": [
+                            "string",
+                            null
+                        ]
+                    },
+                    "last_post_at": {
+                        "type": [
+                            "string",
+                            null
+                        ],
+                        "format": "date-time"
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Forum"
+                        },
+                        "description": "Вложенные подразделы"
+                    }
+                }
+            },
+            "Topic": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "forum_id": {
+                        "type": "integer",
+                        "description": "ID раздела, в котором лежит тема"
+                    },
+                    "forum": {
+                        "description": "Раздел темы, приходит в GET /topics/{id} (в списке тем раздела не дублируется)",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Forum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "login": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "closed": {
+                        "type": "integer",
+                        "description": "Тема закрыта"
+                    },
+                    "locked": {
+                        "type": "integer",
+                        "description": "Тема закреплена вверху"
+                    },
+                    "count_posts": {
+                        "type": "integer"
+                    },
+                    "visits": {
+                        "type": "integer"
+                    },
+                    "moderators": {
+                        "type": [
+                            "string",
+                            null
+                        ],
+                        "description": "Список модераторов темы"
+                    },
+                    "note": {
+                        "type": [
+                            "string",
+                            null
+                        ],
+                        "description": "Примечание модератора"
+                    },
+                    "last_post_id": {
+                        "type": [
+                            "integer",
+                            null
+                        ]
+                    },
+                    "last_post_user_login": {
+                        "type": [
+                            "string",
+                            null
+                        ]
+                    },
+                    "last_post_user_name": {
+                        "type": [
+                            "string",
+                            null
+                        ]
+                    },
+                    "close_user_id": {
+                        "type": [
+                            "integer",
+                            null
+                        ],
+                        "description": "ID пользователя, закрывшего тему"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "Post": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "login": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "rating": {
+                        "type": "integer"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

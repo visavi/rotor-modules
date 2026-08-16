@@ -4,7 +4,7 @@ return [
     'name'        => 'Репутация',
     'description' => 'Репутация пользователей с голосованием и историей',
     'version'     => '1.0.1',
-    'requires'    => '14.1.2',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

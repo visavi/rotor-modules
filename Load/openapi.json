@@ -1,0 +1,500 @@
+{
+    "paths": {
+        "/downs": {
+            "get": {
+                "tags": [
+                    "Загрузки"
+                ],
+                "summary": "Список загрузок",
+                "description": "Приходят только проверенные загрузки; без category_id — из всех категорий",
+                "operationId": "getDowns",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/CategoryId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Down"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Загрузки"
+                ],
+                "summary": "Создание загрузки",
+                "description": "Требует токен. Дистрибутив прикладывается заранее через POST /files с type=downs и id=0,\nлибо вместо файла передаются ссылки. Загрузка публикуется после проверки модератором.\n",
+                "operationId": "createDown",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Название уникально среди всех загрузок"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "links": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uri"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Загрузка создана",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "down": {
+                                            "$ref": "#/components/schemas/Down"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "422": {
+                        "description": "Загрузки закрыты, категория недоступна, нет файла и ссылок или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/loads": {
+            "get": {
+                "tags": [
+                    "Загрузки"
+                ],
+                "summary": "Категории загрузок",
+                "operationId": "getLoadCategories",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/downs/{id}": {
+            "get": {
+                "tags": [
+                    "Загрузки"
+                ],
+                "summary": "Загрузка с комментариями",
+                "description": "Токен необязателен: гость читает загрузку, авторизованному дополнительно приходит его голос в data.vote.value.\nФайлы дистрибутива отдаются ссылкой на роут скачивания, а не прямым путём — иначе не считались бы загрузки\nи не работал бы запрет скачивания гостям (настройка down_guest_download).\n",
+                "operationId": "getDown",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Down"
+                                        },
+                                        "comments": {
+                                            "type": "object",
+                                            "description": "Комментарии записи со своей пагинацией",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Comment"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Загрузка не проверена — доступна только автору и администрации"
+                    },
+                    "404": {
+                        "description": "Загрузка не найдена"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Загрузки"
+                ],
+                "summary": "Редактирование своей непроверенной загрузки",
+                "description": "Требует токен. После проверки модератором загрузку правит только администрация",
+                "operationId": "updateDown",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "links": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uri"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Загрузка изменена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "down": {
+                                            "$ref": "#/components/schemas/Down"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "404": {
+                        "description": "Загрузка не найдена или принадлежит другому пользователю"
+                    },
+                    "422": {
+                        "description": "Загрузка уже проверена, нет файла и ссылок или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Down": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "breadcrumbs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "rating": {
+                        "type": "integer"
+                    },
+                    "vote": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "+",
+                                    "-",
+                                    null
+                                ]
+                            },
+                            "own": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/Category"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Проверена администрацией"
+                    },
+                    "downloads": {
+                        "type": "integer",
+                        "description": "Счётчик скачиваний"
+                    },
+                    "comments_count": {
+                        "type": "integer"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/Author"
+                    },
+                    "media": {
+                        "type": "array",
+                        "description": "Скриншоты и видео",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "can_download": {
+                        "type": "boolean",
+                        "description": "Скачивание разрешено текущему запросу; false — гостям запрещено настройкой"
+                    },
+                    "files": {
+                        "type": "array",
+                        "description": "Файлы дистрибутива. Прямого пути нет: качать только по download_url",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "size": {
+                                    "type": "integer"
+                                },
+                                "extension": {
+                                    "type": "string"
+                                },
+                                "mime_type": {
+                                    "type": "string"
+                                },
+                                "download_url": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "uri",
+                                    "description": "null — скачивание запрещено"
+                                },
+                                "archive_url": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "uri",
+                                    "description": "Просмотр содержимого zip, у остальных файлов null"
+                                }
+                            }
+                        }
+                    },
+                    "links": {
+                        "type": "array",
+                        "description": "Внешние ссылки на скачивание",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "download_url": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

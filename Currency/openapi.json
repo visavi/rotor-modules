@@ -1,0 +1,57 @@
+{
+    "paths": {
+        "/currency": {
+            "get": {
+                "tags": [
+                    "Курсы валют"
+                ],
+                "summary": "Курсы валют ЦБ",
+                "description": "Отдаётся то, что уже лежит в кэше сайта — к ЦБ ходит сам сайт раз в час, а не каждый клиент",
+                "operationId": "getCurrency",
+                "security": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "date": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "description": "Ключ — код валюты (USD, EUR, …)",
+                                            "additionalProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "nominal": {
+                                                        "type": "integer"
+                                                    },
+                                                    "value": {
+                                                        "type": "number"
+                                                    },
+                                                    "previous": {
+                                                        "type": "number"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Курсы недоступны"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,9 +1,9 @@
 <?php
 
-use App\Classes\Hook;
-use App\Classes\Registry;
-use App\Classes\Validator;
 use App\Models\User;
+use App\Support\Hook;
+use App\Support\Registry;
+use App\Support\Validator;
 use Illuminate\Http\Request;
 use Modules\UserField\Models\UserData;
 use Modules\UserField\Models\UserField;

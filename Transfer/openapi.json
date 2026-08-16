@@ -1,0 +1,148 @@
+{
+    "paths": {
+        "/transfers": {
+            "get": {
+                "tags": [
+                    "Переводы"
+                ],
+                "summary": "Свои переводы",
+                "description": "И отправленные, и полученные; направление — в поле type",
+                "operationId": "getTransfers",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "in",
+                                                            "out"
+                                                        ]
+                                                    },
+                                                    "user": {
+                                                        "type": "string",
+                                                        "description": "Логин второй стороны перевода"
+                                                    },
+                                                    "total": {
+                                                        "type": "integer"
+                                                    },
+                                                    "text": {
+                                                        "type": "string"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Переводы"
+                ],
+                "summary": "Перевести деньги",
+                "description": "Порог баллов для переводов приходит в /config (transfer.point). Получателю уходит уведомление в личные сообщения.",
+                "operationId": "storeTransfer",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "user",
+                                    "money"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "type": "string",
+                                        "description": "Логин получателя"
+                                    },
+                                    "money": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "text": {
+                                        "type": "string",
+                                        "description": "Комментарий к переводу"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Перевод выполнен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "money": {
+                                            "type": "integer",
+                                            "description": "Остаток на своём счету"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Не хватает денег или баллов, получатель не найден, перевод самому себе"
+                    }
+                }
+            }
+        }
+    }
+}

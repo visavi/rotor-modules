@@ -1,7 +1,7 @@
 <?php
 
-use App\Classes\Hook;
-use App\Classes\Registry;
+use App\Support\Hook;
+use App\Support\Registry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Modules\Logs\Models\Log;

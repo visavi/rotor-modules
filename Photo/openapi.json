@@ -1,0 +1,425 @@
+{
+    "paths": {
+        "/photos": {
+            "get": {
+                "tags": [
+                    "Галерея"
+                ],
+                "summary": "Список фото",
+                "operationId": "getPhotos",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Photo"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Галерея"
+                ],
+                "summary": "Загрузка фотографии",
+                "description": "Требует токен. Снимки загружаются заранее через POST /files с type=photos и id=0 — без них запись не создаётся",
+                "operationId": "createPhoto",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "closed": {
+                                        "type": "boolean",
+                                        "description": "Закрыть комментирование"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Фотография загружена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "photo": {
+                                            "$ref": "#/components/schemas/Photo"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "422": {
+                        "description": "Раздел закрыт, снимки не загружены или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/photos/{id}": {
+            "get": {
+                "tags": [
+                    "Галерея"
+                ],
+                "summary": "Фото с комментариями",
+                "description": "Токен необязателен: гость смотрит фото, авторизованному дополнительно приходит его голос в data.vote.value.\nВ отличие от других разделов, в media попадают все снимки записи, включая вставленные в текст — они и есть её содержимое.\n",
+                "operationId": "getPhoto",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Photo"
+                                        },
+                                        "comments": {
+                                            "type": "object",
+                                            "description": "Комментарии записи со своей пагинацией",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Comment"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Фото не найдено"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Галерея"
+                ],
+                "summary": "Редактирование своей фотографии",
+                "operationId": "updatePhoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "closed": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Фотография изменена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "photo": {
+                                            "$ref": "#/components/schemas/Photo"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "404": {
+                        "description": "Запись не найдена или принадлежит другому пользователю"
+                    },
+                    "422": {
+                        "description": "Данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Галерея"
+                ],
+                "summary": "Удаление своей фотографии",
+                "description": "Требует токен. Фотографию с комментариями удалить нельзя",
+                "operationId": "deletePhoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "404": {
+                        "description": "Запись не найдена или принадлежит другому пользователю"
+                    },
+                    "422": {
+                        "description": "У записи есть комментарии"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Photo": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "breadcrumbs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "rating": {
+                        "type": "integer"
+                    },
+                    "vote": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "+",
+                                    "-",
+                                    null
+                                ]
+                            },
+                            "own": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "closed": {
+                        "type": "boolean",
+                        "description": "Комментирование закрыто"
+                    },
+                    "comments_count": {
+                        "type": "integer"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/Author"
+                    },
+                    "media": {
+                        "type": "array",
+                        "description": "Все снимки записи, включая вставленные в текст",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

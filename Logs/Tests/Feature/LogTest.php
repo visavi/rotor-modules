@@ -59,7 +59,9 @@ class LogTest extends ModuleTestCase
         $response = $this->actingAs($this->boss)->post('/admin/logs/clear');
         $response->assertRedirect(route('admin.logs.index'));
 
-        $this->assertSame(0, Log::query()->count());
+        // Старые записи удалены, осталась одна — о самой очистке, её пишет хук модуля
+        $this->assertDatabaseMissing('logs', ['request' => '/admin/test']);
+        $this->assertSame(1, Log::query()->count());
     }
 
     public function testDeleteLogsCommand(): void

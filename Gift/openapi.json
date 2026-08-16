@@ -1,0 +1,222 @@
+{
+    "paths": {
+        "/gifts": {
+            "get": {
+                "tags": [
+                    "Подарки"
+                ],
+                "summary": "Каталог подарков",
+                "operationId": "getGifts",
+                "security": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "url": {
+                                                        "type": "string",
+                                                        "format": "uri"
+                                                    },
+                                                    "price": {
+                                                        "type": "integer"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                },
+                                                "days": {
+                                                    "type": "integer",
+                                                    "description": "Через сколько дней подарок пропадёт из профиля"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gifts/{login}": {
+            "get": {
+                "tags": [
+                    "Подарки"
+                ],
+                "summary": "Подарки пользователя",
+                "description": "Просроченные подарки не приходят, как и в профиле на сайте",
+                "operationId": "getUserGifts",
+                "security": [],
+                "parameters": [
+                    {
+                        "name": "login",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[\\w\\-]+$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "url": {
+                                                        "type": "string",
+                                                        "format": "uri"
+                                                    },
+                                                    "text": {
+                                                        "type": "string"
+                                                    },
+                                                    "sender": {
+                                                        "$ref": "#/components/schemas/Author"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "expires_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/Author"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    }
+                }
+            }
+        },
+        "/gifts/{id}/send": {
+            "post": {
+                "tags": [
+                    "Подарки"
+                ],
+                "summary": "Отправить подарок",
+                "description": "Стоимость списывается со счёта, получателю уходит уведомление в личные сообщения",
+                "operationId": "sendGift",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "user"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "type": "string",
+                                        "description": "Логин получателя"
+                                    },
+                                    "text": {
+                                        "type": "string",
+                                        "maxLength": 1000
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Подарок отправлен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "money": {
+                                            "type": "integer",
+                                            "description": "Остаток на своём счету"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Подарок или получатель не найден"
+                    },
+                    "422": {
+                        "description": "Не хватает денег"
+                    }
+                }
+            }
+        }
+    }
+}

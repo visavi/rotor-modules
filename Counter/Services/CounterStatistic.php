@@ -25,9 +25,12 @@ class CounterStatistic
             return;
         }
 
-        if (date('Y-m-d 00:00:00', strtotime($counter->period)) !== $day) {
+        $counterDay = date('Y-m-d 00:00:00', strtotime($counter->period));
+
+        if ($counterDay !== $day) {
+            // В архив уходят итоги закрытого дня, под его же датой
             Counter31::query()->insertOrIgnore([
-                'period' => $day,
+                'period' => $counterDay,
                 'hosts'  => $counter->dayhosts,
                 'hits'   => $counter->dayhits,
             ]);
@@ -40,7 +43,7 @@ class CounterStatistic
 
         if ($counter->period !== $period) {
             Counter24::query()->insertOrIgnore([
-                'period' => $period,
+                'period' => $counter->period,
                 'hosts'  => $counter->hosts24,
                 'hits'   => $counter->hits24,
             ]);

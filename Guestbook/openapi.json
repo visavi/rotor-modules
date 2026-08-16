@@ -1,0 +1,269 @@
+{
+    "paths": {
+        "/guestbook": {
+            "get": {
+                "tags": [
+                    "Гостевая книга"
+                ],
+                "summary": "Сообщения гостевой",
+                "description": "Опубликованные сообщения, свежие первыми. Токен не нужен.",
+                "operationId": "getGuestbook",
+                "security": [],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GuestbookPost"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Гостевая книга"
+                ],
+                "summary": "Добавить сообщение",
+                "description": "С токеном сообщение публикуется сразу и приносит баллы по настройкам сайта.\n\nБез токена запись принимается, только если гостевые сообщения открыты настройкой:\nтогда нужна капча (GET /captcha), ссылки в тексте не принимаются, а при включённой\nмодерации сообщение ждёт проверки администрации.\n",
+                "operationId": "storeGuestbookPost",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "text"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "guest_name": {
+                                        "type": "string",
+                                        "minLength": 3,
+                                        "maxLength": 20,
+                                        "description": "Имя гостя, только без токена"
+                                    },
+                                    "captcha_key": {
+                                        "type": "string"
+                                    },
+                                    "protect": {
+                                        "type": "string"
+                                    },
+                                    "files[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "description": "Фото и видео (необязательно)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Сообщение добавлено",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "post": {
+                                            "$ref": "#/components/schemas/GuestbookPost"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Гостевые сообщения закрыты"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации, капча или флуд"
+                    }
+                }
+            }
+        },
+        "/guestbook/{id}": {
+            "patch": {
+                "tags": [
+                    "Гостевая книга"
+                ],
+                "summary": "Правка своего сообщения",
+                "description": "Открыта первые десять минут после публикации, как и на сайте",
+                "operationId": "updateGuestbookPost",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "text"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "post": {
+                                            "$ref": "#/components/schemas/GuestbookPost"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Сообщение не найдено или принадлежит другому пользователю"
+                    },
+                    "422": {
+                        "description": "Время правки вышло или ошибка валидации"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "GuestbookPost": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "user": {
+                        "description": "Автор; у гостевых сообщений — null",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "guest_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Имя гостя, если сообщение оставлено без входа"
+                    },
+                    "media": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "reply": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Ответ администрации"
+                    },
+                    "edited_by": {
+                        "description": "Кто правил сообщение",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,508 @@
+{
+    "paths": {
+        "/items": {
+            "get": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Список объявлений",
+                "description": "Истёкшие объявления в список не попадают; без category_id — из всех категорий",
+                "operationId": "getItems",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/CategoryId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Item"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Создание объявления",
+                "description": "Требует токен. Медиа прикладываются заранее через POST /files с type=items и id=0",
+                "operationId": "createItem",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "integer"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Объявление создано",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "item": {
+                                            "$ref": "#/components/schemas/Item"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "422": {
+                        "description": "Раздел закрыт, категория недоступна, антифлуд или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/boards": {
+            "get": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Категории объявлений",
+                "operationId": "getBoardCategories",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/items/{id}": {
+            "get": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Объявление",
+                "description": "У объявлений нет комментариев и рейтинга, поэтому ответ — одна запись без пагинации.\nТокен необязателен.\n",
+                "operationId": "getItem",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Item"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Срок объявления истёк — доступно только автору"
+                    },
+                    "404": {
+                        "description": "Объявление не найдено"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Редактирование своего объявления",
+                "operationId": "updateItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "price": {
+                                        "type": "integer"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Объявление изменено",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "item": {
+                                            "$ref": "#/components/schemas/Item"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "403": {
+                        "description": "Объявление принадлежит другому пользователю"
+                    },
+                    "404": {
+                        "description": "Объявление не найдено"
+                    },
+                    "422": {
+                        "description": "Категория недоступна или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Удаление своего объявления",
+                "operationId": "deleteItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "403": {
+                        "description": "Объявление принадлежит другому пользователю"
+                    },
+                    "404": {
+                        "description": "Объявление не найдено"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/items/{id}/publish": {
+            "post": {
+                "tags": [
+                    "Объявления"
+                ],
+                "summary": "Снятие с публикации и повторная публикация",
+                "description": "Требует токен. Активное объявление снимается, снятое публикуется заново на срок из настроек",
+                "operationId": "publishItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус изменён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "item": {
+                                            "$ref": "#/components/schemas/Item"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "403": {
+                        "description": "Объявление принадлежит другому пользователю"
+                    },
+                    "404": {
+                        "description": "Объявление не найдено"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Item": {
+                "type": "object",
+                "description": "Объявление. Комментариев и рейтинга у раздела нет",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "breadcrumbs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/Category"
+                    },
+                    "price": {
+                        "type": "integer"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "Валюта сайта из настроек"
+                    },
+                    "phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "visits": {
+                        "type": "integer"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/Author"
+                    },
+                    "media": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Срок публикации"
+                    },
+                    "expired": {
+                        "type": "boolean",
+                        "description": "Срок истёк: объявление пропадает из списков и ленты"
+                    }
+                }
+            }
+        }
+    }
+}

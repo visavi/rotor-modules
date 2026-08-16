@@ -1,0 +1,225 @@
+{
+    "paths": {
+        "/walls/{login}": {
+            "get": {
+                "tags": [
+                    "Стена сообщений"
+                ],
+                "summary": "Записи на стене пользователя",
+                "operationId": "getWall",
+                "security": [],
+                "parameters": [
+                    {
+                        "name": "login",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[\\w\\-]+$"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/WallPost"
+                                            }
+                                        },
+                                        "user": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/Author"
+                                                }
+                                            ],
+                                            "description": "Хозяин стены"
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Стена сообщений"
+                ],
+                "summary": "Написать на стену",
+                "description": "Длина текста берётся из настроек комментариев",
+                "operationId": "storeWallPost",
+                "parameters": [
+                    {
+                        "name": "login",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[\\w\\-]+$"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "text"
+                                ],
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Запись добавлена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "post": {
+                                            "$ref": "#/components/schemas/WallPost"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации или флуд"
+                    }
+                }
+            }
+        },
+        "/walls/{login}/{id}": {
+            "delete": {
+                "tags": [
+                    "Стена сообщений"
+                ],
+                "summary": "Удалить запись со стены",
+                "description": "Чистит стену её хозяин, чужие записи удаляет только администрация",
+                "operationId": "deleteWallPost",
+                "parameters": [
+                    {
+                        "name": "login",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[\\w\\-]+$"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Чужая стена"
+                    },
+                    "404": {
+                        "description": "Запись не найдена"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "WallPost": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            }
+                        ],
+                        "description": "Хозяин стены"
+                    },
+                    "author": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            }
+                        ],
+                        "description": "Кто оставил запись"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

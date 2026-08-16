@@ -1,0 +1,474 @@
+{
+    "paths": {
+        "/articles": {
+            "get": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Список статей",
+                "description": "Без category_id приходят статьи всех категорий",
+                "operationId": "getArticles",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/CategoryId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Sort"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Article"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Создание статьи",
+                "description": "Требует токен. Файлы прикладываются заранее через POST /files с type=articles и id=0.\n\ndraft оставляет статью черновиком, published_at (только для администрации) откладывает публикацию.\nПри включённой модерации статья создаётся скрытой.\n",
+                "operationId": "createArticle",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text",
+                                    "tags"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 10,
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "draft": {
+                                        "type": "boolean"
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Статья создана",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "article": {
+                                            "$ref": "#/components/schemas/Article"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "422": {
+                        "description": "Раздел закрыт, категория недоступна, антифлуд или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/blogs": {
+            "get": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Категории блогов",
+                "operationId": "getBlogCategories",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Category"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{id}": {
+            "get": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Статья с комментариями",
+                "description": "Принимает как слаг из ссылки (12-test-article), так и просто id.\nТокен необязателен: гость читает статью, авторизованному дополнительно приходит его голос в data.vote.value.\n",
+                "operationId": "getArticle",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Id статьи или слаг из ссылки"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Article"
+                                        },
+                                        "comments": {
+                                            "type": "object",
+                                            "description": "Комментарии записи со своей пагинацией",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Comment"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "$ref": "#/components/schemas/PaginationLinks"
+                                                },
+                                                "meta": {
+                                                    "$ref": "#/components/schemas/PaginationMeta"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Статья не найдена"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Редактирование своей статьи",
+                "description": "Требует токен. publish переводит черновик в публикацию. Здесь принимается только id — слаг может измениться вместе с заголовком",
+                "operationId": "updateArticle",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "category_id",
+                                    "title",
+                                    "text",
+                                    "tags"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "minItems": 1,
+                                        "maxItems": 10,
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "publish": {
+                                        "type": "boolean"
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Статья изменена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "article": {
+                                            "$ref": "#/components/schemas/Article"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
+                    },
+                    "403": {
+                        "description": "Статья принадлежит другому пользователю"
+                    },
+                    "404": {
+                        "description": "Статья не найдена"
+                    },
+                    "422": {
+                        "description": "Категория недоступна или данные не прошли проверку"
+                    },
+                    "429": {
+                        "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Article": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "description": "Слаг из ссылки, начинается с id"
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "category": {
+                        "$ref": "#/components/schemas/Category"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "breadcrumbs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "rating": {
+                        "type": "integer"
+                    },
+                    "vote": {
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "+",
+                                    "-",
+                                    null
+                                ]
+                            },
+                            "own": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "visits": {
+                        "type": "integer"
+                    },
+                    "comments_count": {
+                        "type": "integer"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "format": "uri"
+                                }
+                            }
+                        }
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/Author"
+                    },
+                    "media": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}
