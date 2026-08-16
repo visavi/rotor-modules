@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Guestbook\Http\Controllers\Admin\GuestbookController as AdminGuestbookController;
 use Modules\Guestbook\Http\Controllers\Admin\GuestbookSettingController;
+use Modules\Guestbook\Http\Controllers\Api\GuestbookApiController;
 use Modules\Guestbook\Http\Controllers\GuestbookController;
 
 Route::middleware('web')
@@ -36,4 +37,21 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/guestbook-settings', 'index')->name('settings');
                 Route::post('/guestbook-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Чтение открыто, как и страница гостевой
+Route::middleware(['api', 'check.token.optional'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/guestbook', [GuestbookApiController::class, 'index']);
+        // Гостю писать можно, если это открыто настройкой — тогда с капчей
+        Route::post('/guestbook', [GuestbookApiController::class, 'store']);
+    });
+
+// Правка своего сообщения — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::patch('/guestbook/{id}', [GuestbookApiController::class, 'update'])->whereNumber('id');
     });

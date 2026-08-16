@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Offer\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
+use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;

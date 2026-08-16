@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Blog\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;

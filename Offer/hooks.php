@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', static fn () => '<li>

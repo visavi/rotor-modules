@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Feed;
 use App\Models\File;
@@ -12,6 +11,7 @@ use App\Models\Flood;
 use App\Models\Poll;
 use App\Models\Reader;
 use App\Models\User;
+use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;

@@ -2,10 +2,10 @@
 
 namespace Modules\Photo\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\Photo\Models\Photo;
@@ -36,13 +36,13 @@ class PhotoApiTest extends ModuleTestCase
         $response = $this->getJson('/api/photos/' . $photo->id);
 
         $response->assertOk();
-        $response->assertJsonPath('photo.id', $photo->id);
-        $response->assertJsonPath('photo.title', 'Test photo');
-        $response->assertJsonPath('photo.url', $photo->getViewUrl());
-        $response->assertJsonPath('photo.user.login', $this->user->login);
-        $response->assertJsonPath('photo.breadcrumbs.0.title', __('photo::photos.photos'));
-        $response->assertJsonPath('photo.vote.value', null);
-        $response->assertJsonStructure(['data', 'links', 'meta']);
+        $response->assertJsonPath('data.id', $photo->id);
+        $response->assertJsonPath('data.title', 'Test photo');
+        $response->assertJsonPath('data.url', $photo->getViewUrl());
+        $response->assertJsonPath('data.user.login', $this->user->login);
+        $response->assertJsonPath('data.breadcrumbs.0.title', __('photo::photos.photos'));
+        $response->assertJsonPath('data.vote.value', null);
+        $response->assertJsonStructure(['data', 'comments' => ['data', 'links', 'meta']]);
     }
 
     public function testGalleryKeepsMediaInsertedIntoText(): void
@@ -56,7 +56,7 @@ class PhotoApiTest extends ModuleTestCase
 
         $response->assertOk();
         // Снимки — само содержимое записи, поэтому в галерее оба
-        $response->assertJsonCount(2, 'photo.media');
+        $response->assertJsonCount(2, 'data.media');
     }
 
     public function testViewReturnsCommentsPaginated(): void
@@ -69,12 +69,12 @@ class PhotoApiTest extends ModuleTestCase
         $response = $this->getJson('/api/photos/' . $photo->id . '?per_page=1');
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('meta.total', 2);
+        $response->assertJsonCount(1, 'comments.data');
+        $response->assertJsonPath('comments.meta.total', 2);
 
         $this->getJson('/api/photos/' . $photo->id . '?per_page=1&page=2')
             ->assertOk()
-            ->assertJsonPath('data.0.parent_id', $first->id);
+            ->assertJsonPath('comments.data.0.parent_id', $first->id);
     }
 
     public function testViewReturnsVoteOfCurrentUser(): void
@@ -90,8 +90,8 @@ class PhotoApiTest extends ModuleTestCase
 
         $this->getJson('/api/photos/' . $photo->id, ['Authorization' => 'Bearer ' . $voter->apikey])
             ->assertOk()
-            ->assertJsonPath('photo.vote.value', '+')
-            ->assertJsonPath('photo.vote.own', false);
+            ->assertJsonPath('data.vote.value', '+')
+            ->assertJsonPath('data.vote.own', false);
     }
 
     public function testIndexReturnsList(): void

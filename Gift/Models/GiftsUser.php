@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string          $text
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $deleted_at
+ * @property-read Gift $gift
+ * @property-read User $user
+ * @property-read User $sendUser
  */
 class GiftsUser extends Model
 {

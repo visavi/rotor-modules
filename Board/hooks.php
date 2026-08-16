@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Ссылка в боковом меню
 Hook::add('sidebarMenu', static function () {

@@ -10,11 +10,30 @@ use Modules\Forum\Observers\TopicObserver;
 return [
     'name'        => 'Форум',
     'description' => 'Форум с темами и сообщениями',
-    'version'     => '1.0.9',
-    'requires'    => '14.2.2',
+    'version'     => '1.1.0',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
+
+    // Секции в /api/config: клиент берёт отсюда лимиты форм форума
+    'api' => [
+        'forum' => [
+            'title_min' => 'forum_title_min',
+            'title_max' => 'forum_title_max',
+            'text_min'  => 'forum_text_min',
+            'text_max'  => 'forum_text_max',
+        ],
+        'vote' => [
+            'title_min'  => 'vote_title_min',
+            'title_max'  => 'vote_title_max',
+            'answer_min' => 'vote_answer_min',
+            'answer_max' => 'vote_answer_max',
+            // Пределы количества вариантов зашиты в форме голосования
+            'answers_min' => 2,
+            'answers_max' => 10,
+        ],
+    ],
 
     'models' => [
         Topic::class => [

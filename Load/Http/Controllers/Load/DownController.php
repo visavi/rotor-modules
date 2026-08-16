@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Load\Http\Controllers\Load;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
+use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

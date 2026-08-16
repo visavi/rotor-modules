@@ -62,3 +62,12 @@ Route::middleware(['api', 'check.token.optional'])
         Route::get('/photos', [PhotoApiController::class, 'index']);
         Route::get('/photos/{id}', [PhotoApiController::class, 'view']);
     });
+
+// Создание, правка и удаление — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/photos', [PhotoApiController::class, 'store']);
+        Route::patch('/photos/{id}', [PhotoApiController::class, 'update']);
+        Route::delete('/photos/{id}', [PhotoApiController::class, 'destroy']);
+    });

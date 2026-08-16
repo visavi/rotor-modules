@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
+use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

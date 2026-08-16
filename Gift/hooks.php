@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 use Modules\Gift\Models\GiftsUser;
 
 // Добавляем ссылку на подарки в меню сайта

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\News\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CommentResource;
 use App\Traits\HandlesApiComments;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
@@ -56,8 +55,8 @@ class NewsApiController extends Controller
             abort(404, __('main.record_not_found'));
         }
 
-        // Комментарии страницей, сама новость — в additional
-        return CommentResource::collection($this->apiComments($news, $request))
-            ->additional(['news' => NewsResource::make($news)]);
+        // Запись — в data, её комментарии страницей — в comments
+        return NewsResource::make($news)
+            ->additional(['comments' => $this->apiCommentsBlock($news, $request)]);
     }
 }

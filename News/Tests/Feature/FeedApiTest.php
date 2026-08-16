@@ -2,10 +2,10 @@
 
 namespace Modules\News\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\News\Models\News;
 use Tests\ModuleTestCase;

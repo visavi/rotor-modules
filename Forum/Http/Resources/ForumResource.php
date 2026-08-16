@@ -14,8 +14,8 @@ class ForumResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                   => $this->id,
-            'parent_id'            => $this->parent_id,
+            'id'        => $this->id,
+            'parent_id' => $this->parent_id,
             // Родительский раздел отдаётся вложенным, когда связь загружена
             // (у корневых разделов связь возвращает пустую модель-заглушку)
             'parent'               => $this->whenLoaded('parent', fn () => $this->parent->id ? self::make($this->parent) : null),

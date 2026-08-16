@@ -14,8 +14,8 @@ class TopicResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                   => $this->id,
-            'forum_id'             => $this->forum_id,
+            'id'       => $this->id,
+            'forum_id' => $this->forum_id,
             // Раздел отдаётся вложенным, когда связь загружена (сообщения темы)
             'forum'                => ForumResource::make($this->whenLoaded('forum')),
             'title'                => e($this->title),

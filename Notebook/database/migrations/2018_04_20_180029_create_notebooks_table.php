@@ -13,6 +13,9 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->text('text');
                 $table->dateTime('created_at');
+                // На обновляемых сайтах колонку добавляет миграция перевода дат,
+                // свежей установке она нужна сразу — иначе заметку не сохранить
+                $table->dateTime('updated_at')->nullable();
 
                 $table->unique('user_id');
             });

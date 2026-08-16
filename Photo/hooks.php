@@ -1,8 +1,8 @@
 <?php
 
-use App\Classes\Hook;
-use App\Classes\Registry;
 use App\Models\User;
+use App\Support\Hook;
+use App\Support\Registry;
 use Illuminate\Http\Request;
 use Modules\Photo\Models\Photo;
 

@@ -5,8 +5,8 @@ use Modules\Guestbook\Models\Guestbook;
 return [
     'name'        => 'Гостевая книга',
     'description' => 'Гостевая книга сайта с поддержкой модерации и ответов от администратора',
-    'version'     => '1.0.4',
-    'requires'    => '14.1.0',
+    'version'     => '1.1.0',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -17,6 +17,14 @@ return [
             'search' => ['view' => 'guestbook::search/_guestbooks'],
             'upload' => 'media',
             'spam'   => true,
+            'stat'   => true,
+        ],
+    ],
+
+    'api' => [
+        'guestbook' => [
+            'text_min' => 'guestbook_text_min',
+            'text_max' => 'guestbook_text_max',
         ],
     ],
 

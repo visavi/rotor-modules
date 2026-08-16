@@ -97,3 +97,11 @@ Route::middleware(['api', 'check.token.optional'])
         Route::get('/downs/{id}', [DownApiController::class, 'view']);
         Route::get('/loads', [DownApiController::class, 'categories']);
     });
+
+// Создание и правка — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/downs', [DownApiController::class, 'store']);
+        Route::patch('/downs/{id}', [DownApiController::class, 'update']);
+    });

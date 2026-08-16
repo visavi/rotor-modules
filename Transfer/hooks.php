@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Ссылка на перевод денег в анкете пользователя
 Hook::add('userNotPersonalStart', static function ($user) {

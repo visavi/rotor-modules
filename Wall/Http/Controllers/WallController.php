@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Wall\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

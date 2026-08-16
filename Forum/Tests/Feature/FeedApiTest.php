@@ -2,9 +2,9 @@
 
 namespace Modules\Forum\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Feed;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\Forum\Models\Forum;

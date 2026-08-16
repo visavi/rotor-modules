@@ -2,10 +2,10 @@
 
 namespace Modules\News\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\News\Models\News;
@@ -37,13 +37,13 @@ class NewsApiTest extends ModuleTestCase
         $response = $this->getJson('/api/news/' . $news->id);
 
         $response->assertOk();
-        $response->assertJsonPath('news.id', $news->id);
-        $response->assertJsonPath('news.title', 'Test news');
-        $response->assertJsonPath('news.url', $news->getViewUrl());
-        $response->assertJsonPath('news.user.login', $this->user->login);
-        $response->assertJsonPath('news.breadcrumbs.0.title', __('news::news.news'));
-        $response->assertJsonPath('news.vote.value', null);
-        $response->assertJsonStructure(['data', 'links', 'meta']);
+        $response->assertJsonPath('data.id', $news->id);
+        $response->assertJsonPath('data.title', 'Test news');
+        $response->assertJsonPath('data.url', $news->getViewUrl());
+        $response->assertJsonPath('data.user.login', $this->user->login);
+        $response->assertJsonPath('data.breadcrumbs.0.title', __('news::news.news'));
+        $response->assertJsonPath('data.vote.value', null);
+        $response->assertJsonStructure(['data', 'comments' => ['data', 'links', 'meta']]);
     }
 
     public function testViewSplitsMediaAndFiles(): void
@@ -56,10 +56,10 @@ class NewsApiTest extends ModuleTestCase
         $response = $this->getJson('/api/news/' . $news->id);
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'news.media');
-        $response->assertJsonCount(1, 'news.files');
-        $response->assertJsonPath('news.media.0.name', 'photo.jpg');
-        $response->assertJsonPath('news.files.0.name', 'manual.pdf');
+        $response->assertJsonCount(1, 'data.media');
+        $response->assertJsonCount(1, 'data.files');
+        $response->assertJsonPath('data.media.0.name', 'photo.jpg');
+        $response->assertJsonPath('data.files.0.name', 'manual.pdf');
     }
 
     public function testViewReturnsCommentsPaginated(): void
@@ -72,13 +72,13 @@ class NewsApiTest extends ModuleTestCase
         $response = $this->getJson('/api/news/' . $news->id . '?per_page=1');
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('meta.total', 2);
-        $response->assertJsonPath('data.0.parent_id', null);
+        $response->assertJsonCount(1, 'comments.data');
+        $response->assertJsonPath('comments.meta.total', 2);
+        $response->assertJsonPath('comments.data.0.parent_id', null);
 
         $this->getJson('/api/news/' . $news->id . '?per_page=1&page=2')
             ->assertOk()
-            ->assertJsonPath('data.0.parent_id', $first->id);
+            ->assertJsonPath('comments.data.0.parent_id', $first->id);
     }
 
     public function testViewReturnsVoteOfCurrentUser(): void
@@ -94,9 +94,9 @@ class NewsApiTest extends ModuleTestCase
 
         $this->getJson('/api/news/' . $news->id, ['Authorization' => 'Bearer ' . $voter->apikey])
             ->assertOk()
-            ->assertJsonPath('news.vote.value', '+')
-            ->assertJsonPath('news.vote.own', false)
-            ->assertJsonPath('news.rating', 1);
+            ->assertJsonPath('data.vote.value', '+')
+            ->assertJsonPath('data.vote.own', false)
+            ->assertJsonPath('data.rating', 1);
     }
 
     public function testIndexReturnsList(): void

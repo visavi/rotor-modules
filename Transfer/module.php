@@ -3,11 +3,17 @@
 return [
     'name'        => 'Денежные переводы',
     'description' => 'Переводы денег между пользователями',
-    'version'     => '1.0.3',
-    'requires'    => '14.1.0',
+    'version'     => '1.1.0',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
+
+    'api' => [
+        'transfer' => [
+            'point' => 'sendmoneypoint',
+        ],
+    ],
 
     'actions' => [
         '/admin/transfer-settings' => __('transfer::transfers.settings'),

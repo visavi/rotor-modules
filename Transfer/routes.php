@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Transfer\Http\Controllers\Admin\TransferController as AdminTransferController;
 use Modules\Transfer\Http\Controllers\Admin\TransferSettingController;
+use Modules\Transfer\Http\Controllers\Api\TransferApiController;
 use Modules\Transfer\Http\Controllers\TransferController;
 
 /* Перевод денег */
@@ -33,4 +34,13 @@ Route::middleware(['web', 'check.admin:moder', 'admin.logger'])
                 Route::get('/transfer-settings', 'index')->name('settings');
                 Route::post('/transfer-settings', 'update')->name('settings.update');
             });
+    });
+
+/* ---- API роуты ---- */
+// Переводы касаются денег — только со своим токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::get('/transfers', [TransferApiController::class, 'index']);
+        Route::post('/transfers', [TransferApiController::class, 'store']);
     });

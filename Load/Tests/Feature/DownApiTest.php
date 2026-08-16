@@ -2,10 +2,10 @@
 
 namespace Modules\Load\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\Load\Models\Down;
@@ -39,17 +39,17 @@ class DownApiTest extends ModuleTestCase
         $response = $this->getJson('/api/downs/' . $down->id);
 
         $response->assertOk();
-        $response->assertJsonPath('down.id', $down->id);
-        $response->assertJsonPath('down.title', 'Test down');
-        $response->assertJsonPath('down.url', $down->getViewUrl());
-        $response->assertJsonPath('down.user.login', $this->user->login);
-        $response->assertJsonPath('down.breadcrumbs.0.title', __('load::loads.loads'));
-        $response->assertJsonPath('down.breadcrumbs.1.title', 'Test category');
+        $response->assertJsonPath('data.id', $down->id);
+        $response->assertJsonPath('data.title', 'Test down');
+        $response->assertJsonPath('data.url', $down->getViewUrl());
+        $response->assertJsonPath('data.user.login', $this->user->login);
+        $response->assertJsonPath('data.breadcrumbs.0.title', __('load::loads.loads'));
+        $response->assertJsonPath('data.breadcrumbs.1.title', 'Test category');
         // Категория записи приходит объектом, как раздел у темы форума
-        $response->assertJsonPath('down.category_id', $down->category_id);
-        $response->assertJsonPath('down.category.name', 'Test category');
-        $response->assertJsonPath('down.category.parent', null);
-        $response->assertJsonStructure(['data', 'links', 'meta']);
+        $response->assertJsonPath('data.category_id', $down->category_id);
+        $response->assertJsonPath('data.category.name', 'Test category');
+        $response->assertJsonPath('data.category.parent', null);
+        $response->assertJsonStructure(['data', 'comments' => ['data', 'links', 'meta']]);
     }
 
     public function testFilesAreServedThroughDownloadRoute(): void
@@ -63,14 +63,14 @@ class DownApiTest extends ModuleTestCase
 
         $response->assertOk();
         // Картинка идёт в галерею, дистрибутив — в files со ссылкой на роут скачивания
-        $response->assertJsonCount(1, 'down.media');
-        $response->assertJsonPath('down.media.0.name', 'screen.jpg');
-        $response->assertJsonCount(1, 'down.files');
-        $response->assertJsonPath('down.files.0.name', 'game.zip');
-        $response->assertJsonPath('down.files.0.download_url', route('downs.download', ['id' => $down->id, 'fid' => $archive->id]));
-        $response->assertJsonPath('down.files.0.archive_url', route('downs.zip', ['id' => $down->id, 'fid' => $archive->id]));
+        $response->assertJsonCount(1, 'data.media');
+        $response->assertJsonPath('data.media.0.name', 'screen.jpg');
+        $response->assertJsonCount(1, 'data.files');
+        $response->assertJsonPath('data.files.0.name', 'game.zip');
+        $response->assertJsonPath('data.files.0.download_url', route('downs.download', ['id' => $down->id, 'fid' => $archive->id]));
+        $response->assertJsonPath('data.files.0.archive_url', route('downs.zip', ['id' => $down->id, 'fid' => $archive->id]));
         // Прямой путь к файлу дистрибутива в ответ не попадает
-        $response->assertJsonMissingPath('down.files.0.path');
+        $response->assertJsonMissingPath('data.files.0.path');
     }
 
     public function testGuestDownloadCanBeDisabled(): void
@@ -83,8 +83,8 @@ class DownApiTest extends ModuleTestCase
         $response = $this->getJson('/api/downs/' . $down->id);
 
         $response->assertOk();
-        $response->assertJsonPath('down.can_download', false);
-        $response->assertJsonPath('down.files.0.download_url', null);
+        $response->assertJsonPath('data.can_download', false);
+        $response->assertJsonPath('data.files.0.download_url', null);
     }
 
     public function testInactiveDownIsHiddenFromStrangers(): void
@@ -99,7 +99,7 @@ class DownApiTest extends ModuleTestCase
 
         $this->getJson('/api/downs/' . $down->id, ['Authorization' => 'Bearer ' . $author->apikey])
             ->assertOk()
-            ->assertJsonPath('down.active', false);
+            ->assertJsonPath('data.active', false);
     }
 
     public function testViewReturnsCommentsPaginated(): void
@@ -112,12 +112,12 @@ class DownApiTest extends ModuleTestCase
         $response = $this->getJson('/api/downs/' . $down->id . '?per_page=1');
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('meta.total', 2);
+        $response->assertJsonCount(1, 'comments.data');
+        $response->assertJsonPath('comments.meta.total', 2);
 
         $this->getJson('/api/downs/' . $down->id . '?per_page=1&page=2')
             ->assertOk()
-            ->assertJsonPath('data.0.parent_id', $first->id);
+            ->assertJsonPath('comments.data.0.parent_id', $first->id);
     }
 
     public function testViewReturnsVoteOfCurrentUser(): void
@@ -133,8 +133,8 @@ class DownApiTest extends ModuleTestCase
 
         $this->getJson('/api/downs/' . $down->id, ['Authorization' => 'Bearer ' . $voter->apikey])
             ->assertOk()
-            ->assertJsonPath('down.vote.value', '+')
-            ->assertJsonPath('down.vote.own', false);
+            ->assertJsonPath('data.vote.value', '+')
+            ->assertJsonPath('data.vote.own', false);
     }
 
     public function testIndexFiltersByCategory(): void

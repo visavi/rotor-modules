@@ -7,8 +7,8 @@ use Modules\Board\Models\Item;
 return [
     'name'        => 'Объявления',
     'description' => 'Доска объявлений',
-    'version'     => '1.1.0',
-    'requires'    => '14.1.0',
+    'version'     => '1.2.0',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

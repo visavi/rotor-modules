@@ -71,3 +71,13 @@ Route::middleware(['api', 'check.token.optional'])
         Route::get('/items/{id}', [ItemApiController::class, 'view']);
         Route::get('/boards', [ItemApiController::class, 'categories']);
     });
+
+// Создание, правка и снятие — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/items', [ItemApiController::class, 'store']);
+        Route::patch('/items/{id}', [ItemApiController::class, 'update']);
+        Route::post('/items/{id}/publish', [ItemApiController::class, 'publish']);
+        Route::delete('/items/{id}', [ItemApiController::class, 'destroy']);
+    });

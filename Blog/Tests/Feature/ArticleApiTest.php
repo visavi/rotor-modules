@@ -2,9 +2,9 @@
 
 namespace Modules\Blog\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\Blog\Models\Article;
@@ -37,19 +37,19 @@ class ArticleApiTest extends ModuleTestCase
         $response = $this->getJson('/api/articles/' . $article->slug);
 
         $response->assertOk();
-        $response->assertJsonPath('article.id', $article->id);
-        $response->assertJsonPath('article.title', 'Test article');
-        $response->assertJsonPath('article.url', $article->getViewUrl());
-        $response->assertJsonPath('article.user.login', $this->user->login);
-        $response->assertJsonPath('article.breadcrumbs.0.title', __('blog::blogs.blogs'));
-        $response->assertJsonPath('article.breadcrumbs.1.title', 'Test category');
+        $response->assertJsonPath('data.id', $article->id);
+        $response->assertJsonPath('data.title', 'Test article');
+        $response->assertJsonPath('data.url', $article->getViewUrl());
+        $response->assertJsonPath('data.user.login', $this->user->login);
+        $response->assertJsonPath('data.breadcrumbs.0.title', __('blog::blogs.blogs'));
+        $response->assertJsonPath('data.breadcrumbs.1.title', 'Test category');
         // Категория записи приходит объектом, как раздел у темы форума
-        $response->assertJsonPath('article.category_id', $article->category_id);
-        $response->assertJsonPath('article.category.name', 'Test category');
-        $response->assertJsonPath('article.category.url', route('blogs.blog', ['id' => $article->category_id]));
-        $response->assertJsonPath('article.category.parent', null);
-        $response->assertJsonPath('article.vote.value', null);
-        $response->assertJsonStructure(['data', 'links', 'meta']);
+        $response->assertJsonPath('data.category_id', $article->category_id);
+        $response->assertJsonPath('data.category.name', 'Test category');
+        $response->assertJsonPath('data.category.url', route('blogs.blog', ['id' => $article->category_id]));
+        $response->assertJsonPath('data.category.parent', null);
+        $response->assertJsonPath('data.vote.value', null);
+        $response->assertJsonStructure(['data', 'comments' => ['data', 'links', 'meta']]);
     }
 
     public function testViewAcceptsIdInsteadOfSlug(): void
@@ -58,7 +58,7 @@ class ArticleApiTest extends ModuleTestCase
 
         $this->getJson('/api/articles/' . $article->id)
             ->assertOk()
-            ->assertJsonPath('article.id', $article->id);
+            ->assertJsonPath('data.id', $article->id);
     }
 
     public function testViewReturnsTags(): void
@@ -70,8 +70,8 @@ class ArticleApiTest extends ModuleTestCase
         $response = $this->getJson('/api/articles/' . $article->slug);
 
         $response->assertOk();
-        $response->assertJsonPath('article.tags.0.name', 'laravel');
-        $response->assertJsonPath('article.tags.0.url', route('blogs.tag', ['tag' => 'laravel']));
+        $response->assertJsonPath('data.tags.0.name', 'laravel');
+        $response->assertJsonPath('data.tags.0.url', route('blogs.tag', ['tag' => 'laravel']));
     }
 
     public function testViewReturnsCommentsPaginated(): void
@@ -84,13 +84,13 @@ class ArticleApiTest extends ModuleTestCase
         $response = $this->getJson('/api/articles/' . $article->slug . '?per_page=1');
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('meta.total', 2);
-        $response->assertJsonPath('data.0.parent_id', null);
+        $response->assertJsonCount(1, 'comments.data');
+        $response->assertJsonPath('comments.meta.total', 2);
+        $response->assertJsonPath('comments.data.0.parent_id', null);
 
         $this->getJson('/api/articles/' . $article->slug . '?per_page=1&page=2')
             ->assertOk()
-            ->assertJsonPath('data.0.parent_id', $first->id);
+            ->assertJsonPath('comments.data.0.parent_id', $first->id);
     }
 
     public function testViewReturnsVoteOfCurrentUser(): void
@@ -106,9 +106,9 @@ class ArticleApiTest extends ModuleTestCase
 
         $this->getJson('/api/articles/' . $article->slug, ['Authorization' => 'Bearer ' . $voter->apikey])
             ->assertOk()
-            ->assertJsonPath('article.vote.value', '+')
-            ->assertJsonPath('article.vote.own', false)
-            ->assertJsonPath('article.rating', 1);
+            ->assertJsonPath('data.vote.value', '+')
+            ->assertJsonPath('data.vote.own', false)
+            ->assertJsonPath('data.rating', 1);
     }
 
     public function testIndexFiltersByCategory(): void

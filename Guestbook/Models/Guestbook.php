@@ -27,6 +27,7 @@ use Illuminate\Support\HtmlString;
  * @property string               $ip
  * @property string               $brow
  * @property string               $reply
+ * @property string|null          $guest_name
  * @property int                  $edit_user_id
  * @property bool                 $active
  * @property CarbonImmutable      $created_at

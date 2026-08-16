@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Board\Http\Controllers\Admin;
 
-use App\Classes\Restatement;
-use App\Classes\Validator;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
+use App\Support\Restatement;
+use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

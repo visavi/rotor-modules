@@ -1,4 +1,4 @@
-@use('App\Classes\Hook')
+@use('App\Support\Hook')
 @extends('layout')
 
 @section('title', __('forum::forums.forums'))

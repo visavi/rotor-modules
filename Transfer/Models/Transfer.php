@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string          $text
  * @property int             $total
  * @property CarbonImmutable $created_at
+ * @property-read User $user
+ * @property-read User $recipientUser
  */
 class Transfer extends Model
 {

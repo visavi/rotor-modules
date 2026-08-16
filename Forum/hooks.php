@@ -1,9 +1,9 @@
 <?php
 
-use App\Classes\Hook;
-use App\Classes\Registry;
-use App\Classes\Restatement;
 use App\Models\User;
+use App\Support\Hook;
+use App\Support\Registry;
+use App\Support\Restatement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Modules\Forum\Models\Bookmark;

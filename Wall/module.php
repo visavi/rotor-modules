@@ -6,8 +6,8 @@ use Modules\Wall\Observers\WallObserver;
 return [
     'name'        => 'Стена сообщений',
     'description' => 'Стена сообщений пользователя',
-    'version'     => '1.0.3',
-    'requires'    => '14.1.0',
+    'version'     => '1.1.0',
+    'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -16,6 +16,7 @@ return [
         Wall::class => [
             'label' => __('wall::walls.wall_posts'),
             'spam'  => true,
+            'stat'  => true,
         ],
     ],
 

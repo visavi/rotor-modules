@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Board\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

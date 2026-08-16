@@ -1,7 +1,7 @@
 <?php
 
-use App\Classes\Hook;
-use App\Classes\Registry;
+use App\Support\Hook;
+use App\Support\Registry;
 use Modules\Guestbook\Models\Guestbook;
 
 // Жалобы на сообщения гостевой

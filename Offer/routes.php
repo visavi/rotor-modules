@@ -57,3 +57,11 @@ Route::middleware(['api', 'check.token.optional'])
         Route::get('/offers', [OfferApiController::class, 'index']);
         Route::get('/offers/{id}', [OfferApiController::class, 'view']);
     });
+
+// Создание и правка — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/offers', [OfferApiController::class, 'store']);
+        Route::patch('/offers/{id}', [OfferApiController::class, 'update']);
+    });

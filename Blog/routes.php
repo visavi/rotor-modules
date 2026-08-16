@@ -91,6 +91,14 @@ Route::middleware(['api', 'check.token.optional'])
     ->prefix('api')
     ->group(function () {
         Route::get('/articles', [ArticleApiController::class, 'index']);
-        Route::get('/articles/{slug}', [ArticleApiController::class, 'view']);
+        Route::get('/articles/{id}', [ArticleApiController::class, 'view']);
         Route::get('/blogs', [ArticleApiController::class, 'categories']);
+    });
+
+// Создание и правка — только с токеном
+Route::middleware(['api', 'check.token'])
+    ->prefix('api')
+    ->group(function () {
+        Route::post('/articles', [ArticleApiController::class, 'store']);
+        Route::patch('/articles/{id}', [ArticleApiController::class, 'update'])->whereNumber('id');
     });

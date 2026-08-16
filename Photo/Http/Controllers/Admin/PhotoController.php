@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Photo\Http\Controllers\Admin;
 
-use App\Classes\Restatement;
-use App\Classes\Validator;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
+use App\Support\Restatement;
+use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

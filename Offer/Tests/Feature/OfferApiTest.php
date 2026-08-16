@@ -2,9 +2,9 @@
 
 namespace Modules\Offer\Tests\Feature;
 
-use App\Classes\Registry;
 use App\Models\Comment;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Modules\Offer\Models\Offer;
@@ -35,16 +35,16 @@ class OfferApiTest extends ModuleTestCase
         $response = $this->getJson('/api/offers/' . $offer->id);
 
         $response->assertOk();
-        $response->assertJsonPath('offer.id', $offer->id);
-        $response->assertJsonPath('offer.type', Offer::ISSUE);
-        $response->assertJsonPath('offer.status', Offer::WAIT);
-        $response->assertJsonPath('offer.title', 'Test issue');
-        $response->assertJsonPath('offer.url', $offer->getViewUrl());
-        $response->assertJsonPath('offer.user.login', $this->user->login);
-        $response->assertJsonPath('offer.breadcrumbs.0.title', __('offer::offers.section'));
+        $response->assertJsonPath('data.id', $offer->id);
+        $response->assertJsonPath('data.type', Offer::ISSUE);
+        $response->assertJsonPath('data.status', Offer::WAIT);
+        $response->assertJsonPath('data.title', 'Test issue');
+        $response->assertJsonPath('data.url', $offer->getViewUrl());
+        $response->assertJsonPath('data.user.login', $this->user->login);
+        $response->assertJsonPath('data.breadcrumbs.0.title', __('offer::offers.section'));
         // Голос не проставлен, но цель голосования гость видит
-        $response->assertJsonPath('offer.vote.value', null);
-        $response->assertJsonStructure(['data', 'links', 'meta']);
+        $response->assertJsonPath('data.vote.value', null);
+        $response->assertJsonStructure(['data', 'comments' => ['data', 'links', 'meta']]);
     }
 
     public function testViewReturnsCommentsPaginated(): void
@@ -57,15 +57,40 @@ class OfferApiTest extends ModuleTestCase
         $response = $this->getJson('/api/offers/' . $offer->id . '?per_page=1');
 
         $response->assertOk();
-        $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('meta.total', 2);
-        $response->assertJsonPath('data.0.parent_id', null);
-        $this->assertStringContainsString('First comment', $response->json('data.0.text'));
+        $response->assertJsonCount(1, 'comments.data');
+        $response->assertJsonPath('comments.meta.total', 2);
+        $response->assertJsonPath('comments.data.0.parent_id', null);
+        $this->assertStringContainsString('First comment', $response->json('comments.data.0.text'));
 
         // Ответ лежит на второй странице и знает своего родителя
         $this->getJson('/api/offers/' . $offer->id . '?per_page=1&page=2')
             ->assertOk()
-            ->assertJsonPath('data.0.parent_id', $first->id);
+            ->assertJsonPath('comments.data.0.parent_id', $first->id);
+    }
+
+    public function testReplyCarriesParentContext(): void
+    {
+        $offer = $this->createOffer();
+        $parent = $this->addComment($offer, 'Первый комментарий');
+        $this->addComment($offer, 'Ответ на первый', $parent->id);
+
+        // Родитель может остаться на другой странице, поэтому ответ несёт его с собой
+        $response = $this->getJson('/api/offers/' . $offer->id . '?per_page=1&page=2');
+
+        $response->assertOk();
+        $response->assertJsonPath('comments.data.0.parent.id', $parent->id);
+        $response->assertJsonPath('comments.data.0.parent.login', $parent->user->login);
+        $this->assertStringContainsString('Первый комментарий', $response->json('comments.data.0.parent.excerpt'));
+    }
+
+    public function testRootCommentHasNoParent(): void
+    {
+        $offer = $this->createOffer();
+        $this->addComment($offer, 'Первый комментарий');
+
+        $this->getJson('/api/offers/' . $offer->id)
+            ->assertOk()
+            ->assertJsonPath('comments.data.0.parent', null);
     }
 
     public function testDeletedCommentStaysAsPlaceholder(): void
@@ -77,9 +102,9 @@ class OfferApiTest extends ModuleTestCase
         $response = $this->getJson('/api/offers/' . $offer->id);
 
         $response->assertOk();
-        $response->assertJsonPath('data.0.deleted', true);
-        $response->assertJsonPath('data.0.text', null);
-        $response->assertJsonPath('data.0.user', null);
+        $response->assertJsonPath('comments.data.0.deleted', true);
+        $response->assertJsonPath('comments.data.0.text', null);
+        $response->assertJsonPath('comments.data.0.user', null);
     }
 
     public function testViewReturnsVoteOfCurrentUser(): void
@@ -95,9 +120,9 @@ class OfferApiTest extends ModuleTestCase
 
         $this->getJson('/api/offers/' . $offer->id, ['Authorization' => 'Bearer ' . $voter->apikey])
             ->assertOk()
-            ->assertJsonPath('offer.vote.value', '+')
-            ->assertJsonPath('offer.vote.own', false)
-            ->assertJsonPath('offer.rating', 2);
+            ->assertJsonPath('data.vote.value', '+')
+            ->assertJsonPath('data.vote.own', false)
+            ->assertJsonPath('data.rating', 2);
     }
 
     public function testIndexFiltersByType(): void
