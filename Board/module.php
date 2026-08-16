@@ -24,6 +24,11 @@ return [
                 'api'   => fn (Item $post): array => ['price' => $post->price, 'phone' => $post->phone],
             ],
             'upload' => 'media',
+            // Только живые объявления: скрытые и просроченные не считаем
+            'stat' => static fn (): int => Item::query()
+                ->where('active', true)
+                ->where('expires_at', '>', now())
+                ->count(),
         ],
     ],
 

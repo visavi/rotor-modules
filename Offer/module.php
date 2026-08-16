@@ -23,6 +23,7 @@ return [
             ],
             'upload' => 'media',
             'rating' => true,
+            'stat'   => true,
         ],
     ],
 

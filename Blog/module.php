@@ -21,6 +21,8 @@ return [
             'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
             'upload' => 'media',
             'rating' => true,
+            // Отложенные статьи публикуются по расписанию, до этого не считаются
+            'stat' => static fn (): int => Article::query()->where('active', true)->count(),
         ],
     ],
 

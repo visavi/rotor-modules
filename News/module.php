@@ -19,6 +19,7 @@ return [
             'feed'   => ['with' => ['user', 'files'], 'view' => 'news::feeds/_news'],
             'upload' => 'media',
             'rating' => true,
+            'stat'   => true,
         ],
     ],
 

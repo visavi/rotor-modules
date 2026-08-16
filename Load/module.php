@@ -19,6 +19,8 @@ return [
             'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
             'upload' => 'file',
             'rating' => true,
+            // Файлы на модерации в счётчик не идут
+            'stat' => static fn (): int => Down::query()->where('active', true)->count(),
         ],
     ],
 

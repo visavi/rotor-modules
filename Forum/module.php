@@ -50,6 +50,7 @@ return [
                     ? [Post::$morphName, $topic->last_post_id]
                     : null,
             ],
+            'stat' => true,
         ],
         Post::class => [
             'label'  => __('forum::forums.forum_posts'),
@@ -57,6 +58,7 @@ return [
             'upload' => 'file',
             'rating' => true,
             'spam'   => true,
+            'stat'   => true,
         ],
         Vote::class => [],
     ],
