@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Подключение пользовательского CSS
 Hook::add('head', function () {

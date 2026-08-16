@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Плитка в панели редактора
 Hook::add('adminBlockEditor', static function () {

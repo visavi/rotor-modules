@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Game\Http\Controllers;
 
-use App\Classes\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Validator;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

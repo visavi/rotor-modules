@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Добавляем ссылку на лотерею на страницу игр
 Hook::add('gamesEnd', static function () {

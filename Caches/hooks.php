@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Плитка очистки кеша в админ-панели (блок босса)
 Hook::add('adminBlockBoss', static function () {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Ссылка в блоке boss в админке
 Hook::add('adminBlockBoss', static function () {

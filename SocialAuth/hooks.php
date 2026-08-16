@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 Hook::add('adminSettingsNav', static function () {
     return '<a class="nav-link" href="' . route('social_auth.settings') . '">'

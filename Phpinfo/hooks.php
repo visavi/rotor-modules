@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 // Плитка PHP-информации в админ-панели (блок администратора)
 Hook::add('adminBlockAdmin', static function () {

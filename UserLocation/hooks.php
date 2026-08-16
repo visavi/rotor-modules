@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 use Modules\UserLocation\Models\UserLocation;
 
 // Добавляем ссылку на просмотр

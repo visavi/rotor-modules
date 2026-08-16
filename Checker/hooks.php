@@ -1,6 +1,6 @@
 <?php
 
-use App\Classes\Hook;
+use App\Support\Hook;
 
 Hook::add('adminBlockBoss', static function () {
     return '<div class="col">
