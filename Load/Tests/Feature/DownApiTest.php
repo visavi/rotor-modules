@@ -68,9 +68,22 @@ class DownApiTest extends ModuleTestCase
         $response->assertJsonCount(1, 'data.files');
         $response->assertJsonPath('data.files.0.name', 'game.zip');
         $response->assertJsonPath('data.files.0.download_url', route('downs.download', ['id' => $down->id, 'fid' => $archive->id]));
-        $response->assertJsonPath('data.files.0.archive_url', route('downs.zip', ['id' => $down->id, 'fid' => $archive->id]));
+        // Просмотр архива закрыт для гостей, ссылки в ответе нет
+        $response->assertJsonPath('data.files.0.archive_url', null);
         // Прямой путь к файлу дистрибутива в ответ не попадает
         $response->assertJsonMissingPath('data.files.0.path');
+    }
+
+    public function testArchiveUrlIsReturnedForAuthorized(): void
+    {
+        $down = $this->createDown();
+        $archive = $this->attachFile($down, 'game.zip', 'zip', 'application/zip');
+
+        $reader = User::factory()->create(['apikey' => Str::random(32)]);
+
+        $this->getJson('/api/downs/' . $down->id, ['Authorization' => 'Bearer ' . $reader->apikey])
+            ->assertOk()
+            ->assertJsonPath('data.files.0.archive_url', route('downs.zip', ['id' => $down->id, 'fid' => $archive->id]));
     }
 
     public function testGuestDownloadCanBeDisabled(): void

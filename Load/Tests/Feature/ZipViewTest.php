@@ -19,6 +19,8 @@ class ZipViewTest extends ModuleTestCase
 
     private File $file;
 
+    private User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,17 +28,21 @@ class ZipViewTest extends ModuleTestCase
         Relation::morphMap([Down::$morphName => Down::class]);
 
         $load = Load::query()->create(['name' => 'Категория']);
+        $this->user = User::factory()->create();
 
         $this->down = Down::query()->create([
             'category_id' => $load->id,
             'title'       => 'Загрузка',
             'text'        => 'Описание',
-            'user_id'     => User::factory()->create()->id,
+            'user_id'     => $this->user->id,
             'active'      => true,
             'created_at'  => now(),
         ]);
 
         $this->file = $this->attachArchive();
+
+        // Просмотр архивов закрыт для гостей
+        $this->actingAs($this->user);
     }
 
     protected function tearDown(): void
@@ -48,6 +54,30 @@ class ZipViewTest extends ModuleTestCase
         }
 
         parent::tearDown();
+    }
+
+    public function testGuestIsRedirectedFromArchive(): void
+    {
+        auth()->logout();
+
+        $this->get($this->zipUrl())->assertRedirect(route('login'));
+        $this->get($this->zipUrl(0))->assertRedirect(route('login'));
+    }
+
+    public function testGuestDoesNotSeeArchiveLink(): void
+    {
+        auth()->logout();
+
+        $this->get('/downs/' . $this->down->id)
+            ->assertOk()
+            ->assertDontSee(route('downs.zip', ['id' => $this->down->id, 'fid' => $this->file->id]));
+    }
+
+    public function testUserSeesArchiveLink(): void
+    {
+        $this->get('/downs/' . $this->down->id)
+            ->assertOk()
+            ->assertSee(route('downs.zip', ['id' => $this->down->id, 'fid' => $this->file->id]));
     }
 
     public function testArchiveIsListed(): void

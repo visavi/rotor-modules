@@ -331,8 +331,12 @@ class DownController extends Controller
     /**
      * Просмотр zip архива
      */
-    public function zip(int $id, int $fid): View
+    public function zip(int $id, int $fid): View|RedirectResponse
     {
+        if ($redirect = $this->guestRedirect()) {
+            return $redirect;
+        }
+
         [$down, $file, $archive] = $this->openZipFile($id, $fid);
 
         // Обход всех записей архива идёт один раз на файл, дальше из кеша
@@ -351,8 +355,12 @@ class DownController extends Controller
     /**
      * Просмотр файла в zip архиве
      */
-    public function zipView(int $id, int $fid, int $zid): View|Response
+    public function zipView(int $id, int $fid, int $zid): View|Response|RedirectResponse
     {
+        if ($redirect = $this->guestRedirect()) {
+            return $redirect;
+        }
+
         [$down, $file] = $this->findZipFile($id, $fid);
 
         // Индексы перебирают боты — известный по карте промах архив не открывает
@@ -403,6 +411,19 @@ class DownController extends Controller
         }
 
         return view('load::downs/zip_view', compact('down', 'file', 'document', 'content'));
+    }
+
+    /**
+     * Гостям просмотр архивов закрыт: содержимое перебирают боты с тысяч адресов,
+     * а поиску внутренности архива индексировать незачем
+     */
+    private function guestRedirect(): ?RedirectResponse
+    {
+        if (! auth()->guest()) {
+            return null;
+        }
+
+        return redirect()->route('login')->with('danger', __('main.not_authorized'));
     }
 
     /**

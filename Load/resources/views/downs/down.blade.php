@@ -66,7 +66,8 @@
                         @endif
 
                         <b>{{ $file->name }}</b> ({{ formatSize($file->size) }})<br>
-                        @if ($file->extension === 'zip')
+                        {{-- Гостям просмотр архива закрыт, ссылку не показываем --}}
+                        @if ($file->extension === 'zip' && getUser())
                             <a href="{{ route('downs.zip', ['id' => $down->id, 'fid' => $file->id]) }}">{{ __('load::loads.view_archive') }}</a><br>
                         @endif
 
