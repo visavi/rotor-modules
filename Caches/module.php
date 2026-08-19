@@ -3,7 +3,7 @@
 return [
     'name'        => 'Очистка кеша',
     'description' => 'Просмотр и очистка кеша приложения и скомпилированных шаблонов',
-    'version'     => '1.0.1',
+    'version'     => '1.0.2',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

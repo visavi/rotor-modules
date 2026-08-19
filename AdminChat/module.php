@@ -3,7 +3,7 @@
 return [
     'name'        => 'Админ-чат',
     'description' => 'Чат для администраторов сайта',
-    'version'     => '1.0.2',
+    'version'     => '1.0.3',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

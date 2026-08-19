@@ -3,7 +3,7 @@
 return [
     'name'        => 'Редактор CSS/JS',
     'description' => 'Редактор пользовательских стилей и скриптов',
-    'version'     => '1.0.1',
+    'version'     => '1.0.2',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
