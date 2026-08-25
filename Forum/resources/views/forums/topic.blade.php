@@ -68,30 +68,36 @@
 @section('content')
 
 
+    <div class="d-flex flex-wrap align-items-center column-gap-3 row-gap-1 mb-2">
     @if (getUser())
         @if (! $topic->closed && getUser('id') === $topic->user_id && getUser('point') >= setting('editforumpoint'))
-            <i class="fas fa-lock"></i>
-            <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
-                @csrf
-                <button class="btn btn-link p-0 me-3">{{ __('main.close') }}</button>
-            </form>
-            <i class="fas fa-pencil-alt"></i> <a class="me-3" href="{{ route('topics.edit', ['id' => $topic->id]) }}">{{ __('main.edit') }}</a>
+            <span class="d-inline-flex align-items-center gap-1">
+                <i class="fas fa-lock"></i>
+                <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
+                    @csrf
+                    <button class="btn btn-link p-0 align-baseline">{{ __('main.close') }}</button>
+                </form>
+            </span>
+            <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-pencil-alt"></i> <a href="{{ route('topics.edit', ['id' => $topic->id]) }}">{{ __('main.edit') }}</a></span>
         @endif
 
         @if ($topic->closed && getUser('id') === $topic->closeUser->id)
-            <i class="fas fa-unlock"></i>
-            <form action="{{ route('topics.open', ['id' => $topic->id]) }}" method="post" class="d-inline">
-                @csrf
-                <button class="btn btn-link p-0 me-3">{{ __('main.open') }}</button>
-            </form>
+            <span class="d-inline-flex align-items-center gap-1">
+                <i class="fas fa-unlock"></i>
+                <form action="{{ route('topics.open', ['id' => $topic->id]) }}" method="post" class="d-inline">
+                    @csrf
+                    <button class="btn btn-link p-0 align-baseline">{{ __('main.open') }}</button>
+                </form>
+            </span>
         @endif
 
         <?php $bookmark = $topic->bookmark_posts ? __('forum::forums.from_bookmarks') : __('forum::forums.to_bookmarks'); ?>
-        <i class="fas fa-bookmark"></i> <a class="me-3" href="#" onclick="return bookmark(this)" data-tid="{{ $topic->id }}" data-from="{{ __('forum::forums.from_bookmarks') }}"  data-to="{{ __('forum::forums.to_bookmarks') }}">{{ $bookmark }}</a>
+        <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-bookmark"></i> <a href="#" onclick="return bookmark(this)" data-tid="{{ $topic->id }}" data-from="{{ __('forum::forums.from_bookmarks') }}"  data-to="{{ __('forum::forums.to_bookmarks') }}">{{ $bookmark }}</a></span>
     @endif
 
-    <div class="float-end" data-bs-toggle="tooltip" title="{{ __('main.views') }}">
-        <i class="far fa-eye"></i> {{ $topic->visits }}
+        <span class="ms-auto d-inline-flex align-items-center gap-1 text-nowrap" data-bs-toggle="tooltip" title="{{ __('main.views') }}">
+            <i class="far fa-eye"></i> {{ $topic->visits }}
+        </span>
     </div>
 
     @if ($topic->curators)

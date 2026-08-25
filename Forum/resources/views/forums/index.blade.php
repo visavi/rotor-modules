@@ -70,7 +70,6 @@
                 </div>
                 <div>
                     @if ($forum->children->isNotEmpty())
-                        @php $forum->children->load('children'); @endphp
                         <div class="collapse" id="section_{{ $forum->id }}">
                             <div class="section-content border-top p-2">
                                 @foreach ($forum->children as $child)

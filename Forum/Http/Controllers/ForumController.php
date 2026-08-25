@@ -29,7 +29,7 @@ class ForumController extends Controller
     {
         $forums = Forum::query()
             ->where('parent_id', 0)
-            ->with('children', 'lastTopic.lastPost.user')
+            ->with('children.children', 'lastTopic.lastPost.user')
             ->orderBy('sort')
             ->get();
 
@@ -103,7 +103,7 @@ class ForumController extends Controller
             $forum = Forum::query()->find($fid);
 
             $validator
-                ->notEmpty($forum, ['fid' => 'Форума для новой темы не существует!'])
+                ->notEmpty($forum, ['fid' => __('forum::forums.forum_not_exist')])
                 ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
                 ->length($title, setting('forum_title_min'), setting('forum_title_max'), ['title' => __('validator.text')])
                 ->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);

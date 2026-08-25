@@ -248,7 +248,10 @@ class TopicController extends Controller
                 ->withErrors($validator->getErrors());
         }
 
-        $posts = Post::query()->whereIn('id', $del)->get();
+        $posts = Post::query()
+            ->where('topic_id', $topic->id)
+            ->whereIn('id', $del)
+            ->get();
 
         $posts->each(static function (Post $post) {
             $post->delete();
@@ -269,9 +272,12 @@ class TopicController extends Controller
 
         $topic = Topic::query()->find($id);
 
+        if (! $topic) {
+            abort(404, __('forum::forums.topic_not_exist'));
+        }
+
         $validator
             ->gte($user->point, setting('editforumpoint'), __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]))
-            ->notEmpty($topic, __('forum::forums.topic_not_exist'))
             ->equal($topic->user_id, $user->id, __('forum::forums.topic_not_author'))
             ->empty($topic->closed, __('forum::forums.topic_closed'));
 
@@ -300,8 +306,11 @@ class TopicController extends Controller
 
         $topic = Topic::query()->find($id);
 
+        if (! $topic) {
+            abort(404, __('forum::forums.topic_not_exist'));
+        }
+
         $validator
-            ->notEmpty($topic, __('forum::forums.topic_not_exist'))
             ->equal($topic->user_id, $user->id, __('forum::forums.topic_not_author'))
             ->equal($topic->close_user_id, $user->id, __('forum::forums.topic_opened_author'))
             ->notEmpty($topic->closed, __('forum::forums.topic_already_open'));
@@ -408,12 +417,13 @@ class TopicController extends Controller
                             $vote->answers()->whereIn('id', $answerIdsToDelete)->delete();
                         }
 
-                        $countAnswers = $vote->answers()->count();
+                        $existingAnswers = $vote->answers()->get()->keyBy('id');
+                        $countAnswers = $existingAnswers->count();
 
                         foreach ($answers as $answerId => $answer) {
-                            $ans = $vote->answers()->find($answerId);
+                            $ans = $existingAnswers->get($answerId);
 
-                            if ($ans && $ans->exists) {
+                            if ($ans) {
                                 $ans->update(['answer' => $answer]);
                             } elseif ($countAnswers < 10) {
                                 $vote->answers()->create(['answer' => $answer]);
