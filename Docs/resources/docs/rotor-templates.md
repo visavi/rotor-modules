@@ -16,11 +16,15 @@ resources/views/themes/my-theme/
 
 Активная тема устанавливается в AdminPanel → Настройки → Оформление.
 
-Темы можно переключать программно через настройку `theme`:
+Имя активной темы лежит в настройке `themes`:
 
 ```php
-setting('theme')  // возвращает имя текущей темы, например 'default'
+setting('themes')       // тема сайта, например 'default'
+getAvailableThemes()    // список установленных тем
 ```
+
+У пользователя может быть своя тема (`$user->themes`) — она имеет приоритет над
+настройкой сайта. Подстановкой занимается middleware `ApplySettings`.
 
 ## Основной layout
 
@@ -95,10 +99,50 @@ setting('theme')  // возвращает имя текущей темы, нап
 
 ## Создание темы
 
-1. Скопируйте папку `resources/views/themes/default` с новым именем
-2. Отредактируйте `layout.blade.php`, `navbar.blade.php`, `sidebar.blade.php`, `footer.blade.php`
-3. Добавьте CSS в `resources/themes/` (или подключите из CDN)
+Тема — это папка с blade-файлами; она появляется в списке сразу, как только создана.
+
+### Со сборкой
+
+1. Скопируйте `resources/views/themes/default` с новым именем
+2. Скопируйте `resources/themes/default` — исходники стилей темы
+3. Добавьте точку входа `resources/themes/<имя>/js/app.js` в `input` в `vite.config.js`
+4. Соберите: `npm run build`
+5. Активируйте в AdminPanel → Настройки
+
+### Без сборки
+
+Не требует npm и правок `vite.config.js` — готовый пример лежит
+в `resources/views/themes/simple`.
+
+1. Создайте `resources/views/themes/<имя>` с `layout.blade.php`
+2. Положите свои `style.css` и `app.js` в `public/themes/<имя>`
+3. В layout подключите общие файлы ядра и свои:
+
+```blade
+@vite('resources/css/bootstrap.scss')
+@vite('resources/themes/vendor.scss')
+@vite('resources/js/main.js')
+<link rel="stylesheet" href="{{ asset('/themes/<имя>/style.css') }}">
+```
+
 4. Активируйте в AdminPanel → Настройки
+
+Оформление задаётся CSS-переменными Bootstrap (`--bs-primary` и другие), подробнее —
+в разделе «Сборка ресурсов».
+
+### Что обязан отдавать layout
+
+```blade
+@translation                 {{-- переводы для js --}}
+@yield('navbar')             {{-- @includeIf('theme::navbar') --}}
+@yield('sidebar')            {{-- @includeIf('theme::sidebar'), если он есть --}}
+@yield('titlebar')
+@yield('flash')
+@yield('content')
+@stack('styles')
+@stack('scripts')            {{-- сюда попадают модалки языка и правки комментариев --}}
+@hook('head') @hook('footer') @hook('contentStart') @hook('contentEnd')
+```
 
 ## Хелперы в шаблонах
 

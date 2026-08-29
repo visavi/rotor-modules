@@ -44,7 +44,7 @@
 @stop
 
 @push('styles')
-    @vite('public/assets/css/chartist.css')
+    <link rel="stylesheet" href="{{ asset('/assets/modules/counters/chartist/chartist.css') }}">
     <style>
         .ct-label{
             color: var(--bs-body-color);
@@ -67,9 +67,9 @@
 @endpush
 
 @push('scripts')
-    @vite('public/assets/js/chartist.js')
+    <script src="{{ asset('/assets/modules/counters/chartist/chartist.js') }}"></script>
     <script type="module">
-        new LineChart('.ct-chart24', {
+        new Chartist.LineChart('.ct-chart24', {
             onlyInteger: true,
             labels: @json($counts24['labels']),
             series: [
@@ -93,7 +93,7 @@
             }
         });
 
-        new LineChart('.ct-chart31', {
+        new Chartist.LineChart('.ct-chart31', {
             onlyInteger: true,
             labels: @json($counts31['labels']),
             series: [
