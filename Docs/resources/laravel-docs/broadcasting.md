@@ -1,5 +1,5 @@
 ---
-git: 78073cef81065dc91c2927243cbd8763f6f4eccb
+git: d6a3cb993b6c1f8b99aaf3f6044f4396ffc3a06c
 ---
 
 # Трансляция (broadcast) событий
@@ -41,7 +41,7 @@ Laravel из коробки поддерживает несколько драй
 <a name="quickstart-next-steps"></a>
 #### Следующие шаги
 
-После включения трансляции событий вы готовы узнать больше об [определении широковещательных событий](#defining-broadcast-events) и [прослушивании событий](#listening-for-events). Если вы используете [стартовые наборы](/docs/{{version}}/starter-kits) Laravel React или Vue, вы можете прослушивать события с помощью [хука useEcho](#using-react-or-vue) библиотеки Laravel Echo.
+После включения трансляции событий вы готовы узнать больше об [определении широковещательных событий](#defining-broadcast-events) и [прослушивании событий](#listening-for-events). Если вы используете [стартовые наборы](/docs/{{version}}/starter-kits) Laravel React, Vue или Svelte, вы можете прослушивать события с помощью [хука useEcho](#using-react-or-vue) библиотеки Laravel Echo.
 
 > [!NOTE]
 > Перед трансляцией любых событий необходимо настроить и запустить [обработчик очереди](/docs/{{version}}/queues). Вся трансляция событий осуществляется посредством заданий, помещенных в очередь, поэтому время отклика вашего приложения не будет существенно зависеть от транслируемых событий.
@@ -175,7 +175,7 @@ BROADCAST_CONNECTION=ably
 npm install --save-dev laravel-echo pusher-js
 ```
 
-После установки Echo вы готовы создать новый экземпляр Echo в JavaScript вашего приложения. Отличное место для этого — внизу файла `resources/js/bootstrap.js`, который входит в состав фреймворка Laravel:
+После установки Echo вы готовы создать новый экземпляр Echo в JavaScript вашего приложения. Отличное место для этого — внизу файла `resources/js/app.js`, который входит в состав фреймворка Laravel:
 
 ```js tab=JavaScript
 import Echo from 'laravel-echo';
@@ -222,6 +222,20 @@ configureEcho({
 });
 ```
 
+```js tab=Svelte
+import { configureEcho } from "@laravel/echo-svelte";
+
+configureEcho({
+    broadcaster: "reverb",
+    // key: import.meta.env.VITE_REVERB_APP_KEY,
+    // wsHost: import.meta.env.VITE_REVERB_HOST,
+    // wsPort: import.meta.env.VITE_REVERB_PORT,
+    // wssPort: import.meta.env.VITE_REVERB_PORT,
+    // forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+    // enabledTransports: ['ws', 'wss'],
+});
+```
+
 Далее вам следует скомпилировать ресурсы вашего приложения:
 
 ```shell
@@ -247,7 +261,7 @@ npm run build
 npm install --save-dev laravel-echo pusher-js
 ```
 
-После установки Echo вы готовы создать новый экземпляр Echo в файле `resources/js/bootstrap.js` вашего приложения:
+После установки Echo вы готовы создать новый экземпляр Echo в файле `resources/js/app.js` вашего приложения:
 
 ```js tab=JavaScript
 import Echo from 'laravel-echo';
@@ -280,6 +294,21 @@ configureEcho({
 
 ```js tab=Vue
 import { configureEcho } from "@laravel/echo-vue";
+
+configureEcho({
+    broadcaster: "pusher",
+    // key: import.meta.env.VITE_PUSHER_APP_KEY,
+    // cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    // forceTLS: true,
+    // wsHost: import.meta.env.VITE_PUSHER_HOST,
+    // wsPort: import.meta.env.VITE_PUSHER_PORT,
+    // wssPort: import.meta.env.VITE_PUSHER_PORT,
+    // enabledTransports: ["ws", "wss"],
+});
+```
+
+```js tab=Svelte
+import { configureEcho } from "@laravel/echo-svelte";
 
 configureEcho({
     broadcaster: "pusher",
@@ -362,7 +391,7 @@ npm install --save-dev laravel-echo pusher-js
 
 **Прежде чем продолжить, вы должны включить поддержку протокола Pusher в настройках вашего приложения Ably. Вы можете включить эту функцию в разделе настроек «Protocol Adapter Settings» панели вашего приложения Ably.**
 
-После установки Echo вы готовы создать новый экземпляр Echo в файле `resources/js/bootstrap.js` вашего приложения:
+После установки Echo вы готовы создать новый экземпляр Echo в файле `resources/js/app.js` вашего приложения:
 
 ```js tab=JavaScript
 import Echo from 'laravel-echo';
@@ -395,6 +424,19 @@ configureEcho({
 
 ```js tab=Vue
 import { configureEcho } from "@laravel/echo-vue";
+
+configureEcho({
+    broadcaster: "ably",
+    // key: import.meta.env.VITE_ABLY_PUBLIC_KEY,
+    // wsHost: "realtime-pusher.ably.io",
+    // wsPort: 443,
+    // disableStats: true,
+    // encrypted: true,
+});
+```
+
+```js tab=Svelte
+import { configureEcho } from "@laravel/echo-svelte";
 
 configureEcho({
     broadcaster: "ably",
@@ -520,7 +562,7 @@ Broadcast::channel('orders.{orderId}', function (User $user, int $orderId) {
 <a name="listening-for-event-broadcasts"></a>
 #### Прослушивание трансляций событий
 
-Далее все, что остается, – это прослушивать событие в нашем JavaScript-приложении. Мы можем сделать это с помощью [Laravel Echo](#client-side-installation). Встроенные в Laravel Echo хуки React и Vue упрощают начало работы, и по умолчанию все публичные свойства события будут включены в трансляцию:
+Далее все, что остается, – это прослушивать событие в нашем JavaScript-приложении. Мы можем сделать это с помощью [Laravel Echo](#client-side-installation). Встроенные в Laravel Echo хуки React, Vue и Svelte упрощают начало работы, и по умолчанию все публичные свойства события будут включены в трансляцию:
 
 ```js tab=React
 import { useEcho } from "@laravel/echo-react";
@@ -537,6 +579,20 @@ useEcho(
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEcho } from "@laravel/echo-vue";
+
+useEcho(
+    `orders.${orderId}`,
+    "OrderShipmentStatusUpdated",
+    (e) => {
+        console.log(e.order);
+    },
+);
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEcho } from "@laravel/echo-svelte";
 
 useEcho(
     `orders.${orderId}`,
@@ -650,22 +706,18 @@ public function broadcastWith(): array
 <a name="broadcast-queue"></a>
 ### Очередь трансляции
 
-По умолчанию каждое транслируемое событие помещается в очередь по умолчанию и соединение очереди по умолчанию, указанные в вашем конфигурационном файле `config/queue.php`. Вы можете изменить соединение очереди и имя, используемое вещателем, определив свойства `connection` и `queue` в вашем классе события:
+По умолчанию каждое транслируемое событие помещается в очередь по умолчанию для соединения очереди по умолчанию, указанного в конфигурационном файле `config/queue.php`. Вы можете изменить соединение очереди и имя, используемые broadcaster, с помощью атрибутов `Connection` и `Queue` в вашем классе события:
 
 ```php
-/**
- * Имя соединения очереди, которое будет использоваться при трансляции события.
- *
- * @var string
- */
-public $connection = 'redis';
+use Illuminate\Queue\Attributes\Connection;
+use Illuminate\Queue\Attributes\Queue;
 
-/**
- * Имя очереди, в которую нужно поместить задание трансляции.
- *
- * @var string
- */
-public $queue = 'default';
+#[Connection('redis')]
+#[Queue('default')]
+class ServerCreated implements ShouldBroadcast
+{
+    // ...
+}
 ```
 
 В качестве альтернативы вы можете настроить имя очереди, определив в методе `broadcastQueue` вашего события:
@@ -740,7 +792,15 @@ class ServerCreated implements ShouldBroadcast, ShouldDispatchAfterCommit
 
 Частные каналы требуют, чтобы текущий аутентифицированный пользователь был авторизован и действительно мог прослушивать канал. Это достигается путем отправки HTTP-запроса вашему приложению Laravel с именем канала, что позволит вашему приложению определить, может ли пользователь прослушивать этот канал. При использовании [Laravel Echo](#client-side-installation) HTTP-запрос на авторизацию подписок на частные каналы будет выполнен автоматически.
 
-Когда вещание включено, Laravel автоматически регистрирует маршрут `/broadcasting/auth` для обработки запросов на авторизацию. Маршрут `/broadcasting/auth` автоматически помещается в группу посредников `web`.
+Когда вещание установлено, Laravel пытается автоматически зарегистрировать маршрут `/broadcasting/auth` для обработки запросов на авторизацию. Если Laravel не сможет автоматически зарегистрировать эти маршруты, вы можете зарегистрировать их вручную в файле `/bootstrap/app.php` вашего приложения:
+
+```php
+->withRouting(
+    web: __DIR__.'/../routes/web.php',
+    channels: __DIR__.'/../routes/channels.php',
+    health: '/up',
+)
+```
 
 <a name="defining-authorization-callbacks"></a>
 ### Определение авторизации канала
@@ -1078,9 +1138,9 @@ Echo.channel('orders')
 ```
 
 <a name="using-react-or-vue"></a>
-### Использование React или Vue
+### Использование React, Vue или Svelte
 
-Laravel Echo включает хуки React и Vue, которые упрощают прослушивание событий. Для начала вызовите хук `useEcho`, который используется для прослушивания приватных событий. Хук `useEcho` автоматически отключит каналы при отмонтировании потребляющего компонента:
+Laravel Echo включает хуки React, Vue и Svelte, которые упрощают прослушивание событий. Для начала вызовите хук `useEcho`, который используется для прослушивания приватных событий. Хук `useEcho` автоматически отключит каналы при отмонтировании потребляющего компонента:
 
 ```js tab=React
 import { useEcho } from "@laravel/echo-react";
@@ -1097,6 +1157,20 @@ useEcho(
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEcho } from "@laravel/echo-vue";
+
+useEcho(
+    `orders.${orderId}`,
+    "OrderShipmentStatusUpdated",
+    (e) => {
+        console.log(e.order);
+    },
+);
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEcho } from "@laravel/echo-svelte";
 
 useEcho(
     `orders.${orderId}`,
@@ -1192,6 +1266,32 @@ leave();
 </script>
 ```
 
+```svelte tab=Svelte
+<script>
+import { useEcho } from "@laravel/echo-svelte";
+
+const { leaveChannel, leave, stopListening, listen } = useEcho(
+    `orders.${orderId}`,
+    "OrderShipmentStatusUpdated",
+    (e) => {
+        console.log(e.order);
+    },
+);
+
+// Прекратите прослушивание, не покидая канал...
+stopListening();
+
+// Начать прослушивание снова...
+listen();
+
+// Покинуть канал...
+leaveChannel();
+
+// Покинуть канал, а также связанные с ним приватные и каналы присутствия...
+leave();
+</script>
+```
+
 <a name="react-vue-connecting-to-public-channels"></a>
 #### Подключение к публичным каналам
 
@@ -1208,6 +1308,16 @@ useEchoPublic("posts", "PostPublished", (e) => {
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEchoPublic } from "@laravel/echo-vue";
+
+useEchoPublic("posts", "PostPublished", (e) => {
+    console.log(e.post);
+});
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEchoPublic } from "@laravel/echo-svelte";
 
 useEchoPublic("posts", "PostPublished", (e) => {
     console.log(e.post);
@@ -1236,6 +1346,102 @@ useEchoPresence("posts", "PostPublished", (e) => {
     console.log(e.post);
 });
 </script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEchoPresence } from "@laravel/echo-svelte";
+
+useEchoPresence("posts", "PostPublished", (e) => {
+    console.log(e.post);
+});
+</script>
+```
+
+<a name="react-vue-connection-status"></a>
+#### Статус соединения
+
+Вы можете получить текущий статус WebSocket-соединения с помощью хука `useConnectionStatus`, который предоставляет реактивный статус, автоматически обновляющийся при изменении состояния соединения:
+
+```js tab=React
+import { useConnectionStatus } from "@laravel/echo-react";
+
+function ConnectionIndicator() {
+    const status = useConnectionStatus();
+
+    return <div>Connection: {status}</div>;
+}
+```
+
+```vue tab=Vue
+<script setup lang="ts">
+import { useConnectionStatus } from "@laravel/echo-vue";
+
+const status = useConnectionStatus();
+</script>
+
+<template>
+    <div>Connection: {{ status }}</div>
+</template>
+```
+
+```svelte tab=Svelte
+<script>
+import { useConnectionStatus } from "@laravel/echo-svelte";
+
+const status = useConnectionStatus();
+</script>
+
+<div>Connection: {status()}</div>
+```
+
+Возможные значения статуса:
+
+<!-- <div class="content-list" markdown="1"> -->
+
+- `connected` - успешное подключение к WebSocket-серверу.
+- `connecting` - выполняется первая попытка подключения.
+- `reconnecting` - выполняется попытка повторного подключения после разрыва.
+- `disconnected` - соединения нет, попытка повторного подключения не выполняется.
+- `failed` - подключение не удалось и повторная попытка не будет выполнена.
+
+<!-- </div> -->
+
+<a name="react-vue-socket-id"></a>
+#### Socket ID
+
+Текущий WebSocket socket ID можно получить с помощью хука `useSocketId`, который предоставляет reactive value, автоматически обновляющееся при повторном подключении с новым socket ID:
+
+```js tab=React
+import { useSocketId } from "@laravel/echo-react";
+
+function SocketIndicator() {
+    const socketId = useSocketId();
+
+    return <div>Socket ID: {socketId}</div>;
+}
+```
+
+```vue tab=Vue
+<script setup lang="ts">
+import { useSocketId } from "@laravel/echo-vue";
+
+const socketId = useSocketId();
+</script>
+
+<template>
+    <div>Socket ID: {{ socketId }}</div>
+</template>
+```
+
+```svelte tab=Svelte
+<script>
+import { useSocketId } from "@laravel/echo-svelte";
+
+const socketId = useSocketId();
+</script>
+
+<div>Socket ID: {socketId()}</div>
 ```
 
 <a name="presence-channels"></a>
@@ -1512,9 +1718,9 @@ Echo.private(`App.Models.User.${this.user.id}`)
 ```
 
 <a name="model-broadcasts-with-react-or-vue"></a>
-#### Использование React или Vue
+#### Использование React, Vue или Svelte
 
-Если вы используете React или Vue, вы можете использовать встроенный в Laravel Echo хук `useEchoModel` для легкого прослушивания трансляций модели:
+Если вы используете React, Vue или Svelte, вы можете использовать встроенный в Laravel Echo хук `useEchoModel` для легкого прослушивания трансляций модели:
 
 ```js tab=React
 import { useEchoModel } from "@laravel/echo-react";
@@ -1527,6 +1733,16 @@ useEchoModel("App.Models.User", userId, ["UserUpdated"], (e) => {
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEchoModel } from "@laravel/echo-vue";
+
+useEchoModel("App.Models.User", userId, ["UserUpdated"], (e) => {
+    console.log(e.model);
+});
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEchoModel } from "@laravel/echo-svelte";
 
 useEchoModel("App.Models.User", userId, ["UserUpdated"], (e) => {
     console.log(e.model);
@@ -1588,6 +1804,18 @@ channel().whisper('typing', { name: user.name });
 </script>
 ```
 
+```svelte tab=Svelte
+<script>
+import { useEcho } from "@laravel/echo-svelte";
+
+const { channel } = useEcho(`chat.${roomId}`, ['update'], (e) => {
+    console.log('Chat event received:', e);
+});
+
+channel().whisper('typing', { name: user.name });
+</script>
+```
+
 Чтобы прослушивать клиентские события, вы можете использовать метод `listenForWhisper`:
 
 ```js tab=JavaScript
@@ -1613,6 +1841,20 @@ channel().listenForWhisper('typing', (e) => {
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEcho } from "@laravel/echo-vue";
+
+const { channel } = useEcho(`chat.${roomId}`, ['update'], (e) => {
+    console.log('Chat event received:', e);
+});
+
+channel().listenForWhisper('typing', (e) => {
+    console.log(e.name);
+});
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEcho } from "@laravel/echo-svelte";
 
 const { channel } = useEcho(`chat.${roomId}`, ['update'], (e) => {
     console.log('Chat event received:', e);
@@ -1660,4 +1902,35 @@ channel().notification((notification) => {
 </script>
 ```
 
+```svelte tab=Svelte
+<script>
+import { useEchoModel } from "@laravel/echo-svelte";
+
+const { channel } = useEchoModel('App.Models.User', userId);
+
+channel().notification((notification) => {
+    console.log(notification.type);
+});
+</script>
+```
+
 В этом примере все уведомления, отправленные экземплярам `App\Models\User` через канал `broadcast`, будут получены в замыкании. Авторизация канала `App.Models.User.{id}` включена в файл `routes/channels.php` вашего приложения.
+
+<a name="stop-listening-for-notifications"></a>
+#### Прекращение прослушивания уведомлений
+
+Если вы хотите прекратить прослушивать уведомления без [выхода из канала](#leaving-a-channel), вы можете использовать метод `stopListeningForNotification`:
+
+```js
+const callback = (notification) => {
+    console.log(notification.type);
+}
+
+// Начать прослушивание...
+Echo.private(`App.Models.User.${userId}`)
+    .notification(callback);
+
+// Прекратить прослушивание (callback должен быть тем же)...
+Echo.private(`App.Models.User.${userId}`)
+    .stopListeningForNotification(callback);
+```

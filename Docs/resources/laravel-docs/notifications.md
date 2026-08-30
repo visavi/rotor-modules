@@ -1,5 +1,5 @@
 ---
-git: 5f01fbcdb444f11dfbbaa031e3be6ce4cf3188a6
+git: 83c4069cfdad631beb8f2de883034179d5727860
 ---
 
 # Уведомления
@@ -133,7 +133,7 @@ $user->notify(new InvoicePaid($invoice));
 Если вы хотите отложить доставку уведомления, то вы можете вызвать метод `delay` экземпляра уведомления:
 
 ```php
-$delay = now()->addMinutes(10);
+$delay = now()->plus(minutes: 10);
 
 $user->notify((new InvoicePaid($invoice))->delay($delay));
 ```
@@ -142,8 +142,8 @@ $user->notify((new InvoicePaid($invoice))->delay($delay));
 
 ```php
 $user->notify((new InvoicePaid($invoice))->delay([
-    'mail' => now()->addMinutes(5),
-    'sms' => now()->addMinutes(10),
+    'mail' => now()->plus(minutes: 5),
+    'sms' => now()->plus(minutes: 10),
 ]));
 ```
 
@@ -158,8 +158,8 @@ $user->notify((new InvoicePaid($invoice))->delay([
 public function withDelay(object $notifiable): array
 {
     return [
-        'mail' => now()->addMinutes(5),
-        'sms' => now()->addMinutes(10),
+        'mail' => now()->plus(minutes: 5),
+        'sms' => now()->plus(minutes: 10),
         // Задержки для других каналов
     ];
 }
@@ -231,6 +231,81 @@ public function viaQueues(): array
     ];
 }
 ```
+
+<a name="customizing-queued-notification-job-properties"></a>
+#### Настройка атрибутов задания уведомления в очереди
+
+Вы можете настроить поведение базового задания в очереди, определив атрибуты очереди в классе уведомления. Эти атрибуты будут унаследованы заданием в очереди, которое отправляет уведомление:
+
+```php
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+use Illuminate\Queue\Attributes\FailOnTimeout;
+use Illuminate\Queue\Attributes\MaxExceptions;
+use Illuminate\Queue\Attributes\Timeout;
+use Illuminate\Queue\Attributes\Tries;
+
+#[Tries(5)]
+#[Timeout(120)]
+#[MaxExceptions(3)]
+#[FailOnTimeout]
+class InvoicePaid extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    // ...
+}
+```
+
+Если вы хотите обеспечить конфиденциальность и целостность данных уведомления в очереди с помощью [шифрования](/docs/{{version}}/encryption), добавьте интерфейс `ShouldBeEncrypted` к классу уведомления:
+
+```php
+<?php
+
+namespace App\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeEncrypted;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+
+class InvoicePaid extends Notification implements ShouldQueue, ShouldBeEncrypted
+{
+    use Queueable;
+
+    // ...
+}
+```
+
+Помимо определения этих атрибутов непосредственно в классе уведомления, вы также можете определить методы `backoff` и `retryUntil`, чтобы указать стратегию задержки повторных попыток и время окончания повторных попыток для задания уведомления в очереди:
+
+```php
+use DateTime;
+
+/**
+ * Рассчитать количество секунд ожидания перед повторной попыткой отправки уведомления.
+ */
+public function backoff(): int
+{
+    return 3;
+}
+
+/**
+ * Определить время, в которое уведомление должно прекратить выполняться.
+ */
+public function retryUntil(): DateTime
+{
+    return now()->plus(minutes: 5);
+}
+```
+
+> [!NOTE]
+> Дополнительную информацию об этих атрибутах и методах заданий можно найти в документации по [заданиям в очереди](/docs/{{version}}/queues#max-job-attempts-and-timeout).
 
 <a name="queued-notification-middleware"></a>
 #### Посредник для уведомлений в очереди
@@ -310,6 +385,21 @@ class InvoicePaid extends Notification implements ShouldQueue
 public function shouldSend(object $notifiable, string $channel): bool
 {
     return $this->invoice->isPaid();
+}
+```
+
+<a name="after-sending-notifications"></a>
+#### После отправки уведомлений
+
+Если вы хотите выполнить код после отправки уведомления, вы можете определить метод `afterSending` в классе уведомления. Этот метод получит уведомляемую сущность, имя канала и ответ от канала:
+
+```php
+/**
+ * Обработать уведомление после его отправки.
+ */
+public function afterSending(object $notifiable, string $channel, mixed $response): void
+{
+    // ...
 }
 ```
 
@@ -580,22 +670,6 @@ public function toMail(object $notifiable): MailMessage
 }
 ```
 
-В отличие от прикрепления файлов к почтовым отправлениям, вы не можете прикреплять файл непосредственно с диска файлового хранилища с помощью `attachFromStorage`. Лучше использовать метод `attach` с абсолютным путем к файлу на диске. В качестве альтернативы вы можете вернуть [отправление](/docs/{{version}}/mail#generating-mailables) из метода `toMail`:
-
-```php
-use App\Mail\InvoicePaid as InvoicePaidMailable;
-
-/**
- * Получить содержимое почтового уведомления.
- */
-public function toMail(object $notifiable): Mailable
-{
-    return (new InvoicePaidMailable($this->invoice))
-        ->to($notifiable->email)
-        ->attachFromStorage('/path/to/file');
-}
-```
-
 При необходимости к сообщению можно прикрепить несколько файлов, используя метод `attachMany`:
 
 ```php
@@ -612,6 +686,24 @@ public function toMail(object $notifiable): MailMessage
                 'as' => 'Logo.svg',
                 'mime' => 'image/svg+xml',
             ],
+        ]);
+}
+```
+
+Вы можете использовать метод `attachFromStorageDisk`, чтобы прикрепить файл, существующий на конкретном [диске файловой системы](/docs/{{version}}/filesystem). Этот метод принимает имя диска и путь к файлу на этом диске:
+
+```php
+use App\Mail\InvoicePaid as InvoicePaidMailable;
+
+/**
+ * Получить содержимое почтового уведомления.
+ */
+public function toMail(object $notifiable): Mailable
+{
+    return (new InvoicePaidMailable($this->invoice))
+        ->to($notifiable->email)
+        ->attachFromStorageDisk('s3', '/path/to/file', 'invoice.pdf', [
+            'mime' => 'application/pdf',
         ]);
 }
 ```
@@ -1067,9 +1159,9 @@ Echo.private('App.Models.User.' + userId)
 ```
 
 <a name="using-react-or-vue"></a>
-#### Использование React или Vue
+#### Использование React, Vue или Svelte
 
-Laravel Echo включает хуки React и Vue, которые делают прослушивание уведомлений безболезненным. Чтобы начать, вызовите хук `useEchoNotification`, который используется для прослушивания уведомлений. Хук `useEchoNotification` автоматически покинет каналы, когда потребляющий компонент будет размонтирован:
+Laravel Echo включает хуки React, Vue и Svelte, которые делают прослушивание уведомлений безболезненным. Чтобы начать, вызовите хук `useEchoNotification`, который используется для прослушивания уведомлений. Хук `useEchoNotification` автоматически покинет каналы, когда потребляющий компонент будет размонтирован:
 
 ```js tab=React
 import { useEchoNotification } from "@laravel/echo-react";
@@ -1085,6 +1177,19 @@ useEchoNotification(
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEchoNotification } from "@laravel/echo-vue";
+useEchoNotification(
+    `App.Models.User.${userId}`,
+    (notification) => {
+        console.log(notification.type);
+    },
+);
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEchoNotification } from "@laravel/echo-svelte";
+
 useEchoNotification(
     `App.Models.User.${userId}`,
     (notification) => {
@@ -1111,6 +1216,20 @@ useEchoNotification(
 ```vue tab=Vue
 <script setup lang="ts">
 import { useEchoNotification } from "@laravel/echo-vue";
+useEchoNotification(
+    `App.Models.User.${userId}`,
+    (notification) => {
+        console.log(notification.type);
+    },
+    'App.Notifications.InvoicePaid',
+);
+</script>
+```
+
+```svelte tab=Svelte
+<script>
+import { useEchoNotification } from "@laravel/echo-svelte";
+
 useEchoNotification(
     `App.Models.User.${userId}`,
     (notification) => {
@@ -1474,7 +1593,7 @@ public function toSlack(object $notifiable): SlackMessage
 ```
 
 <a name="inspecting-slack-blocks"></a>
-#### Просмотр cтруктуры блоков Slack
+#### Просмотр структуры блоков Slack
 
 Если вы хотите быстро проверить структуру блоков, которые вы создали, вы можете использовать метод `dd` в экземпляре `SlackMessage`. Метод `dd` сгенерирует и выведет URL-адрес для [Block Kit Builder Slack](https://app.slack.com/block-kit-builder/), который отображает предварительный просмотр полезной нагрузки и уведомления в вашем браузере. Вы можете передать `true` методу `dd`, чтобы вывести сырую полезную нагрузку:
 
@@ -1689,7 +1808,7 @@ Notification::assertSentTo(
 );
 ```
 
-<a name="on-demand-notifications"></a>
+<a name="testing-on-demand-notifications"></a>
 #### Уведомления по требованию
 
 Если код, который вы тестируете, отправляет [уведомления по требованию](#on-demand-notifications), вы можете проверить, что уведомление по требованию было отправлено с помощью метода `assertSentOnDemand`:
@@ -1855,4 +1974,3 @@ class InvoicePaid extends Notification
     }
 }
 ```
-

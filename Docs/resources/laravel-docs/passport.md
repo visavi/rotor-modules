@@ -1,5 +1,5 @@
 ---
-git: 8035e585737b0e942bd6a92289e5bdb0cfa25823
+git: b2300431921ec68c8ba31bbef248bff1511e8eff
 ---
 
 # Laravel Passport
@@ -40,6 +40,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\Bridge\Client;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 
@@ -817,7 +818,7 @@ class User extends Authenticatable implements OAuthenticatable
     /**
      * Возвращает экземпляр пользователя для переданного имени.
      */
-    public function findForPassport(string $username): User
+    public function findForPassport(string $username, Client $client): User
     {
         return $this->where('username', $username)->first();
     }
@@ -930,6 +931,9 @@ Route::get('/orders', function (Request $request) {
     // Токен доступа действителен, клиент является владельцем ресурса и имеет обе области действия: «servers:read» и «servers:create»...
 })->middleware(EnsureClientIsResourceOwner::using('servers:read', 'servers:create'));
 ```
+
+> [!WARNING]
+> [Базовый OAuth2-сервер](https://oauth2.thephpleague.com/database-setup/#:~:text=Please%20note%20that,the%20bearer%20token.) устанавливает claim `sub` токена в идентификатор клиента для токенов client credentials. По умолчанию Passport использует UUID для клиентов, поэтому это не может пересечься с целочисленным первичным ключом пользователя. Однако если вы установили `Passport::$clientUuids` в `false`, токен client credentials может непреднамеренно разрешиться в пользователя, ID которого совпадает с ID клиента. В таких случаях использование этого посредника не может гарантировать, что входящий токен является токеном client credentials.
 
 <a name="retrieving-tokens"></a>
 ### Получение токенов
@@ -1168,6 +1172,37 @@ Route::get('/orders', function () {
 })->middleware(['auth:api', CheckTokenForAnyScope::using('orders:read', 'orders:create')]);
 ```
 
+<a name="scope-attributes"></a>
+#### Атрибуты областей
+
+Если ваше приложение использует [атрибуты посредников контроллеров](/docs/{{version}}/controllers#middleware-attributes), вы можете использовать атрибут `Laravel\Passport\Attributes\AuthorizeToken` как удобное сокращение для посредников областей Passport:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Laravel\Passport\Attributes\AuthorizeToken;
+
+#[AuthorizeToken('orders:read')]
+#[AuthorizeToken('orders:create', only: ['store'])]
+class OrderController
+{
+    #[AuthorizeToken(['orders:read', 'orders:create'], anyScope: true)]
+    public function index()
+    {
+        // Access token has either "orders:read" or "orders:create" scope...
+    }
+
+    public function store()
+    {
+        // Access token has both "orders:read" and "orders:create" scopes...
+    }
+}
+```
+
+По умолчанию атрибут `AuthorizeToken` требует наличия всех переданных областей. Если передать `anyScope: true`, запрос будет авторизован, когда токен содержит хотя бы одну из переданных областей.
+
 <a name="checking-scopes-on-a-token-instance"></a>
 #### Проверка областей на экземпляре токена
 
@@ -1222,7 +1257,7 @@ Passport::hasScope('orders:create');
 ```php
 use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->web(append: [
         CreateFreshApiToken::class,
     ]);

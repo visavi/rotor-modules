@@ -1,5 +1,5 @@
 ---
-git: 1615dd424f6a7823c54fcdad1522ed367b90ff4d
+git: 57ae1e7dbd4bda3bae24ce93e527f1807ae49a43
 ---
 
 # База данных · Использование Redis
@@ -7,7 +7,7 @@ git: 1615dd424f6a7823c54fcdad1522ed367b90ff4d
 <a name="introduction"></a>
 ## Введение
 
-[Redis](https://redis.io) – это расширенное хранилище ключ-значение с открытым исходным кодом. Его часто называют сервером структуры данных, поскольку ключи могут содержать [строки](https://redis.io/docs/data-types/strings/), [хеши](https://redis.io/docs/data-types/hashes/), [списки](https://redis.io/docs/data-types/lists/), [наборы](https://redis.io/docs/data-types/sets/) и [отсортированные наборы](https://redis.io/docs/data-types/sorted-sets/).
+[Redis](https://redis.io) – это расширенное хранилище ключ-значение с открытым исходным кодом. Его часто называют сервером структуры данных, поскольку ключи могут содержать [строки](https://redis.io/docs/latest/develop/data-types/strings/), [хеши](https://redis.io/docs/latest/develop/data-types/hashes/), [списки](https://redis.io/docs/latest/develop/data-types/lists/), [наборы](https://redis.io/docs/latest/develop/data-types/sets/) и [отсортированные наборы](https://redis.io/docs/latest/develop/data-types/sorted-sets/).
 
 Перед использованием Redis с Laravel мы рекомендуем вам установить и использовать расширение [PhpRedis](https://github.com/phpredis/phpredis) PHP через PECL. Расширение сложнее установить по сравнению с пакетами PHP пользовательского слоя, но оно может обеспечить лучшую производительность для приложений, интенсивно использующих Redis. Если вы используете [Laravel Sail](/docs/{{version}}/sail), то это расширение уже установлено в контейнере Docker вашего приложения.
 
@@ -200,6 +200,76 @@ Laravel также поддерживает клиентское разделе�
     'context' => [
         // 'auth' => ['username', 'secret'],
         // 'stream' => ['verify_peer' => false],
+    ],
+],
+```
+
+<a name="retry-and-backoff-configuration"></a>
+#### Конфигурация повторных попыток и задержки
+
+Опции `retry_interval`, `max_retries`, `backoff_algorithm`, `backoff_base` и `backoff_cap` можно использовать, чтобы настроить, как клиент PhpRedis должен пытаться повторно подключиться к серверу Redis. Поддерживаются следующие алгоритмы задержки: `default`, `decorrelated_jitter`, `equal_jitter`, `exponential`, `uniform` и `constant`:
+
+```php
+'default' => [
+    'url' => env('REDIS_URL'),
+    'host' => env('REDIS_HOST', '127.0.0.1'),
+    'username' => env('REDIS_USERNAME'),
+    'password' => env('REDIS_PASSWORD'),
+    'port' => env('REDIS_PORT', '6379'),
+    'database' => env('REDIS_DB', '0'),
+    'max_retries' => env('REDIS_MAX_RETRIES', 3),
+    'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+    'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+    'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+],
+```
+
+После временного сбоя соединения Laravel автоматически один раз повторяет безопасные команды чтения. Опция `command_retries` позволяет настроить количество повторных попыток для всех команд Redis:
+
+```php
+'default' => [
+    // ...
+    'command_retries' => env('REDIS_COMMAND_RETRIES', 0),
+],
+```
+
+Predis 3.4.0 и выше поддерживает встроенную конфигурацию повторных попыток и задержки через класс `Retry`. Вы можете настроить повторные попытки с помощью опции `max_retries`, а стратегию задержки - с помощью опции `retry`. Опция `retry` должна быть массивом с ключом, соответствующим одному из следующих классов стратегий: `NoBackoff`, `EqualBackoff` или `ExponentialBackoff`:
+
+```php
+use Predis\Retry\Strategy\ExponentialBackoff;
+
+'default' => [
+    'url' => env('REDIS_URL'),
+    // ...
+    'retry' => [
+        ExponentialBackoff::class => [
+            env('REDIS_BACKOFF_BASE', 100),
+            env('REDIS_BACKOFF_CAP', 1000),
+            true, // Включить jitter...
+        ],
+    ],
+    'max_retries' => env('REDIS_MAX_RETRIES', 3),
+],
+```
+
+При использовании Predis с кластером Redis вы можете определить конфигурацию повторных попыток в опции `parameters` конфигурации кластера:
+
+```php
+use Predis\Retry\Strategy\NoBackoff;
+
+'clusters' => [
+    'default' => [
+        // ...
+    ],
+],
+
+'options' => [
+    'cluster' => env('REDIS_CLUSTER', 'redis'),
+    'parameters' => [
+        'retry' => [
+            NoBackoff::class => [],
+        ],
+        'max_retries' => env('REDIS_MAX_RETRIES', 3),
     ],
 ],
 ```

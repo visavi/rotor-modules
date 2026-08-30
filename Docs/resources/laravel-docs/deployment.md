@@ -1,5 +1,5 @@
 ---
-git: 4223ed3fb9af969df6803cc81a21d5e803236ae0
+git: 5e0a0edf75ca5f9ec60a27cece58fa9997958335
 ---
 
 # Развертывание
@@ -16,7 +16,7 @@ git: 4223ed3fb9af969df6803cc81a21d5e803236ae0
 
 <!-- <div class="content-list" markdown="1"> -->
 
-- PHP >= 8.2
+- PHP >= 8.3
 - Расширение PHP Ctype
 - Расширение PHP cURL
 - Расширение PHP DOM
@@ -67,9 +67,12 @@ server {
     error_page 404 /index.php;
 
     location ~ ^/index\.php(/|$) {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_buffer_size 32k;
+        fastcgi_buffers 8 32k;
+        fastcgi_busy_buffers_size 64k;
         fastcgi_hide_header X-Powered-By;
     }
 
@@ -88,7 +91,7 @@ server {
 frankenphp php-server -r public/
 ```
 
-Чтобы воспользоваться более мощными функциями, поддерживаемыми FrankenPHP, такими как интеграция [Laravel Octane](/docs/{{version}}/octane), HTTP/3, современное сжатие или возможность упаковывать приложения Laravel как автономные двоичные файлы, обратитесь к [документации Laravel](https://frankenphp.dev/docs/laravel/) FrankenPHP.
+Чтобы воспользоваться более мощными функциями, поддерживаемыми FrankenPHP, такими как интеграция [Laravel Octane](/docs/{{version}}/octane), HTTP/3, современное сжатие или возможность упаковывать приложения Laravel как автономные двоичные файлы, обратитесь к [документации FrankenPHP по Laravel](https://frankenphp.dev/docs/laravel/).
 
 <a name="directory-permissions"></a>
 ### Разрешения для папок
@@ -156,6 +159,20 @@ php artisan view:cache
 ```
 
 Эта команда предварительно скомпилирует все ваши шаблоны Blade, чтобы они не компилировались во время запроса, повышая производительность каждого запроса, возвращающего шаблоном.
+
+<a name="reloading-services"></a>
+## Перезагрузка сервисов
+
+> [!NOTE]
+> При развертывании в [Laravel Cloud](https://cloud.laravel.com) нет необходимости использовать команду `reload`, так как плавная перезагрузка всех сервисов выполняется автоматически.
+
+После развертывания новой версии вашего приложения любые долго работающие сервисы, такие как обработчики очередей, Laravel Reverb или Laravel Octane, следует перезагрузить / перезапустить, чтобы они использовали новый код. Laravel предоставляет единую команду Artisan `reload`, которая завершит работу этих сервисов:
+
+```shell
+php artisan reload
+```
+
+Если вы не используете [Laravel Cloud](https://cloud.laravel.com), вам следует вручную настроить монитор процессов, который сможет обнаруживать завершение перезагружаемых процессов и автоматически запускать их заново.
 
 <a name="debug-mode"></a>
 ## Режим отладки

@@ -1,5 +1,5 @@
 ---
-git: 2dc867e406e5a429556de850435213ae44d9d6c4
+git: 2de07ea1f93f5f7954df4f85d59d4f0148b87853
 ---
 
 # Тестирование · Тесты HTTP
@@ -243,7 +243,7 @@ class ExampleTest extends TestCase
 }
 ```
 
-Вы также можете указать, какой гейт должен использоваться для аутентификации конкретного пользователя, передав имя гейта в качестве второго аргумента методу `actingAs`.  Гейт, предоставленный методу actingAs, также станет гейтом по умолчанию на протяжении всего теста::
+Можно также указать guard для аутентификации конкретного пользователя, передав его имя вторым аргументом методу `actingAs`. Переданный guard станет guard по умолчанию на протяжении всего теста:
 
 ```php
 $this->actingAs($user, 'web');
@@ -588,6 +588,25 @@ class ExampleTest extends TestCase
 $response->assertJsonPath('team.owner.name', fn (string $name) => strlen($name) >= 3);
 ```
 
+Если вам нужно проверить несколько JSON-путей сразу, вы можете использовать метод `assertJsonPaths`. Ожидаемое значение для каждого пути также может быть замыканием:
+
+```php
+$response->assertJsonPaths([
+    'team.owner.name' => 'Darian',
+    'team.owner.email' => fn (string $email) => str($email)->is('*@laravel.com'),
+    'team.members.0.name' => 'Sally',
+]);
+```
+
+Вы можете использовать метод `assertJsonMissingPaths`, чтобы проверить, что несколько JSON-путей отсутствуют в ответе:
+
+```php
+$response->assertJsonMissingPaths([
+    'team.owner.password',
+    'team.members.0.api_token',
+]);
+```
+
 <a name="fluent-json-testing"></a>
 ### Последовательное тестирование JSON
 
@@ -696,6 +715,22 @@ $response
                      ->etc()
              )
     );
+```
+
+Если вы хотите выполнить одинаковые утверждения для каждого элемента JSON-коллекции, вы можете использовать метод `each`:
+
+```php
+$response
+  ->assertJson(fn (AssertableJson $json) =>
+      $json->has(3)
+          ->each(fn (AssertableJson $json) =>
+              $json->whereType('id', 'integer')
+                  ->whereType('name', 'string')
+                  ->whereType('email', 'string')
+                  ->missing('password')
+                  ->etc()
+          )
+  );
 ```
 
 <a name="scoping-json-collection-assertions"></a>
@@ -930,6 +965,51 @@ $view = $this->component(Profile::class, ['name' => 'Taylor']);
 $view->assertSee('Taylor');
 ```
 
+<a name="caching-routes"></a>
+## Кеширование маршрутов
+
+Перед запуском теста Laravel загружает новый экземпляр приложения, включая сбор всех определённых маршрутов. Если в вашем приложении много файлов маршрутов, вы можете добавить трейт `Illuminate\Foundation\Testing\WithCachedRoutes` к вашим тестовым классам. В тестах, использующих этот трейт, маршруты строятся один раз и сохраняются в памяти, то есть процесс сбора маршрутов выполняется только один раз для всех тестов в наборе:
+
+```php tab=Pest
+<?php
+
+use App\Http\Controllers\UserController;
+use Illuminate\Foundation\Testing\WithCachedRoutes;
+
+pest()->use(WithCachedRoutes::class);
+
+test('basic example', function () {
+    $this->get(action([UserController::class, 'index']));
+
+    // ...
+});
+```
+
+```php tab=PHPUnit
+<?php
+
+namespace Tests\Feature;
+
+use App\Http\Controllers\UserController;
+use Illuminate\Foundation\Testing\WithCachedRoutes;
+use Tests\TestCase;
+
+class BasicTest extends TestCase
+{
+    use WithCachedRoutes;
+
+    /**
+     * A basic functional test example.
+     */
+    public function test_basic_example(): void
+    {
+        $response = $this->get(action([UserController::class, 'index']));
+
+        // ...
+    }
+}
+```
+
 <a name="available-assertions"></a>
 ## Доступные утверждения
 
@@ -954,10 +1034,12 @@ $view->assertSee('Taylor');
 - [assertDownload](#assert-download)
 - [assertExactJson](#assert-exact-json)
 - [assertExactJsonStructure](#assert-exact-json-structure)
+- [assertFailedDependency](#assert-failed-dependency)
 - [assertForbidden](#assert-forbidden)
 - [assertFound](#assert-found)
 - [assertGone](#assert-gone)
 - [assertHeader](#assert-header)
+- [assertHeaderContains](#assert-header-contains)
 - [assertHeaderMissing](#assert-header-missing)
 - [assertInternalServerError](#assert-internal-server-error)
 - [assertJson](#assert-json)
@@ -969,7 +1051,9 @@ $view->assertSee('Taylor');
 - [assertJsonMissingExact](#assert-json-missing-exact)
 - [assertJsonMissingValidationErrors](#assert-json-missing-validation-errors)
 - [assertJsonPath](#assert-json-path)
+- [assertJsonPaths](#assert-json-paths)
 - [assertJsonMissingPath](#assert-json-missing-path)
+- [assertJsonMissingPaths](#assert-json-missing-paths)
 - [assertJsonStructure](#assert-json-structure)
 - [assertJsonValidationErrors](#assert-json-validation-errors)
 - [assertJsonValidationErrorFor](#assert-json-validation-error-for)
@@ -1006,6 +1090,7 @@ $view->assertSee('Taylor');
 - [assertSessionHasNoErrors](#assert-session-has-no-errors)
 - [assertSessionDoesntHaveErrors](#assert-session-doesnt-have-errors)
 - [assertSessionMissing](#assert-session-missing)
+- [assertSessionMissingInput](#assert-session-missing-input)
 - [assertStatus](#assert-status)
 - [assertSuccessful](#assert-successful)
 - [assertTooManyRequests](#assert-too-many-requests)
@@ -1042,7 +1127,7 @@ $response->assertBadRequest();
 <a name="assert-client-error"></a>
 #### assertClientError
 
-Утверждает, что ответ имеет код состояния HTTP соответствующий ошибке клиента - `>= 400 , < 500` :
+Проверяет, что HTTP-код состояния ответа соответствует ошибке клиента: `>= 400, < 500`:
 
 ```php
 $response->assertClientError();
@@ -1155,6 +1240,15 @@ $response->assertExactJsonStructure(array $data);
 
 Этот метод является более строгим вариантом [assertJsonStructure](#assert-json-structure). В отличие от `assertJsonStructure`, этот метод завершится ошибкой, если ответ содержит какие-либо ключи, которые явно не включены в ожидаемую структуру JSON.
 
+<a name="assert-failed-dependency"></a>
+#### assertFailedDependency
+
+Утверждает, что ответ имеет HTTP-код состояния `424` — failed dependency:
+
+```php
+$response->assertFailedDependency();
+```
+
 <a name="assert-forbidden"></a>
 #### assertForbidden
 
@@ -1189,6 +1283,15 @@ $response->assertGone();
 
 ```php
 $response->assertHeader($headerName, $value = null);
+```
+
+<a name="assert-header-contains"></a>
+#### assertHeaderContains
+
+Утверждает, что указанный заголовок содержит заданную подстроку:
+
+```php
+$response->assertHeaderContains($headerName, $value);
 ```
 
 <a name="assert-header-missing"></a>
@@ -1321,6 +1424,24 @@ $response->assertJsonPath($path, $expectedValue);
 $response->assertJsonPath('user.name', 'Steve Schoger');
 ```
 
+<a name="assert-json-paths"></a>
+#### assertJsonPaths
+
+Утверждает, что ответ содержит указанные данные по заданным путям:
+
+```php
+$response->assertJsonPaths(array $paths);
+```
+
+Например, вы можете одновременно проверить несколько значений в ответе:
+
+```php
+$response->assertJsonPaths([
+    'user.name' => 'Steve Schoger',
+    'user.email' => fn (string $email) => str($email)->endsWith('@laravel.com'),
+]);
+```
+
 <a name="assert-json-missing-path"></a>
 #### assertJsonMissingPath
 
@@ -1344,6 +1465,24 @@ $response->assertJsonMissingPath($path);
 
 ```php
 $response->assertJsonMissingPath('user.email');
+```
+
+<a name="assert-json-missing-paths"></a>
+#### assertJsonMissingPaths
+
+Утверждает, что ответ не содержит указанные пути:
+
+```php
+$response->assertJsonMissingPaths($paths);
+```
+
+Например, вы можете утверждать, что в ответе отсутствует несколько путей:
+
+```php
+$response->assertJsonMissingPaths([
+    'user.email',
+    'user.password',
+]);
 ```
 
 <a name="assert-json-structure"></a>
@@ -1479,9 +1618,7 @@ $response->assertNoContent($status = 204);
 
 Утверждает, что ответ был передан потоком:
 
-```php
-$response->assertStreamed();
-```
+    $response->assertStreamed();
 
 <a name="assert-streamed-content"></a>
 #### assertStreamedContent
@@ -1587,7 +1724,7 @@ $response->assertRedirectToRoute($name, $parameters = []);
 <a name="assert-redirect-to-signed-route"></a>
 #### assertRedirectToSignedRoute
 
-Утвердите, что ответ представляет собой перенаправление на указанный [подписанный маршрут](/docs/{{version}}/urls#signed-urls)::
+Проверяет, что ответ перенаправляет на указанный [подписанный маршрут](/docs/{{version}}/urls#signed-urls):
 
 ```php
 $response->assertRedirectToSignedRoute($name = null, $parameters = []);
@@ -1641,7 +1778,7 @@ $response->assertSeeTextInOrder(array $values, $escaped = true);
 <a name="assert-server-error"></a>
 #### assertServerError
 
-Утверждает, что ответ имеет код состояния HTTP соответствующий ошибке сервера - `>= 500 , < 600` :
+Проверяет, что HTTP-код состояния ответа соответствует ошибке сервера: `>= 500, < 600`:
 
 ```php
 $response->assertServerError();
@@ -1775,6 +1912,15 @@ $response->assertSessionDoesntHaveErrors($keys = [], $format = null, $errorBag =
 
 ```php
 $response->assertSessionMissing($key);
+```
+
+<a name="assert-session-missing-input"></a>
+#### assertSessionMissingInput
+
+Утверждает, что в сессии отсутствует указанный ключ входных данных в массиве сохраненных во флеше входных данных:
+
+```php
+$response->assertSessionMissingInput($key);
 ```
 
 <a name="assert-status"></a>

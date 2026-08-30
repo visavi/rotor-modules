@@ -1,5 +1,5 @@
 ---
-git: 96617d0be0510d33cfa46db034b73a2273b22a97
+git: 57ae1e7dbd4bda3bae24ce93e527f1807ae49a43
 ---
 
 # Пакет Laravel Socialite
@@ -53,7 +53,7 @@ composer require laravel/socialite
 Для аутентификации пользователей с помощью провайдера OAuth вам понадобятся два маршрута: один для перенаправления пользователя к провайдеру OAuth, а другой для получения обратного вызова от провайдера после аутентификации. Пример ниже демонстрирует реализацию обоих маршрутов:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 Route::get('/auth/redirect', function () {
     return Socialite::driver('github')->redirect();
@@ -76,7 +76,7 @@ Route::get('/auth/callback', function () {
 ```php
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 Route::get('/auth/callback', function () {
     $githubUser = Socialite::driver('github')->user();
@@ -105,7 +105,7 @@ Route::get('/auth/callback', function () {
 Перед перенаправлением пользователя вы можете использовать метод `scopes`, чтобы указать "scopes" (права/области) которые должны быть включены в запрос аутентификации.  Этот метод объединит все ранее указанные права с теми, которые указали вы:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 return Socialite::driver('github')
     ->scopes(['read:user', 'public_repo'])
@@ -157,7 +157,7 @@ $user = Socialite::driver('slack')->asBotUser()->user();
 Некоторые провайдеры OAuth поддерживают другие необязательные параметры в запросе перенаправления. Чтобы включить в запрос любые необязательные параметры, вызовите метод `with` с ассоциативным массивом:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 return Socialite::driver('google')
     ->with(['hd' => 'example.com'])
@@ -175,7 +175,7 @@ return Socialite::driver('google')
 Различные свойства и методы этого объекта могут быть доступны в зависимости от версии провайдера OAuth, с которым вы выполняете аутентификацию, OAuth 1.0 или OAuth 2.0:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 Route::get('/auth/callback', function () {
     $user = Socialite::driver('github')->user();
@@ -204,20 +204,90 @@ Route::get('/auth/callback', function () {
 Если у вас уже есть действительный токен доступа пользователя, то вы можете получить его данные с помощью метода `userFromToken` пакета Socialite:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 $user = Socialite::driver('github')->userFromToken($token);
 ```
 
-Если вы используете ограниченный вход в Facebook через приложение iOS, Facebook вернет токен OIDC вместо токена доступа. Как и токен доступа, токен OIDC может быть предоставлен методу `userFromToken` для получения сведений о пользователе.
+Если вы используете Facebook Limited Login в iOS-приложении, Facebook вернет OIDC-токен вместо токена доступа. Чтобы получить сведения о пользователе по OIDC-токену, передайте методу `userFromToken` значение nonce, использованное при запуске входа:
+
+```php
+$user = Socialite::driver('facebook')->userFromToken($token, $nonce);
+```
 
 <a name="stateless-authentication"></a>
 #### Аутентификация без сохранения состояния
 
-Метод `stateless` используется для отключения проверки состояния сессии. Это полезно при добавлении социальной аутентификации в API без сохранения состояния, не использующему сеансы на основе файлов cookie::
+Метод `stateless` отключает проверку состояния сессии. Это полезно при добавлении социальной аутентификации в API без состояния, который не использует сессии на основе cookie:
 
 ```php
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
 
 return Socialite::driver('google')->stateless()->user();
 ```
+
+<a name="testing"></a>
+## Тестирование
+
+Laravel Socialite предоставляет удобный способ тестировать OAuth-флоу аутентификации без выполнения реальных запросов к OAuth-провайдерам. Метод `fake` позволяет имитировать поведение OAuth-провайдера и определить данные пользователя, которые должны быть возвращены.
+
+<a name="faking-the-redirect"></a>
+#### Имитация перенаправления
+
+Чтобы проверить, что ваше приложение корректно перенаправляет пользователей к OAuth-провайдеру, вы можете вызвать метод `fake` перед выполнением запроса к маршруту перенаправления. В этом случае Socialite вернет перенаправление на фиктивный URL авторизации вместо перенаправления к реальному OAuth-провайдеру:
+
+```php
+use Laravel\Socialite\Socialite;
+
+test('user is redirected to github', function () {
+    Socialite::fake('github');
+
+    $response = $this->get('/auth/github/redirect');
+
+    $response->assertRedirect();
+});
+```
+
+<a name="faking-the-callback"></a>
+#### Имитация обратного вызова
+
+Чтобы протестировать маршрут обратного вызова вашего приложения, вы можете вызвать метод `fake` и передать экземпляр `User`, который должен быть возвращен, когда приложение запросит сведения о пользователе у провайдера. Экземпляр `User` можно создать с помощью метода `fake`:
+
+```php
+use Laravel\Socialite\Socialite;
+use Laravel\Socialite\Two\User;
+
+test('user can login with github', function () {
+    Socialite::fake('github', User::fake([
+        'id' => 'github-123',
+        'name' => 'Jason Beggs',
+        'email' => 'jason@example.com',
+    ]));
+
+    $response = $this->get('/auth/github/callback');
+
+    $response->assertRedirect('/dashboard');
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Jason Beggs',
+        'email' => 'jason@example.com',
+        'github_id' => 'github-123',
+    ]);
+});
+```
+
+По умолчанию экземпляр `User` будет содержать фиктивные значения OAuth-токенов. При необходимости вы можете переопределить эти значения, передав дополнительные атрибуты методу `fake`:
+
+```php
+$fakeUser = User::fake([
+    'id' => 'github-123',
+    'name' => 'Jason Beggs',
+    'email' => 'jason@example.com',
+    'token' => 'fake-token',
+    'refreshToken' => 'fake-refresh-token',
+    'expiresIn' => 3600,
+    'approvedScopes' => ['read', 'write'],
+]);
+```
+
+Пользователей OAuth 1 можно имитировать с помощью класса `Laravel\Socialite\One\User`.

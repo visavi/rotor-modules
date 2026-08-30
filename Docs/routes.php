@@ -17,7 +17,7 @@ Route::middleware('web')->group(function () {
     Route::controller(DocsController::class)
         ->prefix('docs')
         ->group(function () {
-            Route::get('/search', 'search');
+            Route::get('/find', 'search');
             Route::get('/{page?}', 'show');
         });
 });

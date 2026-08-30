@@ -1,5 +1,5 @@
 ---
-git: 097ebc343c5ba6bc5daaaebc2ab3d79cebe8c8dc
+git: a656f28557de9c3b98926eebd87bc1e578b0436e
 ---
 
 # Prompts (Подсказки)
@@ -169,6 +169,74 @@ $story = textarea(
 );
 ```
 
+<a name="number"></a>
+### Число
+
+Функция `number` задает пользователю вопрос, принимает числовой ввод и возвращает его. Пользователь может изменять значение с помощью клавиш со стрелками вверх и вниз:
+
+```php
+use function Laravel\Prompts\number;
+
+$number = number('Сколько копий вы хотите?');
+```
+
+Вы также можете указать placeholder, значение по умолчанию и информационную подсказку:
+
+```php
+$copies = number(
+    label: 'Сколько копий вы хотите?',
+    placeholder: '5',
+    default: 1,
+    hint: 'Это определит, сколько копий будет создано.'
+);
+```
+
+<a name="number-required"></a>
+#### Обязательные значения
+
+Если значение обязательно, передайте аргумент `required`:
+
+```php
+$copies = number(
+    label: 'Сколько копий вы хотите?',
+    required: true
+);
+```
+
+Если вы хотите настроить сообщение об ошибке валидации, вы также можете передать строку:
+
+```php
+$copies = number(
+    label: 'Сколько копий вы хотите?',
+    required: 'Количество копий обязательно.'
+);
+```
+
+<a name="number-validation"></a>
+#### Дополнительная валидация
+
+Для дополнительной логики валидации передайте замыкание в аргумент `validate`:
+
+```php
+$copies = number(
+    label: 'Сколько копий вы хотите?',
+    validate: fn (?int $value) => match (true) {
+        $value < 1 => 'Нужна хотя бы одна копия.',
+        $value > 100 => 'Нельзя создать больше 100 копий.',
+        default => null
+    }
+);
+```
+
+Также можно использовать [валидатор](/docs/{{version}}/validation) Laravel:
+
+```php
+$copies = number(
+    label: 'Сколько копий вы хотите?',
+    validate: ['copies' => 'required|integer|min:1|max:100']
+);
+```
+
 <a name="password"></a>
 ### Пароль
 
@@ -330,6 +398,38 @@ $role = select(
 );
 ```
 
+<a name="select-info"></a>
+#### Дополнительная информация
+
+Аргумент `info` можно использовать для отображения дополнительной информации о текущем выделенном варианте. Если передано замыкание, оно получит значение текущего выделенного варианта и должно вернуть строку или `null`:
+
+```php
+$role = select(
+    label: 'Какая роль должна быть у пользователя?',
+    options: [
+        'member' => 'Участник',
+        'contributor' => 'Автор',
+        'owner' => 'Владелец',
+    ],
+    info: fn (string $value) => match ($value) {
+        'member' => 'Может просматривать и комментировать.',
+        'contributor' => 'Может просматривать, комментировать и редактировать.',
+        'owner' => 'Полный доступ ко всем ресурсам.',
+        default => null,
+    }
+);
+```
+
+Вы также можете передать в аргумент `info` статическую строку, если информация не зависит от выделенного варианта:
+
+```php
+$role = select(
+    label: 'Какая роль должна быть у пользователя?',
+    options: ['Member', 'Contributor', 'Owner'],
+    info: 'Роль может быть изменена в любой момент.'
+);
+```
+
 <a name="select-validation"></a>
 #### Дополнительная валидация
 
@@ -401,6 +501,30 @@ $categories = multiselect(
     label: 'Какие категории следует присвоить?',
     options: Category::pluck('name', 'id'),
     scroll: 10
+);
+```
+
+<a name="multiselect-info"></a>
+#### Дополнительная информация
+
+Аргумент `info` можно использовать для отображения дополнительной информации о текущем выделенном варианте. Если передано замыкание, оно получит значение текущего выделенного варианта и должно вернуть строку или `null`:
+
+```php
+$permissions = multiselect(
+    label: 'Какие разрешения следует назначить?',
+    options: [
+        'read' => 'Читать',
+        'create' => 'Создавать',
+        'update' => 'Обновлять',
+        'delete' => 'Удалять',
+    ],
+    info: fn (string $value) => match ($value) {
+        'read' => 'Просмотр ресурсов и их свойств.',
+        'create' => 'Создание новых ресурсов.',
+        'update' => 'Изменение существующих ресурсов.',
+        'delete' => 'Безвозвратное удаление ресурсов.',
+        default => null,
+    }
 );
 ```
 
@@ -482,6 +606,23 @@ $name = suggest(
 );
 ```
 
+<a name="suggest-info"></a>
+#### Дополнительная информация
+
+Аргумент `info` можно использовать для отображения дополнительной информации о текущем выделенном варианте. Если передано замыкание, оно получит значение текущего выделенного варианта и должно вернуть строку или `null`:
+
+```php
+$name = suggest(
+    label: 'Как вас зовут?',
+    options: ['Taylor', 'Dayle'],
+    info: fn (string $value) => match ($value) {
+        'Taylor' => 'Администратор',
+        'Dayle' => 'Автор',
+        default => null,
+    }
+);
+```
+
 <a name="suggest-required"></a>
 #### Обязательные значения
 
@@ -537,7 +678,7 @@ $name = suggest(
 <a name="search"></a>
 ### Поиск
 
-Если у вас много вариантов для выбора пользователем, функция `search` позволяет пользователю вводить запрос поиска для фильтрации результатов, прежде чем использовать клавиши со стрелками для выбора параметра::
+Если пользователю доступно много вариантов, функция `search` позволяет отфильтровать их поисковым запросом, а затем выбрать нужный вариант клавишами со стрелками:
 
 ```php
 use function Laravel\Prompts\search;
@@ -591,6 +732,21 @@ $id = search(
 );
 ```
 
+<a name="search-info"></a>
+#### Дополнительная информация
+
+Аргумент `info` можно использовать для отображения дополнительной информации о текущем выделенном варианте. Если передано замыкание, оно получит значение текущего выделенного варианта и должно вернуть строку или `null`:
+
+```php
+$id = search(
+    label: 'Найдите пользователя, который должен получать почту',
+    options: fn (string $value) => strlen($value) > 0
+        ? User::whereLike('name', "%{$value}%")->pluck('name', 'id')->all()
+        : [],
+    info: fn (int $userId) => User::find($userId)?->email
+);
+```
+
 <a name="search-validation"></a>
 #### Дополнительная валидация
 
@@ -623,7 +779,7 @@ $id = search(
 use function Laravel\Prompts\multisearch;
 
 $ids = multisearch(
-    'Поиск пользователей, которые должны получать почту',
+    'Поиск пользователей, которым нужно отправить письмо',
     fn (string $value) => strlen($value) > 0
         ? User::whereLike('name', "%{$value}%")->pluck('name', 'id')->all()
         : []
@@ -638,7 +794,7 @@ $ids = multisearch(
 $names = collect(['Taylor', 'Abigail']);
 
 $selected = multisearch(
-    label: 'Поиск пользователей, которые должны получать почту',
+    label: 'Поиск пользователей, которым нужно отправить письмо',
     options: fn (string $value) => $names
         ->filter(fn ($name) => Str::contains($name, $value, ignoreCase: true))
         ->values()
@@ -650,7 +806,7 @@ $selected = multisearch(
 
 ```php
 $ids = multisearch(
-    label: 'Поиск пользователей, которые должны получать почту',
+    label: 'Поиск пользователей, которым нужно отправить письмо',
     placeholder: 'Например: Тейлор Отвелл',
     options: fn (string $value) => strlen($value) > 0
         ? User::whereLike('name', "%{$value}%")->pluck('name', 'id')->all()
@@ -663,11 +819,26 @@ $ids = multisearch(
 
 ```php
 $ids = multisearch(
-    label: 'Поиск пользователей, которые должны получать почту',
+    label: 'Поиск пользователей, которым нужно отправить письмо',
     options: fn (string $value) => strlen($value) > 0
         ? User::whereLike('name', "%{$value}%")->pluck('name', 'id')->all()
         : [],
     scroll: 10
+);
+```
+
+<a name="multisearch-info"></a>
+#### Дополнительная информация
+
+Аргумент `info` можно использовать для отображения дополнительной информации о текущем выделенном варианте. Если передано замыкание, оно получит значение текущего выделенного варианта и должно вернуть строку или `null`:
+
+```php
+$ids = multisearch(
+    label: 'Поиск пользователей, которые должны получать почту',
+    options: fn (string $value) => strlen($value) > 0
+        ? User::whereLike('name', "%{$value}%")->pluck('name', 'id')->all()
+        : [],
+    info: fn (int $userId) => User::find($userId)?->email
 );
 ```
 
@@ -731,6 +902,89 @@ use function Laravel\Prompts\pause;
 
 pause('Нажмите ENTER, чтобы продолжить.');
 ```
+
+<a name="autocomplete"></a>
+### Автодополнение
+
+Функция `autocomplete` позволяет предложить inline-автодополнение для возможных вариантов. По мере ввода подходящие подсказки отображаются как ghost text, который можно принять клавишей `Tab` или стрелкой вправо:
+
+```php
+use function Laravel\Prompts\autocomplete;
+
+$name = autocomplete(
+    label: 'Как вас зовут?',
+    options: ['Taylor', 'Dayle', 'Jess', 'Nuno', 'Tim']
+);
+```
+
+Вы также можете передать замыкание для динамического построения вариантов на основе ввода пользователя:
+
+```php
+$file = autocomplete(
+    label: 'Какой файл?',
+    options: fn (string $value) => collect($files)
+        ->filter(fn ($file) => str_starts_with(strtolower($file), strtolower($value)))
+        ->values()
+        ->all(),
+);
+```
+
+<a name="autocomplete-closure"></a>
+#### Динамические варианты
+
+Вы также можете передать замыкание для динамического построения вариантов на основе ввода пользователя. Замыкание будет вызываться каждый раз, когда пользователь вводит символ, и должно вернуть массив вариантов для автодополнения:
+
+```php
+$file = autocomplete(
+    label: 'Какой файл?',
+    options: fn (string $value) => collect($files)
+        ->filter(fn ($file) => str_starts_with(strtolower($file), strtolower($value)))
+        ->values()
+        ->all(),
+);
+```
+
+<a name="autocomplete-required"></a>
+#### Обязательные значения
+
+Если значение обязательно, передайте аргумент `required`:
+
+```php
+$name = autocomplete(
+    label: 'Как вас зовут?',
+    options: ['Taylor', 'Dayle', 'Jess', 'Nuno', 'Tim'],
+    required: true
+);
+```
+
+Если вы хотите настроить сообщение об ошибке валидации, вы также можете передать строку:
+
+```php
+$name = autocomplete(
+    label: 'Как вас зовут?',
+    options: ['Taylor', 'Dayle', 'Jess', 'Nuno', 'Tim'],
+    required: 'Ваше имя обязательно.'
+);
+```
+
+<a name="autocomplete-validation"></a>
+#### Дополнительная валидация
+
+Наконец, если вам нужно выполнить дополнительную логику валидации, вы можете передать замыкание в аргумент `validate`:
+
+```php
+$name = autocomplete(
+    label: 'Как вас зовут?',
+    options: ['Taylor', 'Dayle', 'Jess', 'Nuno', 'Tim'],
+    validate: fn (string $value) => match (true) {
+        strlen($value) < 3 => 'Имя должно состоять минимум из 3 символов.',
+        strlen($value) > 255 => 'Имя не должно превышать 255 символов.',
+        default => null
+    }
+);
+```
+
+Замыкание получит введенное значение и может вернуть сообщение об ошибке или `null`, если валидация пройдет успешно.
 
 <a name="transforming-input-before-validation"></a>
 ## Преобразование входных данных перед проверкой
@@ -816,6 +1070,100 @@ use function Laravel\Prompts\info;
 info('Пакет успешно установлен.');
 ```
 
+<a name="callouts"></a>
+## Callouts
+
+Функция `callout` отображает сообщение в рамке с label и content. Callouts полезны для важной информации, которая должна выделяться: deployment summaries, error details или status updates:
+
+```php
+use function Laravel\Prompts\callout;
+
+callout(
+    label: 'Environment Configured',
+    content: 'Your application is running in production mode with 4 workers.',
+);
+```
+
+Можно передать `warning` или `error` в аргумент `type`, чтобы изменить visual style callout:
+
+```php
+callout(
+    label: 'Deprecation Notice',
+    content: 'The `--prefer-stable` flag will be removed in v4.0. Use `--stability=stable` instead.',
+    type: 'warning',
+);
+
+callout(
+    label: 'Database Connection Failed',
+    content: 'Could not connect to MySQL on 127.0.0.1:3306.',
+    type: 'error',
+);
+```
+
+Аргумент `info` добавляет footer line к callout, что удобно для metadata вроде IDs или timestamps:
+
+```php
+callout(
+    label: 'Deployment Summary',
+    content: 'Your application was deployed to production.',
+    info: 'deploy-id: d4f8a2c',
+);
+```
+
+<a name="callout-rich-content"></a>
+#### Rich content
+
+Вместо строки можно передать массив строк и elements, чтобы построить rich, structured callouts. Класс `Element` предоставляет factory methods для headings, bulleted lists, numbered lists, key-value lists и links:
+
+```php
+use Laravel\Prompts\Elements\Element;
+
+use function Laravel\Prompts\callout;
+
+callout('Deployment Summary', [
+    'Your application was deployed to production at 2024-03-15 14:32 UTC.',
+    Element::heading('What Changed'),
+    Element::bulletedList([
+        'Migrated 3 pending database migrations',
+        'Cleared and rebuilt route cache',
+        'Restarted 4 queue workers',
+    ]),
+    Element::heading('Next Steps'),
+    Element::numberedList([
+        'Verify the health check endpoint at /up',
+        'Monitor error rates for the next 15 minutes',
+        'Confirm background jobs are processing',
+    ]),
+]);
+```
+
+Также можно использовать `Element::keyValueList` для отображения labeled data:
+
+```php
+callout('Database Connection Failed', [
+    'Could not connect to the database server.',
+    Element::keyValueList([
+        'Host' => '127.0.0.1',
+        'Port' => '3306',
+        'Database' => 'forge',
+        'Status' => 'Connection refused',
+    ]),
+], type: 'error');
+```
+
+Метод `Element::link` создает кликабельную гиперссылку в терминалах, которые поддерживают [OSC 8](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda). Можно передать только URL или URL с пользовательской меткой:
+
+```php
+callout('Server Health Check', [
+    'Multiple services are reporting degraded performance.',
+    Element::heading('Affected Services'),
+    'Look here: '.Element::link('https://example.com/health', 'Health Dashboard'),
+    Element::link('https://example.com/health'),
+]);
+```
+
+Если label не передан, сам URL будет отображен как link text.
+
 <a name="tables"></a>
 ## Таблицы
 
@@ -897,6 +1245,193 @@ foreach ($users as $user) {
 }
 
 $progress->finish();
+```
+
+<a name="task"></a>
+## Задача
+
+Функция `task` отображает задачу с подписью, spinner и прокручиваемой областью живого вывода во время выполнения callback. Она хорошо подходит для долгих процессов, например установки зависимостей или deployment-скриптов:
+
+```php
+use function Laravel\Prompts\task;
+
+task(
+    label: 'Установка зависимостей',
+    callback: function ($logger) {
+        // Долгий процесс...
+    }
+);
+```
+
+Callback получает экземпляр `Logger`, который можно использовать для вывода строк, статусных сообщений и потокового текста в области вывода задачи.
+
+> [!WARNING]
+> Функция `task` требует расширение PHP [PCNTL](https://www.php.net/manual/ru/book.pcntl.php) для анимации spinner. Если расширение недоступно, будет показана статическая версия задачи.
+
+<a name="task-logging"></a>
+#### Логирование строк
+
+Метод `line` записывает одну строку лога в прокручиваемую область вывода задачи:
+
+```php
+task(
+    label: 'Установка зависимостей',
+    callback: function ($logger) {
+        $logger->line('Разрешение пакетов...');
+        // ...
+        $logger->line('Загрузка laravel/framework');
+    }
+);
+```
+
+<a name="task-status-messages"></a>
+#### Статусные сообщения
+
+Методы `success`, `warning` и `error` отображают выделенные статусные сообщения над областью лога:
+
+```php
+task(
+    label: 'Развертывание приложения',
+    callback: function ($logger) {
+        $logger->line('Запуск миграций...');
+        $logger->warning('Нет новых миграций.');
+        $logger->success('Кеш очищен!');
+    }
+);
+```
+
+<a name="task-label"></a>
+#### Обновление подписи
+
+Метод `label` позволяет обновить подпись задачи во время ее выполнения:
+
+```php
+task(
+    label: 'Запуск развертывания...',
+    callback: function ($logger) {
+        $logger->label('Получение последних изменений...');
+        // ...
+        $logger->label('Запуск миграций...');
+        // ...
+        $logger->label('Очистка кеша...');
+        // ...
+    }
+);
+```
+
+<a name="task-sub-label"></a>
+#### Отображение sub-label
+
+Метод `subLabel` отображает приглушенную строку под основной label задачи. Это удобно для ephemeral status, например текущего выполняемого шага. Передайте пустую строку, чтобы очистить sub-label:
+
+```php
+task(
+    label: 'Deploying',
+    callback: function ($logger) {
+        $logger->subLabel('Building assets...');
+        // ...
+        $logger->subLabel('Running migrations...');
+        // ...
+        $logger->subLabel('');
+    }
+);
+```
+
+Также можно передать начальный sub-label через аргумент `subLabel`:
+
+```php
+task(
+    label: 'Deploying',
+    callback: function ($logger) {
+        // ...
+    },
+    subLabel: 'Preparing...'
+);
+```
+
+<a name="task-streaming"></a>
+#### Потоковый текст
+
+Для процессов, которые постепенно производят вывод, например AI-ответов, метод `partial` позволяет выводить текст частями. После завершения потока вызовите `commitPartial`:
+
+```php
+task(
+    label: 'Генерация ответа...',
+    callback: function ($logger) {
+        foreach ($words as $word) {
+            $logger->partial($word . ' ');
+        }
+
+        $logger->commitPartial();
+    }
+);
+```
+
+<a name="task-limit"></a>
+#### Настройка ограничения вывода
+
+По умолчанию задача отображает до 10 строк прокручиваемого вывода. Вы можете настроить это через аргумент `limit`:
+
+```php
+task(
+    label: 'Установка зависимостей',
+    callback: function ($logger) {
+        // ...
+    },
+    limit: 20
+);
+```
+
+<a name="task-keep-summary"></a>
+#### Сохранение summary
+
+По умолчанию output задачи стирается после завершения callback. Если вы хотите оставить status messages на экране после завершения задачи, передайте аргумент `keepSummary`:
+
+```php
+task(
+    label: 'Deploying',
+    callback: function ($logger) {
+        $logger->success('Assets built');
+        // ...
+        $logger->success('Migrations complete');
+    },
+    keepSummary: true,
+);
+```
+
+<a name="stream"></a>
+## Поток
+
+Функция `stream` отображает текст, который постепенно появляется в терминале. Это удобно для AI-контента или любого вывода, поступающего частями:
+
+```php
+use function Laravel\Prompts\stream;
+
+$stream = stream();
+
+foreach ($words as $word) {
+    $stream->append($word . ' ');
+    usleep(25_000);
+}
+
+$stream->close();
+```
+
+<a name="terminal-title"></a>
+## Заголовок терминала
+
+Функция `title` обновляет заголовок окна или вкладки терминала пользователя:
+
+```php
+use function Laravel\Prompts\title;
+
+title('Установка зависимостей');
+```
+
+Чтобы сбросить заголовок терминала, передайте пустую строку:
+
+```php
+title('');
 ```
 
 <a name="clear"></a>

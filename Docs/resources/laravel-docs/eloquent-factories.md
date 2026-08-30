@@ -1,5 +1,5 @@
 ---
-git: 3c0bfd38b414133db9065f2415cf264d79c13f7f
+git: 49106591ee64e65cd6abcf47592924e684a84d0d
 ---
 
 # Eloquent: Фабрики (Factory)
@@ -82,7 +82,22 @@ php artisan make:factory PostFactory
 
 После того как вы определили свои фабрики, вы можете использовать статический метод `factory` предоставляемый вашим моделям с помощью трейта `Illuminate\Database\Eloquent\Factories\HasFactory`, чтобы создать экземпляр фабрики для этой модели.
 
-Метод `factory` трейта `HasFactory` будет использовать соглашения для определения подходящей фабрики для модели. В частности, метод будет искать фабрику в пространстве имен `Database\Factories`, имя класса которой соответствует имени модели и имеет суффикс `Factory`. Если эти соглашения не применимы к вашему конкретному приложению или фабрике, вы можете перезаписать метод `newFactory` вашей модели, чтобы напрямую возвращать экземпляр соответствующей фабрики модели:
+Метод `factory` трейта `HasFactory` будет использовать соглашения для определения подходящей фабрики для модели. В частности, метод будет искать фабрику в пространстве имен `Database\Factories`, имя класса которой соответствует имени модели и имеет суффикс `Factory`.
+
+Если эти соглашения не подходят для вашего конкретного приложения или фабрики, вы можете добавить атрибут `UseFactory` к модели, чтобы вручную указать фабрику модели:
+
+```php
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Database\Factories\Administration\FlightFactory;
+
+#[UseFactory(FlightFactory::class)]
+class Flight extends Model
+{
+    // ...
+}
+```
+
+Кроме того, вы можете переопределить метод `newFactory` в вашей модели, чтобы напрямую возвращать экземпляр соответствующей фабрики модели:
 
 ```php
 use Database\Factories\Administration\FlightFactory;
@@ -96,20 +111,17 @@ protected static function newFactory()
 }
 ```
 
-Затем определите свойство `model` в соответствующей фабрике:
+Затем используйте атрибут `UseModel` в соответствующей фабрике, чтобы указать модель:
 
 ```php
 use App\Administration\Flight;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(Flight::class)]
 class FlightFactory extends Factory
 {
-    /**
-     * Название модели, соответствующей фабрике.
-     *
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
-     */
-    protected $model = Flight::class;
+    // ...
 }
 ```
 
@@ -306,12 +318,14 @@ $users = User::factory()
     ->create();
 ```
 
-Внутри замыкания последовательности вы можете получить доступ к свойствам `$index` или `$count` экземпляра последовательности, который вводится в замыкание. Свойство `$index` содержит номер текущей итерации, а свойство `$count` - общее количество итераций:
+Внутри замыкания последовательности вы можете получить доступ к свойству `$index` экземпляра последовательности, который вводится в замыкание. Свойство `$index` содержит номер текущей итерации:
 
 ```php
 $users = User::factory()
     ->count(10)
-    ->sequence(fn (Sequence $sequence) => ['name' => 'Name '.$sequence->index])
+    ->state(new Sequence(
+        fn (Sequence $sequence) => ['name' => 'Name '.$sequence->index],
+    ))
     ->create();
 ```
 
@@ -339,7 +353,7 @@ $users = User::factory()
 use App\Models\Post;
 use App\Models\User;
 
-$user = User::factory()
+$users = User::factory()
     ->has(Post::factory()->count(3))
     ->create();
 ```
@@ -384,6 +398,18 @@ $user = User::factory()
     ->hasPosts(3, [
         'published' => false,
     ])
+    ->create();
+```
+
+Вы также можете передать несколько массивов атрибутов, чтобы создать связанные модели с состоянием для каждой модели. Laravel применит каждый массив по порядку:
+
+```php
+$user = User::factory()
+    ->hasPosts(
+        ['title' => 'First Post'],
+        ['title' => 'Second Post'],
+        ['title' => 'Third Post'],
+    )
     ->create();
 ```
 
@@ -470,6 +496,20 @@ $user = User::factory()
     ->create();
 ```
 
+Вы также можете передать массив pivot-массивов, чтобы задать уникальные pivot-данные для каждой связанной модели:
+
+```php
+$user = User::factory()
+    ->hasAttached(
+        Role::factory(),
+        [
+            ['active' => true],
+            ['active' => false],
+        ]
+    )
+    ->create();
+```
+
 Вы можете преобразовать состояние связанной модели с помощью замыкания, предоставив ему доступ к родительской модели:
 
 ```php
@@ -540,7 +580,7 @@ $comments = Comment::factory()->count(3)->for(
 use App\Models\Tag;
 use App\Models\Video;
 
-$videos = Video::factory()
+$video = Video::factory()
     ->hasAttached(
         Tag::factory()->count(3),
         ['public' => true]
@@ -551,7 +591,7 @@ $videos = Video::factory()
 Конечно, магический метод `has` также используется для создания полиморфных отношений Many To Many:
 
 ```php
-$videos = Video::factory()
+$video = Video::factory()
     ->hasTags(3, ['public' => true])
     ->create();
 ```

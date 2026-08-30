@@ -1,5 +1,5 @@
 <div class="docs-search mb-2">
-    <form action="/docs/search" method="get">
+    <form action="/docs/find" method="get">
         <input name="query" class="form-control form-control-sm" type="search"
                placeholder="Поиск по документации..." value="{{ request('query') }}" minlength="3" maxlength="64">
     </form>

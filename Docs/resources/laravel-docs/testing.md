@@ -1,5 +1,5 @@
 ---
-git: 96617d0be0510d33cfa46db034b73a2273b22a97
+git: 7069be16037d772d289b504f5bc878fb384e9238
 ---
 
 # Тестирование · Начало работы
@@ -40,6 +40,31 @@ php artisan make:test UserTest
 
 ```shell
 php artisan make:test UserTest --unit
+```
+
+Если у вас есть тестовый класс, который в основном полагается на возможности тестирования Laravel, но конкретному тестовому методу не требуется загруженное приложение, вы можете применить к этому методу атрибут `#[UnitTest]`, чтобы пропустить загрузку приложения только для этого теста.
+
+```php tab=PHPUnit
+<?php
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\Attributes\UnitTest;
+use Tests\TestCase;
+
+class LocationServiceTest extends TestCase
+{
+    public function test_get_coordinates_resolves_address(): void
+    {
+        // Этот тест использует возможности тестирования Laravel...
+    }
+
+    #[UnitTest]
+    public function test_get_state_returns_state_from_abbreviation(): void
+    {
+        // Этот тест выполняется без загрузки приложения...
+    }
+}
 ```
 
 > [!NOTE]
@@ -216,4 +241,35 @@ php artisan test --coverage --min=80.3
 
 ```shell
 php artisan test --profile
+```
+
+<a name="configuration-caching"></a>
+## Кеширование конфигурации
+
+При запуске тестов Laravel загружает приложение для каждого отдельного тестового метода. Без кешированного файла конфигурации каждый файл конфигурации вашего приложения должен загружаться в начале теста. Чтобы собрать конфигурацию один раз и повторно использовать её для всех тестов в рамках одного запуска, вы можете использовать трейт `Illuminate\Foundation\Testing\WithCachedConfig`:
+
+```php tab=Pest
+<?php
+
+use Illuminate\Foundation\Testing\WithCachedConfig;
+
+pest()->use(WithCachedConfig::class);
+
+// ...
+```
+
+```php tab=PHPUnit
+<?php
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\WithCachedConfig;
+use Tests\TestCase;
+
+class ConfigTest extends TestCase
+{
+    use WithCachedConfig;
+
+    // ...
+}
 ```

@@ -1,5 +1,5 @@
 ---
-git: 749f980905661156d686084d95ed0d131695f439
+git: 7a5294176d0df3fc64050c667d3809eb66131169
 ---
 
 # HTTP-запросы
@@ -145,12 +145,13 @@ $request->fullUrlWithoutQuery(['type']);
 <a name="retrieving-the-request-host"></a>
 #### Получение хоста(host) запроса
 
-Вы можете получить "host" входящего запроса с помощью методов `host`, `httpHost`, и `schemeAndHttpHost` :
+Получить имя хоста входящего запроса можно с помощью методов `host`, `httpHost` и `schemeAndHttpHost`:
 
 ```php
-$request->host();
-$request->httpHost();
-$request->schemeAndHttpHost();
+// http://localhost:8000
+$request->host(); // localhost
+$request->httpHost(); // localhost:8000
+$request->schemeAndHttpHost(); // http://localhost:8000
 ```
 
 <a name="retrieving-the-request-method"></a>
@@ -236,6 +237,18 @@ $preferred = $request->prefers(['text/html', 'application/json']);
 ```php
 if ($request->expectsJson()) {
     // ...
+}
+```
+
+Если вам нужно определить, предпочитает ли запрос именно Markdown или принимает Markdown среди других типов содержимого, например при обслуживании AI-агентов или других клиентов, потребляющих Markdown-ответы, вы можете использовать методы `wantsMarkdown` и `acceptsMarkdown`:
+
+```php
+if ($request->wantsMarkdown()) {
+    // Наиболее предпочтительный тип содержимого клиента - text/markdown...
+}
+
+if ($request->acceptsMarkdown()) {
+    // Клиент принимает Markdown-ответы...
 }
 ```
 
@@ -403,6 +416,27 @@ $elapsed = $request->date('elapsed', '!H:i', 'Europe/Madrid');
 
 Если входное значение присутствует, но имеет недопустимый формат, будет выброшено исключение `InvalidArgumentException`, поэтому рекомендуется проверять ввод перед вызовом метода `date`.
 
+<a name="retrieving-interval-input-values"></a>
+#### Получение входных значений интервала
+
+Входные значения, содержащие длительность, можно получить в виде экземпляров `CarbonInterval` с помощью метода `interval`. Если запрос не содержит входного значения с заданным именем, будет возвращено значение `null`:
+
+```php
+$duration = $request->interval('duration');
+```
+
+Если входное значение является числовым, вы можете передать единицу измерения вторым аргументом. Единица может быть строкой, например `second`, `minute` или `day`, либо экземпляром enum `Carbon\Unit`:
+
+```php
+use Carbon\Unit;
+
+$timeout = $request->interval('timeout', 'second');
+
+$delay = $request->interval('delay', Unit::Minute);
+```
+
+Если входное значение присутствует, но имеет недопустимый формат, будет выброшено исключение `InvalidArgumentException`, поэтому рекомендуется проверять ввод перед вызовом метода `interval`.
+
 <a name="retrieving-enum-input-values"></a>
 #### Получение входных значений перечисления
 
@@ -542,7 +576,7 @@ $request->whenFilled('name', function (string $input) {
 });
 ```
 
-Второе замыкание может быть передано методу `whenFilled` которое будет выполнено, если указанное значение «не заполнено»:
+Методу `whenFilled` можно передать второе замыкание, которое будет выполнено, если указанное значение не заполнено:
 
 ```php
 $request->whenFilled('name', function (string $input) {
@@ -658,7 +692,7 @@ $value = $request->cookie('name');
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Foundation\Http\Middleware\TrimStrings;
 
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->remove([
         ConvertEmptyStringsToNull::class,
         TrimStrings::class,
@@ -669,7 +703,7 @@ use Illuminate\Foundation\Http\Middleware\TrimStrings;
 Если вы хотите отключить обрезку строк и преобразование пустых строк для подмножества запросов к вашему приложению, вы можете использовать методы посредника `trimStrings` и `convertEmptyStringsToNull` в файле `bootstrap/app.php` вашего приложения. Оба метода принимают массив замыканий, который должен возвращать `true` или `false`, чтобы указать, следует ли пропустить нормализацию ввода:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->convertEmptyStringsToNull(except: [
         fn (Request $request) => $request->is('admin/*'),
     ]);
@@ -701,6 +735,14 @@ if ($request->hasFile('photo')) {
     // ...
 }
 ```
+
+Если загруженный файл является изображением, которое нужно обработать перед сохранением, вы можете использовать метод `image`, чтобы получить экземпляр `Illuminate\Image\Image` или `null`, если файл отсутствует:
+
+```php
+$image = $request->image('photo');
+```
+
+Дополнительную информацию об обработке изображений смотрите в полной [документации по работе с изображениями](/docs/{{version}}/images).
 
 <a name="validating-successful-uploads"></a>
 #### Валидация загрузки файлов
@@ -763,7 +805,7 @@ $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
 Чтобы решить эту проблему, вы можете использовать посредника `Illuminate\Http\Middleware\TrustProxies`, содержащийся в вашем приложении Laravel, что позволяет вам быстро настраивать балансировщики нагрузки или прокси, которым ваше приложение должно доверять. Доверенные прокси-серверы должны быть указаны с помощью метода посредника `trustProxies` в файле `bootstrap/app.php` вашего приложения:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->trustProxies(at: [
         '192.168.1.1',
         '10.0.0.0/8',
@@ -774,7 +816,7 @@ $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
 Помимо настройки доверенных прокси-серверов, вы также можете настроить заголовки прокси-серверов, которым следует доверять:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR |
         Request::HEADER_X_FORWARDED_HOST |
         Request::HEADER_X_FORWARDED_PORT |
@@ -785,7 +827,7 @@ $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
 ```
 
 > [!NOTE]
-> Если вы используете AWS Elastic Load Balancing, значение `headers` должно быть `Request::HEADER_X_FORWARDED_AWS_ELB`. Если ваш балансировщик нагрузки использует стандартный заголовок `Forwarded` из [RFC 7239] (https://www.rfc-editor.org/rfc/rfc7239#section-4), значение `headers` должно быть `Request::HEADER_FORWARDED`. Для получения дополнительной информации о константах, которые можно использовать в значении `headers`, ознакомьтесь с документацией Symfony о [доверенных прокси-серверах] (https://symfony.com/doc/current/deployment/proxies.html).
+> Если вы используете AWS Elastic Load Balancing, значение `headers` должно быть `Request::HEADER_X_FORWARDED_AWS_ELB`. Если ваш балансировщик нагрузки использует стандартный заголовок `Forwarded` из [RFC 7239](https://www.rfc-editor.org/rfc/rfc7239#section-4), значение `headers` должно быть `Request::HEADER_FORWARDED`. Для получения дополнительной информации о константах, которые можно использовать в значении `headers`, ознакомьтесь с документацией Symfony о [доверенных прокси-серверах](https://symfony.com/doc/current/deployment/proxies.html).
 
 <a name="trusting-all-proxies"></a>
 #### Доверие ко всем прокси
@@ -793,7 +835,7 @@ $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
 Если вы используете Amazon AWS или другой поставщик «облачных» балансировщиков нагрузки, то вы можете не знать IP-адреса своих фактических балансировщиков. В этом случае вы можете использовать `*`, чтобы доверять всем прокси:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->trustProxies(at: '*');
 })
 ```
@@ -805,26 +847,26 @@ $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
 
 Как правило, вам следует настроить свой веб-сервер (Nginx или Apache), так, чтобы он обслуживал запросы, соответствующие только указанному имени хоста. Однако, если у вас нет возможности напрямую настроить свой веб-сервер и вам нужно указать Laravel, чтобы он отвечал только на определенные имена хостов, вы можете сделать это, задействовав посредник `Illuminate\Http\Middleware\TrustHosts` для вашего приложения.
 
-Чтобы включить посредника `TrustHosts`, вам следует вызвать метод посредника `trustHosts` в файле `bootstrap/app.php` вашего приложения. Используя аргумент `at` этого метода, вы можете указать имена хостов, на которые ваше приложение должно реагировать. Входящие запросы с другими заголовками `Host` будут отклонены:
+Чтобы включить посредника `TrustHosts`, вам следует вызвать метод посредника `trustHosts` в файле `bootstrap/app.php` вашего приложения. Используя аргумент `at` этого метода, вы можете указать имена хостов, на которые ваше приложение должно реагировать. Строка имени хоста рассматривается как регулярное выражение. Входящие запросы с другими заголовками `Host` будут отклонены:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->trustHosts(at: ['laravel.test']);
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->trustHosts(at: ['^laravel\.test$']);
 })
 ```
 
 По умолчанию запросы, поступающие из поддоменов URL-адреса приложения, также автоматически считаются доверенными. Если вы хотите отключить это поведение, вы можете использовать аргумент `subdomains`:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->trustHosts(at: ['laravel.test'], subdomains: false);
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->trustHosts(at: ['^laravel\.test$'], subdomains: false);
 })
 ```
 
 Если вам нужен доступ к файлам конфигурации или базе данных вашего приложения, чтобы определить доверенные хосты, вы можете предоставить замыкание аргументу `at`:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->trustHosts(at: fn () => config('app.trusted_hosts'));
 })
 ```

@@ -1,5 +1,5 @@
 ---
-git: 65c933d176e63dd052717dff43677ed135bb6f45
+git: 7625dc556c6f366f894fecc9e5cc2ab76834d8db
 ---
 
 # Eloquent · Начало работы
@@ -93,78 +93,74 @@ class Flight extends Model
 
 Взглянув на приведенный выше пример, вы могли заметить, что мы не сообщили Eloquent, какая таблица БД соответствует нашей модели `Flight`. По соглашению, в качестве имени таблицы будет использоваться имя класса в формате `snake_case` (все), во множественном числе, если явно не указано другое. В нашем случае, Eloquent будет предполагать, что модель `Flight` хранит записи в таблице `flights`, а модель `AirTrafficController` – в таблице `air_traffic_controllers`.
 
-Если таблица БД вашей модели не соответствует этому соглашению, вы можете вручную указать имя таблицы модели, определив свойство `table` в модели:
+Если таблица БД вашей модели не соответствует этому соглашению, вы можете вручную указать имя таблицы модели с помощью атрибута `Table`:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table('my_flights')]
 class Flight extends Model
 {
-    /**
-     * Таблица БД, ассоциированная с моделью.
-     *
-     * @var string
-     */
-    protected $table = 'my_flights';
+    // ...
 }
 ```
 
 <a name="primary-keys"></a>
 ### Первичные ключи
 
-Eloquent также предполагает, что в соответствующей таблице БД каждой модели есть столбец первичного ключа с именем `id`. При необходимости вы можете определить защищенное свойство `$primaryKey` в модели, чтобы указать другой столбец, который служит первичным ключом:
+Eloquent также предполагает, что в соответствующей таблице БД каждой модели есть столбец первичного ключа с именем `id`. При необходимости вы можете указать другой столбец, который служит первичным ключом модели, с помощью аргумента `key` атрибута `Table`:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table(key: 'flight_id')]
 class Flight extends Model
 {
-    /**
-     * Первичный ключ таблицы БД.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'flight_id';
+    // ...
 }
 ```
 
-Кроме того, Eloquent предполагает, что первичный ключ является автоинкрементным целочисленным значением, что означает, что Eloquent автоматически преобразует первичный ключ в целое число. Если вы хотите использовать неинкрементный или нечисловой первичный ключ, вы должны определить общедоступное свойство `$incrementing` в модели, для которого установлено значение `false`:
+Кроме того, Eloquent предполагает, что первичный ключ является автоинкрементным целочисленным значением, что означает, что Eloquent автоматически преобразует первичный ключ в целое число. Если вы хотите использовать неинкрементный или нечисловой первичный ключ, вам следует указать аргументы `keyType` и `incrementing` атрибута `Table`:
 
 ```php
 <?php
 
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Model;
+
+#[Table(key: 'uuid', keyType: 'string', incrementing: false)]
 class Flight extends Model
 {
-    /**
-     * Указывает, что идентификаторы модели являются автоинкрементными.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
+    // ...
 }
 ```
 
-Если первичный ключ модели не является целочисленным, то определите защищенное свойство `$keyType` в модели. Это свойство имеет значение типа `string`:
+Если вам нужно только отключить автоинкрементные идентификаторы, вы можете использовать атрибут `WithoutIncrementing`:
 
 ```php
 <?php
 
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
+use Illuminate\Database\Eloquent\Model;
+
+#[WithoutIncrementing]
 class Flight extends Model
 {
-    /**
-     * Тип данных автоинкрементного идентификатора.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
+    // ...
 }
 ```
 
@@ -178,7 +174,7 @@ Eloquent требует, чтобы каждая модель имела по к
 
 Вместо использования автоинкрементных целых чисел в качестве первичных ключей вашей модели Eloquent вы можете выбрать использование UUID. UUID - это уникальные буквенно-цифровые идентификаторы длиной 36 символов.
 
-Если вы хотите, чтобы модель использовала ключ UUID вместо автоинкрементного целочисленного ключа, вы можете использовать трейт `Illuminate\Database\Eloquent\Concerns\HasUuids` в модели. Конечно же, убедитесь, что у модели есть [столбец первичного ключа, эквивалентный UUID](/docs/{{version}}/migrations#column-method-uuid)::
+Чтобы модель использовала UUID вместо автоинкрементного целочисленного ключа, добавьте к ней трейт `Illuminate\Database\Eloquent\Concerns\HasUuids`. Убедитесь, что первичный ключ модели хранится в [столбце UUID](/docs/{{version}}/migrations#column-method-uuid):
 
 ```php
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -193,10 +189,10 @@ class Article extends Model
 
 $article = Article::create(['title' => 'Traveling to Europe']);
 
-$article->id; // "8f8e8478-9035-4d23-b9a7-62f4d2612ce5"
+$article->id; // "018f2b5c-6a7f-7b12-9d6f-2f8a4e0c9c11"
 ```
 
-По умолчанию трейт `HasUuids` генерирует ["упорядоченные" UUID](/docs/{{version}}/strings#method-str-ordered-uuid) для ваших моделей. Эти UUID более эффективны для индексированного хранения в базе данных, поскольку их можно лексикографически сортировать.
+По умолчанию трейт `HasUuids` генерирует идентификаторы [UUIDv7](/docs/{{version}}/strings#method-str-uuid7) для ваших моделей. Эти UUID более эффективны для индексированного хранения в базе данных, поскольку их можно лексикографически сортировать.
 
 Вы можете переопределить процесс генерации UUID для определенной модели, определив метод `newUniqueId` в модели. Кроме того, вы можете указать, какие столбцы должны получать UUID, определив метод `uniqueIds` в модели:
 
@@ -243,43 +239,71 @@ $article->id; // "01gd4d3tgrrfqeda94gdbtdk5c"
 <a name="timestamps"></a>
 ### Временные метки
 
-По умолчанию Eloquent ожидает, что столбцы `created_at` и `updated_at` будут существовать в соответствующей таблице БД модели. Eloquent автоматически устанавливает значения этих столбцов при создании или обновлении моделей. Если вы не хотите, чтобы эти столбцы автоматически управлялись Eloquent, вы должны определить свойство `$timestamps` модели со значением` false`:
+По умолчанию Eloquent ожидает, что столбцы `created_at` и `updated_at` будут существовать в соответствующей таблице БД модели. Eloquent автоматически устанавливает значения этих столбцов при создании или обновлении моделей. Если вы не хотите, чтобы эти столбцы автоматически управлялись Eloquent, вы можете установить для `timestamps` значение `false` в атрибуте `Table` вашей модели:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
+#[Table(timestamps: false)]
 class Flight extends Model
 {
-    /**
-     * Следует ли обрабатывать временные метки модели.
-     *
-     * @var bool
-     */
-    public $timestamps = false;
+    // ...
 }
 ```
 
-Если вам нужно настроить формат временных меток модели, то укажите необходимый формат для свойства `$dateFormat`. Это свойство определяет, как атрибуты даты хранятся в БД, а также их формат при сериализации модели в массив или JSON:
+Если вам нужно только отключить временные метки, вы можете использовать атрибут `WithoutTimestamps`:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
+#[WithoutTimestamps]
 class Flight extends Model
 {
-    /**
-     * Формат хранения столбцов даты модели.
-     *
-     * @var string
-     */
-    protected $dateFormat = 'U';
+    // ...
+}
+```
+
+Если вам нужно настроить формат временных меток модели, вы можете использовать аргумент `dateFormat` атрибута `Table`. Он определяет, как атрибуты даты хранятся в БД, а также их формат при сериализации модели в массив или JSON:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Model;
+
+#[Table(dateFormat: 'U')]
+class Flight extends Model
+{
+    // ...
+}
+```
+
+Если вам нужно только определить формат даты, вы можете использовать атрибут `DateFormat`:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\DateFormat;
+use Illuminate\Database\Eloquent\Model;
+
+#[DateFormat('U')]
+class Flight extends Model
+{
+    // ...
 }
 ```
 
@@ -290,8 +314,19 @@ class Flight extends Model
 
 class Flight extends Model
 {
-    const CREATED_AT = 'creation_date';
-    const UPDATED_AT = 'updated_date';
+    /**
+     * Имя столбца "created at".
+     *
+     * @var string|null
+     */
+    public const CREATED_AT = 'creation_date';
+
+    /**
+     * Имя столбца "updated at".
+     *
+     * @var string|null
+     */
+    public const UPDATED_AT = 'updated_date';
 }
 ```
 
@@ -304,30 +339,27 @@ Model::withoutTimestamps(fn () => $post->increment('reads'));
 <a name="database-connections"></a>
 ### Соединения с БД
 
-По умолчанию все модели Eloquent будут использовать соединение с БД, настроенное для вашего приложения. Если вы хотите указать другое соединение, которое должно использоваться при взаимодействии с определенной моделью, вы должны определить свойство `$connection` модели:
+По умолчанию все модели Eloquent будут использовать соединение с БД, настроенное для вашего приложения. Если вы хотите указать другое соединение, которое должно использоваться при взаимодействии с определенной моделью, вы можете использовать атрибут `Connection`:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Model;
 
+#[Connection('mysql')]
 class Flight extends Model
 {
-    /**
-     * Соединение с БД, которое должна использовать модель.
-     *
-     * @var string
-     */
-    protected $connection = 'mysql';
+    // ...
 }
 ```
 
 <a name="default-attribute-values"></a>
 ### Значения атрибутов по умолчанию
 
-По умолчанию вновь созданный экземпляр модели не будет содержать никаких значений атрибутов. Если вы хотите определить значения по умолчанию для некоторых атрибутов модели, то укажите необходимые значения в свойстве `$attributes` модели. Значения атрибутов, помещенные в массив $attributes, должны быть в их исходном, "хранящемся" формате, как если бы они только что были считаны из базы данных::
+По умолчанию новый экземпляр модели не содержит значений атрибутов. Чтобы задать значения по умолчанию, укажите их в свойстве `$attributes` модели. Значения в этом массиве должны иметь исходный формат хранения, как если бы они были только что прочитаны из базы данных:
 
 ```php
 <?php
@@ -341,7 +373,7 @@ class Flight extends Model
     /**
      * Значения по умолчанию для атрибутов модели.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $attributes = [
         'options' => '[]',
@@ -480,7 +512,7 @@ Flight::where('departed', true)
     }, column: 'id');
 ```
 
-Поскольку методы `chunkById` и `lazyById` добавляют свои собственные условия "where" к выполняемому запросу, вам обычно следует [логически группировать](/docs/{{version}}/queries#ological-grouping) свои собственные условия внутри замыкания:
+Поскольку методы `chunkById` и `lazyById` добавляют собственные условия `where` к выполняемому запросу, обычно следует [логически группировать](/docs/{{version}}/queries#logical-grouping) свои условия внутри замыкания:
 
 ```php
 Flight::where(function ($query) {
@@ -524,7 +556,7 @@ Flight::where('departed', true)
 Метод `cursor` выполнит только один запрос к БД; однако отдельные модели Eloquent не будут включены в результирующий набор, пока они не будут фактически итерированы. Следовательно, только одна модель Eloquent хранится в памяти в любой момент времени при итерации с использованием курсора.
 
 > [!WARNING]
-> Поскольку метод `cursor` всегда хранит в памяти только одну модель Eloquent, то "жадная" (eager) загрузка отношений недопустима. Если вам нужно "жадно" загрузить отношения, то рассмотрите возможность использования метода [`lazy`](#streaming-results-lazily).
+> Поскольку метод `cursor` всегда хранит в памяти только одну модель Eloquent, то "жадная" (eager) загрузка отношений недопустима. Если вам нужно "жадно" загрузить отношения, то рассмотрите возможность использования метода [`lazy`](#chunking-using-lazy-collections).
 
 Внутри метод `cursor` использует [генераторы PHP](https://www.php.net/manual/ru/language.generators.overview.php) для реализации этого функционала:
 
@@ -721,6 +753,12 @@ class FlightController extends Controller
 
 В этом примере мы присваиваем параметр `name` из входящего HTTP-запроса атрибуту `name` экземпляра модели `App\Models\Flight`. Когда мы вызываем метод `save`, запись будет вставлена в БД. Временные метки `created_at` и `updated_at` будут автоматически установлены при вызове метода `save`, поэтому нет необходимости устанавливать их вручную.
 
+Если вы хотите сохранить модель внутри транзакции базы данных, вы можете использовать метод `saveOrFail`. Если во время сохранения будет выброшено исключение, транзакция автоматически откатится:
+
+```php
+$flight->saveOrFail();
+```
+
 В качестве альтернативы вы можете использовать метод `create`, чтобы «сохранить» новую модель с помощью одного оператора PHP. Вставленный экземпляр модели будет возвращен вам методом `create`:
 
 ```php
@@ -731,7 +769,7 @@ $flight = Flight::create([
 ]);
 ```
 
-Однако, перед использованием метода `create` вам нужно будет указать свойство `fillable` или `guarded` в классе модели. Эти свойства необходимы, потому что все модели Eloquent по умолчанию защищены от уязвимостей массового присвоения. Чтобы узнать больше о массовом присвоении, обратитесь к [документации](#mass-assignment).
+Однако, перед использованием метода `create` вам нужно будет указать атрибут `Fillable` или `Guarded` в классе модели. Эти атрибуты необходимы, потому что все модели Eloquent по умолчанию защищены от уязвимостей массового присвоения. Чтобы узнать больше о массовом присвоении, обратитесь к [документации](#mass-assignment).
 
 <a name="updates"></a>
 ### Обновление
@@ -748,6 +786,12 @@ $flight->name = 'Paris to London';
 $flight->save();
 ```
 
+Если вы хотите обновить модель внутри транзакции базы данных, вы можете использовать метод `updateOrFail`. Если во время обновления будет выброшено исключение, транзакция автоматически откатится:
+
+```php
+$flight->updateOrFail(['name' => 'Paris to London']);
+```
+
 Иногда вам может потребоваться обновить существующую модель или создать новую, если подходящей модели не существует. Как и метод `firstOrCreate`, метод `updateOrCreate` сохраняет модель, поэтому нет необходимости вручную вызывать метод `save`.
 
 В приведенном ниже примере, если существует `departure` (рейс) с местом отправления `Oakland` и `destination` (местом назначения) `San Diego`, его столбцы `price` (цена) и `discounted` (скидка) будут обновлены. Если такого полета не существует, будет создан новый полет с атрибутами, полученными в результате слияния первого массива аргументов со вторым массивом аргументов:
@@ -757,6 +801,18 @@ $flight = Flight::updateOrCreate(
     ['departure' => 'Oakland', 'destination' => 'San Diego'],
     ['price' => 99, 'discounted' => 1]
 );
+```
+
+При использовании методов вроде `firstOrCreate` или `updateOrCreate` вы можете не знать, была ли создана новая модель или обновлена существующая. Свойство `wasRecentlyCreated` указывает, была ли модель создана во время её текущего жизненного цикла:
+
+```php
+$flight = Flight::updateOrCreate(
+    // ...
+);
+
+if ($flight->wasRecentlyCreated) {
+    // Была вставлена новая запись рейса...
+}
 ```
 
 <a name="mass-updates"></a>
@@ -889,27 +945,24 @@ $flight = Flight::create([
 ]);
 ```
 
-Однако перед использованием метода `create` вам нужно будет указать свойство `fillable` или `guarded` в классе модели. Эти свойства необходимы, потому что все модели Eloquent по умолчанию защищены от уязвимостей массового присвоения.
+Однако перед использованием метода `create` вам нужно будет указать атрибут `Fillable` или `Guarded` в классе модели. Эти атрибуты необходимы, потому что все модели Eloquent по умолчанию защищены от уязвимостей массового присвоения.
 
 Уязвимость массового присвоения возникает, когда пользователь передает неожиданное поле HTTP-запроса, и это поле изменяет столбец в вашей базе данных, чего вы никак не ожидали. Например, злоумышленник может отправить параметр `is_admin` через HTTP-запрос, который затем передается методу `create` модели, позволяя пользователю перейти на уровень администратора.
 
-Итак, для начала вы должны определить, какие атрибуты модели вы хотите сделать массово-назначаемыми. Вы можете сделать это используя свойство `$fillable` модели. Например, давайте сделаем атрибут `name` нашей модели `Flight` массово-назначаемым:
+Итак, для начала вы должны определить, какие атрибуты модели вы хотите сделать массово-назначаемыми. Вы можете сделать это с помощью атрибута `Fillable` в модели. Например, давайте сделаем атрибут `name` нашей модели `Flight` массово-назначаемым:
 
 ```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
+#[Fillable(['name'])]
 class Flight extends Model
 {
-    /**
-     * Атрибуты, для которых разрешено массовое присвоение значений.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = ['name'];
+    // ...
 }
 ```
 
@@ -928,37 +981,42 @@ $flight->fill(['name' => 'Amsterdam to Frankfurt']);
 <a name="mass-assignment-json-columns"></a>
 #### Массовое присвоение и JSON-столбцы
 
-При назначении JSON-столбцов необходимо указать массово назначаемый ключ для каждого столбца в массиве `$fillable` модели. В целях безопасности Laravel не поддерживает обновление вложенных атрибутов JSON при использовании свойства `guarded`:
+При назначении JSON-столбцов необходимо указать массово назначаемый ключ для каждого столбца в атрибуте `Fillable` модели. В целях безопасности Laravel не поддерживает обновление вложенных атрибутов JSON при использовании атрибута `Guarded`:
 
 ```php
-/**
- * Атрибуты, для которых разрешено массовое присвоение значений.
- *
- * @var array<int, string>
- */
-protected $fillable = [
-    'options->enabled',
-];
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+
+#[Fillable(['options->enabled'])]
+class Flight extends Model
+{
+    // ...
+}
 ```
 
 <a name="allowing-mass-assignment"></a>
 #### Защита массового присвоения
 
-Если вы хотите, чтобы все ваши атрибуты были массово-назначаемыми, вы можете определить свойство модели `$guarded` как пустой массив. Если вы решите не защищать свою модель, вам следует позаботиться о том, чтобы всегда вручную обрабатывать массивы, переданные в методы Eloquent `fill`,` create` и `update`:
+Если вы хотите, чтобы все ваши атрибуты были массово-назначаемыми, вы можете использовать атрибут `Unguarded` в модели. Если вы решите не защищать свою модель, вам следует позаботиться о том, чтобы всегда вручную обрабатывать массивы, переданные в методы Eloquent `fill`, `create` и `update`:
 
 ```php
-/**
- * Атрибуты, для которых НЕ разрешено массовое присвоение значений.
- *
- * @var array<string>|bool
- */
-protected $guarded = [];
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Unguarded;
+use Illuminate\Database\Eloquent\Model;
+
+#[Unguarded]
+class Flight extends Model
+{
+    // ...
+}
 ```
 
 <a name="mass-assignment-exceptions"></a>
-### Исключения при массовом присвоении
+#### Исключения при массовом присвоении
 
-По умолчанию атрибуты, которые не включены в массив `$fillable`, автоматически отбрасываются при выполнении операций массового присвоения. В продакшн-среде это ожидаемое поведение, однако во время локальной разработки это может вызвать путаницу в том, почему изменения модели не вступают в силу.
+По умолчанию атрибуты, которые не включены в атрибут `Fillable`, автоматически отбрасываются при выполнении операций массового присвоения. В продакшн-среде это ожидаемое поведение, однако во время локальной разработки это может вызвать путаницу в том, почему изменения модели не вступают в силу.
 
 Вы можете указать Laravel генерировать исключение при попытке назначения неподлежащего назначения атрибута, вызвав метод `preventSilentlyDiscardingAttributes`. Обычно этот метод следует вызывать в методе `boot` класса `AppServiceProvider` вашего приложения:
 
@@ -1000,6 +1058,12 @@ use App\Models\Flight;
 $flight = Flight::find(1);
 
 $flight->delete();
+```
+
+Если вы хотите удалить модель внутри транзакции базы данных, вы можете использовать метод `deleteOrFail`. Если во время удаления будет выброшено исключение, транзакция автоматически откатится:
+
+```php
+$flight->deleteOrFail();
 ```
 
 <a name="deleting-an-existing-model-by-its-primary-key"></a>
@@ -1185,7 +1249,7 @@ class Flight extends Model
      */
     public function prunable(): Builder
     {
-        return static::where('created_at', '<=', now()->subMonth());
+        return static::where('created_at', '<=', now()->minus(months: 1));
     }
 }
 ```
@@ -1258,7 +1322,7 @@ class Flight extends Model
      */
     public function prunable(): Builder
     {
-        return static::where('created_at', '<=', now()->subMonth());
+        return static::where('created_at', '<=', now()->minus(months: 1));
     }
 }
 ```
@@ -1340,7 +1404,7 @@ class AncientScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('created_at', '<', now()->subYears(2000));
+        $builder->where('created_at', '<', now()->minus(years: 2000));
     }
 }
 ```
@@ -1417,7 +1481,7 @@ class User extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('ancient', function (Builder $builder) {
-            $builder->where('created_at', '<', now()->subYears(2000));
+            $builder->where('created_at', '<', now()->minus(years: 2000));
         });
     }
 }
@@ -1447,6 +1511,11 @@ User::withoutGlobalScopes()->get();
 // Игнорировать некоторые глобальные диапазоны...
 User::withoutGlobalScopes([
     FirstScope::class, SecondScope::class
+])->get();
+
+// Удалить все глобальные диапазоны, кроме указанных...
+User::withoutGlobalScopesExcept([
+    SecondScope::class,
 ])->get();
 ```
 
@@ -1546,6 +1615,8 @@ class User extends Model
 $users = User::ofType('admin')->get();
 ```
 
+Методы диапазонов, объявленные через атрибут, должны быть `protected`. При вызове такого диапазона внутри класса модели вызывайте его через экземпляр построителя запросов, например `static::query()->ofType('admin')`, чтобы вызов был обработан механизмом диапазонов Eloquent.
+
 <a name="pending-attributes"></a>
 ### Ожидаемые атрибуты
 
@@ -1618,7 +1689,7 @@ if ($post->author()->is($user)) {
 ## События
 
 > [!NOTE]
-> Хотите транслировать события Eloquent непосредственно в приложение на стороне клиента? Ознакомьтесь с [model event broadcasting] (/docs/{{version}}/broadcasting#model-broadcasting) в Laravel.
+> Хотите транслировать события Eloquent непосредственно в приложение на стороне клиента? Ознакомьтесь с [трансляцией событий моделей](/docs/{{version}}/broadcasting#model-broadcasting) в Laravel.
 
 Модели Eloquent инициируют некоторые события, что позволяет использовать следующие хуки жизненного цикла модели: `retrieved`, `creating`, `created`, `updating`, `updated`, `saving`, `saved`, `deleting`, `deleted`, `trashed`, `forceDeleting`, `forceDeleted`, `restoring`, `restored` и `replicating`.
 
@@ -1683,7 +1754,7 @@ class User extends Model
 }
 ```
 
-При необходимости вы можете использовать [поочередных анонимных слушателей событий](/docs/{{version}}/events#queuable-anonymous-event-listeners) при регистрации событий модели. Это проинструктирует Laravel выполнить слушателя событий модели в фоновом режиме, используя [очередь](/docs/{{version}}/queues) вашего приложения:
+При необходимости вы можете использовать [очередные анонимные слушатели событий](/docs/{{version}}/events#queueable-anonymous-event-listeners) при регистрации событий модели. Это проинструктирует Laravel выполнить слушателя событий модели в фоновом режиме, используя [очередь](/docs/{{version}}/queues) вашего приложения:
 
 ```php
 use function Illuminate\Events\queueable;

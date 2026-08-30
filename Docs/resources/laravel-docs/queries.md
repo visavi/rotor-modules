@@ -1,5 +1,5 @@
 ---
-git: 4d2579e3a11ad725724355549d0a3532c66e0424
+git: ef3755a1624e91fdbefa0eabd6b11304a68400ab
 ---
 
 # Построитель запросов
@@ -12,7 +12,7 @@ git: 4d2579e3a11ad725724355549d0a3532c66e0424
 Построитель запросов Laravel использует связывание параметров PDO для защиты приложения от SQL-инъекций. Нет необходимости чистить строки, передаваемые как связываемые параметры.
 
 > [!WARNING]
-> PDO не поддерживает связывание имен столбцов. Поэтому, вы никогда не должны использовать какие-либо входящие от пользователя данные в качестве имен столбцов, используемые вашими запросами, включая столбцы в запросах `order by` и т.д.
+> PDO не поддерживает привязку имен столбцов. Поэтому никогда не используйте пользовательские данные в качестве имен столбцов запроса, в том числе в выражениях `ORDER BY`.
 
 <a name="running-database-queries"></a>
 ## Выполнение запросов к базе данных
@@ -152,7 +152,7 @@ DB::table('users')->where('active', false)
     });
 ```
 
-Поскольку методы `chunkById` и `lazyById` добавляют свои собственные условия "where" к выполняемому запросу, вам обычно следует [логически группировать](#ologic-grouping) свои собственные условия внутри замыкания:
+Поскольку методы `chunkById` и `lazyById` добавляют свои собственные условия "where" к выполняемому запросу, вам обычно следует [логически группировать](#logical-grouping) свои собственные условия внутри замыкания:
 
 ```php
 DB::table('users')->where(function ($query) {
@@ -456,12 +456,12 @@ $users = DB::table('users')
 ```php
 use Illuminate\Support\Facades\DB;
 
-$first = DB::table('users')
+$usersWithoutFirstName = DB::table('users')
     ->whereNull('first_name');
 
 $users = DB::table('users')
     ->whereNull('last_name')
-    ->union($first)
+    ->union($usersWithoutFirstName)
     ->get();
 ```
 
@@ -631,7 +631,7 @@ WHERE published = true AND (
 Метод `whereNone` можно использовать для извлечения записей, в которых ни один из заданных столбцов не соответствует заданному ограничению:
 
 ```php
-$posts = DB::table('albums')
+$albums = DB::table('albums')
     ->where('published', true)
     ->whereNone([
         'title',
@@ -789,7 +789,7 @@ $users = DB::table('users')
 ```php
 $activeUsers = DB::table('users')->select('id')->where('is_active', 1);
 
-$users = DB::table('comments')
+$comments = DB::table('comments')
     ->whereIn('user_id', $activeUsers)
     ->get();
 ```
@@ -850,7 +850,7 @@ $patients = DB::table('patients')
 Метод `whereValueBetween` проверяет, находится ли заданное значение между значениями двух столбцов одного типа в одной строке таблицы:
 
 ```php
-$patients = DB::table('products')
+$products = DB::table('products')
     ->whereValueBetween(100, ['min_price', 'max_price'])
     ->get();
 ```
@@ -858,7 +858,7 @@ $patients = DB::table('products')
 Метод `whereValueNotBetween` проверяет, что значение лежит за пределами значений двух столбцов в одной строке таблицы:
 
 ```php
-$patients = DB::table('products')
+$products = DB::table('products')
     ->whereValueNotBetween(100, ['min_price', 'max_price'])
     ->get();
 ```
@@ -878,6 +878,18 @@ $users = DB::table('users')
 ```php
 $users = DB::table('users')
     ->whereNotNull('updated_at')
+    ->get();
+```
+
+**whereNullSafeEquals / orWhereNullSafeEquals**
+
+Методы `whereNullSafeEquals` и `orWhereNullSafeEquals` можно использовать для сравнения значения столбца с заданным значением, считая два значения `NULL` равными:
+
+```php
+$lastLoginIp = $request->input('last_login_ip');
+
+$users = DB::table('users')
+    ->whereNullSafeEquals('last_login_ip', $lastLoginIp)
     ->get();
 ```
 
@@ -1113,6 +1125,58 @@ $users = DB::table('users')
     ->get();
 ```
 
+<a name="vector-similarity-clauses"></a>
+### Условия векторного сходства
+
+> [!NOTE]
+> Условия векторного сходства в настоящее время поддерживаются только для соединений PostgreSQL с расширением `pgvector`. Информацию об определении векторных столбцов и индексов см. в [документации по миграциям](/docs/{{version}}/migrations#available-column-types).
+
+Метод `whereVectorSimilarTo` фильтрует результаты по косинусному сходству с заданным вектором и упорядочивает результаты по релевантности. Порог `minSimilarity` должен быть значением от `0.0` до `1.0`, где `1.0` означает полное совпадение:
+
+```php
+$documents = DB::table('documents')
+    ->whereVectorSimilarTo('embedding', $queryEmbedding, minSimilarity: 0.4)
+    ->limit(10)
+    ->get();
+```
+
+Когда в качестве аргумента вектора передана обычная строка, Laravel автоматически сгенерирует для неё embeddings с помощью [Laravel AI SDK](/docs/{{version}}/ai-sdk#embeddings):
+
+```php
+$documents = DB::table('documents')
+    ->whereVectorSimilarTo('embedding', 'Best wineries in Napa Valley')
+    ->limit(10)
+    ->get();
+```
+
+По умолчанию `whereVectorSimilarTo` также сортирует результаты по расстоянию (сначала наиболее похожие). Вы можете отключить эту сортировку, передав `false` в аргумент `order`:
+
+```php
+$documents = DB::table('documents')
+    ->whereVectorSimilarTo('embedding', $queryEmbedding, minSimilarity: 0.4, order: false)
+    ->orderBy('created_at', 'desc')
+    ->limit(10)
+    ->get();
+```
+
+Если вам нужен больший контроль, вы можете использовать методы `selectVectorDistance`, `whereVectorDistanceLessThan` и `orderByVectorDistance` независимо:
+
+```php
+$documents = DB::table('documents')
+    ->select('*')
+    ->selectVectorDistance('embedding', $queryEmbedding, as: 'distance')
+    ->whereVectorDistanceLessThan('embedding', $queryEmbedding, maxDistance: 0.3)
+    ->orderByVectorDistance('embedding', $queryEmbedding)
+    ->limit(10)
+    ->get();
+```
+
+При использовании PostgreSQL расширение `pgvector` должно быть загружено до создания столбцов `vector`:
+
+```php
+Schema::ensureVectorExtensionExists();
+```
+
 <a name="ordering-grouping-limit-and-offset"></a>
 ## Сортировка, группировка, ограничение и смещение
 
@@ -1321,7 +1385,7 @@ DB::table('pruned_users')->insertUsing([
     'id', 'name', 'email', 'email_verified_at'
 ], DB::table('users')->select(
     'id', 'name', 'email', 'email_verified_at'
-)->where('updated_at', '<=', now()->subMonth()));
+)->where('updated_at', '<=', now()->minus(months: 1)));
 ```
 
 <a name="auto-incrementing-ids"></a>

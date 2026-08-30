@@ -35,6 +35,14 @@ class DocsTest extends ModuleTestCase
         $this->get('/docs')->assertOk()->assertSee('Установка');
     }
 
+    public function testAnchorsSurviveMarkdown(): void
+    {
+        $html = $this->docs->render("<a name=\"web-servers\"></a>\n## Web-серверы\n\n<script>alert(1)</script>");
+
+        $this->assertStringContainsString('<a id="web-servers"></a>', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+    }
+
     public function testUnknownPageIsNotFound(): void
     {
         // Проверяем только когда документация Laravel загружена: без неё раздел
@@ -77,14 +85,14 @@ class DocsTest extends ModuleTestCase
 
     public function testShortQueryIsIgnored(): void
     {
-        $this->get('/docs/search?query=мо')
+        $this->get('/docs/find?query=мо')
             ->assertOk()
             ->assertSee('Минимум 3 символа');
     }
 
     public function testSearchPageShowsResults(): void
     {
-        $this->get('/docs/search?query=module.php')
+        $this->get('/docs/find?query=module.php')
             ->assertOk()
             ->assertSee('Найдено:');
     }

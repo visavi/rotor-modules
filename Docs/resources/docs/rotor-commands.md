@@ -24,9 +24,9 @@ php artisan search:import
 
 ```bash
 php artisan docs:sync
-php artisan docs:sync --branch=11.x
+php artisan docs:sync --branch=12.x
 ```
-Скачивает Laravel-документацию с репозитория `laravelsu/docs` в `storage/docs/`. По умолчанию ветка `12.x`.
+Скачивает Laravel-документацию с репозитория `laravelsu/docs` в `modules/Docs/resources/laravel-docs/`. По умолчанию ветка `13.x`.
 
 ## Очистка данных
 

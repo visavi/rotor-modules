@@ -1,5 +1,5 @@
 ---
-git: 004621832e0cdac25323b01fab168de55c94d95c
+git: 1dc671fe651a023b4c379ddc2c68158d249301d6
 ---
 
 # Посредники (middleware)
@@ -9,7 +9,7 @@ git: 004621832e0cdac25323b01fab168de55c94d95c
 
 Посредник обеспечивает удобный механизм для проверки и фильтрации HTTP-запросов, поступающих в ваше приложение. Например, в Laravel уже содержится посредник, проверяющий аутентификацию пользователя вашего приложения. Если пользователь не аутентифицирован, то посредник перенаправит пользователя на экран входа в ваше приложение. Однако, если пользователь аутентифицирован, то посредник позволит запросу продолжить работу в приложении.
 
-Посредник может быть написан для выполнения различных задач помимо аутентификации. Например, посредник для ведения журналов может регистрировать все входящие запросы к вашему приложению. В Laravel включено множество посредников, включая псредники для аутентификации и защиты CSRF; однако все определяемые пользователями посредники обычно находится в каталоге `app/Http/Middleware` вашего приложения.
+Посредник может быть написан для выполнения различных задач помимо аутентификации. Например, посредник для ведения журналов может регистрировать все входящие запросы к вашему приложению. В Laravel включено множество посредников, включая псредники для аутентификации и защиты CSRF; однако все определяемые пользователями посредники обычно находятся в каталоге `app/Http/Middleware` вашего приложения.
 
 <a name="defining-middleware"></a>
 ## Определение посредника
@@ -143,6 +143,24 @@ use App\Http\Middleware\EnsureTokenIsValid;
 })
 ```
 
+Чтобы добавить посредника в существующий список приоритетов, не заменяя его целиком, используйте методы `prependToPriorityList` или `appendToPriorityList`. Метод `prependToPriorityList` вставляет переданный посредник перед другим посредником, а `appendToPriorityList` - после него:
+
+```php
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->prependToPriorityList(
+        before: \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        prepend: \App\Http\Middleware\EnsureTokenIsValid::class,
+    );
+
+    $middleware->appendToPriorityList(
+        after: \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        append: \App\Http\Middleware\EnsureUserIsSubscribed::class,
+    );
+})
+```
+
+Аргументы `before` и `after` также могут быть массивами классов посредников.
+
 <a name="assigning-middleware-to-routes"></a>
 ### Назначение посредников маршрутам
 
@@ -242,7 +260,7 @@ Laravel включает в себя предопределенные групп
 | `Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse` |
 | `Illuminate\Session\Middleware\StartSession`              |
 | `Illuminate\View\Middleware\ShareErrorsFromSession`       |
-| `Illuminate\Foundation\Http\Middleware\ValidateCsrfToken` |
+| `Illuminate\Foundation\Http\Middleware\PreventRequestForgery` |
 | `Illuminate\Routing\Middleware\SubstituteBindings`        |
 
 | Группа посредников `api`                           |
@@ -297,7 +315,7 @@ $middleware->web(remove: [
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
         // \Illuminate\Session\Middleware\AuthenticateSession::class,
     ]);
@@ -366,7 +384,7 @@ Route::get('/profile', function () {
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
         \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         \Illuminate\Routing\Middleware\ThrottleRequests::class,
         \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,

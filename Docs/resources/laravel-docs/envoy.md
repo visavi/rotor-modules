@@ -1,5 +1,5 @@
 ---
-git: 378b3faeb70edb807ac44a118e97fa616ad57ec8
+git: a656f28557de9c3b98926eebd87bc1e578b0436e
 ---
 
 # Пакет Laravel Envoy
@@ -34,7 +34,7 @@ php vendor/bin/envoy
 
 Все ваши задачи Envoy должны быть определены в файле `Envoy.blade.php` в корне вашего приложения. Например:
 
-```bash
+```blade
 @servers(['web' => ['user@192.168.1.1'], 'workers' => ['user@192.168.1.2']])
 
 @task('restart-queues', ['on' => 'workers'])
@@ -50,7 +50,7 @@ php vendor/bin/envoy
 
 Вы можете принудительно запустить сценарий на вашем локальном компьютере, указав IP-адрес сервера как `127.0.0.1`:
 
-```bash
+```blade
 @servers(['localhost' => '127.0.0.1'])
 ```
 
@@ -59,7 +59,7 @@ php vendor/bin/envoy
 
 Используя директиву `@import`, вы можете импортировать другие файлы Envoy для добавления дополнительных историй и задач. После того как файлы были импортированы, вы можете выполнять задачи, содержащиеся в них, как если бы они были определены в вашем собственном файле Envoy:
 
-```bash
+```blade
 @import('vendor/package/Envoy.blade.php')
 ```
 
@@ -68,7 +68,7 @@ php vendor/bin/envoy
 
 Envoy позволяет легко запускать задачу на нескольких серверах. Во-первых, добавьте необходимые серверы в объявление `@servers`. Каждому серверу должно быть присвоено уникальное имя. После определения дополнительных серверов, вы можете использовать каждый из них в массиве задачи `on`:
 
-```bash
+```blade
 @servers(['web-1' => '192.168.1.1', 'web-2' => '192.168.1.2'])
 
 @task('deploy', ['on' => ['web-1', 'web-2']])
@@ -83,7 +83,7 @@ Envoy позволяет легко запускать задачу на нес�
 
 По умолчанию задачи будут выполняться на каждом сервере поочередно. Другими словами, задача должна завершится на первом сервере, прежде чем будет выполнена на втором. Если вы хотите запустить задачу на нескольких серверах параллельно, то добавьте параметр `parallel` в определение задачи:
 
-```bash
+```blade
 @servers(['web-1' => '192.168.1.1', 'web-2' => '192.168.1.2'])
 
 @task('deploy', ['on' => ['web-1', 'web-2'], 'parallel' => true])
@@ -106,7 +106,7 @@ Envoy позволяет легко запускать задачу на нес�
 
 Если вам нужны другие файлы PHP перед выполнением вашей задачи, то вы можете использовать директиву `@include` в верхней части вашего файла `Envoy.blade.php`:
 
-```bash
+```blade
 @include('vendor/autoload.php')
 
 @task('restart-queues')
@@ -125,7 +125,7 @@ php vendor/bin/envoy run deploy --branch=master
 
 Вы можете получить доступ к параметрам ваших задач, используя [синтаксис «вывода» Blade](/docs/{{version}}/blade#displaying-data). Вы также можете определять операторы `if` и циклы Blade в своих задачах. Например, давайте проверим наличие переменной `$branch` перед выполнением команды `git pull`:
 
-```bash
+```blade
 @servers(['web' => ['user@192.168.1.1']])
 
 @task('deploy', ['on' => 'web'])
@@ -144,7 +144,7 @@ php vendor/bin/envoy run deploy --branch=master
 
 Истории группируют набор задач под одним удобным названием. Например, вы можете сгруппировать запуск задач `update-code` и `install-dependencies`, перечислив их имена в определении истории `deploy`:
 
-```bash
+```blade
 @servers(['web' => ['user@192.168.1.1']])
 
 @story('deploy')
@@ -181,7 +181,7 @@ php vendor/bin/envoy run deploy
 
 Перед выполнением каждой задачи будут выполняться все хуки `@before`, зарегистрированные в вашем скрипте Envoy. Хуки `@before` получают имя задачи, которая будет выполняться:
 
-```php
+```blade
 @before
     if ($task === 'deploy') {
         // ...
@@ -194,7 +194,7 @@ php vendor/bin/envoy run deploy
 
 После выполнения каждой задачи будут выполняться все хуки `@after`, зарегистрированные в вашем сценарии Envoy. Хуки `@after` получат имя запущенной задачи:
 
-```php
+```blade
 @after
     if ($task === 'deploy') {
         // ...
@@ -207,7 +207,7 @@ php vendor/bin/envoy run deploy
 
 После каждого сбоя задачи (выход с кодом состояния больше `0`) будут выполняться все хуки `@error`, зарегистрированные в вашем сценарии Envoy. Хуки `@error` получат имя запущенной задачи:
 
-```php
+```blade
 @error
     if ($task === 'deploy') {
         // ...
@@ -220,7 +220,7 @@ php vendor/bin/envoy run deploy
 
 Если все задачи выполнены без ошибок, то все хуки `@success`, зарегистрированные в вашем сценарии Envoy, будут выполнены:
 
-```bash
+```blade
 @success
     // ...
 @endsuccess
@@ -231,7 +231,7 @@ php vendor/bin/envoy run deploy
 
 После выполнения всех задач (независимо от статуса выхода) будут выполнены все хуки `@finished`. Хуки `@finished` получат код состояния завершенной задачи, который может быть `null` или `integer`, большим или равным `0`:
 
-```bash
+```blade
 @finished
     if ($exitCode > 0) {
         // В одной из задач произошли ошибки ...
@@ -253,7 +253,7 @@ php vendor/bin/envoy run deploy
 
 Если вы хотите получить запрос на подтверждение перед запуском конкретной задачи на своих серверах, вам следует добавить параметр `confirm` в директиву определения задачи. Этот параметр особенно полезен для деструктивных операций:
 
-```bash
+```blade
 @task('deploy', ['on' => 'web', 'confirm' => true])
     cd /home/user/example.com
     git pull origin {{ $branch }}
@@ -271,7 +271,7 @@ Envoy поддерживает отправку уведомлений в [Slack
 
 Вы должны передать полный WebHook URL в качестве первого аргумента директивы `@slack`. Вторым аргументом, передаваемым директиве `@slack`, должно быть имя канала `#channel` или имя пользователя `@user`:
 
-```php
+```blade
 @finished
     @slack('webhook-url', '#bots')
 @endfinished
@@ -279,7 +279,7 @@ Envoy поддерживает отправку уведомлений в [Slack
 
 По умолчанию уведомления Envoy отправляют сообщение в канал уведомлений с описанием выполненной задачи. Однако вы можете назначить свое сообщение, передав третий аргумент директиве `@slack`:
 
-```php
+```blade
 @finished
     @slack('webhook-url', '#bots', 'Hello, Slack.')
 @endfinished
@@ -290,7 +290,7 @@ Envoy поддерживает отправку уведомлений в [Slack
 
 Envoy также поддерживает отправку уведомлений в [Discord](https://discord.com) после выполнения каждой задачи. Директива `@discord` принимает WebHook URL и сообщение. Вы можете получить WebHook URL, создав «Webhook» в настройках сервера и выбрав канал, на который WebHook должен публиковать сообщения. Вы должны передать полный WebHook URL в директиву `@discord`:
 
-```php
+```blade
 @finished
     @discord('discord-webhook-url')
 @endfinished
@@ -301,7 +301,7 @@ Envoy также поддерживает отправку уведомлени�
 
 Envoy также поддерживает отправку уведомлений в [Telegram](https://telegram.org) после выполнения каждой задачи. Директива `@telegram` принимает идентификатор бота Telegram и идентификатор чата. Вы можете получить свой идентификатор бота, создав нового бота в [BotFather](https://t.me/botfather). Вы можете получить действительный идентификатор чата, используя [`@username_to_id_bot`](https://t.me/username_to_id_bot). Вы должны передать полный идентификатор бота и идентификатор чата в директиву `@telegram`:
 
-```php
+```blade
 @finished
     @telegram('bot-id','chat-id')
 @endfinished
@@ -312,7 +312,7 @@ Envoy также поддерживает отправку уведомлени�
 
 Envoy также поддерживает отправку уведомлений в [Microsoft Teams](https://www.microsoft.com/en-us/microsoft-teams) после выполнения каждой задачи. Директива `@microsoftTeams` принимает Webhook Teams (обязательно), сообщение, цвет темы (success, info, warning, error) и массив параметров. Вы можете получить ваш Webhook Teams, создав новый [входящий веб-хук](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook). API Teams имеет множество других атрибутов для настройки вашего сообщения, таких как заголовок, краткое описание и разделы. Дополнительную информацию можно найти в [документации Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#example-of-connector-message). Вы должны передать полный URL веб-хука в директиву `@microsoftTeams`:
 
-```php
+```blade
 @finished
     @microsoftTeams('webhook-url')
 @endfinished

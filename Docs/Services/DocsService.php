@@ -12,6 +12,9 @@ class DocsService
 
     private const array SKIP_FILES = ['documentation', 'readme', 'license', 'navigation'];
 
+    /** Метка якоря, переживающая рендер markdown */
+    private const string ANCHOR_TOKEN = '@@docs-anchor:';
+
     /**
      * Извлекает заголовок h1 из markdown
      */
@@ -22,6 +25,26 @@ class DocsService
         }
 
         return null;
+    }
+
+    /**
+     * Рендерит markdown в html
+     *
+     * Якоря в документации Laravel заданы тегами `<a name="section"></a>`, а html
+     * из markdown вырезается. Подменяем их на токен, который переживёт рендер,
+     * и возвращаем уже своей разметкой — без остального html из исходника
+     */
+    public function render(string $raw): string
+    {
+        $md = preg_replace('/<a\s+name="([\w-]+)"\s*><\/a>/i', self::ANCHOR_TOKEN . '$1@@', $raw);
+
+        $html = Str::of($md)->markdown(['html_input' => 'strip'])->toString();
+
+        return preg_replace(
+            '/(?:<p>)?' . preg_quote(self::ANCHOR_TOKEN, '/') . '([\w-]+)@@(?:<\/p>)?/',
+            '<a id="$1"></a>',
+            $html,
+        );
     }
 
     /**

@@ -16,7 +16,7 @@
 
 @section('content')
     <div class="mb-4">
-        <form action="/docs/search" method="get" class="d-flex gap-2">
+        <form action="/docs/find" method="get" class="d-flex gap-2">
             <input name="query" class="form-control" type="search"
                    placeholder="Поиск по документации..." value="{{ $query }}" minlength="3" maxlength="64">
             <button class="btn btn-primary">Найти</button>

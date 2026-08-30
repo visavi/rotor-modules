@@ -1,5 +1,5 @@
 ---
-git: de0cc80cd74216e1c7a5ac5d5681165357f865a6
+git: 559641a3995aa42dc5f54216f016131d3b47226c
 ---
 
 # Маршрутизация
@@ -46,6 +46,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 ```
+
+Конечно, вы можете не указывать посредник `auth:sanctum` для маршрутов, которые должны быть публично доступными.
 
 Маршруты в `routes/api.php` не сохраняют состояние и назначаются `api` [группе посредников](/docs/{{version}}/middleware#laravels-default-middleware-groups). Кроме того, к этим маршрутам автоматически применяется префикс URI `/api`, поэтому вам не нужно вручную применять его к каждому маршруту в файле. Вы можете изменить префикс, изменив файл `bootstrap/app.php` вашего приложения:
 
@@ -261,7 +263,7 @@ Route::get('/posts/{post}/comments/{comment}', function (string $postId, string 
 });
 ```
 
-Параметры маршрута всегда заключаются в фигурные скобки `{}` и должны состоять из буквенных символов. Подчеркивание (`_`) также допускается в именах параметров маршрута. Параметры маршрута будут внедрены в замыкания маршрута / контроллеры в зависимости от их порядка, т.е. имена аргументов замыкания маршрута / контроллера не имеют значения.
+Параметры маршрута всегда заключаются в фигурные скобки `{}` и должны состоять из буквенных символов. В именах параметров также допускается символ подчеркивания (`_`). Параметры внедряются в замыкания маршрутов или контроллеры в порядке следования, поэтому имена аргументов замыкания или контроллера не имеют значения.
 
 <a name="parameters-and-dependency-injection"></a>
 #### Параметры и внедрение зависимости
@@ -436,7 +438,7 @@ Route::get('/user/{id}/profile', function (string $id) {
 
 $url = route('profile', ['id' => 1, 'photos' => 'yes']);
 
-// /user/1/profile?photos=yes
+// http://example.com/user/1/profile?photos=yes
 ```
 
 > [!NOTE]
@@ -517,9 +519,6 @@ Route::domain('{account}.example.com')->group(function () {
     });
 });
 ```
-
-> [!WARNING]
-> Чтобы обеспечить доступность маршрутов поддоменов, вы должны зарегистрировать маршруты поддоменов перед регистрацией маршрутов корневого домена. Это предотвратит перезапись маршрутами корневого домена маршрутов поддоменов, имеющих одинаковый путь URI.
 
 <a name="route-group-prefixes"></a>
 ### Префиксы URI сгруппированных маршрутов
@@ -609,15 +608,16 @@ Route::get('/posts/{post:slug}', function (Post $post) {
 });
 ```
 
-Если вы хотите, чтобы при извлечении класса связанной модели всегда использовался столбец базы данных, отличный от `id`, то вы можете переопределить метод `getRouteKeyName` модели Eloquent:
+Если вы хотите, чтобы привязка модели всегда использовала столбец базы данных, отличный от `id`, при извлечении заданного класса модели, вы можете применить атрибут `RouteKey` к модели Eloquent:
 
 ```php
-/**
- * Получить ключ маршрута для модели.
- */
-public function getRouteKeyName(): string
+use Illuminate\Database\Eloquent\Attributes\RouteKey;
+use Illuminate\Database\Eloquent\Model;
+
+#[RouteKey('slug')]
+class Post extends Model
 {
-    return 'slug';
+    // ...
 }
 ```
 
@@ -825,7 +825,7 @@ use Illuminate\Support\Facades\RateLimiter;
 /**
  * Запуск любых служб приложения.
  */
-protected function boot(): void
+public function boot(): void
 {
     RateLimiter::for('api', function (Request $request) {
         return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
@@ -843,7 +843,7 @@ use Illuminate\Support\Facades\RateLimiter;
 /**
  * Запуск любых служб приложения.
  */
-protected function boot(): void
+public function boot(): void
 {
     RateLimiter::for('global', function (Request $request) {
         return Limit::perMinute(1000);
@@ -865,9 +865,9 @@ RateLimiter::for('global', function (Request $request) {
 
 ```php
 RateLimiter::for('uploads', function (Request $request) {
-    return $request->user()->vipCustomer()
+    return $request->user()?->vipCustomer()
         ? Limit::none()
-        : Limit::perMinute(100);
+        : Limit::perHour(10);
 });
 ```
 
@@ -919,6 +919,29 @@ RateLimiter::for('uploads', function (Request $request) {
 });
 ```
 
+<a name="response-base-rate-limiting"></a>
+#### Ограничение частоты на основе ответа
+
+Помимо ограничения частоты входящих запросов, Laravel позволяет ограничивать частоту на основе ответа с помощью метода `after`. Это полезно, когда вы хотите учитывать в лимите только определённые ответы, например ошибки валидации, ответы 404 или другие конкретные HTTP-статусы.
+
+Метод `after` принимает замыкание, которое получает ответ и должно вернуть `true`, если ответ следует учитывать в лимите частоты, или `false`, если его нужно игнорировать. Это особенно полезно для предотвращения атак перебора, ограничивая последовательные ответы 404, или позволяя пользователям повторять запросы, не прошедшие валидацию, не исчерпывая лимит для конечной точки, которая должна ограничивать только успешные операции:
+
+```php
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Symfony\Component\HttpFoundation\Response;
+
+RateLimiter::for('resource-not-found', function (Request $request) {
+    return Limit::perMinute(10)
+        ->by($request->user()?->id ?: $request->ip())
+        ->after(function (Response $response) {
+            // Учитывать в лимите только ответы 404, чтобы предотвратить перебор...
+            return $response->status() === 404;
+        });
+});
+```
+
 <a name="attaching-rate-limiters-to-routes"></a>
 ### Привязка ограничителей частоты запросов к маршрутам
 
@@ -942,7 +965,7 @@ Route::middleware(['throttle:uploads'])->group(function () {
 По умолчанию посредник `throttle` сопоставлен классу `Illuminate\Routing\Middleware\ThrottleRequests`. Однако, если вы используете Redis в качестве драйвера кэша вашего приложения, вы можете поручить Laravel использовать Redis для управления ограничением скорости. Для этого вам следует использовать метод `throttleWithRedis` в файле `bootstrap/app.php` вашего приложения. Этот метод сопоставляет посредника `throttle` с классом посредника `Illuminate\Routing\Middleware\ThrottleRequestsWithRedis`:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
+->withMiddleware(function (Middleware $middleware): void {
     $middleware->throttleWithRedis();
     // ...
 })

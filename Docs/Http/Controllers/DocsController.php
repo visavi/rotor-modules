@@ -23,7 +23,7 @@ class DocsController extends Controller
 
         if (file_exists($rotorPath)) {
             $raw = file_get_contents($rotorPath);
-            $content = Str::of($raw)->markdown(['html_input' => 'strip']);
+            $content = $this->docs->render($raw);
             $title = $this->docs->extractTitle($raw) ?? $page;
             $section = 'rotor';
             $menu = $this->docs->buildMenu($page, null);
@@ -34,11 +34,13 @@ class DocsController extends Controller
         if (file_exists($laravelPath)) {
             $synced = true;
             $raw = file_get_contents($laravelPath);
-            $content = Str::of($raw)
-                ->replace('{{version}}', DocsService::LARAVEL_VERSION)
-                ->after('---')
-                ->after('---')
-                ->markdown(['html_input' => 'strip']);
+            $content = $this->docs->render(
+                Str::of($raw)
+                    ->replace('{{version}}', DocsService::LARAVEL_VERSION)
+                    ->after('---')
+                    ->after('---')
+                    ->toString()
+            );
             $title = $this->docs->extractTitle($raw) ?? $page;
             $section = 'laravel';
             $menu = $this->docs->buildMenu(null, $page);

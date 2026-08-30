@@ -1,5 +1,5 @@
 ---
-git: 2d68f340f3adc35a707e1bd6861c6a27423a9df6
+git: 4350436469a91de3600dbeb72de644fe139d2147
 ---
 
 # Laravel Horizon
@@ -20,7 +20,7 @@ git: 2d68f340f3adc35a707e1bd6861c6a27423a9df6
 ## Установка
 
 > [!WARNING]
-> Laravel Horizon требует, чтобы вы использовали [Redis](https://redis.io) для управления очередью. Следовательно, вы должны убедиться, что соединение с очередью настроено на `redis` в файле конфигурации приложения `config/queue.php`.
+> Laravel Horizon требует, чтобы вы использовали [Redis](https://redis.io) для управления очередью. Следовательно, вы должны убедиться, что соединение с очередью настроено на `redis` в файле конфигурации приложения `config/queue.php`. В настоящее время Horizon несовместим с Redis Cluster.
 
 Вы можете установить Horizon в свой проект с помощью диспетчера пакетов Composer:
 
@@ -40,7 +40,35 @@ php artisan horizon:install
 После публикации ресурсов Horizon его основной файл конфигурации будет расположен по адресу `config/horizon.php`. Этот файл конфигурации позволяет вам настроить параметры обработчика очереди для приложения. Каждый вариант конфигурации включает описание своего назначения, поэтому обязательно внимательно изучите этот файл.
 
 > [!WARNING]
-> Horizon использует Redis-соединение с именем «horizon». Это имя соединения Redis зарезервировано и не должно назначаться другому Redis-соединению в файле конфигурации `database.php` или в качестве значения параметра` use` в файле конфигурации `horizon.php`.
+> Horizon использует Redis-соединение с именем «horizon». Это имя соединения Redis зарезервировано и не должно назначаться другому Redis-соединению в файле конфигурации `database.php` или в качестве значения параметра `use` в файле конфигурации `horizon.php`.
+
+<a name="content-security-policy-csp-nonce"></a>
+#### Nonce для Content Security Policy (CSP)
+
+Если вы хотите использовать [атрибут nonce](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/nonce) в тегах script и style, используемых в представлениях Horizon, как часть вашей [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), вы можете указать нужное значение nonce с помощью метода `Horizon::cspNonce`. Обычно этот метод следует вызывать внутри посредника, чтобы для каждого запроса назначался новый nonce:
+
+```php
+use Closure;
+use Illuminate\Http\Request;
+use Laravel\Horizon\Horizon;
+use Symfony\Component\HttpFoundation\Response;
+
+public function handle(Request $request, Closure $next): Response
+{
+    Horizon::cspNonce('csp-nonce');
+
+    return $next($request);
+}
+```
+
+Вы можете добавить этот посредник в опцию `middleware` файла конфигурации `config/horizon.php` вашего приложения:
+
+```php
+'middleware' => [
+    'web',
+    App\Http\Middleware\AddHorizonCspNonce::class,
+],
+```
 
 <a name="environments"></a>
 #### Окружение
@@ -121,7 +149,7 @@ php artisan horizon:install
 /**
  * Регистрация шлюза Horizon.
  *
- * Этот шлюз определяют, кто может получить доступ к Horizon во внешней среде.
+ * Этот шлюз определяет, кто может получить доступ к Horizon во внешней среде.
  */
 protected function gate(): void
 {
@@ -175,7 +203,7 @@ protected function gate(): void
 'environments' => [
     'production' => [
         'supervisor-1' => [
-            // ...¨
+            // ...
             'timeout' => 60,
         ],
     ],
@@ -214,6 +242,38 @@ protected function gate(): void
 ],
 ```
 
+<a name="other-worker-options"></a>
+### Другие параметры воркеров
+
+Помимо `tries`, `timeout` и `backoff`, каждый супервизор принимает несколько других параметров, которые управляют поведением его процессов-воркеров и тем, когда они автоматически перезапускаются. Периодический перезапуск воркеров является хорошей практикой для долгоживущих процессов, поскольку помогает защититься от утечек памяти:
+
+```php
+'environments' => [
+    'production' => [
+        'supervisor-1' => [
+            // ...
+            'memory' => 128,
+            'maxJobs' => 1000,
+            'maxTime' => 3600,
+            'sleep' => 3,
+            'rest' => 0,
+            'nice' => 0,
+        ],
+    ],
+],
+```
+
+<div class="content-list" markdown="1">
+
+- `memory` определяет максимальный объем памяти в мегабайтах, который может использовать один процесс-воркер перед перезапуском. По умолчанию это значение равно `128`.
+- `maxJobs` определяет количество заданий, которое воркер должен обработать перед перезапуском. Значение `0` означает, что воркеры не должны перезапускаться на основе количества обработанных заданий. По умолчанию это значение равно `0`.
+- `maxTime` определяет количество секунд, в течение которых воркер должен работать перед перезапуском. Значение `0` означает, что воркеры не должны перезапускаться на основе времени. По умолчанию это значение равно `0`.
+- `sleep` определяет количество секунд, которое воркер должен ждать при отсутствии доступных заданий перед повторным опросом очереди. По умолчанию это значение равно `3`.
+- `rest` определяет количество секунд паузы между обработкой каждого задания. По умолчанию это значение равно `0`.
+- `nice` определяет «уступчивость» (приоритет планирования) процессов-воркеров. Более высокое значение дает процессу более низкий приоритет. По умолчанию это значение равно `0`.
+
+</div>
+
 <a name="silenced-jobs"></a>
 ### Заглушить задания
 
@@ -222,6 +282,14 @@ protected function gate(): void
 ```php
 'silenced' => [
     App\Jobs\ProcessPodcast::class,
+],
+```
+
+Помимо заглушения отдельных классов заданий, Horizon также поддерживает заглушение заданий на основе [тегов](#tags). Это может быть полезно, если вы хотите скрыть несколько заданий с общим тегом:
+
+```php
+'silenced_tags' => [
+    'notifications'
 ],
 ```
 
@@ -454,6 +522,43 @@ php artisan horizon:supervisor-status supervisor-1
 php artisan horizon:terminate
 ```
 
+<a name="automatically-restarting-horizon"></a>
+#### Автоматический перезапуск Horizon
+
+Во время локальной разработки вы можете запускать команду `horizon:listen`. При использовании команды `horizon:listen` вам не нужно вручную перезапускать Horizon, когда вы хотите перезагрузить обновлённый код. Перед использованием этой возможности убедитесь, что [Node](https://nodejs.org) установлен в вашей локальной среде разработки. Кроме того, установите библиотеку наблюдения за файлами [Chokidar](https://github.com/paulmillr/chokidar) в ваш проект:
+
+```shell
+npm install --save-dev chokidar
+```
+
+После установки Chokidar вы можете запустить Horizon с помощью команды `horizon:listen`:
+
+```shell
+php artisan horizon:listen
+```
+
+При запуске внутри Docker или Vagrant следует использовать опцию `--poll`:
+
+```shell
+php artisan horizon:listen --poll
+```
+
+Вы можете настроить каталоги и файлы, за которыми нужно наблюдать, с помощью опции конфигурации `watch` в файле `config/horizon.php` вашего приложения:
+
+```php
+'watch' => [
+    'app',
+    'bootstrap',
+    'config',
+    'database',
+    'public/**/*.php',
+    'resources/**/*.php',
+    'routes',
+    'composer.lock',
+    '.env',
+],
+```
+
 <a name="deploying-horizon"></a>
 ### Развертывание Horizon (deploy)
 
@@ -636,6 +741,8 @@ public function boot(): void
 ],
 ```
 
+Установка порога очереди в `0` отключит уведомления о долгом ожидании для этой очереди.
+
 <a name="metrics"></a>
 ## Метрики
 
@@ -645,6 +752,17 @@ Horizon включает в себя панель метрик, которая �
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
+```
+
+Вы можете настроить, сколько снимков Horizon хранит для графиков метрик, с помощью опции `metrics.trim_snapshots` в файле конфигурации `config/horizon.php` вашего приложения. Поскольку эта опция ограничивает количество снимков, а не их возраст, срок хранения зависит от того, как часто выполняется команда `horizon:snapshot`:
+
+```php
+'metrics' => [
+    'trim_snapshots' => [
+        'job' => 24,
+        'queue' => 24,
+    ],
+],
 ```
 
 Если вы хотите удалить все данные метрик, вы можете вызвать команду Artisan `horizon:clear-metrics`:

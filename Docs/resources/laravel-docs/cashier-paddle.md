@@ -1,5 +1,5 @@
 ---
-git: 6f02e3f9fae473a1af9591fb46b7d7969a2cc54c
+git: 7069be16037d772d289b504f5bc878fb384e9238
 ---
 
 # Laravel Cashier (Paddle)
@@ -415,7 +415,7 @@ Route::get('/buy', function (Request $request) {
 });
 ```
 
-Кассир включает в себя [компонент Blade](/docs/{{version}}/blade#comComponents) `paddle-button`. Вы можете передать сеанс оформления заказа этому компоненту в качестве «реквизита». Затем, когда эта кнопка будет нажата, отобразится виджет оформления заказа Paddle:
+Cashier включает [компонент Blade](/docs/{{version}}/blade#components) `paddle-button`. Этому компоненту можно передать сеанс оформления заказа в качестве входного параметра. При нажатии кнопки будет показан виджет оформления заказа Paddle:
 
 ```html
 <x-paddle-button :checkout="$checkout" class="px-8 py-4">
@@ -727,7 +727,7 @@ $checkout = $request->user()->subscribe($premium = 'pri_123', 'default')
 </x-paddle-button>
 ```
 
-После того, как пользователь завершит оформление заказа, из Paddle будет отправлен вебхук `subscription_created`. Cashier получит этот вебхук и настроит подписку для вашего клиента. Чтобы убедиться, что все веб-хуки правильно принимаются и обрабатываются вашим приложением, убедитесь, что у вас правильно настроена [настройка обработки веб-хуков](#handling-paddle-webhooks).
+После того, как пользователь завершит оформление заказа, из Paddle будет отправлен вебхук `subscription_created`. Cashier получит этот вебхук и настроит подписку для вашего клиента. Чтобы убедиться, что все веб-хуки правильно принимаются и обрабатываются вашим приложением, убедитесь, что вы правильно [настроили обработку веб-хуков](#handling-paddle-webhooks).
 
 <a name="checking-subscription-status"></a>
 ### Проверка статуса подписки
@@ -832,7 +832,7 @@ if ($user->subscription()->pastDue()) {
 }
 ```
 
-Если срок подписки просрочен, вы должны поручить пользователю [обновить платежную информацию](#updating-pay-information).
+Если срок подписки просрочен, вы должны поручить пользователю [обновить платежную информацию](#updating-payment-information).
 
 Если вы хотите, чтобы подписки по-прежнему считались действительными, когда они истекли (`past_due`), вы можете использовать метод `keepPastDueSubscriptionsActive`, предоставляемый Cashier. Обычно этот метод следует вызывать в методе `register` вашего `AppServiceProvider`:
 
@@ -1104,13 +1104,13 @@ $user->subscription()->pauseNow();
 Используя метод `pauseUntil`, вы можете приостановить подписку до определенного момента времени:
 
 ```php
-$user->subscription()->pauseUntil(now()->addMonth());
+$user->subscription()->pauseUntil(now()->plus(months: 1));
 ```
 
 Или вы можете использовать метод `pauseNowUntil`, чтобы немедленно приостановить подписку до заданного момента времени:
 
 ```php
-$user->subscription()->pauseNowUntil(now()->addMonth());
+$user->subscription()->pauseNowUntil(now()->plus(months: 1));
 ```
 
 Вы можете определить, приостановил ли пользователь свою подписку, но все еще находится в «льготном периоде», используя метод `onPausedGracePeriod`:
@@ -1230,7 +1230,7 @@ $user = User::create([
 ]);
 
 $user->createAsCustomer([
-    'trial_ends_at' => now()->addDays(10)
+    'trial_ends_at' => now()->plus(days: 10)
 ]);
 ```
 
@@ -1278,7 +1278,7 @@ if ($user->onGenericTrial()) {
 Вы можете продлить существующий пробный период подписки, вызвав метод `extendTrial` и указав момент времени, когда пробная версия должна закончиться:
 
 ```php
-$user->subscription()->extendTrial(now()->addDays(5));
+$user->subscription()->extendTrial(now()->plus(days: 5));
 ```
 
 Или вы можете немедленно активировать подписку, завершив ее пробную версию, вызвав метод `activate` подписки:
@@ -1313,8 +1313,8 @@ Paddle может уведомлять ваше приложение о разл
 Поскольку веб-хукам Paddle необходимо обходить [защиту CSRF](/docs/{{version}}/csrf) Laravel, вам следует убедиться, что Laravel не пытается проверить токен CSRF для входящих веб-хуков Paddle. Для этого вам следует исключить `paddle/*` из защиты CSRF в файле `bootstrap/app.php` вашего приложения:
 
 ```php
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->validateCsrfTokens(except: [
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->preventRequestForgery(except: [
         'paddle/*',
     ]);
 })
@@ -1479,7 +1479,7 @@ $transactions = $user->transactions;
 
 При перечислении транзакций для клиента вы можете использовать методы экземпляра транзакции для отображения соответствующей платежной информации. Например, вы можете перечислить каждую транзакцию в таблице, чтобы пользователь мог легко загрузить любой из счетов:
 
-```blade
+```html
 <table>
     @foreach ($transactions as $transaction)
         <tr>

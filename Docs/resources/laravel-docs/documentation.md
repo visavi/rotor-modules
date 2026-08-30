@@ -1,5 +1,5 @@
 ---
-git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
+git: 3ebbcbf54a8ed7dcb72610d04e6780737ccb462b
 ---
 
 - ## Пролог
@@ -9,6 +9,7 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
 - ## Начало работы
     - [Установка](/docs/{{version}}/installation)
     - [Конфигурация](/docs/{{version}}/configuration)
+    - [Агентная разработка](/docs/{{version}}/ai)
     - [Структура каталогов](/docs/{{version}}/structure)
     - [Frontend](/docs/{{version}}/frontend)
     - [Стартовые наборы](/docs/{{version}}/starter-kits)
@@ -45,6 +46,7 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
     - [Файловое хранилище](/docs/{{version}}/filesystem)
     - [Помощники](/docs/{{version}}/helpers)
     - [HTTP Клиент](/docs/{{version}}/http-client)
+    - [Изображения](/docs/{{version}}/images)
     - [Локализация](/docs/{{version}}/localization)
     - [Почта](/docs/{{version}}/mail)
     - [Уведомления](/docs/{{version}}/notifications)
@@ -52,6 +54,7 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
     - [Процессы](/docs/{{version}}/processes)
     - [Очереди](/docs/{{version}}/queues)
     - [Ограничение скорости](/docs/{{version}}/rate-limiting)
+    - [Поиск](/docs/{{version}}/search)
     - [Строки](/docs/{{version}}/strings)
     - [Планировщик](/docs/{{version}}/scheduling)
 - ## Безопасность
@@ -77,6 +80,10 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
     - [API Ресурсы](/docs/{{version}}/eloquent-resources)
     - [Сериализация](/docs/{{version}}/eloquent-serialization)
     - [Фабрики](/docs/{{version}}/eloquent-factories)
+- ## ИИ
+    - [AI SDK](/docs/{{version}}/ai-sdk)
+    - [MCP](/docs/{{version}}/mcp)
+    - [Boost](/docs/{{version}}/boost)
 - ## Тестирование
     - [Начало работы](/docs/{{version}}/testing)
     - [HTTP Тесты](/docs/{{version}}/http-tests)
@@ -85,16 +92,15 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
     - [База данных](/docs/{{version}}/database-testing)
     - [Имитация](/docs/{{version}}/mocking)
 - ## Пакеты
-    - [Breeze](/docs/{{version}}/starter-kits#laravel-breeze)
     - [Cashier (Stripe)](/docs/{{version}}/billing)
     - [Cashier (Paddle)](/docs/{{version}}/cashier-paddle)
     - [Dusk](/docs/{{version}}/dusk)
     - [Envoy](/docs/{{version}}/envoy)
     - [Fortify](/docs/{{version}}/fortify)
     - [Folio](/docs/{{version}}/folio)
+    - [Head](/docs/{{version}}/head)
     - [Homestead](/docs/{{version}}/homestead)
     - [Horizon](/docs/{{version}}/horizon)
-    - [Jetstream](https://jetstream.laravel.com)
     - [Mix](/docs/{{version}}/mix)
     - [Octane](/docs/{{version}}/octane)
     - [Passport](/docs/{{version}}/passport)
@@ -110,4 +116,4 @@ git: 88b6f0d99c9f89ca38266d9fa0c3b4ea3df3c85e
     - [Socialite](/docs/{{version}}/socialite)
     - [Telescope](/docs/{{version}}/telescope)
     - [Valet](/docs/{{version}}/valet)
-    - [API Документация](https://laravel.com/api/11.x)
+    - [API Документация](https://api.laravel.com/docs/13.x)

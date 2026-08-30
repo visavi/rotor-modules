@@ -1,5 +1,5 @@
 ---
-git: 861a9116742b8054dc74aa25a7fa167c4e287d96
+git: 68f903aca708d7c9070f73127e64468132b1266b
 ---
 
 # Контейнер служб (service container)
@@ -64,7 +64,7 @@ Route::get('/', function (Service $service) {
 
 В этом примере, при посещении `/` вашего приложения, маршрут автоматически получит класс `Service` и внедрит его в обработчике вашего маршрута. Это меняет правила игры. Это означает, что вы можете разработать свое приложение и воспользоваться преимуществами внедрения зависимостей, не беспокоясь о раздутых файлах конфигурации.
 
-К счастью, многие классы, которые вы будете писать при создании приложения Laravel, автоматически получают свои зависимости через контейнер, включая [контроллеры](/docs/{{version}}/controllers), [слушатели событий](/docs/{{version}}/events), [посредники](/docs/{{version}}/middleware ) и т.д. Кроме того, вы можете указать зависимости в методе `handle` обработки [заданий в очереди](/docs/{{version}}/queues). Как только вы почувствуете всю мощь автоматического неконфигурируемого внедрения зависимостей, вы почувствуете невозможность разработки без нее.
+Многие классы приложения Laravel автоматически получают зависимости через контейнер, включая [контроллеры](/docs/{{version}}/controllers), [слушатели событий](/docs/{{version}}/events), [посредники](/docs/{{version}}/middleware) и другие классы. Кроме того, зависимости можно указать в методе `handle` [задания в очереди](/docs/{{version}}/queues). Оценив преимущества автоматического внедрения зависимостей без дополнительной настройки, вам будет трудно представить разработку без него.
 
 <a name="when-to-use-the-container"></a>
 ### Когда использовать контейнер
@@ -301,6 +301,23 @@ interface EventPusher
 }
 ```
 
+Для привязок, зависящих от произвольного условия, можно использовать атрибут `BindWhen`. Замыкание может получить контейнер и должно вернуть `true`, когда привязку нужно применить. Атрибуты `Bind` и `BindWhen` обрабатываются в порядке объявления:
+
+```php
+use App\Services\BetaEventPusher;
+use Illuminate\Container\Attributes\BindWhen;
+use Laravel\Pennant\Feature;
+
+#[BindWhen(BetaEventPusher::class, static fn () => Feature::active('beta-events'))]
+interface EventPusher
+{
+    // ...
+}
+```
+
+> [!NOTE]
+> Атрибут `BindWhen` требует PHP 8.5 или выше.
+
 <a name="contextual-binding"></a>
 ### Контекстная привязка
 
@@ -351,7 +368,7 @@ class PhotoController extends Controller
 }
 ```
 
-В дополнение к атрибуту `Storage`, Laravel предлагает атрибуты `Auth`, `Cache`, `Config`, `Context`, `DB`, `Give`, `Log`, `RouteParameter` и [Tag](#tagging):
+В дополнение к атрибуту `Storage`, Laravel предлагает атрибуты `Auth`, `Cache`, `Config`, `Context`, `DB`, `Give`, `Log`, `RequestAttribute`, `RouteParameter` и [Tag](#tagging):
 
 ```php
 <?php
@@ -359,6 +376,7 @@ class PhotoController extends Controller
 namespace App\Http\Controllers;
 
 use App\Contracts\UserRepository;
+use App\Models\Organization;
 use App\Models\Photo;
 use App\Repositories\DatabaseRepository;
 use Illuminate\Container\Attributes\Auth;
@@ -368,6 +386,7 @@ use Illuminate\Container\Attributes\Context;
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Container\Attributes\Give;
 use Illuminate\Container\Attributes\Log;
+use Illuminate\Container\Attributes\RequestAttribute;
 use Illuminate\Container\Attributes\RouteParameter;
 use Illuminate\Container\Attributes\Tag;
 use Illuminate\Contracts\Auth\Guard;
@@ -386,13 +405,18 @@ class PhotoController extends Controller
         #[DB('mysql')] protected Connection $connection,
         #[Give(DatabaseRepository::class)] protected UserRepository $users,
         #[Log('daily')] protected LoggerInterface $log,
-        #[RouteParameter('photo')] protected Photo $photo,
+        #[RequestAttribute('organization')] protected Organization $organization,
+        #[RouteParameter] protected Photo $photo,
         #[Tag('reports')] protected iterable $reports,
     ) {
         // ...
     }
 }
 ```
+
+Атрибут `RouteParameter` разрешит параметр маршрута, соответствующий имени переменной. При необходимости вы можете явно указать имя параметра маршрута: `#[RouteParameter('photo')]`.
+
+Атрибут `RequestAttribute` разрешит значение, сохраненное под указанным ключом в [сумке атрибутов](https://symfony.com/doc/current/components/http_foundation.html#accessing-request-data) текущего запроса: `#[RequestAttribute('organization')]`.
 
 Кроме того, Laravel предоставляет атрибут `CurrentUser` для добавления текущего аутентифицированного пользователя в заданный маршрут или класс:
 
@@ -418,6 +442,7 @@ namespace App\Attributes;
 use Attribute;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Container\ContextualAttribute;
+use ReflectionParameter;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
 class Config implements ContextualAttribute
@@ -434,9 +459,10 @@ class Config implements ContextualAttribute
      *
      * @param  self  $attribute
      * @param  \Illuminate\Contracts\Container\Container  $container
+     * @param  \ReflectionParameter  $parameter
      * @return mixed
      */
-    public static function resolve(self $attribute, Container $container)
+    public static function resolve(self $attribute, Container $container, ReflectionParameter $parameter)
     {
         return $container->make('config')->get($attribute->key, $attribute->default);
     }
@@ -634,7 +660,7 @@ public function __construct(
 <a name="automatic-injection"></a>
 ### Автоматическое внедрение зависимостей
 
-Важно, что в качестве альтернативы, вы можете объявить тип зависимости в конструкторе класса, который извлекается контейнером, включая [контроллеры](/docs/{{version}}/controllers), [слушатели событий](/docs/{{version}}/events), [посредники](/docs/{{version}}/middleware ) и т.д. Кроме того, вы можете объявить зависимости в методе `handle` обработки [заданий в очереди](/docs/{{version}}/queues). На практике именно так контейнер должен извлекать большинство ваших объектов.
+В качестве альтернативы тип зависимости можно объявить в конструкторе класса, разрешаемого контейнером, например [контроллера](/docs/{{version}}/controllers), [слушателя событий](/docs/{{version}}/events) или [посредника](/docs/{{version}}/middleware). Кроме того, зависимости можно объявлять в методе `handle` [задания в очереди](/docs/{{version}}/queues). На практике именно так контейнер должен разрешать большинство объектов приложения.
 
 Например, вы можете объявить сервис, определенный вашим приложением, в конструкторе контроллера. Сервис будет автоматически получен и внедрен в класс:
 

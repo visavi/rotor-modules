@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 
 class DocsSyncCommand extends Command
 {
-    protected $signature = 'docs:sync {--branch=12.x : Ветка репозитория laravelsu/docs}';
+    protected $signature = 'docs:sync {--branch=13.x : Ветка репозитория laravelsu/docs}';
 
     protected $description = 'Синхронизация Laravel документации с репозитория laravelsu/docs';
 

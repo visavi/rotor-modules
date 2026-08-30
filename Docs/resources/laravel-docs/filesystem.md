@@ -1,5 +1,5 @@
 ---
-git: f0dd01fbfc7a510da582efa03c6e1b31ef188aed
+git: 57ae1e7dbd4bda3bae24ce93e527f1807ae49a43
 ---
 
 # Файловое хранилище
@@ -155,7 +155,7 @@ composer require league/flysystem-sftp-v3 "^3.0"
 ```
 
 <a name="scoped-and-read-only-filesystems"></a>
-### Ограниченные и только для чтения файловые системы
+### Ограниченные файловые системы, файловые системы только для чтения и со сквозным чтением
 
 Ограниченные диски позволяют вам определить файловую систему, в которой все пути автоматически дополняются указанным префиксом пути. Прежде чем создать ограниченный диск файловой системы, вам необходимо установить дополнительный пакет Flysystem с помощью менеджера пакетов Composer:
 
@@ -185,32 +185,32 @@ composer require league/flysystem-read-only "^3.0"
 's3-videos' => [
     'driver' => 's3',
     // ...
-    'read-only' => true,
+'read-only' => true,
 ],
 ```
+
+Диски со сквозным чтением позволяют переносить файлы между дисками без простоя. При чтении файла Laravel сначала проверяет основной диск. Если файл существует только на резервном диске, Laravel читает его оттуда и копирует на основной диск для последующих запросов:
+
+```php
+'assets' => [
+    'driver' => 'read-through',
+    'primary' => 's3',
+    'fallback' => 'legacy-s3',
+],
+```
+
+Операции записи и получения списка каталогов выполняются на основном диске. Проверки существования файла и его метаданных используют любой из дисков, не копируя файл на основной. Если скопировать файл с резервного диска на основной не удастся, по умолчанию чтение все равно завершится успешно. Чтобы вместо этого выбрасывалось исключение, установите параметр конфигурации `throw_on_promotion_failure` в `true`.
 
 <a name="amazon-s3-compatible-filesystems"></a>
 ### Файловые системы, совместимые с Amazon S3
 
-По умолчанию файл конфигурации вашего приложения `filesystems` содержит конфигурацию диска для диска `s3`. Помимо использования этого диска для взаимодействия с [Amazon S3](https://aws.amazon.com/s3/), вы можете использовать его для взаимодействия с любым совместимым с S3 сервисом хранения файлов, таким как [MinIO](https://github.com/minio/minio), [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces/), [Vultr Object Storage](https://www.vultr.com/products/object-storage/), [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) или [Hetzner Cloud Storage](https://www.hetzner.com/storage/object-storage/).
+По умолчанию файл конфигурации вашего приложения `filesystems` содержит конфигурацию диска для диска `s3`. Помимо использования этого диска для взаимодействия с [Amazon S3](https://aws.amazon.com/s3/), вы можете использовать его для взаимодействия с любым совместимым с S3 сервисом хранения файлов, таким как [RustFS](https://github.com/rustfs/rustfs), [DigitalOcean Spaces](https://www.digitalocean.com/products/spaces/), [Vultr Object Storage](https://www.vultr.com/products/object-storage/), [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) или [Hetzner Cloud Storage](https://www.hetzner.com/storage/object-storage/).
 
 Обычно после обновления учетных данных диска для соответствия учетным данным службы, которую вы планируете использовать, вам нужно только обновить значение параметра конфигурации `endpoint`. Значение этой опции обычно определяется через переменную окружения `AWS_ENDPOINT`:
 
 ```php
-'endpoint' => env('AWS_ENDPOINT', 'https://minio:9000'),
+'endpoint' => env('AWS_ENDPOINT', 'https://rustfs:9000'),
 ```
-
-<a name="minio"></a>
-#### MinIO
-
-Для того чтобы интеграция Flysystem в Laravel генерировала правильные URL при использовании MinIO, вам следует определить переменную окружения `AWS_URL`, чтобы она соответствовала локальному URL вашего приложения и включала имя бакета в путь URL:
-
-```ini
-AWS_URL=http://localhost:9000/local
-```
-
-> [!WARNING]
-> Генерация временных URL-адресов для хранилища с использованием метода `temporaryUrl` может не работать при использовании MinIO, если клиент не может получить доступ к конечной точке.
 
 <a name="obtaining-disk-instances"></a>
 ## Доступ к экземплярам дисков
@@ -327,7 +327,7 @@ $url = Storage::url('file.jpg');
 use Illuminate\Support\Facades\Storage;
 
 $url = Storage::temporaryUrl(
-    'file.jpg', now()->addMinutes(5)
+    'file.jpg', now()->plus(minutes: 5)
 );
 ```
 
@@ -353,7 +353,7 @@ $url = Storage::temporaryUrl(
 ```php
 $url = Storage::temporaryUrl(
     'file.jpg',
-    now()->addMinutes(5),
+    now()->plus(minutes: 5),
     [
         'ResponseContentType' => 'application/octet-stream',
         'ResponseContentDisposition' => 'attachment; filename=file2.jpg',
@@ -400,7 +400,7 @@ class AppServiceProvider extends ServiceProvider
 #### Временные URL-адреса для загрузки
 
 > [!WARNING]
-> Возможность генерации временных URL-адресов для загрузки поддерживается только драйвером `s3`.
+> Возможность генерации временных URL-адресов для загрузки поддерживается только драйверами `s3` и `local`.
 
 Если вам нужно создать временный URL-адрес, который можно использовать для загрузки файла непосредственно из вашего клиентского приложения на стороне клиента, вы можете использовать метод `temporaryUploadUrl`. Этот метод принимает путь и экземпляр `DateTime`, указывающий, когда URL должен истечь. Метод `temporaryUploadUrl` возвращает ассоциативный массив, который можно деструктурировать на URL-адрес для загрузки и заголовки, которые должны включаться в запрос на загрузку:
 
@@ -408,7 +408,7 @@ class AppServiceProvider extends ServiceProvider
 use Illuminate\Support\Facades\Storage;
 
 ['url' => $url, 'headers' => $headers] = Storage::temporaryUploadUrl(
-    'file.jpg', now()->addMinutes(5)
+    'file.jpg', now()->plus(minutes: 5)
 );
 ```
 
@@ -660,6 +660,24 @@ $path = $request->file('avatar')->storePubliclyAs(
 );
 ```
 
+<a name="image-manipulation"></a>
+### Работа с изображениями
+
+Если перед сохранением вам нужно изменить размер, обрезать или преобразовать загруженное изображение, вы можете использовать [возможности Laravel для работы с изображениями](/docs/{{version}}/images):
+
+```php
+$path = $request->image('avatar')
+    ->cover(400, 400)
+    ->toWebp()
+    ->storePublicly('avatars', 'public');
+```
+
+Вы также можете создать экземпляр изображения из файла, уже сохраненного на одном из дисков файловой системы:
+
+```php
+$image = Storage::disk('public')->image('avatars/photo.jpg');
+```
+
 <a name="local-files-and-visibility"></a>
 #### Локальные файлы и видимость
 
@@ -781,6 +799,9 @@ test('albums can be uploaded', function () {
 
     // Проверка, что данный каталог пуст...
     Storage::disk('photos')->assertDirectoryEmpty('/wallpapers');
+
+    // Проверка, что диск не содержит файлов...
+    Storage::disk('photos')->assertEmpty();
 });
 ```
 
@@ -817,6 +838,9 @@ class ExampleTest extends TestCase
 
         // Проверка, что указанная директория пуста...
         Storage::disk('photos')->assertDirectoryEmpty('/wallpapers');
+
+        // Проверка, что диск не содержит файлов...
+        Storage::disk('photos')->assertEmpty();
     }
 }
 ```

@@ -1,5 +1,5 @@
 ---
-git: 4da19a5f3f4c14d57d08662b942e3c270fc35af5
+git: 57ae1e7dbd4bda3bae24ce93e527f1807ae49a43
 ---
 
 # События (Events)
@@ -92,6 +92,34 @@ php artisan event:list
 
 Чтобы повысить скорость вашего приложения, вам следует кэшировать манифест всех прослушивателей вашего приложения с помощью Artisan-команд `optimize` или `event:cache`. Обычно эту команду следует запускать как часть [процесса развертывания](/docs/{{version}}/deployment#optimization). Этот манифест будет использоваться платформой для ускорения процесса регистрации событий. Команда `event:clear` может использоваться для уничтожения кэша событий.
 
+<a name="dynamic-event-discovery"></a>
+#### Динамическое обнаружение событий
+
+Чтобы динамически управлять тем, должен ли конкретный слушатель быть обнаружен, вы можете реализовать интерфейс `ShouldBeDiscovered` в классе слушателя и определить метод `shouldBeDiscovered`, возвращающий булево значение. Если метод возвращает `false`, слушатель не будет зарегистрирован во время обнаружения событий:
+
+```php
+use Illuminate\Contracts\Events\ShouldBeDiscovered;
+
+class SendPodcastNotification implements ShouldBeDiscovered
+{
+    /**
+     * Обработать событие.
+     */
+    public function handle(PodcastProcessed $event): void
+    {
+        // ...
+    }
+
+    /**
+     * Определить, должен ли слушатель быть обнаружен.
+     */
+    public static function shouldBeDiscovered(): bool
+    {
+        return app()->environment('production');
+    }
+}
+```
+
 <a name="manually-registering-events"></a>
 ### Ручная регистрация событий
 
@@ -140,7 +168,7 @@ public function boot(): void
 }
 ```
 
-<a name="queuable-anonymous-event-listeners"></a>
+<a name="queueable-anonymous-event-listeners"></a>
 #### Анонимные слушатели событий в очереди
 
 При регистрации слушателей событий на основе замыкания вы можете обернуть замыкание слушателя в функцию `Illuminate\Events\queueable`, чтобы указать Laravel выполнить слушателя с использованием [очереди](/docs/{{version}}/queues):
@@ -288,7 +316,7 @@ class SendShipmentNotification implements ShouldQueue
 <a name="customizing-the-queue-connection-queue-name"></a>
 #### Настройка соединения очереди, имени, и времени задержки
 
-Если вы хотите настроить соединение очереди, имя очереди или время задержки очереди для слушателя событий, то вы можете определить свойства `$connection`, `$queue`, или `$delay` в своем классе слушателя:
+Если вы хотите настроить соединение очереди, имя очереди или время задержки очереди для слушателя событий, вы можете использовать атрибуты `Connection`, `Queue` и `Delay` в классе слушателя:
 
 ```php
 <?php
@@ -297,29 +325,16 @@ namespace App\Listeners;
 
 use App\Events\OrderShipped;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\Connection;
+use Illuminate\Queue\Attributes\Delay;
+use Illuminate\Queue\Attributes\Queue;
 
+#[Connection('sqs')]
+#[Queue('listeners')]
+#[Delay(60)]
 class SendShipmentNotification implements ShouldQueue
 {
-    /**
-     * Имя соединения, на которое должно быть отправлено задание.
-     *
-     * @var string|null
-     */
-    public $connection = 'sqs';
-
-    /**
-     * Имя очереди, в которую должно быть отправлено задание.
-     *
-     * @var string|null
-     */
-    public $queue = 'listeners';
-
-    /**
-     * Время (в секундах) до обработки задания.
-     *
-     * @var int
-     */
-    public $delay = 60;
+    // ...
 }
 ```
 
@@ -494,6 +509,189 @@ class SendShipmentNotification implements ShouldQueue, ShouldBeEncrypted
 }
 ```
 
+<a name="unique-event-listeners"></a>
+### Уникальные слушатели событий
+
+> [!WARNING]
+> Для уникальных слушателей требуется драйвер кеша, поддерживающий [блокировки](/docs/{{version}}/cache#atomic-locks). В настоящее время атомарные блокировки поддерживают драйверы кеша `memcached`, `redis`, `dynamodb`, `database`, `file` и `array`.
+
+Иногда вам может понадобиться гарантировать, что в очереди в любой момент времени находится только один экземпляр конкретного слушателя. Для этого реализуйте интерфейс `ShouldBeUnique` в классе слушателя:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use App\Events\LicenseSaved;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class AcquireProductKey implements ShouldQueue, ShouldBeUnique
+{
+    public function __invoke(LicenseSaved $event): void
+    {
+        // ...
+    }
+}
+```
+
+В приведенном выше примере слушатель `AcquireProductKey` является уникальным. Поэтому слушатель не будет поставлен в очередь, если другой экземпляр этого слушателя уже находится в очереди и еще не завершил обработку. Это гарантирует, что для каждой лицензии будет получен только один ключ продукта, даже если лицензия сохраняется несколько раз подряд.
+
+В некоторых случаях может потребоваться определить конкретный «ключ», который делает слушатель уникальным, или указать время, по истечении которого слушатель перестает оставаться уникальным. Для этого можно определить свойства или методы `uniqueId` и `uniqueFor` в классе слушателя. Методы получают экземпляр события, что позволяет использовать данные события для построения возвращаемого значения:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use App\Events\LicenseSaved;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class AcquireProductKey implements ShouldQueue, ShouldBeUnique
+{
+    /**
+     * Количество секунд, после которого уникальная блокировка слушателя будет снята.
+     *
+     * @var int
+     */
+    public $uniqueFor = 3600;
+
+    public function __invoke(LicenseSaved $event): void
+    {
+        // ...
+    }
+
+    /**
+     * Получить уникальный ID слушателя.
+     */
+    public function uniqueId(LicenseSaved $event): string
+    {
+        return 'listener:'.$event->license->id;
+    }
+}
+```
+
+В приведенном выше примере слушатель `AcquireProductKey` уникален по ID лицензии. Поэтому любые новые отправки слушателя для той же лицензии будут проигнорированы, пока существующий слушатель не завершит обработку. Это предотвращает получение дублирующихся ключей продукта для одной лицензии. Кроме того, если существующий слушатель не будет обработан в течение одного часа, уникальная блокировка будет снята и другой слушатель с тем же уникальным ключом сможет быть поставлен в очередь.
+
+> [!WARNING]
+> Если ваше приложение отправляет события с нескольких веб-серверов или контейнеров, убедитесь, что все серверы взаимодействуют с одним и тем же центральным сервером кеша, чтобы Laravel мог корректно определить, является ли слушатель уникальным.
+
+<a name="keeping-listeners-unique-until-processing-begins"></a>
+#### Сохранение уникальности слушателей до начала обработки
+
+По умолчанию уникальные слушатели «разблокируются» после завершения обработки слушателя или после исчерпания всех попыток. Однако иногда может понадобиться разблокировать слушатель непосредственно перед его обработкой. Для этого слушатель должен реализовывать контракт `ShouldBeUniqueUntilProcessing` вместо контракта `ShouldBeUnique`:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use App\Events\LicenseSaved;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class AcquireProductKey implements ShouldQueue, ShouldBeUniqueUntilProcessing
+{
+    // ...
+}
+```
+
+<a name="unique-listener-locks"></a>
+#### Блокировки уникальных слушателей
+
+За кулисами, когда слушатель `ShouldBeUnique` отправляется, Laravel пытается получить [блокировку](/docs/{{version}}/cache#atomic-locks) с ключом `uniqueId`. Если блокировка уже удерживается, слушатель не отправляется. Эта блокировка снимается, когда слушатель завершает обработку или исчерпывает все попытки. По умолчанию Laravel использует драйвер кеша по умолчанию для получения этой блокировки. Однако, если вы хотите использовать другой драйвер для получения блокировки, определите метод `uniqueVia`, возвращающий драйвер кеша, который должен использоваться:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use App\Events\LicenseSaved;
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Facades\Cache;
+
+class AcquireProductKey implements ShouldQueue, ShouldBeUnique
+{
+    // ...
+
+    /**
+     * Получить драйвер кеша для блокировки уникального слушателя.
+     */
+    public function uniqueVia(LicenseSaved $event): Repository
+    {
+        return Cache::driver('redis');
+    }
+}
+```
+
+> [!NOTE]
+> Если вам нужно только ограничить конкурентную обработку слушателя, используйте middleware задания [WithoutOverlapping](/docs/{{version}}/queues#preventing-job-overlaps).
+
+<a name="debounced-event-listeners"></a>
+### Слушатели событий с подавлением частых вызовов
+
+Иногда требуется обработать только последний экземпляр события, которое многократно отправляется за короткий период. Для этого добавьте атрибут `DebounceFor` к слушателю в очереди:
+
+```php
+<?php
+
+namespace App\Listeners;
+
+use App\Events\ProductUpdated;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DebounceFor;
+
+#[DebounceFor(30)]
+class UpdateProductSearchIndex implements ShouldQueue
+{
+    /**
+     * Обработать событие.
+     */
+    public function handle(ProductUpdated $event): void
+    {
+        // Обновить поисковый индекс товара...
+    }
+
+    /**
+     * Получить идентификатор подавления частых вызовов для слушателя.
+     */
+    public function debounceId(ProductUpdated $event): string
+    {
+        return (string) $event->product->getKey();
+    }
+}
+```
+
+В приведенном примере многократная отправка событий `ProductUpdated` для одного товара в течение `30` секунд откладывает выполнение слушателя так, что будет обработано только последнее событие. События с разными идентификаторами обрабатываются независимо.
+
+Чтобы ограничить время, на которое часто отправляемое событие может откладывать слушателя, передайте атрибуту `DebounceFor` аргумент `maxWait`:
+
+```php
+#[DebounceFor(30, maxWait: 120)]
+class UpdateProductSearchIndex implements ShouldQueue
+{
+    // ...
+}
+```
+
+Хранилище кеша, используемое для отслеживания таких событий, можно настроить, определив в слушателе метод `debounceVia`. Метод получает экземпляр события и должен возвращать репозиторий кеша:
+
+```php
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Facades\Cache;
+
+public function debounceVia(ProductUpdated $event): Repository
+{
+    return Cache::driver('redis');
+}
+```
+
+Подавление частых вызовов и уникальность слушателя взаимоисключающи. Слушатель с атрибутом `DebounceFor` не должен реализовывать `ShouldBeUnique`.
+
+> [!WARNING]
+> Если приложение отправляет события с нескольких веб-серверов или контейнеров, убедитесь, что все серверы взаимодействуют с одним общим центральным сервером кеша.
+
 <a name="handling-failed-jobs"></a>
 ### Обработка невыполненных заданий
 
@@ -536,7 +734,7 @@ class SendShipmentNotification implements ShouldQueue
 
 Если один из ваших слушателей в очереди обнаруживает ошибку, вы, вероятно, не хотите, чтобы он продолжал повторять попытки бесконечно. Таким образом, Laravel предлагает различные способы указать, сколько раз и как долго может выполняться попытка прослушивания.
 
-Вы можете определить свойство или метод `tries` в своем классе слушателя, чтобы указать, сколько раз можно попытаться выполнить слушатель, прежде чем он будет считаться неудачным:
+Вы можете использовать атрибут `Tries` в классе слушателя, чтобы указать, сколько раз можно попытаться выполнить слушатель, прежде чем он будет считаться неудачным:
 
 ```php
 <?php
@@ -545,30 +743,27 @@ namespace App\Listeners;
 
 use App\Events\OrderShipped;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 
+#[Tries(5)]
 class SendShipmentNotification implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    /**
-     * Количество попыток слушателя в очереди.
-     *
-     * @var int
-     */
-    public $tries = 5;
+    // ...
 }
 ```
 
-В качестве альтернативы определению того, сколько раз можно попытаться выполнить слушатель, прежде чем он потерпит неудачу, вы можете определить время, через которое слушатель больше не должен выполняться. Это позволяет попытаться выполнить прослушивание любое количество раз в течение заданного периода времени. Чтобы определить время, через которое больше не следует предпринимать попытки прослушивания, добавьте метод `retryUntil` в свой класс слушателя. Этот метод должен возвращать экземпляр `DateTime`:
+В качестве альтернативы определению того, сколько раз можно попытаться выполнить слушатель, прежде чем он потерпит неудачу, вы можете определить время, после которого слушатель больше не должен выполняться. Это позволяет попытаться выполнить слушатель любое количество раз в течение заданного периода времени. Чтобы определить время, после которого больше не следует предпринимать попытки выполнения слушателя, добавьте метод `retryUntil` в свой класс слушателя. Этот метод должен возвращать экземпляр `DateTimeInterface`:
 
 ```php
-use DateTime;
+use DateTimeInterface;
 
 /**
  * Определить время, через которое слушатель должен отключиться.
  */
-public function retryUntil(): DateTime
+public function retryUntil(): DateTimeInterface
 {
     return now()->plus(minutes: 5);
 }
@@ -579,15 +774,21 @@ public function retryUntil(): DateTime
 <a name="specifying-queued-listener-backoff"></a>
 #### Указание задержки прослушивания в очереди
 
-Если вы хотите настроить, сколько секунд Laravel должен ждать перед повторной попыткой прослушивателя, обнаружившего исключение, вы можете сделать это, определив свойство `$backoff` в своем классе прослушивателя:
+Если вы хотите настроить, сколько секунд Laravel должен ждать перед повторной попыткой слушателя, столкнувшегося с исключением, вы можете использовать атрибут `Backoff` в классе слушателя:
 
 ```php
-/**
- * Количество секунд ожидания перед повторной попыткой прослушивателя в очереди.
- *
- * @var int
- */
-public $backoff = 3;
+<?php
+
+namespace App\Listeners;
+
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\Backoff;
+
+#[Backoff(3)]
+class SendShipmentNotification implements ShouldQueue
+{
+    // ...
+}
 ```
 
 Если вам требуется более сложная логика для определения времени отсрочки прослушивания, вы можете определить метод `backoff` в своем классе прослушивателя:
@@ -619,7 +820,7 @@ public function backoff(OrderShipped $event): array
 <a name="specifying-queued-listener-max-exceptions"></a>
 #### Указание максимального количества исключений для прослушивателя в очереди
 
-Иногда может потребоваться указать, что прослушиватель, находящийся в очереди, может быть запущен много раз, но должен завершиться неудачей, если повторные попытки будут вызваны заданным количеством необработанных исключений (в отличие от непосредственного освобождения методом `release`). Для этого можно определить свойство `$maxExceptions` в классе прослушивателя:
+Иногда может потребоваться указать, что слушатель в очереди может быть запущен много раз, но должен завершиться неудачей, если повторные попытки вызваны заданным количеством необработанных исключений (в отличие от непосредственного освобождения методом `release`). Для этого можно использовать атрибуты `Tries` и `MaxExceptions` в классе слушателя:
 
 ```php
 <?php
@@ -628,25 +829,15 @@ namespace App\Listeners;
 
 use App\Events\OrderShipped;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\MaxExceptions;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\InteractsWithQueue;
 
+#[Tries(25)]
+#[MaxExceptions(3)]
 class SendShipmentNotification implements ShouldQueue
 {
     use InteractsWithQueue;
-
-    /**
-     * The number of times the queued listener may be attempted.
-     *
-     * @var int
-     */
-    public $tries = 25;
-
-    /**
-     * The maximum number of unhandled exceptions to allow before failing.
-     *
-     * @var int
-     */
-    public $maxExceptions = 3;
 
     /**
      * Handle the event.
@@ -663,7 +854,7 @@ class SendShipmentNotification implements ShouldQueue
 <a name="specifying-queued-listener-timeout"></a>
 #### Указание тайм-аута очереди прослушивателя
 
-Зачастую вы примерно знаете, сколько времени займёт выполнение ваших слушателей в очереди. Поэтому Laravel позволяет указать значение тайм-аута. Если слушатель обрабатывается дольше, чем указано в значении тайм-аута, обрабатывающий его обработчик завершится с ошибкой. Вы можете определить максимальное время выполнения слушателя в секундах, определив свойство `$timeout` в классе слушателя:
+Зачастую вы примерно знаете, сколько времени займёт выполнение ваших слушателей в очереди. Поэтому Laravel позволяет указать значение тайм-аута. Если слушатель обрабатывается дольше, чем указано в значении тайм-аута, обрабатывающий его worker завершится с ошибкой. Вы можете определить максимальное время выполнения слушателя в секундах с помощью атрибута `Timeout` в классе слушателя:
 
 ```php
 <?php
@@ -672,19 +863,16 @@ namespace App\Listeners;
 
 use App\Events\OrderShipped;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\Timeout;
 
+#[Timeout(120)]
 class SendShipmentNotification implements ShouldQueue
 {
-    /**
-     * The number of seconds the listener can run before timing out.
-     *
-     * @var int
-     */
-    public $timeout = 120;
+    // ...
 }
 ```
 
-Если вы хотите указать, что прослушиватель должен быть помечен как неудачный по истечении времени ожидания, вы можете определить свойство `$failOnTimeout` в классе прослушивателя:
+Если вы хотите указать, что слушатель должен быть помечен как неудачный по истечении времени ожидания, вы можете использовать атрибут `FailOnTimeout` в классе слушателя:
 
 ```php
 <?php
@@ -693,15 +881,12 @@ namespace App\Listeners;
 
 use App\Events\OrderShipped;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\FailOnTimeout;
 
+#[FailOnTimeout]
 class SendShipmentNotification implements ShouldQueue
 {
-    /**
-     * Indicate if the listener should be marked as failed on timeout.
-     *
-     * @var bool
-     */
-    public $failOnTimeout = true;
+    // ...
 }
 ```
 

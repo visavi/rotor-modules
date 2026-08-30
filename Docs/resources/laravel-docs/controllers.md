@@ -1,5 +1,5 @@
 ---
-git: 462c210d1d8b5e34d4a3035c65148f76112ca1d4
+git: 9c350d3c53b5c4d82e77177d5629cb6e3bda702d
 ---
 
 # Контроллеры
@@ -116,7 +116,7 @@ namespace App\Http\Controllers;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
-class UserController extends Controller implements HasMiddleware
+class UserController implements HasMiddleware
 {
     /**
      * Получить посредников, которые должны быть назначены контроллеру.
@@ -152,6 +152,120 @@ public static function middleware(): array
     ];
 }
 ```
+
+<a name="middleware-attributes"></a>
+### Атрибуты посредников
+
+Вы также можете назначать посредников контроллерам с помощью PHP-атрибутов:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+
+#[Middleware('auth')]
+#[Middleware('log', only: ['index'])]
+#[Middleware('subscribed', except: ['store'])]
+class UserController
+{
+    // ...
+}
+```
+
+Атрибуты посредников можно размещать и на отдельных методах контроллера. Посредники, назначенные методам, будут объединены с посредниками, назначенными на уровне класса:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
+
+#[Middleware('auth')]
+class UserController
+{
+    #[Middleware('log')]
+    #[Middleware('subscribed')]
+    public function index()
+    {
+        // ...
+    }
+
+    #[Middleware(static function (Request $request, Closure $next) {
+        // ...
+
+        return $next($request);
+    })]
+    public function store()
+    {
+        // ...
+    }
+}
+```
+
+Чтобы исключить посредника из контроллера или отдельных методов контроллера, используйте атрибут `WithoutMiddleware`. Вы можете использовать аргументы `only` и `except`, чтобы ограничить атрибут уровня класса конкретными методами контроллера:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Middleware\EnsureTokenIsValid;
+use Illuminate\Routing\Attributes\Controllers\WithoutMiddleware;
+
+#[WithoutMiddleware('subscribed', except: ['index'])]
+class UserController
+{
+    #[WithoutMiddleware(EnsureTokenIsValid::class)]
+    public function index()
+    {
+        // ...
+    }
+
+    public function show()
+    {
+        // ...
+    }
+}
+```
+
+Атрибуты `WithoutMiddleware` уровня класса наследуются дочерними контроллерами. Этот атрибут может удалять только посредников маршрутов и не применяется к [глобальным посредникам](/docs/{{version}}/middleware#global-middleware).
+
+<a name="authorization-attributes"></a>
+### Атрибуты авторизации
+
+Если вы авторизуете действия контроллера через политики, вы можете использовать атрибут `Authorize` как удобное сокращение для посредника `can`:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Comment;
+use App\Models\Post;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
+
+class CommentController
+{
+    #[Authorize('create', [Comment::class, 'post'])]
+    public function store(Post $post)
+    {
+        // ...
+    }
+
+    #[Authorize('delete', 'comment')]
+    public function destroy(Comment $comment)
+    {
+        // ...
+    }
+}
+```
+
+Первый аргумент - это возможность, которую вы хотите авторизовать. Второй аргумент - класс модели, параметр маршрута или параметры, которые должны быть переданы в политику.
 
 <a name="resource-controllers"></a>
 ## Ресурсные контроллеры
@@ -467,7 +581,7 @@ Route::singleton('profile', ProfileController::class);
 Route::singleton('photos.thumbnail', ThumbnailController::class);
 ```
 
-В этом примере ресурс `photos` будет содержать все [стандартные маршруты ресурса](#actions-handled-by-resource-controller), однако ресурс `thumbnail` будет синглтон-ресурсом со следующими маршрутами:
+В этом примере ресурс `photos` будет содержать все [стандартные маршруты ресурса](#actions-handled-by-resource-controllers), однако ресурс `thumbnail` будет синглтон-ресурсом со следующими маршрутами:
 
 | Метод     | URI                                | Действие | Имя маршрута            |
 | --------- | ---------------------------------- | -------- | ----------------------- |

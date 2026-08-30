@@ -1,5 +1,5 @@
 ---
-git: da854c600882815be7adc27bb3cbc5f878039791
+git: 68f903aca708d7c9070f73127e64468132b1266b
 ---
 
 # Отправка электронной почты
@@ -7,7 +7,7 @@ git: da854c600882815be7adc27bb3cbc5f878039791
 <a name="introduction"></a>
 ## Введение
 
-Отправка электронной почты не должна быть сложной. Laravel предлагает чистый и простой почтовый API на базе популярного компонента [Symfony Mailer](https://symfony.com/doc/current/mailer.html). Laravel и Symfony Mailer обеспечены драйверами для отправки электронной почты через SMTP, Mailgun, Postmark, Amazon SES и `sendmail`, что позволяет быстро начать отправку почты через локальный или облачный сервис по вашему выбору.
+Отправка электронной почты не должна быть сложной. Laravel предлагает чистый и простой почтовый API на базе популярного компонента [Symfony Mailer](https://symfony.com/doc/current/mailer.html). Laravel и Symfony Mailer обеспечены драйверами для отправки электронной почты через SMTP, Cloudflare, Mailgun, Postmark, Resend, Amazon SES и `sendmail`, что позволяет быстро начать отправку почты через локальный или облачный сервис по вашему выбору.
 
 <a name="configuration"></a>
 ### Конфигурирование
@@ -20,6 +20,38 @@ git: da854c600882815be7adc27bb3cbc5f878039791
 ### Требования к драйверу и транспорту
 
 Драйверы на основе API, такие, как Mailgun, Postmark и Resend часто проще в использовании и быстрее, чем отправка почты через SMTP-серверы. По возможности мы рекомендуем использовать один из этих драйверов.
+
+<a name="cloudflare-driver"></a>
+#### Драйвер Cloudflare
+
+Чтобы использовать драйвер Cloudflare, установите HTTP Client Symfony через Composer:
+
+```shell
+composer require symfony/http-client
+```
+
+Далее вам нужно будет внести два изменения в файл конфигурации `config/mail.php` вашего приложения. Сначала установите почтовик по умолчанию на `cloudflare`:
+
+```php
+'default' => env('MAIL_MAILER', 'cloudflare'),
+```
+
+Затем добавьте следующий массив конфигурации в массив `mailers`:
+
+```php
+'cloudflare' => [
+    'transport' => 'cloudflare',
+],
+```
+
+После настройки почтовика по умолчанию добавьте следующие параметры в файл конфигурации `config/services.php`:
+
+```php
+'cloudflare' => [
+    'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
+    'key' => env('CLOUDFLARE_KEY'),
+],
+```
 
 <a name="mailgun-driver"></a>
 #### Драйвер Mailgun
@@ -58,7 +90,7 @@ composer require symfony/mailgun-mailer symfony/http-client
 ],
 ```
 
-Если вы не используете [регион Mailgun](https://documentation.mailgun.com/docs/mailgun/api-reference/#mailgun-regions) США, то вы можете определить конечную точку своего региона в конфигурации файла `services`:
+Если вы не используете [регион Mailgun](https://documentation.mailgun.com/docs/mailgun/api-reference/api-overview#mailgun-regions) США, то вы можете определить конечную точку своего региона в конфигурации файла `services`:
 
 ```php
 'mailgun' => [
@@ -163,6 +195,19 @@ public function headers(): Headers
 }
 ```
 
+Чтобы отправить письмо через [tenant](https://docs.aws.amazon.com/ses/latest/dg/tenants.html) SES, вы можете вернуть заголовок `X-Ses-Tenant-Name` из метода `headers`. Laravel передаст значение заголовка как опцию `TenantName` в SES при отправке сообщения:
+
+```php
+public function headers(): Headers
+{
+    return new Headers(
+        text: [
+            'X-Ses-Tenant-Name' => 'tenant-id',
+        ],
+    );
+}
+```
+
 Если вы хотите определить [дополнительные параметры](https://docs.aws.amazon.com/aws-sdk-php/v3/api/api-sesv2-2019-09-27.html#sendemail), которые Laravel должен передать методу `SendEmail` AWS SDK при отправке сообщения электронной почты, вы можете определить массив `options` в конфигурации `ses`:
 
 ```php
@@ -255,7 +300,7 @@ php artisan make:mail OrderShipped
 <a name="configuring-the-sender"></a>
 ### Конфигурирование отправителя
 
-<a name="using-the-from-method"></a>
+<a name="using-the-envelope"></a>
 #### Использование метода `Envelope`
 
 Давайте сначала рассмотрим настройку отправителя электронной почты, то есть того, от кого будет отправлено письмо. Существует два способа настройки отправителя. Во-первых, вы можете указать адрес отправителя в методе `envelope` вашего сообщения:
@@ -576,7 +621,7 @@ public function attachments(): array
 
 Встраивание изображений в ваши электронные письма, как правило, обременительно; однако Laravel предлагает удобный способ прикреплять изображения к вашим письмам. Чтобы встроить изображение, используйте метод `embed` для переменной `$message` в вашем шаблоне электронной почты. Laravel автоматически делает переменную `$message` доступной для всех ваших шаблонов электронной почты, поэтому вам не нужно беспокоиться о ее передаче вручную:
 
-```html
+```blade
 <body>
     Here is an image:
 
@@ -592,7 +637,7 @@ public function attachments(): array
 
 Если у вас уже есть строка необработанных данных изображения, которую вы хотите встроить в шаблон электронной почты, то вы можете вызвать метод `embedData` для переменной `$message`. При вызове метода `embedData` вам необходимо указать имя файла, которое должно быть присвоено встраиваемому изображению:
 
-```html
+```blade
 <body>
     Here is an image from raw data:
 
@@ -806,7 +851,7 @@ Thanks,<br>
 
 Компонент кнопки отображает ссылку на кнопку по центру. Компонент принимает два аргумента: `url` и необязательный `color`. Поддерживаемые цвета: `primary`, `success`, и `error`. Вы можете добавить к сообщению столько компонентов кнопки, сколько захотите:
 
-```html
+```blade
 <x-mail::button :url="$url" color="success">
 View Order
 </x-mail::button>
@@ -965,6 +1010,20 @@ Mail::to($request->user())
     ->cc($moreUsers)
     ->bcc($evenMoreUsers)
     ->queue($message);
+```
+
+В качестве альтернативы вы можете указать соединение и очередь с помощью атрибутов `Connection` и `Queue` в классе mailable:
+
+```php
+use Illuminate\Queue\Attributes\Connection;
+use Illuminate\Queue\Attributes\Queue;
+
+#[Connection('sqs')]
+#[Queue('emails')]
+class OrderShipped extends Mailable
+{
+    // ...
+}
 ```
 
 <a name="queueing-by-default"></a>

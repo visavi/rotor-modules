@@ -1,5 +1,5 @@
 ---
-git: 84bd53af8e3f11d494d66b1b2f0adf7abb7c507f
+git: b0fbeae094a202c1e70377c6b38b7489d339e97d
 ---
 
 # Строки
@@ -35,6 +35,7 @@ Laravel включает в себя различные функции для р
 - [Str::chopEnd](#method-str-chop-end)
 - [Str::contains](#method-str-contains)
 - [Str::containsAll](#method-str-contains-all)
+- [Str::counted](#method-str-counted)
 - [Str::doesntContain](#method-str-doesnt-contain)
 - [Str::doesntEndWith](#method-str-doesnt-end-with)
 - [Str::doesntStartWith](#method-str-doesnt-start-with)
@@ -136,6 +137,7 @@ Laravel включает в себя различные функции для р
 - [chopEnd](#method-fluent-str-chop-end)
 - [contains](#method-fluent-str-contains)
 - [containsAll](#method-fluent-str-contains-all)
+- [counted](#method-fluent-str-counted)
 - [decrypt](#method-fluent-str-decrypt)
 - [deduplicate](#method-fluent-str-deduplicate)
 - [dirname](#method-fluent-str-dirname)
@@ -727,6 +729,23 @@ $headline = Str::headline('EmailNotificationSent');
 // Email Notification Sent
 ```
 
+<a name="method-str-initials"></a>
+#### `Str::initials()`
+
+Метод `Str::initials` возвращает инициалы заданной строки, при необходимости переводя их в верхний регистр:
+
+```php
+use Illuminate\Support\Str;
+
+$initials = Str::initials('taylor otwell');
+
+// to
+
+$initials = Str::initials('taylor otwell', capitalize: true);
+
+// TO
+```
+
 <a name="method-str-inline-markdown"></a>
 #### `Str::inlineMarkdown()`
 
@@ -1069,6 +1088,23 @@ $result = Str::matchAll('/f(\w*)/', 'bar fun bar fly');
 
 Если совпадений не найдено, будет возвращена пустая коллекция.
 
+<a name="method-str-is-match"></a>
+#### `Str::isMatch()`
+
+Метод `Str::isMatch` возвращает `true`, если строка соответствует заданному регулярному выражению:
+
+```php
+use Illuminate\Support\Str;
+
+$result = Str::isMatch('/foo (.*)/', 'foo bar');
+
+// true
+
+$result = Str::isMatch('/foo (.*)/', 'laravel');
+
+// false
+```
+
 <a name="method-str-ordered-uuid"></a>
 #### `Str::orderedUuid()`
 
@@ -1148,6 +1184,23 @@ $password = Str::password(12);
 // 'qwuar>#V|i]N'
 ```
 
+<a name="method-str-counted"></a>
+#### `Str::counted()`
+
+Метод `Str::counted` преобразует строку со словом в единственном числе в форму единственного или множественного числа на основе переданного количества и добавляет перед результатом отформатированное количество:
+
+```php
+use Illuminate\Support\Str;
+
+$label = Str::counted('order', 1);
+
+// 1 order
+
+$label = Str::counted('order', 1000);
+
+// 1,000 orders
+```
+
 <a name="method-str-plural"></a>
 #### `Str::plural()`
 
@@ -1177,6 +1230,16 @@ $plural = Str::plural('child', 2);
 $singular = Str::plural('child', 1);
 
 // child
+```
+
+Аргумент `prependCount` можно передать, чтобы добавить отформатированное значение `$count` перед строкой во множественном числе:
+
+```php
+use Illuminate\Support\Str;
+
+$label = Str::plural('car', 1000, prependCount: true);
+
+// 1,000 cars
 ```
 
 <a name="method-str-plural-studly"></a>
@@ -1712,6 +1775,19 @@ use Illuminate\Support\Str;
 $segments = Str::ucsplit('FooBar');
 
 // [0 => 'Foo', 1 => 'Bar']
+```
+
+<a name="method-str-ucwords"></a>
+#### `Str::ucwords()`
+
+Метод `Str::ucwords` переводит первый символ каждого слова в заданной строке в верхний регистр:
+
+```php
+use Illuminate\Support\Str;
+
+$string = Str::ucwords('laravel framework');
+
+// Laravel Framework
 ```
 
 <a name="method-str-upper"></a>
@@ -2274,6 +2350,39 @@ $string = Str::of('/foo/bar/baz')->dirname(2);
 // '/foo'
 ```
 
+<a name="method-fluent-str-doesnt-contain"></a>
+#### `doesntContain`
+
+Метод `doesntContain` определяет, что заданная строка не содержит указанное значение. Это обратный метод к [contains](#method-fluent-str-contains). По умолчанию метод чувствителен к регистру:
+
+```php
+use Illuminate\Support\Str;
+
+$doesntContain = Str::of('This is name')->doesntContain('my');
+
+// true
+```
+
+Вы также можете передать массив значений, чтобы определить, что строка не содержит ни одного значения из массива:
+
+```php
+use Illuminate\Support\Str;
+
+$doesntContain = Str::of('This is name')->doesntContain(['my', 'framework']);
+
+// true
+```
+
+Вы можете отключить чувствительность к регистру, установив аргумент `ignoreCase` в `true`:
+
+```php
+use Illuminate\Support\Str;
+
+$doesntContain = Str::of('This is my name')->doesntContain('MY', ignoreCase: true);
+
+// false
+```
+
 <a name="method-fluent-str-doesnt-end-with"></a>
 #### `doesntEndWith`
 
@@ -2478,6 +2587,19 @@ $headline = Str::of('taylor_otwell')->headline();
 $headline = Str::of('EmailNotificationSent')->headline();
 
 // Email Notification Sent
+```
+
+<a name="method-fluent-str-initials"></a>
+#### `initials`
+
+Метод `initials` преобразует строку в инициалы:
+
+```php
+use Illuminate\Support\Str;
+
+$initials = Str::of('Taylor Otwell')->initials()->upper();
+
+// TO
 ```
 
 <a name="method-fluent-str-inline-markdown"></a>
@@ -2952,6 +3074,23 @@ $closure = Str::of('foo')->pipe(function (Stringable $str) {
 // 'bar'
 ```
 
+<a name="method-fluent-str-counted"></a>
+#### `counted`
+
+Метод `counted` преобразует строку со словом в единственном числе в форму единственного или множественного числа на основе переданного количества и добавляет перед результатом отформатированное количество:
+
+```php
+use Illuminate\Support\Str;
+
+$label = Str::of('order')->counted(1);
+
+// 1 order
+
+$label = Str::of('order')->counted(1000);
+
+// 1,000 orders
+```
+
 <a name="method-fluent-str-plural"></a>
 #### `plural`
 
@@ -2981,6 +3120,16 @@ $plural = Str::of('child')->plural(2);
 $plural = Str::of('child')->plural(1);
 
 // child
+```
+
+Вы можете передать аргумент `prependCount`, чтобы добавить отформатированное значение `$count` перед строкой во множественном числе:
+
+```php
+use Illuminate\Support\Str;
+
+$label = Str::of('car')->plural(1000, prependCount: true);
+
+// 1,000 cars
 ```
 
 <a name="method-fluent-str-position"></a>
@@ -3021,7 +3170,7 @@ $string = Str::of('Framework')->prepend('Laravel ');
 ```php
 use Illuminate\Support\Str;
 
-$string = Str::of('Arkansas is quite beautiful!')->remove('quite');
+$string = Str::of('Arkansas is quite beautiful!')->remove('quite ');
 
 // Arkansas is beautiful!
 ```
@@ -3270,6 +3419,16 @@ $adjusted = Str::of('/this/string')->start('/');
 use Illuminate\Support\Str;
 
 $result = Str::of('This is my name')->startsWith('This');
+
+// true
+```
+
+Вы также можете передать массив значений, чтобы определить, начинается ли строка с любого из значений массива:
+
+```php
+use Illuminate\Support\Str;
+
+$result = Str::of('This is my name')->startsWith(['This', 'That']);
 
 // true
 ```
@@ -3535,7 +3694,20 @@ use Illuminate\Support\Str;
 
 $string = Str::of('Foo Bar')->ucsplit();
 
-// collect(['Foo', 'Bar'])
+// collect(['Foo ', 'Bar'])
+```
+
+<a name="method-fluent-str-ucwords"></a>
+#### `ucwords`
+
+Метод `ucwords` переводит первый символ каждого слова в заданной строке в верхний регистр:
+
+```php
+use Illuminate\Support\Str;
+
+$string = Str::of('laravel framework')->ucwords();
+
+// Laravel Framework
 ```
 
 <a name="method-fluent-str-unwrap"></a>

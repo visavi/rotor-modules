@@ -1,5 +1,5 @@
 ---
-git: 44a24d3a9941c2c2309d4bb7ccb4c33d44310cae
+git: 46c52b42296d2c9c5e901772b28d20ee77967118
 ---
 
 # Рекомендации по участию
@@ -30,7 +30,6 @@ git: 44a24d3a9941c2c2309d4bb7ccb4c33d44310cae
 - [Пакет Laravel Envoy](https://github.com/laravel/envoy)
 - [Пакет Laravel Folio](https://github.com/laravel/folio)
 - [Фреймворк Laravel](https://github.com/laravel/framework)
-- [Пакет Laravel Homestead](https://github.com/laravel/homestead) ([Скрипты для сборки](https://github.com/laravel/settler))
 - [Пакет Laravel Horizon](https://github.com/laravel/horizon)
 - [Пакет Laravel Passport](https://github.com/laravel/passport)
 - [Пакет Laravel Pennant](https://github.com/laravel/pennant)
@@ -44,6 +43,7 @@ git: 44a24d3a9941c2c2309d4bb7ccb4c33d44310cae
 - [Пакет Laravel Telescope](https://github.com/laravel/telescope)
 - [Пакет Laravel Livewire Starter Kit](https://github.com/laravel/livewire-starter-kit)
 - [Пакет Laravel React Starter Kit](https://github.com/laravel/react-starter-kit)
+- [Пакет Laravel Svelte Starter Kit](https://github.com/laravel/svelte-starter-kit)
 - [Пакет Laravel Vue Starter Kit](https://github.com/laravel/vue-starter-kit)
 
 <!-- </div> -->
@@ -75,9 +75,9 @@ git: 44a24d3a9941c2c2309d4bb7ccb4c33d44310cae
 <a name="which-branch"></a>
 ## Какую ветку выбрать при запросах слияния?
 
-**Все** исправления ошибок должны быть отправлены в последнюю версию, которая поддерживает исправления ошибок (на данный момент `12.x`). Исправления ошибок **никогда** не должны отправляться в ветку `master`, если они не исправляют функции, которые существуют только в предстоящем выпуске.
+**Все** исправления ошибок должны быть отправлены в последнюю версию, которая поддерживает исправления ошибок (на данный момент `13.x`). Исправления ошибок **никогда** не должны отправляться в ветку `master`, если они не исправляют функции, которые существуют только в предстоящем выпуске.
 
-**Минорный** функционал, **полностью обратно совместимый** с текущим релизом, может быть отправлен в последнюю стабильную ветку (в настоящее время `12.x`)..
+**Минорный** функционал, **полностью обратно совместимый** с текущим релизом, может быть отправлен в последнюю стабильную ветку (в настоящее время `13.x`).
 
 **Мажорный** новый функционал или функционал с изменениями, приводящими к нарушению обратной совместимости, должен всегда отправляться в ветку `master`, содержащую предстоящий релиз.
 
@@ -86,15 +86,26 @@ git: 44a24d3a9941c2c2309d4bb7ccb4c33d44310cae
 
 Если вы отправляете изменение, которое повлияет на скомпилированные файлы, например, касательно файлов в `resources/css` или` resources/js` репозитория `laravel/laravel`, то не включайте в коммит эти скомпилированные файлы. Из-за большого размера они не могут быть реально рассмотрены сопровождающим. Это может быть использовано как способ внедрения вредоносного кода в Laravel. Чтобы предотвратить это, все скомпилированные файлы будут сгенерированы и включены в коммит сопровождающими Laravel.
 
+<a name="ai-generated-contributions"></a>
+## Вклады, сгенерированные ИИ
+
+Мы ценим каждый Pull Request, отправленный в Laravel. Однако вклады, которые в основном сгенерированы ИИ без вдумчивой человеческой проверки и осмысления, неприемлемы.
+
+Если вы решили использовать инструменты ИИ для помощи в подготовке вклада, получившийся код **должен** быть вами тщательно проверен, протестирован и понят перед отправкой.
+
+**Массовое открытие issues или Pull Request, полностью сгенерированных ИИ, не допускается.** Такие Pull Request будут закрыты без рассмотрения, а пользователь, отправивший их, может быть заблокирован в репозитории.
+
+Мы рекомендуем участникам познакомиться с существующей кодовой базой, взаимодействовать с сообществом и отправлять Pull Request, которые отражают их собственное понимание и внимательное рассмотрение решаемой проблемы.
+
 <a name="security-vulnerabilities"></a>
 ## Уязвимости безопасности
 
-Если вы обнаружите уязвимость в системе безопасности Laravel, отправьте электронное письмо Тейлору Отвеллу по адресу <a href="mailto:taylor@laravel.com">taylor@laravel.com</a>. Все уязвимости безопасности будут незамедлительно устранены.
+Если вы обнаружите уязвимость в системе безопасности Laravel, отправьте письмо нашей команде безопасности по адресу <a href="mailto:security@laravel.com">security@laravel.com</a>. Все уязвимости безопасности будут незамедлительно устранены.
 
 <a name="coding-style"></a>
 ## Стиль кодирования
 
-Laravel следует стандарту кодирования [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide) и стандарту автозагрузки [PSR- 4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader).
+Laravel следует стандарту кодирования [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide) и стандарту автозагрузки [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader).
 
 <a name="phpdoc"></a>
 ### PHPDoc
@@ -123,6 +134,8 @@ public function bind($abstract, $concrete = null, $shared = false)
 ```php
 /**
  * Выполнение задания.
+ * [tl! remove]
+ * @return void [tl! remove]
  */
 public function handle(AudioProcessor $processor): void
 {
@@ -135,8 +148,8 @@ public function handle(AudioProcessor $processor): void
 ```php
 /**
  * Получение вложения к сообщению.
- *
- * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+ * [tl! add]
+ * @return array<int, \Illuminate\Mail\Mailables\Attachment> [tl! add]
  */
 public function attachments(): array
 {

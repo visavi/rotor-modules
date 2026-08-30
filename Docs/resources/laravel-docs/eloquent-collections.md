@@ -1,5 +1,5 @@
 ---
-git: d34d8574ae36efb6a35233bffb16898d2fb979bb
+git: b9903357d820d58a7b08a228857106f9e9e8bc4e
 ---
 
 # Eloquent · Коллекции
@@ -34,7 +34,7 @@ $names = User::all()->reject(function (User $user) {
 <a name="eloquent-collection-conversion"></a>
 #### Преобразование коллекций Eloquent
 
-В то время как большинство методов коллекции Eloquent возвращают новый экземпляр коллекции Eloquent, методы `collapse`, `flatten`, `flip`, `keys`, `pluck`, и `zip` возвращают экземпляр [базовой коллекции](/docs/{{version}}/collections ). Аналогично, если метод `map` возвращает коллекцию, не содержащую никаких моделей Eloquent, она будет преобразована в экземпляр базовой коллекции.
+Хотя большинство методов коллекции Eloquent возвращают новый экземпляр коллекции Eloquent, методы `collapse`, `flatten`, `flip`, `keys`, `pluck` и `zip` возвращают экземпляр [базовой коллекции](/docs/{{version}}/collections). Аналогично, если метод `map` возвращает коллекцию без моделей Eloquent, она будет преобразована в экземпляр базовой коллекции.
 
 <a name="available-methods"></a>
 ## Доступные методы
@@ -208,6 +208,24 @@ $users = $users->makeVisible(['address', 'phone_number']);
 $users = $users->makeHidden(['address', 'phone_number']);
 ```
 
+<a name="method-mergeVisible"></a>
+#### `mergeVisible($attributes)`
+
+Метод `mergeVisible` [делает дополнительные атрибуты видимыми](/docs/{{version}}/eloquent-serialization#hiding-attributes-from-json), сохраняя уже существующие видимые атрибуты:
+
+```php
+$users = $users->mergeVisible(['middle_name']);
+```
+
+<a name="method-mergeHidden"></a>
+#### `mergeHidden($attributes)`
+
+Метод `mergeHidden` [скрывает дополнительные атрибуты](/docs/{{version}}/eloquent-serialization#hiding-attributes-from-json), сохраняя уже существующие скрытые атрибуты:
+
+```php
+$users = $users->mergeHidden(['last_login_at']);
+```
+
 <a name="method-only"></a>
 #### `only($keys)`
 
@@ -228,6 +246,15 @@ $partition = $users->partition(fn ($user) => $user->age > 18);
 dump($partition::class);    // Illuminate\Support\Collection
 dump($partition[0]::class); // Illuminate\Database\Eloquent\Collection
 dump($partition[1]::class); // Illuminate\Database\Eloquent\Collection
+```
+
+<a name="method-setAppends"></a>
+#### `setAppends($attributes)`
+
+Метод `setAppends` временно переопределяет все [добавленные атрибуты](/docs/{{version}}/eloquent-serialization#appending-values-to-json) для каждой модели в коллекции:
+
+```php
+$users = $users->setAppends(['is_admin']);
 ```
 
 <a name="method-setVisible"></a>
@@ -270,6 +297,15 @@ $users->toQuery()->update([
 
 ```php
 $users = $users->unique();
+```
+
+<a name="method-withoutAppends"></a>
+#### `withoutAppends()`
+
+Метод `withoutAppends` временно удаляет все [добавленные атрибуты](/docs/{{version}}/eloquent-serialization#appending-values-to-json) для каждой модели в коллекции:
+
+```php
+$users = $users->withoutAppends();
 ```
 
 <a name="custom-collections"></a>

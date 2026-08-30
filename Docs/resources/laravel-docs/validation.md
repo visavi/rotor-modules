@@ -1,5 +1,5 @@
 ---
-git: d4f5f383462a62d4c86b4122fa89fea6756cf604
+git: 3a4447ffb34a084e7c89ab849bcf40e0c525ed43
 ---
 
 # Валидация
@@ -57,7 +57,7 @@ class PostController extends Controller
     /**
      * Сохранить новую запись в блоге.
      */
-   public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         // Выполнить валидацию и сохранить сообщение в блоге...
 
@@ -84,8 +84,8 @@ class PostController extends Controller
 public function store(Request $request): RedirectResponse
 {
     $validated = $request->validate([
-        'title' => 'required|unique:posts|max:255',
-        'body' => 'required',
+        'title' => ['required', 'unique:posts', 'max:255'],
+        'body' => ['required'],
     ]);
 
     // Запись блога корректна...
@@ -96,19 +96,10 @@ public function store(Request $request): RedirectResponse
 
 Как видите, правила валидации передаются в метод `validate`. Не волнуйтесь – все доступные правила валидации [задокументированы](#available-validation-rules). Опять же, если проверка не пройдена, то будет автоматически сгенерирован корректный ответ. Если проверка пройдет успешно, то наш контроллер продолжит нормальную работу.
 
-В качестве альтернативы правила валидации могут быть указаны как массивы правил вместо одной строки с разделителями `|`:
-
-```php
-$validatedData = $request->validate([
-    'title' => ['required', 'unique:posts', 'max:255'],
-    'body' => ['required'],
-]);
-```
-
 Кроме того, вы можете использовать метод `validateWithBag` для валидации запроса и сохранения любых сообщений об ошибках в [именованную коллекцию ошибок](#named-error-bags):
 
 ```php
-$validatedData = $request->validateWithBag('post', [
+$validated = $request->validateWithBag('post', [
     'title' => ['required', 'unique:posts', 'max:255'],
     'body' => ['required'],
 ]);
@@ -121,8 +112,8 @@ $validatedData = $request->validateWithBag('post', [
 
 ```php
 $request->validate([
-    'title' => 'bail|required|unique:posts|max:255',
-    'body' => 'required',
+    'title' => ['bail', 'required', 'unique:posts', 'max:255'],
+    'body' => ['required'],
 ]);
 ```
 
@@ -135,9 +126,9 @@ $request->validate([
 
 ```php
 $request->validate([
-    'title' => 'required|unique:posts|max:255',
-    'author.name' => 'required',
-    'author.description' => 'required',
+    'title' => ['required', 'unique:posts', 'max:255'],
+    'author.name' => ['required'],
+    'author.description' => ['required'],
 ]);
 ```
 
@@ -145,8 +136,8 @@ $request->validate([
 
 ```php
 $request->validate([
-    'title' => 'required|unique:posts|max:255',
-    'v1\.0' => 'required',
+    'title' => ['required', 'unique:posts', 'max:255'],
+    'v1\.0' => ['required'],
 ]);
 ```
 
@@ -333,13 +324,13 @@ public function store(StorePostRequest $request): RedirectResponse
     $validated = $request->safe()->only(['name', 'email']);
     $validated = $request->safe()->except(['name', 'email']);
 
-    // Сохранить апись в блоге...
+    // Сохранить запись в блоге...
 
     return redirect('/posts');
 }
 ```
 
-При неуспешной валидации будет сгенерирован ответ-перенаправление, чтобы отправить пользователя обратно в его предыдущее местоположение. Ошибки также будут краткосрочно записаны в сессию, чтобы они были доступны для отображения. Если запрос был XHR-запросом, то пользователю будет возвращен HTTP-ответ с кодом состояния 422, включая [JSON-представление ошибок валидации](#validation-error-response-format)..
+При неуспешной валидации будет сформирован ответ-перенаправление, возвращающий пользователя на предыдущую страницу. Ошибки будут временно сохранены в сессии для последующего отображения. Для XHR-запроса будет возвращен HTTP-ответ с кодом состояния 422 и [JSON-представлением ошибок валидации](#validation-error-response-format).
 
 > [!NOTE]
 > Хотите добавить мгновенную валидацию формы для вашего фронтенда Laravel, построенного с использованием Inertia? Посмотрите [Laravel Precognition](/docs/{{version}}/precognition).
@@ -397,40 +388,130 @@ public function after(): array
 <a name="request-stopping-on-first-validation-rule-failure"></a>
 #### Прекращение валидации после первой неуспешной проверки
 
-Добавив свойство `$stopOnFirstFailure` вашему классу запроса, вы можете сообщить валидатору, что он должен прекратить валидацию всех атрибутов после возникновения первой ошибки валидации:
+Добавив атрибут `StopOnFirstFailure` к вашему классу запроса, вы можете сообщить валидатору, что он должен прекратить валидацию всех атрибутов после возникновения первой ошибки валидации:
 
 ```php
-/**
- * Остановить валидацию после первой неуспешной проверки.
- *
- * @var bool
- */
-protected $stopOnFirstFailure = true;
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\Attributes\StopOnFirstFailure;
+use Illuminate\Foundation\Http\FormRequest;
+
+#[StopOnFirstFailure]
+class StorePostRequest extends FormRequest
+{
+    // ...
+}
 ```
+
+<a name="request-failing-on-unknown-fields"></a>
+#### Ошибка при неизвестных полях
+
+Добавив атрибут `FailOnUnknownFields` к вашему классу запроса, можно указать Laravel отклонять любые входящие поля, которые не определены правилами валидации запроса:
+
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\Attributes\FailOnUnknownFields;
+use Illuminate\Foundation\Http\FormRequest;
+
+#[FailOnUnknownFields]
+class StorePostRequest extends FormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string'],
+            'body' => ['required', 'string'],
+        ];
+    }
+}
+```
+
+Также можно включить это поведение глобально для всех form requests из вашего `AppServiceProvider`:
+
+```php
+use Illuminate\Foundation\Http\FormRequest;
+
+/**
+ * Bootstrap any application services.
+ */
+public function boot(): void
+{
+    FormRequest::failOnUnknownFields();
+}
+```
+
+При необходимости это поведение можно отключить для конкретного запроса, передав `false` в атрибут:
+
+```php
+#[FailOnUnknownFields(false)]
+class PublicWebhookRequest extends FormRequest
+{
+    // ...
+}
+```
+
+Отклонение неизвестных полей может дать дополнительную защиту от проблем массового присвоения, предотвращая попадание неожиданных ключей входных данных глубже в приложение. Однако все равно следует настроить свойства `$fillable` / `$guarded` вашей модели и сохранять только доверенные, проверенные входные данные.
 
 <a name="customizing-the-redirect-location"></a>
 #### Настройка ответа-перенаправления
 
-Если проверка запроса формы не удалась, будет сгенерирован ответ-перенаправление, чтобы отправить пользователя обратно в его предыдущее местоположение. Однако вы можете настроить это поведение. Для этого определите свойство `$redirect` в вашем классе запроса:
+Если проверка запроса формы не удалась, будет сгенерирован ответ-перенаправление, чтобы отправить пользователя обратно в его предыдущее местоположение. Однако вы можете настроить это поведение. Для этого используйте атрибут `RedirectTo` в вашем form request:
 
 ```php
-/**
- * URI, на который следует перенаправлять пользователей в случае сбоя проверки.
- *
- * @var string
- */
-protected $redirect = '/dashboard';
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\Attributes\RedirectTo;
+use Illuminate\Foundation\Http\FormRequest;
+
+#[RedirectTo('/dashboard')]
+class StorePostRequest extends FormRequest
+{
+    // ...
+}
 ```
 
-Или, если вы хотите перенаправить пользователей на именованный маршрут, вы можете вместо этого определить свойство `$redirectRoute`:
+Или, если вы хотите перенаправить пользователей на именованный маршрут, используйте атрибут `RedirectToRoute`:
 
 ```php
-/**
- * Маршрут, на который следует перенаправлять пользователей в случае сбоя проверки.
- *
- * @var string
- */
-protected $redirectRoute = 'dashboard';
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\Attributes\RedirectToRoute;
+use Illuminate\Foundation\Http\FormRequest;
+
+#[RedirectToRoute('dashboard')]
+class StorePostRequest extends FormRequest
+{
+    // ...
+}
+```
+
+<a name="customizing-the-error-bag"></a>
+#### Настройка пакета ошибок
+
+Когда form request завершается ошибкой валидации, ошибки сохраняются во флеше в пакет ошибок `default`. Если нужно сохранить ошибки в другой [именованный пакет ошибок](#named-error-bags), используйте атрибут `ErrorBag` в form request:
+
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\Attributes\ErrorBag;
+use Illuminate\Foundation\Http\FormRequest;
+
+#[ErrorBag('login')]
+class LoginRequest extends FormRequest
+{
+    // ...
+}
 ```
 
 <a name="authorizing-form-requests"></a>
@@ -836,7 +917,7 @@ if ($errors->has('email')) {
 <a name="specifying-custom-messages-in-language-files"></a>
 ### Указание пользовательских сообщений в языковых файлах
 
-Каждое встроенное правило валидации Laravel содержит сообщение об ошибке, которое находится в файле `lang/en/validation.php` вашего приложения. . Если у вашего приложения нет директории `lang`, вы можете указать Laravel создать ее с помощью команды Artisan `lang:publish`.
+Сообщение об ошибке для каждого встроенного правила валидации Laravel находится в файле `lang/en/validation.php` приложения. Если в приложении нет каталога `lang`, его можно создать с помощью Artisan-команды `lang:publish`.
 
 В файле `lang/en/validation.php` вы найдете запись о переводе для каждого правила валидации. Вы можете изменять или модифицировать эти сообщения в зависимости от потребностей вашего приложения.
 
@@ -995,6 +1076,7 @@ Validator::make($request->all(), [
 <div class="docs-column-list" markdown="1">
 
 - [Array](#rule-array)
+- [Array Keys](#rule-array-keys)
 - [Between](#rule-between)
 - [Contains](#rule-contains)
 - [Doesnt Contain](#rule-doesnt-contain)
@@ -1035,6 +1117,7 @@ Validator::make($request->all(), [
 - [File](#rule-file)
 - [Image](#rule-image)
 - [Max](#rule-max)
+- [Min](#rule-min)
 - [MIME Types](#rule-mimetypes)
 - [MIME Type By File Extension](#rule-mimes)
 - [Size](#rule-size)
@@ -1103,6 +1186,14 @@ Validator::make($request->all(), [
 #### active_url
 
 Проверяемое поле должно иметь допустимую запись A или AAAA в соответствии с функцией `dns_get_record` PHP. Имя хоста указанного URL извлекается с помощью PHP-функции `parse_url` перед передачей в `dns_get_record`.
+
+При тестировании правил валидации, которые выполняют DNS-запросы, например `active_url` и `email:dns`, вы можете использовать метод `Validator::fakeDnsLookups`. Он подменяет DNS-запросы, сохраняя остальное поведение правил валидации:
+
+```php
+use Illuminate\Support\Facades\Validator;
+
+Validator::fakeDnsLookups();
+```
 
 <a name="rule-after"></a>
 #### after:_date_
@@ -1229,6 +1320,21 @@ Validator::make($input, [
 ```
 
 В общем, вы всегда должны указывать ключи массива, которые могут присутствовать в вашем массиве.
+
+<a name="rule-array-keys"></a>
+#### array_keys:_foo_,_bar_,...
+
+Проверяемое поле должно быть PHP-массивом, ключи которого все входят в переданный список. Необходимо указать хотя бы один ключ:
+
+```php
+'user' => ['array_keys:name,username'],
+```
+
+Для удобства можно использовать метод `Rule::arrayKeys`:
+
+```php
+'user' => [Rule::arrayKeys('name', 'username')],
+```
 
 <a name="rule-ascii"></a>
 #### ascii
@@ -1427,15 +1533,21 @@ use Illuminate\Validation\Rule;
 Проверяемый файл должен быть изображением, отвечающим ограничениям размеров, указанным в параметрах правила:
 
 ```php
-'avatar' => 'dimensions:min_width=100,min_height=200'
+'avatar' => ['dimensions:min_width=100,min_height=200']
 ```
 
-Доступные ограничения: _min\_width_, _max\_width_, _min\_height_, _max\_height_, _width_, _height_, _ratio_.
+Доступные ограничения: _min\_width_, _max\_width_, _min\_height_, _max\_height_, _width_, _height_, _ratio_, _min\_ratio_, _max\_ratio_.
 
 Ограничение _ratio_ должно быть представлено как ширина, разделенная на высоту. Это может быть указано дробью вроде `3/2` или числом с плавающей запятой, например `1.5`:
 
 ```php
-'avatar' => 'dimensions:ratio=3/2'
+'avatar' => ['dimensions:ratio=3/2']
+```
+
+Ограничения _min\_ratio_ и _max\_ratio_ можно использовать, чтобы определить диапазон допустимых aspect ratios:
+
+```php
+'avatar' => ['dimensions:min_ratio=1/2,max_ratio=3/2']
 ```
 
 Поскольку это правило требует нескольких аргументов, часто удобнее использовать метод `Rule::dimensions` для гибкого построения правила:
@@ -1453,6 +1565,12 @@ Validator::make($data, [
             ->ratio(3 / 2),
     ],
 ]);
+```
+
+Также можно использовать методы `minRatio`, `maxRatio` и `ratioBetween`, чтобы выразительно определить ограничения соотношения сторон:
+
+```php
+Rule::dimensions()->ratioBetween(min: 1 / 2, max: 3 / 2)
 ```
 
 <a name="rule-distinct"></a>
@@ -1553,7 +1671,7 @@ Validator::validate($input, [
 <a name="rule-enum"></a>
 #### enum
 
-Правило `Enum` это правило на основе класса, которое проверяет, содержит ли проверяемое поле допустимое значение перечисления. Правило `Enum` принимает имя перечисления как единственный аргумент конструктора. При валидации примитивных значений правилу `Enum` следует предоставить поддерживаемое перечисление :
+Правило `Enum` на основе класса проверяет, содержит ли поле допустимое значение перечисления. Единственным аргументом конструктора `Enum` является имя перечисления. При валидации примитивных значений правилу `Enum` следует передать поддерживаемое перечисление:
 
 ```php
 use App\Enums\ServerStatus;
@@ -1617,6 +1735,21 @@ Validator::make($request->all(), [
 #### exclude_unless:_anotherfield_,_value_
 
 Проверяемое поле будет исключено из данных запроса, возвращаемых методами `validate` и `validated`, если поле _anotherfield_ не равно _value_. При _value_ равном `null` (`exclude_unless: name, null`) проверяемое поле будет исключено, если поле сравнения либо не равно `null`, либо отсутствует в данных запроса.
+
+Если требуется сложная логика условного исключения, можно использовать метод `Rule::excludeUnless`. Этот метод принимает логическое значение или замыкание. Когда передано замыкание, оно должно вернуть `true` или `false`, указывая, должно ли проверяемое поле не исключаться:
+
+```php
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::excludeUnless($request->user()->is_admin)],
+]);
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::excludeUnless(fn () => $request->user()->is_admin)],
+]);
+```
 
 <a name="rule-exclude-with"></a>
 #### exclude_with:_anotherfield_
@@ -1864,7 +1997,9 @@ Validator::make($input, [
 Проверяемый файл должен соответствовать одному из указанных MIME-типов:
 
 ```php
-'video' => 'mimetypes:video/avi,video/mpeg,video/quicktime'
+'video' => 'mimetypes:video/avi,video/mpeg,video/quicktime',
+
+'media' => 'mimetypes:image/*,video/*',
 ```
 
 Чтобы определить MIME-тип загруженного файла, содержимое файла будет прочитано, и фреймворк попытается угадать MIME-тип, который может отличаться от типа, предоставленного клиентом.
@@ -1949,9 +2084,6 @@ Validator::make($data, [
 Проверяемое поле не должно соответствовать переданному регулярному выражению.
 
 Под капотом это правило использует функцию `preg_match`, поэтому указанный шаблон должен подчиняться требованиям, предъявляемым к ней, а также включать допустимые разделители. Например: `'email' => 'not_regex:/^.+$/i'`.
-
-> [!WARNING]
-> При использовании шаблонов `regex` / `not_regex` может потребоваться указать ваши правила валидации с использованием массива вместо использования разделителей `|`, особенно если регулярное выражение содержит символ `|`.
 
 <a name="rule-nullable"></a>
 #### nullable
@@ -2061,6 +2193,21 @@ Validator::make($request->all(), [
 
 <!-- </div> -->
 
+Если требуется сложная логика условного запрета, можно использовать метод `Rule::prohibitedUnless`. Этот метод принимает логическое значение или замыкание. Когда передано замыкание, оно должно вернуть `true` или `false`, указывая, должно ли проверяемое поле не быть запрещено:
+
+```php
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::prohibitedUnless($request->user()->is_admin)],
+]);
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::prohibitedUnless(fn () => $request->user()->is_admin)],
+]);
+```
+
 <a name="rule-prohibits"></a>
 #### prohibits:_anotherfield_,...
 
@@ -2081,9 +2228,6 @@ Validator::make($request->all(), [
 Проверяемое поле должно соответствовать переданному регулярному выражению.
 
 Под капотом это правило использует функцию `preg_match`, поэтому указанный шаблон должен подчиняться требованиям, предъявляемым к ней, а также включать допустимые разделители. Например: `'email' => 'regex:/^.+@.+$/i'`.
-
-> [!WARNING]
-> При использовании шаблонов `regex` / `not_regex` может потребоваться указать ваши правила валидации с использованием массива вместо использования разделителей `|`, особенно если регулярное выражение содержит символ `|`.
 
 <a name="rule-required"></a>
 #### required
@@ -2133,6 +2277,21 @@ Validator::make($request->all(), [
 #### required_unless:_anotherfield_,_value_,...
 
 Проверяемое поле должно присутствовать и не быть пустым, если поле _anotherfield_ не равно какому-либо _value_. Это также означает, что в данных запроса должно присутствовать _anotherfield_, если _value_ не имеет значения `null`. Если _value_ равно `null` (`required_unless: name, null`), проверяемое поле будет обязательным, если поле сравнения не равно `null` или поле сравнения отсутствует в данных запроса.
+
+Если вы хотите построить более сложное условие для правила `required_unless`, можно использовать метод `Rule::requiredUnless`. Этот метод принимает логическое значение или замыкание. Когда передано замыкание, оно должно вернуть `true` или `false`, указывая, что проверяемое поле не является обязательным:
+
+```php
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::requiredUnless($request->user()->is_admin)],
+]);
+
+Validator::make($request->all(), [
+    'role_id' => [Rule::requiredUnless(fn () => $request->user()->is_admin)],
+]);
+```
 
 <a name="rule-required-with"></a>
 #### required_with:_foo_,_bar_,...
@@ -2192,6 +2351,22 @@ Validator::make($request->all(), [
 #### string
 
 Проверяемое поле должно быть строкой. Если вы хотите, чтобы поле также могло быть `null`, вы должны назначить этому полю правило `nullable`.
+
+Для удобства строковые правила валидации также можно создавать с помощью выразительного конструктора правил `Rule::string()`:
+
+```php
+use Illuminate\Validation\Rule;
+
+'title' => [
+    'required',
+    Rule::string()
+        ->min(3)
+        ->max(255)
+        ->alphaDash(ascii: true),
+],
+```
+
+Конструктор строковых правил предоставляет методы для распространенных строковых ограничений, включая `alpha`, `alphaDash`, `alphaNumeric`, `ascii`, `between`, `doesntEndWith`, `doesntStartWith`, `endsWith`, `exactly`, `lowercase`, `max`, `min`, `startsWith` и `uppercase`. Поскольку конструктор правил поддерживает условия, можно также использовать методы `when` и `unless` для условного применения ограничений.
 
 <a name="rule-timezone"></a>
 #### timezone
@@ -2656,6 +2831,9 @@ $validator = Validator::make($request->all(), [
 // Требуется не менее 8 символов...
 Password::min(8)
 
+// Требуется не более 256 символов...
+Password::min(16)->max(256)
+
 // Требуется хотя бы одна буква...
 Password::min(8)->letters()
 
@@ -2688,11 +2866,23 @@ Password::min(8)->uncompromised(3);
 
 ```php
 Password::min(8)
+    ->max(256)
     ->letters()
     ->mixedCase()
     ->numbers()
     ->symbols()
     ->uncompromised()
+```
+
+Можно преобразовать объект правила `Password` в строку, подходящую для HTML-атрибута `passwordrules`, с помощью метода `toPasswordRulesString`:
+
+```blade
+<input
+    type="password"
+    name="password"
+    autocomplete="new-password"
+    passwordrules="{{ Password::defaults()->toPasswordRulesString() }}"
+/>
 ```
 
 <a name="defining-default-password-rules"></a>
@@ -2908,7 +3098,7 @@ $input = ['name' => ''];
 Validator::make($input, $rules)->passes(); // true
 ```
 
-Чтобы ваше правило было применено, даже если атрибут пуст, то правило должно подразумевать, что атрибут является обязательным. Чтобы быстрого сгенерировать новый объект неявного правила, вы можете использовать Artisan-команду `make:rule` с параметром `--implicit`:
+Чтобы ваше правило было применено, даже если атрибут пуст, то правило должно подразумевать, что атрибут является обязательным. Чтобы быстро сгенерировать новый объект неявного правила, вы можете использовать Artisan-команду `make:rule` с параметром `--implicit`:
 
 ```shell
 php artisan make:rule Uppercase --implicit

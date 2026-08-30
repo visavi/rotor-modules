@@ -1,5 +1,5 @@
 ---
-git: b346ab0f732f7be0b377dae3d624778318a2f2d9
+git: 67f17210b4ba48ec6374f64d9568724b02f10b07
 ---
 
 # Глобальные помощники (helpers)
@@ -95,6 +95,7 @@ Laravel содержит множество глобальных «вспомо�
 - [Number::format](#method-number-format)
 - [Number::ordinal](#method-number-ordinal)
 - [Number::pairs](#method-number-pairs)
+- [Number::parse](#method-number-parse)
 - [Number::parseInt](#method-number-parse-int)
 - [Number::parseFloat](#method-number-parse-float)
 - [Number::percentage](#method-number-percentage)
@@ -397,6 +398,33 @@ $array = ['name' => 'Desk', 'price' => 100];
 $filtered = Arr::except($array, ['price']);
 
 // ['name' => 'Desk']
+```
+
+<a name="method-array-except-values"></a>
+#### `Arr::exceptValues()`
+
+Метод `Arr::exceptValues` удаляет указанные значения из массива:
+
+```php
+use Illuminate\Support\Arr;
+
+$array = ['foo', 'bar', 'baz', 'qux'];
+
+$filtered = Arr::exceptValues($array, ['foo', 'baz']);
+
+// ['bar', 'qux']
+```
+
+Вы также можете передать `true` в аргумент `strict`, чтобы использовать строгое сравнение типов при фильтрации:
+
+```php
+use Illuminate\Support\Arr;
+
+$array = [1, '1', 2, '2'];
+
+$filtered = Arr::exceptValues($array, [1, 2], strict: true);
+
+// ['1', '2']
 ```
 
 <a name="method-array-exists"></a>
@@ -798,6 +826,33 @@ $array = ['name' => 'Desk', 'price' => 100, 'orders' => 10];
 $slice = Arr::only($array, ['name', 'price']);
 
 // ['name' => 'Desk', 'price' => 100]
+```
+
+<a name="method-array-only-values"></a>
+#### `Arr::onlyValues()`
+
+Метод `Arr::onlyValues` возвращает только указанные значения из массива:
+
+```php
+use Illuminate\Support\Arr;
+
+$array = ['foo', 'bar', 'baz', 'qux'];
+
+$filtered = Arr::onlyValues($array, ['foo', 'baz']);
+
+// ['foo', 'baz']
+```
+
+Вы также можете передать `true` в аргумент `strict`, чтобы использовать строгое сравнение типов при фильтрации:
+
+```php
+use Illuminate\Support\Arr;
+
+$array = [1, '1', 2, '2'];
+
+$filtered = Arr::onlyValues($array, [1, 2], strict: true);
+
+// [1, 2]
 ```
 
 <a name="method-array-partition"></a>
@@ -1746,6 +1801,23 @@ $result = Number::pairs(25, 10, offset: 0);
 // [[0, 10], [10, 20], [20, 25]]
 ```
 
+<a name="method-number-parse"></a>
+#### `Number::parse()` {.collection-method}
+
+Метод `Number::parse` разбирает локализованную числовую строку с помощью PHP `NumberFormatter`:
+
+```php
+use Illuminate\Support\Number;
+
+$result = Number::parse('10,123', locale: 'en');
+
+// 10123.0
+
+$result = Number::parse('10,123', locale: 'fr');
+
+// 10.123
+```
+
 <a name="method-number-parse-int"></a>
 #### `Number::parseInt()`
 
@@ -2142,7 +2214,7 @@ return to_action(
 <a name="method-to-route"></a>
 #### `to_route()`
 
-Функция `to_route` генерирует [HTTP-ответ перенаправления](/docs/{{version}}/responses#redirects) для заданного [именованного маршрута](/docs/{{version}}/routing#named-routes) :
+Функция `to_route` генерирует [HTTP-ответ перенаправления](/docs/{{version}}/responses#redirects) для заданного [именованного маршрута](/docs/{{version}}/routing#named-routes):
 
 ```php
 return to_route('users.show', ['user' => 1]);
@@ -2371,7 +2443,7 @@ $value = cache('key', 'default');
 ```php
 cache(['key' => 'value'], 300);
 
-cache(['key' => 'value'], now()->addSeconds(10));
+cache(['key' => 'value'], now()->plus(seconds: 10));
 ```
 
 <a name="method-class-uses-recursive"></a>
@@ -2634,7 +2706,7 @@ logger('Debug message');
 logger('User has logged in.', ['id' => $user->id]);
 ```
 
-Если функции не передано значение, то будет возвращен экземпляр [регистратора](/docs/{{version}}/errors#logging):
+Если функции не передано значение, будет возвращен экземпляр [регистратора](/docs/{{version}}/logging):
 
 ```php
 logger()->error('You are not allowed here.');
@@ -2876,6 +2948,16 @@ return response()->json(['foo' => 'bar'], 200, $headers);
 return retry(5, function () {
     // Attempt 5 times while resting 100ms between attempts...
 }, 100);
+```
+
+Длительность паузы также может быть экземпляром `CarbonInterval`:
+
+```php
+use function Illuminate\Support\seconds;
+
+return retry(5, function () {
+    // Выполнить 5 попыток с паузой 5 секунд между попытками...
+}, seconds(5));
 ```
 
 Если вы хотите вручную вычислить количество миллисекунд, которое должно пройти между попытками, вы можете передать функцию в качестве третьего аргумента функции `retry`:
@@ -3175,7 +3257,32 @@ use Illuminate\Support\Carbon;
 $now = Carbon::now();
 ```
 
-Подробное описание `Carbon` и его функций можно найти в [официальной документации Carbon](https://carbon.nesbot.com/docs/).
+Laravel также расширяет экземпляры `Carbon` методами `plus` и `minus`, позволяя удобно изменять дату и время экземпляра:
+
+```php
+return now()->plus(minutes: 5);
+return now()->plus(hours: 8);
+return now()->plus(weeks: 4);
+
+return now()->minus(minutes: 5);
+return now()->minus(hours: 8);
+return now()->minus(weeks: 4);
+```
+
+Подробное описание `Carbon` и его функций можно найти в [официальной документации Carbon](https://carbon.nesbot.com/guide/getting-started/introduction.html).
+
+<a name="interval-functions"></a>
+#### Функции интервалов
+
+Laravel также предлагает функции `milliseconds`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `months` и `years`, которые возвращают экземпляры `CarbonInterval`, расширяющие класс PHP [DateInterval](https://www.php.net/manual/ru/class.dateinterval.php). Эти функции можно использовать везде, где Laravel принимает экземпляр `DateInterval`:
+
+```php
+use Illuminate\Support\Facades\Cache;
+
+use function Illuminate\Support\{minutes};
+
+Cache::put('metrics', $metrics, minutes(10));
+```
 
 <a name="deferred-functions"></a>
 ### Отложенные функции
@@ -3406,7 +3513,7 @@ Sleep::for(500)->milliseconds();
 Sleep::for(5000)->microseconds();
 
 // Приостановить выполнение до заданного времени...
-Sleep::until(now()->addMinute());
+Sleep::until(now()->plus(minutes: 1));
 
 // Псевдоним функции PHP "sleep"...
 Sleep::sleep(2);
@@ -3578,7 +3685,7 @@ $uri = Uri::of('https://example.com/path');
 $uri = Uri::to('/dashboard');
 $uri = Uri::route('users.show', ['user' => 1]);
 $uri = Uri::signedRoute('users.show', ['user' => 1]);
-$uri = Uri::temporarySignedRoute('user.index', now()->addMinutes(5));
+$uri = Uri::temporarySignedRoute('user.index', now()->plus(minutes: 5));
 $uri = Uri::action([UserController::class, 'index']);
 $uri = Uri::action(InvokableController::class);
 

@@ -1,5 +1,5 @@
 ---
-git: bab1b28a63e72f9e51ad89995ef546058bc01bdc
+git: 68f903aca708d7c9070f73127e64468132b1266b
 ---
 
 # База данных · Миграции
@@ -120,7 +120,7 @@ public function up(): void
 Иногда миграция может быть предназначена для поддержки функции, которая еще не активна, и вы пока не хотите, чтобы она запускалась. В этом случае вы можете определить метод `shouldRun` в миграции. Если метод `shouldRun` возвращает `false`, миграция будет пропущена:
 
 ```php
-use App\Models\Flights;
+use App\Models\Flight;
 use Laravel\Pennant\Feature;
 
 /**
@@ -128,7 +128,7 @@ use Laravel\Pennant\Feature;
  */
 public function shouldRun(): bool
 {
-    return Feature::active(Flights::class);
+    return Feature::active(Flight::class);
 }
 ```
 
@@ -141,10 +141,16 @@ public function shouldRun(): bool
 php artisan migrate
 ```
 
-Если вы хотите узнать, какие миграции уже выполнены, то вы можете использовать команду `migrate:status` Artisan:
+Если вы хотите узнать, какие миграции уже выполнены, а какие всё ещё ожидают выполнения, то вы можете использовать команду `migrate:status` Artisan:
 
 ```shell
 php artisan migrate:status
+```
+
+Если вы передадите опцию `--step` команде `migrate`, команда выполнит каждую миграцию как отдельный пакет, что позволит позже откатывать отдельные миграции с помощью команды `migrate:rollback`:
+
+```shell
+php artisan migrate --step
 ```
 
 Если вы хотите посмотреть SQL-запросы, которые будут выполнены миграциями, но при этом не запускать их фактически, вы можете добавить флаг `--pretend` к команде `migrate`:
@@ -153,6 +159,7 @@ php artisan migrate:status
 php artisan migrate --pretend
 ```
 
+<a name="isolating-migration-execution"></a>
 #### Изолированное выполнение миграций
 
 Если вы развертываете свое приложение на нескольких серверах и выполняете миграции в рамках процесса развертывания, вероятно, вам не захочется, чтобы два сервера попытались выполнить миграцию базы данных одновременно. Для избежания этого вы можете использовать опцию `isolated` при вызове команды `migrate`.
@@ -512,6 +519,7 @@ Schema::table('users', function (Blueprint $table) {
 
 </div>
 
+<a name="relationship-method-list"></a>
 #### Типы отношений
 
 <div class="collection-method-list" markdown="1">
@@ -520,12 +528,13 @@ Schema::table('users', function (Blueprint $table) {
 - [foreignIdFor](#column-method-foreignIdFor)
 - [foreignUlid](#column-method-foreignUlid)
 - [foreignUuid](#column-method-foreignUuid)
+- [foreignUuidFor](#column-method-foreignUuidFor)
 - [morphs](#column-method-morphs)
 - [nullableMorphs](#column-method-nullableMorphs)
 
 </div>
 
-<a name="spacifics-method-list"></a>
+<a name="specifics-method-list"></a>
 #### Специальные типы
 
 <div class="collection-method-list" markdown="1">
@@ -699,6 +708,15 @@ $table->foreignUlid('user_id');
 $table->foreignUuid('user_id');
 ```
 
+<a name="column-method-foreignUuidFor"></a>
+#### `foreignUuidFor()`
+
+Метод `foreignUuidFor` добавляет для заданного класса модели столбец `{column}_id`, эквивалентный UUID:
+
+```php
+$table->foreignUuidFor(User::class);
+```
+
 <a name="column-method-geography"></a>
 #### `geography()`
 
@@ -843,9 +861,9 @@ $table->mediumText('data')->charset('binary'); // MEDIUMBLOB
 <a name="column-method-morphs"></a>
 #### `morphs()`
 
-Метод `morphs` - это удобный метод, который добавляет эквивалент столбца `{column}_id` и столбца `{column}_type` с типом данных `VARCHAR`. Тип данных столбца `{column}_id` будет `UNSIGNED BIGINT`, `CHAR(36)` или `CHAR(26)`, в зависимости от типа ключа модели.
+Метод `morphs` - это удобный метод, который добавляет столбец `{column}_type` с типом данных `VARCHAR` и эквивалент столбца `{column}_id`. Тип данных столбца `{column}_id` будет `UNSIGNED BIGINT`, `CHAR(36)` или `CHAR(26)`, в зависимости от типа ключа модели.
 
-Этот метод предназначен для использования при определении столбцов, необходимых для полиморфного [отношения Eloquent](/docs/{{version}}/eloquent-relationships). В следующем примере будут созданы столбцы `taggable_id` и `taggable_type`:
+Этот метод предназначен для использования при определении столбцов, необходимых для полиморфного [отношения Eloquent](/docs/{{version}}/eloquent-relationships). В следующем примере будут созданы столбцы `taggable_type` и `taggable_id`:
 
 ```php
 $table->morphs('taggable');
@@ -1091,9 +1109,9 @@ $table->unsignedTinyInteger('votes');
 <a name="column-method-ulidMorphs"></a>
 #### Метод `ulidMorphs()`
 
-Метод `ulidMorphs` - это удобный метод, который добавляет эквивалент столбца `{column}_id` типа `CHAR(26)` и столбца `{column}_type` типа `VARCHAR`.
+Метод `ulidMorphs` - это удобный метод, который добавляет столбец `{column}_type` типа `VARCHAR` и эквивалент столбца `{column}_id` типа `CHAR(26)`.
 
-Этот метод предназначен для использования при определении столбцов, необходимых для полиморфных [Eloquent отношений](/docs/{{version}}/eloquent-relationships), которые используют ULID идентификаторы. В следующем примере будут созданы столбцы `taggable_id` и `taggable_type`:
+Этот метод предназначен для использования при определении столбцов, необходимых для полиморфных [Eloquent отношений](/docs/{{version}}/eloquent-relationships), которые используют ULID идентификаторы. В следующем примере будут созданы столбцы `taggable_type` и `taggable_id`:
 
 ```php
 $table->ulidMorphs('taggable');
@@ -1102,9 +1120,9 @@ $table->ulidMorphs('taggable');
 <a name="column-method-uuidMorphs"></a>
 #### `uuidMorphs()`
 
-Метод `uuidMorphs` – это удобный метод, который добавляет эквивалент столбца `CHAR(36)` (`{column}_id`) и эквивалент столбца `VARCHAR` (`{column}_type`).
+Метод `uuidMorphs` - это удобный метод, который добавляет столбец `{column}_type` типа `VARCHAR` и эквивалент столбца `{column}_id` типа `CHAR(36)`.
 
-Этот метод предназначен для использования при определении столбцов, необходимых для полиморфного [отношения Eloquent](/docs/{{version}}/eloquent-relationships), использующего идентификаторы UUID. В следующем примере будут созданы столбцы `taggable_id` и `taggable_type`:
+Этот метод предназначен для использования при определении столбцов, необходимых для полиморфного [отношения Eloquent](/docs/{{version}}/eloquent-relationships), использующего идентификаторы UUID. В следующем примере будут созданы столбцы `taggable_type` и `taggable_id`:
 
 ```php
 $table->uuidMorphs('taggable');
@@ -1135,6 +1153,12 @@ $table->uuid('id');
 
 ```php
 $table->vector('embedding', dimensions: 100);
+```
+
+При использовании PostgreSQL расширение `pgvector` должно быть загружено до создания столбцов `vector`:
+
+```php
+Schema::ensureVectorExtensionExists();
 ```
 
 <a name="column-method-year"></a>
@@ -1172,10 +1196,13 @@ Schema::table('users', function (Blueprint $table) {
 | `->default($value)`                 | Указать значение «по умолчанию» для столбца.                                                                     |
 | `->first()`                         | Поместить столбец «первым» в таблице (MariaDB / MySQL).                                                          |
 | `->from($integer)`                  | Установить начальное значение автоинкрементного поля (MariaDB / MySQL / PostgreSQL).                             |
+| `->instant()`                       | Добавить или изменить столбец с помощью instant-операции (MySQL).                                                |
 | `->invisible()`                     | Сделать столбец "невидимым" для запросов `SELECT *` (MariaDB / MySQL).                                           |
+| `->lock($mode)`                     | Указать режим блокировки для операции со столбцом (MySQL).                                                       |
 | `->nullable($value = true)`         | Позволить (по умолчанию) значения `NULL` для вставки в столбец.                                                  |
 | `->storedAs($expression)`           | Создать сохраненный генерируемый столбец (MariaDB / MySQL / PostgreSQL / SQLite).                                |
 | `->unsigned()`                      | Установить столбцы `INTEGER` как `UNSIGNED` (MariaDB / MySQL).                                                   |
+| `->using($expression)`              | Указать выражение приведения при изменении типа столбца (PostgreSQL).                                            |
 | `->useCurrent()`                    | Установить столбцы `TIMESTAMP` для использования `CURRENT_TIMESTAMP` в качестве значения по умолчанию.           |
 | `->useCurrentOnUpdate()`            | Установить столбцы `TIMESTAMP` для использования `CURRENT_TIMESTAMP` при обновлении записи (MariaDB / MySQL).    |
 | `->virtualAs($expression)`          | Создать виртуальный генерируемый столбец (MariaDB / MySQL / SQLite).                                             |
@@ -1227,6 +1254,36 @@ $table->after('password', function (Blueprint $table) {
 });
 ```
 
+<a name="instant-column-operations"></a>
+#### Мгновенные операции со столбцами
+
+При использовании MySQL вы можете добавить модификатор `instant` к определению столбца, чтобы указать, что столбец должен быть добавлен или изменён с использованием "instant" алгоритма MySQL. Этот алгоритм позволяет выполнять некоторые изменения схемы без полной перестройки таблицы, делая их почти мгновенными независимо от размера таблицы:
+
+```php
+$table->string('name')->nullable()->instant();
+```
+
+Мгновенное добавление столбцов может только добавлять столбцы в конец таблицы, поэтому модификатор `instant` нельзя сочетать с модификаторами `after` или `first`. Кроме того, алгоритм поддерживает не все типы столбцов и операции. Если запрошенная операция несовместима, MySQL выдаст ошибку.
+
+Обратитесь к [документации MySQL](https://dev.mysql.com/doc/refman/8.0/en/innodb-online-ddl-operations.html), чтобы определить, какие операции совместимы с мгновенными изменениями столбцов.
+
+<a name="ddl-locking"></a>
+#### DDL-блокировки
+
+При использовании MySQL вы можете добавить модификатор `lock` к определениям столбцов, индексов или внешних ключей, чтобы управлять блокировкой таблицы во время операций со схемой. MySQL поддерживает несколько режимов блокировки: `none` разрешает параллельные чтения и записи, `shared` разрешает параллельные чтения, но блокирует записи, `exclusive` блокирует весь параллельный доступ, а `default` позволяет MySQL выбрать наиболее подходящий режим:
+
+```php
+$table->string('name')->lock('none');
+
+$table->index('email')->lock('shared');
+```
+
+Если запрошенный режим блокировки несовместим с операцией, MySQL выдаст ошибку. Модификатор `lock` можно сочетать с модификатором `instant`, чтобы дополнительно оптимизировать изменения схемы:
+
+```php
+$table->string('name')->instant()->lock('none');
+```
+
 <a name="modifying-columns"></a>
 ### Изменение столбцов
 
@@ -1254,6 +1311,17 @@ $table->bigIncrements('id')->primary()->change();
 
 // Удаляем индекс...
 $table->char('postal_code', 10)->unique(false)->change();
+```
+
+<a name="postgresql-column-modifications"></a>
+#### Изменение столбцов PostgreSQL
+
+При изменении типа столбца в PostgreSQL вы можете использовать модификатор `using`, чтобы указать выражение, применяемое для приведения существующих значений:
+
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->date('birthday')->using('birthday::date')->change();
+});
 ```
 
 <a name="renaming-columns"></a>
@@ -1293,7 +1361,7 @@ Laravel содержит несколько удобных методов, св�
 
 | Команда                            | Описание                                           |
 | ---------------------------------- | -------------------------------------------------- |
-| `$table->dropMorphs('morphable');` | Удалить столбцы `morphable_id` и `morphable_type`. |
+| `$table->dropMorphs('morphable');` | Удалить столбцы `morphable_type` и `morphable_id`. |
 | `$table->dropRememberToken();`     | Удалить столбец `remember_token`.                  |
 | `$table->dropSoftDeletes();`       | Удалить столбец `deleted_at`.                      |
 | `$table->dropSoftDeletesTz();`     | Псевдоним `dropSoftDeletes()`.                     |
@@ -1349,6 +1417,17 @@ $table->unique('email', 'unique_email');
 | `$table->fullText('body');`                      | Добавляет полнотекстовый индекс (MariaDB / MySQL / PostgreSQL).    |
 | `$table->fullText('body')->language('english');` | Добавляет полнотекстовый индекс для указанного языка (PostgreSQL). |
 | `$table->spatialIndex('location');`              | Добавляет пространственный индекс (кроме SQLite).                  |
+
+<a name="online-index-creation"></a>
+#### Создание индексов онлайн
+
+По умолчанию создание индекса на большой таблице может заблокировать таблицу и остановить чтение или запись на время построения индекса. При использовании PostgreSQL или SQL Server вы можете добавить метод `online` к определению индекса, чтобы создать индекс без блокировки таблицы, позволяя приложению продолжать читать и записывать данные во время создания индекса:
+
+```php
+$table->string('email')->unique()->online();
+```
+
+При использовании PostgreSQL это добавляет опцию `CONCURRENTLY` к выражению создания индекса. При использовании SQL Server это добавляет опцию `WITH (online = on)`.
 
 <a name="renaming-indexes"></a>
 ### Переименование индексов
@@ -1484,10 +1563,11 @@ Schema::withoutForeignKeyConstraints(function () {
 
 | Класс                                            | Описание                                           |
 | ------------------------------------------------ | -------------------------------------------------- |
+| `Illuminate\Database\Events\DatabaseRefreshed`   | Команда `migrate:refresh` завершена.               |
 | `Illuminate\Database\Events\MigrationsStarted`   | Вот-вот будет выполнен пакет миграций.             |
-| `Illuminate\Database\Events\MigrationsEnded`     | Завершено выполнение пакета миграций.              |
+| `Illuminate\Database\Events\MigrationsEnded`     | Пакет миграций завершен.                           |
 | `Illuminate\Database\Events\MigrationStarted`    | Одна миграция вот-вот будет выполнена.             |
-| `Illuminate\Database\Events\MigrationEnded`      | Выполнение одной миграции завершено.               |
+| `Illuminate\Database\Events\MigrationEnded`      | Одна миграция завершена.                           |
 | `Illuminate\Database\Events\NoPendingMigrations` | Команда миграции не обнаружила ожидающих миграций. |
-| `Illuminate\Database\Events\SchemaDumped`        | Завершена выгрузка схемы базы данных.              |
+| `Illuminate\Database\Events\SchemaDumped`        | Выгрузка схемы базы данных завершена.              |
 | `Illuminate\Database\Events\SchemaLoaded`        | Загружена существующая выгрузка схемы базы данных. |

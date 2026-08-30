@@ -1,5 +1,5 @@
 ---
-git: a9dea14794cf8fd8919a5be88ba4220d3dbeb652
+git: e064943bc6d9fe866685eae6e3214fe2f9e0fb5a
 ---
 
 # Laravel Pint
@@ -47,6 +47,12 @@ composer require laravel/pint --dev
 ./vendor/bin/pint app/Models
 
 ./vendor/bin/pint app/Models/User.php
+```
+
+По умолчанию Pint не форматирует шаблоны Blade. Если вы также хотите форматировать файлы `.blade.php`, используйте опцию `--blade`, которая включает правило [`Pint/laravel_blade`](#laravel-blade) для текущего запуска без изменения файла `pint.json`:
+
+```shell
+./vendor/bin/pint --blade
 ```
 
 Pint отобразит подробный список всех файлов, которые он обновляет. Вы можете просмотреть еще больше информации об изменениях сделанных Pint, указав опцию `-v` при вызове Pint:
@@ -138,6 +144,76 @@ Pint отобразит подробный список всех файлов, �
 
 Pint построен на основе [PHP CS Fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer). Поэтому вы можете использовать любые из его правил для исправления проблем стиля кода в вашем проекте: [Конфигуратор PHP CS Fixer](https://mlocati.github.io/php-cs-fixer-configurator).
 
+<a name="custom-rules"></a>
+#### Пользовательские правила
+
+Помимо правил PHP CS Fixer, Pint предоставляет пользовательские правила с префиксом `Pint/`. Эти правила не включены по умолчанию, но вы можете включить их в файле `pint.json`.
+
+<a name="laravel-blade"></a>
+##### `Pint/laravel_blade`
+
+Это правило форматирует ваши шаблоны Blade, применяя единообразные отступы, пробелы и форматирование атрибутов к файлам `.blade.php`. По умолчанию Pint не форматирует файлы Blade, поэтому для включения этой возможности нужно явно добавить правило в файл `pint.json`:
+
+```json
+{
+    "preset": "laravel",
+    "rules": {
+        "Pint/laravel_blade": true
+    }
+}
+```
+
+После включения правила Pint будет форматировать шаблоны Blade вместе с PHP-файлами при каждом запуске:
+
+```shell
+./vendor/bin/pint
+```
+
+Если вы хотите включить это правило только для одного запуска без изменения файла `pint.json`, используйте опцию `--blade`:
+
+```shell
+./vendor/bin/pint --blade
+```
+
+Внутри это правило использует [Prettier](https://prettier.io) вместе с плагинами `prettier-plugin-blade` и `prettier-plugin-tailwindcss`, поэтому на вашем компьютере должен быть установлен [Node.js](https://nodejs.org). При первом запуске Pint с включенным правилом Pint обнаружит отсутствующие зависимости Prettier и предложит установить их.
+
+> [!NOTE]
+> Это правило автоматически пропускает файлы, которые обычно полагаются на собственное форматирование, например рекомендации [Laravel Boost](https://github.com/laravel/boost) и email-представления, расположенные в каталогах `resources/views/emails` и `resources/views/mail`.
+
+<a name="phpdoc-type-annotations-only"></a>
+##### `Pint/phpdoc_type_annotations_only`
+
+Это правило удаляет все комментарии и описательный текст docblock из вашего кода, оставляя только строки, содержащие аннотации с `@`, такие как `@param`, `@return`, `@var`, `@phpstan-type` и т. д.:
+
+```php
+/**
+ * Get the posts for the user. [tl! remove]
+ * [tl! remove]
+ * @return HasMany<Post, $this>
+ */
+public function posts(): HasMany
+```
+
+Однострочные комментарии и блочные комментарии без аннотаций `@` удаляются полностью. Если вы хотите сохранить конкретный комментарий, вы можете добавить к нему префикс `@note`, `@warning` или `@todo`:
+
+```php
+// @note This comment will be preserved.
+```
+
+Чтобы включить это правило, добавьте его в файл `pint.json`:
+
+```json
+{
+    "preset": "laravel",
+    "rules": {
+        "Pint/phpdoc_type_annotations_only": true
+    }
+}
+```
+
+> [!NOTE]
+> Это правило автоматически пропускает файлы в каталоге `config`, поскольку файлы конфигурации обычно полагаются на комментарии как на документацию.
+
 <a name="excluding-files-or-folders"></a>
 ### Исключение файлов / каталогов
 
@@ -194,21 +270,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: json, dom, curl, libxml, mbstring
-          coverage: none
-
-      - name: Install Pint
-        run: composer global require laravel/pint
+          tools: pint
 
       - name: Run Pint
         run: pint
 
       - name: Commit linted files
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
 ```
