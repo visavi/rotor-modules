@@ -9,7 +9,7 @@ use Modules\Load\Observers\FileObserver;
 return [
     'name'        => 'Загрузки',
     'description' => 'Загрузки и файлы',
-    'version'     => '1.2.0',
+    'version'     => '1.3.0',
     'requires'    => '14.4.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
