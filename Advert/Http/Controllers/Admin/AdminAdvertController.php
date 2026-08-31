@@ -50,7 +50,7 @@ class AdminAdvertController extends AdminController
                     'bold'       => $bold,
                     'type'       => Advert::TYPE_ADMIN,
                     'user_id'    => getUser('id'),
-                    'deleted_at' => now()->addDays(7),
+                    'deleted_at' => now()->addDays((int) setting('rekadmintime')),
                 ]);
 
             clearCache('adminAdverts');

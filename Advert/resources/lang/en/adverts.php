@@ -23,18 +23,19 @@ return [
 
     'advert_closed'         => 'The display and placement of advertising is prohibited by the site administration!',
     'advert_point'          => 'To purchase advertising you need to earn :point!',
-    'advert_not_seats'      => 'There are currently no free places to advertise!',
     'advert_already_posted' => 'You have already advertised, it is forbidden to add several sites in a row!',
     'advert_not_money'      => 'You don\'t have enough money to buy ads!',
     'advert_success_posted' => 'Sponsored link successfully posted!',
 
-    'settings' => 'Advert settings',
+    'settings'       => 'Advert settings',
+    'settings_user'  => 'User advertising settings',
+    'settings_admin' => 'Admin advertising settings',
 
     'adverts_count_links' => 'Qty. sponsored links',
     'adverts_price'       => 'Advertising price',
     'adverts_points'      => 'Asset for advertising',
     'adverts_option'      => 'Option price (bold text, color)',
     'adverts_term'        => 'Advertising term (hours)',
-    'adverts_max_links'   => 'Maximum links allowed',
     'adverts_per_page'    => 'Listing all links',
+    'adverts_admin_term'  => 'Admin advertising term (days)',
 ];

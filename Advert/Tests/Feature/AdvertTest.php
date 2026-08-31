@@ -20,11 +20,11 @@ class AdvertTest extends ModuleTestCase
 
         $this->overrideSetting('rekusershow', 5);
         $this->overrideSetting('rekuserpost', 10);
-        $this->overrideSetting('rekusertotal', 10);
         $this->overrideSetting('rekuserpoint', 10);
         $this->overrideSetting('rekuserprice', 100);
         $this->overrideSetting('rekuseroptprice', 50);
         $this->overrideSetting('rekusertime', 24);
+        $this->overrideSetting('rekadmintime', 7);
         // Капча проверяется по фразе из сессии, тест подставляет её сам
         $this->overrideSetting('captcha_type', 'graphical');
         // Ежедневный бонус ядра начисляется прямо в запросе и сбивал бы счёт денег
@@ -132,14 +132,21 @@ class AdvertTest extends ModuleTestCase
             ->assertSee(__('advert::adverts.advert_already_posted'));
     }
 
-    public function testNoSeatsLeft(): void
+    public function testAdminAdvertTermComesFromSetting(): void
     {
-        $this->overrideSetting('rekusertotal', 1);
-        $this->advert();
+        $this->overrideSetting('rekadmintime', 3);
+        $admin = User::factory()->create(['level' => User::BOSS]);
 
-        $this->actingAs($this->user)
-            ->get('/adverts/create')
-            ->assertSee(__('advert::adverts.advert_not_seats'));
+        $this->actingAs($admin)
+            ->post('/admin/admin-adverts', [
+                'site' => 'https://example.com',
+                'name' => 'Админская ссылка',
+            ])
+            ->assertRedirect('admin/admin-adverts');
+
+        $advert = Advert::query()->where('type', Advert::TYPE_ADMIN)->firstOrFail();
+
+        $this->assertSame(now()->addDays(3)->format('Y-m-d H:i'), $advert->deleted_at->format('Y-m-d H:i'));
     }
 
     public function testSectionIsClosedWithoutSetting(): void

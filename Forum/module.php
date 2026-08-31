@@ -9,7 +9,7 @@ use Modules\Forum\Observers\TopicObserver;
 
 return [
     'name'        => 'Форум',
-    'description' => 'Форум с темами и сообщениями',
+    'description' => 'Форум с разделами, темами, закладками, лентой новых сообщений и голосованиями',
     'version'     => '1.1.1',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',

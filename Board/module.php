@@ -7,7 +7,7 @@ use Modules\Board\Models\Item;
 
 return [
     'name'        => 'Объявления',
-    'description' => 'Доска объявлений',
+    'description' => 'Доска объявлений по категориям с ценой, телефоном, фотографиями и сроком размещения',
     'version'     => '1.3.0',
     'requires'    => '14.4.0',
     'author'      => 'Vantuz',

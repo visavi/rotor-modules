@@ -60,11 +60,6 @@ class AdvertController extends Controller
 
         Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', now())->delete();
 
-        $total = Advert::query()->where('type', Advert::TYPE_USER)->count();
-        if ($total >= setting('rekusertotal')) {
-            abort(200, __('advert::adverts.advert_not_seats'));
-        }
-
         $advert = Advert::query()
             ->where('type', Advert::TYPE_USER)
             ->where('user_id', $this->user->id)

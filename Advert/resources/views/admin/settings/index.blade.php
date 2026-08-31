@@ -17,6 +17,8 @@
         <form method="post" action="{{ route('advert.settings.update') }}">
             @csrf
 
+            <h5 class="mb-3">{{ __('advert::adverts.settings_user') }}</h5>
+
             <div class="mb-3{{ hasError('sets[rekusershow]') }}">
                 <label for="rekusershow" class="form-label">{{ __('advert::adverts.adverts_count_links') }}:</label>
                 <input type="number" class="form-control" id="rekusershow" name="sets[rekusershow]" maxlength="2" value="{{ old('sets.rekusershow', $settings['rekusershow'] ?? 1) }}" required>
@@ -43,20 +45,24 @@
 
             <div class="mb-3{{ hasError('sets[rekusertime]') }}">
                 <label for="rekusertime" class="form-label">{{ __('advert::adverts.adverts_term') }}:</label>
-                <input type="number" class="form-control" id="rekusertime" name="sets[rekusertime]" maxlength="3" value="{{ old('sets.rekusertime', $settings['rekusertime'] ?? 12) }}" required>
+                <input type="number" class="form-control" id="rekusertime" name="sets[rekusertime]" maxlength="3" value="{{ old('sets.rekusertime', $settings['rekusertime'] ?? 24) }}" required>
                 <div class="invalid-feedback">{{ textError('sets[rekusertime]') }}</div>
-            </div>
-
-            <div class="mb-3{{ hasError('sets[rekusertotal]') }}">
-                <label for="rekusertotal" class="form-label">{{ __('advert::adverts.adverts_max_links') }}:</label>
-                <input type="number" class="form-control" id="rekusertotal" name="sets[rekusertotal]" maxlength="2" value="{{ old('sets.rekusertotal', $settings['rekusertotal'] ?? 10) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekusertotal]') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('sets[rekuserpost]') }}">
                 <label for="rekuserpost" class="form-label">{{ __('advert::adverts.adverts_per_page') }}:</label>
                 <input type="number" class="form-control" id="rekuserpost" name="sets[rekuserpost]" maxlength="2" value="{{ old('sets.rekuserpost', $settings['rekuserpost'] ?? 10) }}" required>
                 <div class="invalid-feedback">{{ textError('sets[rekuserpost]') }}</div>
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">{{ __('advert::adverts.settings_admin') }}</h5>
+
+            <div class="mb-3{{ hasError('sets[rekadmintime]') }}">
+                <label for="rekadmintime" class="form-label">{{ __('advert::adverts.adverts_admin_term') }}:</label>
+                <input type="number" class="form-control" id="rekadmintime" name="sets[rekadmintime]" maxlength="3" value="{{ old('sets.rekadmintime', $settings['rekadmintime'] ?? 7) }}" required>
+                <div class="invalid-feedback">{{ textError('sets[rekadmintime]') }}</div>
             </div>
 
             <button class="btn btn-primary">{{ __('main.save') }}</button>

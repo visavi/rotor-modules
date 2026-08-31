@@ -4,7 +4,7 @@ use Modules\Guestbook\Models\Guestbook;
 
 return [
     'name'        => 'Гостевая книга',
-    'description' => 'Гостевая книга сайта с поддержкой модерации и ответов от администратора',
+    'description' => 'Гостевая книга сайта с модерацией и официальными ответами администрации',
     'version'     => '1.1.0',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',

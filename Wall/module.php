@@ -5,7 +5,7 @@ use Modules\Wall\Observers\WallObserver;
 
 return [
     'name'        => 'Стена сообщений',
-    'description' => 'Стена сообщений пользователя',
+    'description' => 'Стена сообщений в профиле пользователя',
     'version'     => '1.1.0',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',

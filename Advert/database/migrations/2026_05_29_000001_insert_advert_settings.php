@@ -11,7 +11,7 @@ return new class extends Migration {
             ['name' => 'rekuserprice',    'value' => 1000],
             ['name' => 'rekuserpoint',    'value' => 50],
             ['name' => 'rekuseroptprice', 'value' => 100],
-            ['name' => 'rekusertime',     'value' => 12],
+            ['name' => 'rekusertime',     'value' => 24],
             ['name' => 'rekusertotal',    'value' => 10],
             ['name' => 'rekuserpost',     'value' => 10],
         ]);

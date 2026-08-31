@@ -5,7 +5,7 @@ use Modules\Offer\Models\Offer;
 
 return [
     'name'        => 'Предложения и проблемы',
-    'description' => 'Модуль предложений и проблем',
+    'description' => 'Предложения и сообщения о проблемах от пользователей с голосованием и официальным ответом',
     'version'     => '1.2.0',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',

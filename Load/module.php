@@ -8,7 +8,7 @@ use Modules\Load\Observers\FileObserver;
 
 return [
     'name'        => 'Загрузки',
-    'description' => 'Загрузки и файлы',
+    'description' => 'Файловый архив по категориям с модерацией загрузок, скриншотами, комментариями и рейтингом',
     'version'     => '1.3.0',
     'requires'    => '14.4.0',
     'author'      => 'Vantuz',
