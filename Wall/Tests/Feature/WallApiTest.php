@@ -123,7 +123,8 @@ class WallApiTest extends ModuleTestCase
 
         $this->getJson('/api/stats')
             ->assertOk()
-            ->assertJsonPath('sections.' . Wall::$morphName, 1);
+            ->assertJsonPath('sections.' . Wall::$morphName . '.total', 1)
+            ->assertJsonPath('sections.' . Wall::$morphName . '.today', 1);
     }
 
     private function createPost(): Wall

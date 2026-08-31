@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Observers\ArticleObserver;
@@ -9,7 +10,7 @@ return [
     'name'        => 'Блоги',
     'description' => 'Блоги и статьи',
     'version'     => '1.2.0',
-    'requires'    => '14.3.0',
+    'requires'    => '14.4.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -22,7 +23,7 @@ return [
             'upload' => 'media',
             'rating' => true,
             // Отложенные статьи публикуются по расписанию, до этого не считаются
-            'stat' => static fn (): int => Article::query()->where('active', true)->count(),
+            'stat' => static fn (): Builder => Article::query()->where('active', true),
         ],
     ],
 

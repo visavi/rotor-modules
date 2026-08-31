@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\File;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Load\Models\Down;
 use Modules\Load\Observers\FileObserver;
@@ -9,7 +10,7 @@ return [
     'name'        => 'Загрузки',
     'description' => 'Загрузки и файлы',
     'version'     => '1.2.0',
-    'requires'    => '14.3.0',
+    'requires'    => '14.4.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -22,7 +23,7 @@ return [
             'upload' => 'file',
             'rating' => true,
             // Файлы на модерации в счётчик не идут
-            'stat' => static fn (): int => Down::query()->where('active', true)->count(),
+            'stat' => static fn (): Builder => Down::query()->where('active', true),
         ],
     ],
 

@@ -186,7 +186,8 @@ class GuestbookApiTest extends ModuleTestCase
 
         $this->getJson('/api/stats')
             ->assertOk()
-            ->assertJsonPath('sections.' . Guestbook::$morphName, 1);
+            ->assertJsonPath('sections.' . Guestbook::$morphName . '.total', 1)
+            ->assertJsonPath('sections.' . Guestbook::$morphName . '.today', 1);
     }
 
     /**

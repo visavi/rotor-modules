@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Board\Models\Item;
 
@@ -8,7 +9,7 @@ return [
     'name'        => 'Объявления',
     'description' => 'Доска объявлений',
     'version'     => '1.2.0',
-    'requires'    => '14.3.0',
+    'requires'    => '14.4.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -25,10 +26,9 @@ return [
             ],
             'upload' => 'media',
             // Только живые объявления: скрытые и просроченные не считаем
-            'stat' => static fn (): int => Item::query()
+            'stat' => static fn (): Builder => Item::query()
                 ->where('active', true)
-                ->where('expires_at', '>', now())
-                ->count(),
+                ->where('expires_at', '>', now()),
         ],
     ],
 
