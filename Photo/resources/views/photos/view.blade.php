@@ -2,6 +2,11 @@
 
 @section('title', $photo->title)
 
+@section('description', truncateDescription($photo->text))
+@section('canonical', $photo->getViewUrl())
+@section('og_type', 'article')
+@section('image', $photo->getOgImage())
+
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
@@ -65,6 +70,8 @@
 
                 {{ __('main.added') }}: {{ $photo->user->getProfile() }} <small class="section-date text-muted fst-italic">{{ dateFixed($photo->created_at) }}</small><br>
                 {{ __('main.comments') }}: <span class="badge bg-adaptive">{{ $photo->count_comments }}</span>
+
+            @hook('share', ['url' => $photo->getViewUrl(), 'title' => $photo->title])
         </div>
     </div>
 

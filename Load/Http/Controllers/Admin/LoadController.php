@@ -244,7 +244,7 @@ class LoadController extends AdminController
                 $down->update([
                     'category_id' => $category->id,
                     'title'       => $title,
-                    'text'        => $text,
+                    'text'        => antimat($text),
                     'links'       => $links,
                 ]);
 

@@ -2,6 +2,11 @@
 
 @section('title', $item->title)
 
+@section('description', truncateDescription($item->text))
+@section('canonical', $item->getViewUrl())
+@section('og_type', 'article')
+@section('image', $item->getOgImage())
+
 @section('header')
     @if (getUser())
         <div class="float-end">
@@ -89,6 +94,8 @@
                         @if ($item->expires_at->gt(now()))
                             <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}
                         @endif
+
+                        @hook('share', ['url' => $item->getViewUrl(), 'title' => $item->title])
                     </div>
                 </div>
 

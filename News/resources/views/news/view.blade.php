@@ -3,6 +3,9 @@
 @section('title', $news->title)
 
 @section('description', truncateDescription($news->text))
+@section('canonical', $news->getViewUrl())
+@section('og_type', 'article')
+@section('image', $news->getOgImage())
 
 @section('breadcrumb')
     <nav>
@@ -79,6 +82,8 @@
                 {{ __('main.rating') }}:
                 @include('app/_rating', ['model' => $news, 'vote' => $news->vote])
             </div>
+
+            @hook('share', ['url' => $news->getViewUrl(), 'title' => $news->title])
         </div>
     </div>
 

@@ -6,8 +6,8 @@ use Modules\Photo\Models\Photo;
 return [
     'name'        => 'Галерея',
     'description' => 'Галерея фотографий пользователей с альбомами и комментариями',
-    'version'     => '1.2.0',
-    'requires'    => '14.3.0',
+    'version'     => '1.3.0',
+    'requires'    => '14.5.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

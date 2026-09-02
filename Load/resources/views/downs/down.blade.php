@@ -2,7 +2,10 @@
 
 @section('title', $down->title)
 
-@section('description', truncateDescription($down->getText()))
+@section('description', truncateDescription($down->text))
+@section('canonical', $down->getViewUrl())
+@section('og_type', 'article')
+@section('image', $down->getOgImage())
 
 @section('header')
     @if (isAdmin('admin'))
@@ -106,6 +109,8 @@
 
         {{ __('main.downloads') }}: <b>{{ $down->loads }}</b><br>
         {{ __('main.author') }}: {{ $down->user->getProfile() }} <small class="section-date text-muted fst-italic">{{ dateFixed($down->created_at) }}</small>
+
+        @hook('share', ['url' => $down->getViewUrl(), 'title' => $down->title])
     </div>
     </div>
 

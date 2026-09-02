@@ -3,7 +3,9 @@
 @section('title', $article->title)
 
 @section('description', truncateDescription($article->text))
-@section('canonical', route('articles.view', ['slug' => $article->slug]))
+@section('canonical', $article->getViewUrl())
+@section('og_type', 'article')
+@section('image', $article->getOgImage())
 
 @section('header')
     @if (getUser())
@@ -92,6 +94,8 @@
 
         <i class="fa fa-eye"></i> {{ __('main.views') }}: {{ $article->visits }}<br>
         <i class="fa fa-comment"></i> {{ __('main.comments') }}: <span class="badge bg-adaptive">{{ $article->count_comments }}</span>
+
+        @hook('share', ['url' => $article->getViewUrl(), 'title' => $article->title])
     </div>
 
     <div class="section mb-3 shadow p-0 overflow-hidden" id="comments">

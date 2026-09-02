@@ -9,8 +9,8 @@ use Modules\Blog\Observers\ArticleObserver;
 return [
     'name'        => 'Блоги',
     'description' => 'Статьи по категориям с тегами, комментариями, рейтингом, вложениями и отложенной публикацией',
-    'version'     => '1.3.0',
-    'requires'    => '14.4.0',
+    'version'     => '1.4.0',
+    'requires'    => '14.5.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

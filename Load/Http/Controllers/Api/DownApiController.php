@@ -140,7 +140,7 @@ class DownApiController extends Controller
         $down = Down::query()->create([
             'category_id' => $category->id,
             'title'       => $validated['title'],
-            'text'        => $validated['text'],
+            'text'        => antimat($validated['text']),
             'user_id'     => $user->id,
             // Загрузка проверяется модератором, публикуется сразу только за админом
             'active' => isAdmin(User::ADMIN),
@@ -206,7 +206,7 @@ class DownApiController extends Controller
         $down->update([
             'category_id' => $category->id,
             'title'       => $validated['title'],
-            'text'        => $validated['text'],
+            'text'        => antimat($validated['text']),
             'links'       => setting('down_allow_links') ? ($links ?: null) : null,
         ]);
 

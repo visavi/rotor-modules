@@ -54,7 +54,7 @@ class NewsController extends AdminController
             if ($validator->isValid()) {
                 $news->update([
                     'title'  => $title,
-                    'text'   => $text,
+                    'text'   => antimat($text),
                     'closed' => $closed,
                     'top'    => $top,
                 ]);
@@ -98,7 +98,7 @@ class NewsController extends AdminController
                 $news = News::query()->create([
                     'user_id' => getUser('id'),
                     'title'   => $title,
-                    'text'    => $text,
+                    'text'    => antimat($text),
                     'closed'  => $closed,
                     'top'     => $top,
                 ]);

@@ -51,7 +51,7 @@ MyModule/
 ├── hooks.php           # вставки в шаблоны через Hook::add и регистрации Registry/Restatement
 ├── helpers.php         # глобальные вспомогательные функции
 ├── middleware.php      # регистрация middleware (алиасы и/или группа web)
-├── config.php          # конфигурация модуля (config('MyModule.key'))
+├── config.php          # конфигурация модуля (config('my_module.key'))
 ├── Http/
 │   ├── Controllers/    # контроллеры (Modules\MyModule\Http\Controllers)
 │   ├── Requests/       # FormRequest классы
@@ -65,8 +65,8 @@ MyModule/
 │   └── migrations/     # миграции БД — выполняются при установке/обновлении,
 │                       # откатываются при удалении
 ├── resources/
-│   ├── views/          # Blade-шаблоны: view('MyModule::dir/file')
-│   ├── lang/           # переводы по языкам: __('MyModule::file.key')
+│   ├── views/          # Blade-шаблоны: view('my_module::dir/file')
+│   ├── lang/           # переводы по языкам: __('my_module::file.key')
 │   └── assets/         # статические файлы (css, js, img);
 │                       # симлинк создаётся на /assets/modules/my-module/
 └── screenshots/        # скриншоты модуля для карточки в админке
@@ -100,8 +100,8 @@ return [
     'models' => [
         MyModel::class => [
             'label'  => 'Метка раздела',
-            'search' => ['view' => 'MyModule::search/_results', 'with' => ['user']],
-            'feed'   => ['with' => ['user', 'files'], 'view' => 'MyModule::feeds/_feed'],
+            'search' => ['view' => 'my_module::search/_results', 'with' => ['user']],
+            'feed'   => ['with' => ['user', 'files'], 'view' => 'my_module::feeds/_feed'],
             'upload' => 'media',
             'rating' => true,
             'spam'   => true,
@@ -357,10 +357,11 @@ Registry::onAdminDeleteUser(function (\App\Models\User $user, \Illuminate\Http\R
 
 ## Шаблоны
 
-Файлы в `resources/views/` вызываются с указанием неймспейса модуля:
+Файлы в `resources/views/` вызываются с указанием неймспейса модуля.
+Неймспейс — имя директории модуля в snake_case: `MyModule` → `my_module`, `Blog` → `blog`.
 
 ```php
-view('MyModule::directory/file')
+view('my_module::directory/file')
 // → resources/views/directory/file.blade.php
 ```
 
@@ -371,7 +372,7 @@ view('MyModule::directory/file')
 Файлы в `resources/lang/ru/`, `resources/lang/en/` и т.д.:
 
 ```php
-__('MyModule::file.key')
+__('my_module::file.key')
 // → resources/lang/ru/file.php → ['key' => '...']
 ```
 
@@ -386,8 +387,8 @@ return [
     'limit'   => 10,
 ];
 
-// Использование
-config('MyModule.api_key');
+// Использование — ключ конфига совпадает с неймспейсом модуля (snake_case)
+config('my_module.api_key');
 ```
 
 Значения из админки записываются в поле `settings` модуля и сливаются поверх `config.php` при загрузке.
