@@ -92,7 +92,7 @@
         @endif
 
         <?php $bookmark = $topic->bookmark_posts ? __('forum::forums.from_bookmarks') : __('forum::forums.to_bookmarks'); ?>
-        <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-bookmark"></i> <a href="#" onclick="return bookmark(this)" data-tid="{{ $topic->id }}" data-from="{{ __('forum::forums.from_bookmarks') }}"  data-to="{{ __('forum::forums.to_bookmarks') }}">{{ $bookmark }}</a></span>
+        <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-bookmark"></i> <a href="#" data-ajax data-ajax-url="{{ route('forums.bookmarks.perform') }}" data-ajax-replace="self" data-tid="{{ $topic->id }}">{{ $bookmark }}</a></span>
     @endif
 
         <span class="ms-auto d-inline-flex align-items-center gap-1 text-nowrap" data-bs-toggle="tooltip" title="{{ __('main.views') }}">
@@ -118,29 +118,7 @@
     <hr>
 
     @if ($vote)
-        <h5>{{ $vote->title }}</h5>
-
-        <div class="mb-3">
-            @if ($vote->poll || ! getUser())
-                @foreach ($vote->voted as $key => $value)
-                    <?php $proc = round(($value * 100) / $vote->sum, 1); ?>
-                    <?php $maxproc = round(($value * 100) / $vote->max); ?>
-
-                    <b>{{ $key }}</b> ({{ __('forum::forums.votes') }}: {{ $value }})<br>
-                    {{ progressBar($maxproc, $proc . '%') }}
-                @endforeach
-            @else
-                <form class="mb-3" action="{{ route('topics.vote', ['id' => $topic->id, 'page' => $posts->currentPage()]) }}" method="post">
-                    @csrf
-                    @foreach ($vote->answers as $answer)
-                        <label><input name="poll" type="radio" value="{{ $answer->id }}"> {{ $answer->answer }}</label><br>
-                    @endforeach
-                    <button class="btn btn-sm btn-primary mt-3">{{ __('forum::forums.vote') }}</button>
-                </form>
-            @endif
-
-            {{ __('forum::forums.total_votes') }}: {{ $vote->count }}
-        </div>
+        @include('forum::forums/_vote', ['vote' => $vote, 'page' => $posts->currentPage()])
     @endif
 
     @if ($topic->isModer)
@@ -179,7 +157,7 @@
 
                                 <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
 
-                                <a href="#" onclick="return sendComplaint(this)" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
+                                <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
                             @if ($topic->isModer || (getUser('id') === $post->user_id && $post->created_at->gt(now()->subMinutes(10))))

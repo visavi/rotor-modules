@@ -29,7 +29,7 @@
                     <div class="ms-2 flex-shrink-0 d-flex align-items-center">
                         @if (isAdmin())
                             <span class="js-actions me-1">
-                                <a href="#" onclick="return deleteComment(this)" data-rid="{{ $comment->relate_id }}" data-id="{{ $comment->id }}" data-type="{{ $comment->relate->getMorphClass() }}" data-bs-toggle="tooltip" title="Удалить"><i class="fa fa-times text-muted"></i></a>
+                                <a href="#" data-ajax data-ajax-url="{{ url('comments/' . $comment->id) }}" data-ajax-method="delete" data-ajax-confirm data-ajax-remove=".section" data-bs-toggle="tooltip" title="Удалить"><i class="fa fa-times text-muted"></i></a>
                             </span>
                         @endif
                         @include('app/_rating', ['model' => $comment, 'vote' => $comment->poll?->vote])

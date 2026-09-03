@@ -10,8 +10,8 @@ use Modules\Forum\Observers\TopicObserver;
 return [
     'name'        => 'Форум',
     'description' => 'Форум с разделами, темами, закладками, лентой новых сообщений и голосованиями',
-    'version'     => '1.1.1',
-    'requires'    => '14.3.0',
+    'version'     => '1.2.0',
+    'requires'    => '14.5.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
@@ -40,7 +40,9 @@ return [
             'label'  => __('forum::forums.topics'),
             'search' => ['view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
             'feed'   => [
-                'with'  => ['lastPost.user', 'lastPost.files', 'forum.parent'],
+                // Варианты ответов грузятся заранее, а голос пользователя — нет:
+                // модели ленты кешируются общим ключом, личный голос в кеш попадать не должен
+                'with'  => ['lastPost.user', 'lastPost.files', 'forum.parent', 'vote.answers'],
                 'view'  => 'forum::feeds/_topics',
                 'scope' => fn ($query) => $query->leftJoin('posts', 'topics.last_post_id', '=', 'posts.id'),
                 // Текст, автор и файлы записи ленты берутся из последнего сообщения темы

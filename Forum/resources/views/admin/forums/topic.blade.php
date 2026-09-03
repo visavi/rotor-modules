@@ -82,31 +82,7 @@
     @endif
 
     @if ($vote)
-        <h5>{{ $vote->title }}</h5>
-
-        <div class="mb-3">
-            @if ($vote->poll)
-                @foreach ($vote->voted as $key => $data)
-                    @php
-                        $proc = round(($data * 100) / $vote->sum, 1);
-                        $maxproc = round(($data * 100) / $vote->max);
-                    @endphp
-
-                    <b>{{ $key }}</b> ({{ __('forum::forums.votes') }}: {{ $data }})<br>
-                    {{ progressBar($maxproc, $proc . '%') }}
-                @endforeach
-            @else
-                <form class="mb-3" action="{{ route('topics.vote', ['id' => $topic->id, 'page' => $posts->currentPage()]) }}" method="post">
-                    @csrf
-                    @foreach ($vote->answers as $answer)
-                        <label><input name="poll" type="radio" value="{{ $answer->id }}"> {{ $answer->answer }}</label><br>
-                    @endforeach
-                    <button class="btn btn-sm btn-primary mt-3">{{ __('forum::forums.vote') }}</button>
-                </form>
-            @endif
-
-            {{ __('forum::forums.total_votes') }}: {{ $vote->count }}
-        </div>
+        @include('forum::forums/_vote', ['vote' => $vote, 'page' => $posts->currentPage()])
     @endif
 
     <form action="{{ route('admin.posts.delete', ['tid' => $topic->id, 'page' => $posts->currentPage()]) }}" method="post">

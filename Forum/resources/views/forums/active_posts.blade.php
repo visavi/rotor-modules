@@ -36,7 +36,7 @@
                     <div class="ms-2 flex-shrink-0 d-flex align-items-center">
                         @if (isAdmin())
                             <span class="js-actions me-1">
-                                <a href="{{ route('forums.active-delete', ['id' => $data->id]) }}" onclick="return deletePost(this)" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
+                                <a href="{{ route('forums.active-delete', ['id' => $data->id]) }}" data-ajax data-ajax-method="delete" data-ajax-confirm data-ajax-remove=".section" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             </span>
                         @endif
                         @include('app/_rating', ['model' => $data, 'vote' => $data->poll?->vote])

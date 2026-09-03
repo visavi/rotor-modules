@@ -66,6 +66,8 @@ class BookmarkController extends Controller
                     'success' => true,
                     'type'    => 'deleted',
                     'message' => __('forum::forums.bookmark_success_deleted'),
+                    // Ссылка предлагает обратное действие, текст готовит сервер
+                    'html' => __('forum::forums.to_bookmarks'),
                 ]);
             }
 
@@ -79,6 +81,7 @@ class BookmarkController extends Controller
                 'success' => true,
                 'type'    => 'added',
                 'message' => __('forum::forums.bookmark_success_added'),
+                'html'    => __('forum::forums.from_bookmarks'),
             ]);
         }
 

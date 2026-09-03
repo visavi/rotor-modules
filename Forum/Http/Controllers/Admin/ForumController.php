@@ -12,7 +12,6 @@ use App\Support\Validator;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
@@ -395,19 +394,7 @@ class ForumController extends AdminController
         $vote = Vote::query()->where('topic_id', $topic->id)->first();
 
         if ($vote) {
-            $vote->load('poll');
-
-            if ($vote->answers->isNotEmpty()) {
-                $results = Arr::pluck($vote->answers, 'result', 'answer');
-                $max = max($results);
-
-                arsort($results);
-
-                $vote->voted = $results;
-
-                $vote->sum = ($vote->count > 0) ? $vote->count : 1;
-                $vote->max = ($max > 0) ? $max : 1;
-            }
+            $vote->load('answers');
         }
 
         $files = File::query()

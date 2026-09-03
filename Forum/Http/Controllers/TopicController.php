@@ -14,9 +14,9 @@ use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Forum\Models\Bookmark;
@@ -93,19 +93,7 @@ class TopicController extends Controller
         $vote = Vote::query()->where('topic_id', $topic->id)->first();
 
         if ($vote) {
-            $vote->load('poll');
-
-            if ($vote->answers->isNotEmpty()) {
-                $results = Arr::pluck($vote->answers, 'result', 'answer');
-                $max = max($results);
-
-                arsort($results);
-
-                $vote->voted = $results;
-
-                $vote->sum = ($vote->count > 0) ? $vote->count : 1;
-                $vote->max = ($max > 0) ? $max : 1;
-            }
+            $vote->load('answers');
         }
 
         $files = [];
@@ -510,9 +498,13 @@ class TopicController extends Controller
     /**
      * Voting
      */
-    public function vote(int $id, Request $request, Validator $validator): RedirectResponse
+    public function vote(int $id, Request $request, Validator $validator): RedirectResponse|JsonResponse
     {
         if (! $user = getUser()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('main.not_authorized')]);
+            }
+
             abort(403, __('main.not_authorized'));
         }
 
@@ -520,6 +512,10 @@ class TopicController extends Controller
         $vote = $topic ? Vote::query()->where('topic_id', $id)->first() : null;
 
         if (! $vote) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => __('forum::forums.vote_not_found')]);
+            }
+
             abort(404, __('forum::forums.vote_not_found'));
         }
 
@@ -545,6 +541,10 @@ class TopicController extends Controller
         }
 
         if (! $validator->isValid()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => current($validator->getErrors())]);
+            }
+
             return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
                 ->withErrors($validator->getErrors());
         }
@@ -558,6 +558,17 @@ class TopicController extends Controller
             'user_id'     => $user->id,
             'vote'        => $answer->answer,
         ]);
+
+        // Из ленты голосуют без перезагрузки страницы: возвращаем свежие результаты
+        if ($request->ajax()) {
+            $vote->load('answers');
+
+            return response()->json([
+                'success' => true,
+                'message' => __('forum::forums.vote_success'),
+                'html'    => (string) view('forum::forums/_vote', compact('vote', 'page')),
+            ]);
+        }
 
         return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
             ->with('success', __('forum::forums.vote_success'));

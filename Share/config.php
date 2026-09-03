@@ -12,7 +12,7 @@ return [
             'name'  => 'VK',
             'icon'  => 'fa-brands fa-vk',
             'color' => '#0077ff',
-            'link'  => 'https://vk.com/share.php?url={url}&title={title}',
+            'link'  => 'https://vk.com/share.php?url={url}',
         ],
         'ok' => [
             'name'  => 'OK',

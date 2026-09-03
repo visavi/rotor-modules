@@ -23,7 +23,7 @@
                 <i class="fa fa-file-alt"></i> <b><a href="{{ route('photos.view', ['id' => $comment->relate_id, 'cid' => $comment->id]) }}">{{ $comment->title }}</a></b>
 
                 @if (isAdmin())
-                    <a href="#" class="float-end" onclick="return deleteComment(this)" data-rid="{{ $comment->relate_id }}" data-id="{{ $comment->id }}" data-type="{{ $comment->relate->getMorphClass() }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times"></i></a>
+                    <a href="#" class="float-end" data-ajax data-ajax-url="{{ url('comments/' . $comment->id) }}" data-ajax-method="delete" data-ajax-confirm data-ajax-remove=".section" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times"></i></a>
                 @endif
 
                 <div class="section-message">

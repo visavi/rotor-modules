@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.1
+- Кнопка жалобы переведена на ядровой `data-ajax`, свой JS-обработчик больше не нужен
+
 ## 1.1.0
 - API гостевой: `GET /api/guestbook`, `POST /api/guestbook`, `PATCH /api/guestbook/{id}`
 - Гость пишет по API так же, как на сайте: с капчей (`GET /api/captcha`) и без ссылок в тексте, при `guest_moderation` сообщение ждёт проверки

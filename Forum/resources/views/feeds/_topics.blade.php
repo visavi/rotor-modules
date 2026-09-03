@@ -35,6 +35,12 @@
             {{ $post->lastPost->text ? $post->lastPost->getText() : __('main.deleted') }}
         </div>
 
+        {{-- Тема всплывает в ленте с каждым ответом, поэтому опрос показывается
+             только тому, кто ещё не голосовал: гостю isVoted() отвечает true --}}
+        @if ($post->vote->exists && ! $post->vote->isVoted())
+            @include('forum::forums/_vote', ['vote' => $post->vote])
+        @endif
+
         @if ($post->lastPost->getFiles()->isNotEmpty())
             @foreach ($post->lastPost->getFiles() as $file)
                 <div class="media-file">
