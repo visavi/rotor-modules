@@ -23,6 +23,23 @@ return new class extends Migration {
             });
     }
 
+    /**
+     * Создаёт только отсутствующие временные колонки: упавшая миграция могла
+     * оставить их с прошлого запуска, повторный запуск не должен падать.
+     */
+    private function addTempColumns(string $table, string $type, array $cols): void
+    {
+        $missing = array_filter($cols, static fn ($col) => ! Schema::hasColumn($table, $col));
+
+        if ($missing) {
+            Schema::table($table, static function (Blueprint $blueprint) use ($type, $missing) {
+                foreach ($missing as $col) {
+                    $blueprint->{$type}($col)->nullable();
+                }
+            });
+        }
+    }
+
     public function up(): void
     {
         if (Schema::getColumnType('walls', 'created_at') === 'datetime') {
@@ -31,7 +48,7 @@ return new class extends Migration {
 
         $toDt = static fn ($v) => $v ? Date::createFromTimestamp($v, config('app.timezone'))->format('Y-m-d H:i:s') : null;
 
-        Schema::table('walls', fn (Blueprint $table) => $table->dateTime('created_at_dt')->nullable());
+        $this->addTempColumns('walls', 'dateTime', ['created_at_dt']);
         $this->convert('walls', ['created_at'], static fn ($r) => ['created_at_dt' => $toDt($r->created_at)]);
         Schema::table('walls', function (Blueprint $table) {
             if (Schema::hasIndex('walls', ['created_at'])) {
@@ -51,7 +68,7 @@ return new class extends Migration {
 
         $toInt = static fn ($v) => $v ? Date::parse($v, config('app.timezone'))->getTimestamp() : null;
 
-        Schema::table('walls', fn (Blueprint $table) => $table->integer('created_at_int')->nullable());
+        $this->addTempColumns('walls', 'integer', ['created_at_int']);
         $this->convert('walls', ['created_at'], static fn ($r) => ['created_at_int' => $toInt($r->created_at)]);
         Schema::table('walls', function (Blueprint $table) {
             if (Schema::hasIndex('walls', ['created_at'])) {

@@ -7,6 +7,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Создаёт только отсутствующие временные колонки: упавшая миграция могла
+     * оставить их с прошлого запуска, повторный запуск не должен падать.
+     */
+    private function addTempColumns(string $table, string $type, array $cols): void
+    {
+        $missing = array_filter($cols, static fn ($col) => ! Schema::hasColumn($table, $col));
+
+        if ($missing) {
+            Schema::table($table, static function (Blueprint $blueprint) use ($type, $missing) {
+                foreach ($missing as $col) {
+                    $blueprint->{$type}($col)->nullable();
+                }
+            });
+        }
+    }
+
     public function up(): void
     {
         if (Schema::getColumnType('articles', 'created_at') === 'datetime') {
@@ -43,7 +60,7 @@ return new class extends Migration {
             return;
         }
 
-        Schema::table('articles', fn (Blueprint $table) => $table->integer('created_at_int')->nullable());
+        $this->addTempColumns('articles', 'integer', ['created_at_int']);
 
         $tz = config('app.timezone');
 

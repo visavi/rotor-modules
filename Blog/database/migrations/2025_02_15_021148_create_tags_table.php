@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name')->unique();
-        });
+        if (! Schema::hasTable('tags')) {
+            Schema::create('tags', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('name')->unique();
+            });
+        }
     }
 
     public function down(): void

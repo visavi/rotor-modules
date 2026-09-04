@@ -9,7 +9,7 @@ use Modules\Load\Observers\FileObserver;
 return [
     'name'        => 'Загрузки',
     'description' => 'Файловый архив по категориям с модерацией загрузок, скриншотами, комментариями и рейтингом',
-    'version'     => '1.4.1',
+    'version'     => '1.4.2',
     'requires'    => '14.5.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
