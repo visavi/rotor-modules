@@ -36,8 +36,12 @@ return new class extends Migration {
 
         // Индексы дропаем явно (created_at, expires_at), чтобы пересоздание не словило дубликат имени.
         Schema::table('items', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
-            $table->dropIndex(['expires_at']);
+            if (Schema::hasIndex('items', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
+            if (Schema::hasIndex('items', ['expires_at'])) {
+                $table->dropIndex(['expires_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at', 'expires_at']);
         });
         Schema::table('items', function (Blueprint $table) {
@@ -76,8 +80,12 @@ return new class extends Migration {
         });
 
         Schema::table('items', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
-            $table->dropIndex(['expires_at']);
+            if (Schema::hasIndex('items', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
+            if (Schema::hasIndex('items', ['expires_at'])) {
+                $table->dropIndex(['expires_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at', 'expires_at']);
         });
         Schema::table('items', function (Blueprint $table) {

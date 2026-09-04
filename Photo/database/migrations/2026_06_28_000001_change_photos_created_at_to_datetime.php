@@ -32,7 +32,9 @@ return new class extends Migration {
         });
 
         Schema::table('photos', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('photos', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn('created_at');
         });
         Schema::table('photos', fn (Blueprint $table) => $table->renameColumn('created_at_dt', 'created_at'));
@@ -58,7 +60,9 @@ return new class extends Migration {
         });
 
         Schema::table('photos', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('photos', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('photos', fn (Blueprint $table) => $table->renameColumn('created_at_int', 'created_at'));

@@ -39,10 +39,18 @@ return new class extends Migration {
             'updated_at_dt' => $toDt($r->updated_at),
         ]);
         Schema::table('topics', function (Blueprint $table) {
-            $table->dropIndex(['count_posts', 'updated_at']);
-            $table->dropIndex(['user_id', 'updated_at']);
-            $table->dropIndex(['forum_id', 'locked', 'updated_at']);
-            $table->dropIndex(['updated_at']);
+            if (Schema::hasIndex('topics', ['count_posts', 'updated_at'])) {
+                $table->dropIndex(['count_posts', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['user_id', 'updated_at'])) {
+                $table->dropIndex(['user_id', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['forum_id', 'locked', 'updated_at'])) {
+                $table->dropIndex(['forum_id', 'locked', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['updated_at'])) {
+                $table->dropIndex(['updated_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('topics', function (Blueprint $table) {
@@ -74,10 +82,18 @@ return new class extends Migration {
             'updated_at_int' => $toInt($r->updated_at),
         ]);
         Schema::table('topics', function (Blueprint $table) {
-            $table->dropIndex(['count_posts', 'updated_at']);
-            $table->dropIndex(['user_id', 'updated_at']);
-            $table->dropIndex(['forum_id', 'locked', 'updated_at']);
-            $table->dropIndex(['updated_at']);
+            if (Schema::hasIndex('topics', ['count_posts', 'updated_at'])) {
+                $table->dropIndex(['count_posts', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['user_id', 'updated_at'])) {
+                $table->dropIndex(['user_id', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['forum_id', 'locked', 'updated_at'])) {
+                $table->dropIndex(['forum_id', 'locked', 'updated_at']);
+            }
+            if (Schema::hasIndex('topics', ['updated_at'])) {
+                $table->dropIndex(['updated_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('topics', function (Blueprint $table) {

@@ -34,7 +34,9 @@ return new class extends Migration {
         Schema::table('transfers', fn (Blueprint $table) => $table->dateTime('created_at_dt')->nullable());
         $this->convert('transfers', ['created_at'], static fn ($r) => ['created_at_dt' => $toDt($r->created_at)]);
         Schema::table('transfers', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('transfers', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn('created_at');
         });
         Schema::table('transfers', fn (Blueprint $table) => $table->renameColumn('created_at_dt', 'created_at'));
@@ -52,7 +54,9 @@ return new class extends Migration {
         Schema::table('transfers', fn (Blueprint $table) => $table->integer('created_at_int')->nullable());
         $this->convert('transfers', ['created_at'], static fn ($r) => ['created_at_int' => $toInt($r->created_at)]);
         Schema::table('transfers', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('transfers', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn('created_at');
         });
         Schema::table('transfers', fn (Blueprint $table) => $table->renameColumn('created_at_int', 'created_at'));

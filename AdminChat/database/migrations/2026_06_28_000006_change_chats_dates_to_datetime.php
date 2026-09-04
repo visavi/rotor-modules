@@ -40,7 +40,9 @@ return new class extends Migration {
             'updated_at_dt' => $toDt($r->updated_at),
         ]);
         Schema::table('chats', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('chats', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('chats', function (Blueprint $table) {
@@ -67,7 +69,9 @@ return new class extends Migration {
             'updated_at_int' => $toInt($r->updated_at),
         ]);
         Schema::table('chats', function (Blueprint $table) {
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('chats', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('chats', function (Blueprint $table) {

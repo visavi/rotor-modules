@@ -35,8 +35,12 @@ return new class extends Migration {
         // Индексы дропаем явно: при удалении колонки из составного индекса MySQL
         // оставляет его имя (на остатке колонок) и пересоздание ловит дубликат имени.
         Schema::table('guestbook', function (Blueprint $table) {
-            $table->dropIndex(['active', 'created_at']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('guestbook', ['active', 'created_at'])) {
+                $table->dropIndex(['active', 'created_at']);
+            }
+            if (Schema::hasIndex('guestbook', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('guestbook', function (Blueprint $table) {
@@ -72,8 +76,12 @@ return new class extends Migration {
         });
 
         Schema::table('guestbook', function (Blueprint $table) {
-            $table->dropIndex(['active', 'created_at']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('guestbook', ['active', 'created_at'])) {
+                $table->dropIndex(['active', 'created_at']);
+            }
+            if (Schema::hasIndex('guestbook', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('guestbook', function (Blueprint $table) {

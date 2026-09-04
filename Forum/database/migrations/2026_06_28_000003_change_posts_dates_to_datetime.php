@@ -41,10 +41,18 @@ return new class extends Migration {
             'updated_at_dt' => $toDt($r->updated_at),
         ]);
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropIndex(['topic_id', 'created_at']);
-            $table->dropIndex(['user_id', 'created_at']);
-            $table->dropIndex(['rating', 'created_at']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('posts', ['topic_id', 'created_at'])) {
+                $table->dropIndex(['topic_id', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['user_id', 'created_at'])) {
+                $table->dropIndex(['user_id', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['rating', 'created_at'])) {
+                $table->dropIndex(['rating', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('posts', function (Blueprint $table) {
@@ -76,10 +84,18 @@ return new class extends Migration {
             'updated_at_int' => $toInt($r->updated_at),
         ]);
         Schema::table('posts', function (Blueprint $table) {
-            $table->dropIndex(['topic_id', 'created_at']);
-            $table->dropIndex(['user_id', 'created_at']);
-            $table->dropIndex(['rating', 'created_at']);
-            $table->dropIndex(['created_at']);
+            if (Schema::hasIndex('posts', ['topic_id', 'created_at'])) {
+                $table->dropIndex(['topic_id', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['user_id', 'created_at'])) {
+                $table->dropIndex(['user_id', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['rating', 'created_at'])) {
+                $table->dropIndex(['rating', 'created_at']);
+            }
+            if (Schema::hasIndex('posts', ['created_at'])) {
+                $table->dropIndex(['created_at']);
+            }
             $table->dropColumn(['created_at', 'updated_at']);
         });
         Schema::table('posts', function (Blueprint $table) {
