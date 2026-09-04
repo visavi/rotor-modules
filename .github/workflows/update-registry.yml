@@ -31,6 +31,7 @@ jobs:
           CHANGED=0
           MODULES="[]"
           FOUND=()
+          TODAY=$(date -u +%F)
 
           if gh release view registry &>/dev/null; then
             gh release download registry -p "registry.json" -D /tmp/ 2>/dev/null || true
@@ -94,9 +95,18 @@ jobs:
               --arg author   "$(get author)" \
               --arg email    "$(get email)" \
               --arg homepage "$(get homepage)" \
+              --arg today    "$TODAY" \
               --argjson ver  "$VERSION_ENTRY" \
               '
               def verkey: split(".") | map(tonumber? // 0);
+              # Дата релиза ставится один раз — в прогон, который впервые увидел версию.
+              # Накопленная версия сохраняет свою дату (а вышедшая до появления поля так
+              # и остаётся без неё), поэтому пересборка не выдаёт старые релизы за свежие
+              def released($old): $ver + (
+                if $old == null then {released_at: $today}
+                elif ($old | has("released_at")) then {released_at: $old.released_at}
+                else {} end
+              );
               def prune_shadowed:
                 sort_by(.version | verkey) | reverse
                 | reduce .[] as $v ({kept: [], min: null};
@@ -115,7 +125,8 @@ jobs:
                       email:       $email,
                       homepage:    $homepage,
                       versions: (
-                        [(.versions // [])[] | select(.version != $ver.version)] + [$ver]
+                        [(.versions // [])[] | select(.version != $ver.version)]
+                        + [released([(.versions // [])[] | select(.version == $ver.version)] | first)]
                         | prune_shadowed
                       )
                     }
@@ -129,7 +140,7 @@ jobs:
                   author:      $author,
                   email:       $email,
                   homepage:    $homepage,
-                  versions:    [$ver]
+                  versions:    [released(null)]
                 }]
               end
               ' <<< "$MODULES")
@@ -148,7 +159,9 @@ jobs:
             exit 0
           fi
 
-          jq -n --arg name "$REGISTRY_NAME" --argjson m "$MODULES" '{name: $name, modules: $m}' > registry.json
+          # -c: реестр качают клиенты, а GitHub отдаёт его без gzip — отступы
+          # стоили бы трети веса файла. Читать глазами — через `jq .`
+          jq -c -n --arg name "$REGISTRY_NAME" --argjson m "$MODULES" '{name: $name, modules: $m}' > registry.json
           echo "Generated registry.json with $(jq length <<< "$MODULES") modules"
 
           gh release delete registry --yes 2>/dev/null || true

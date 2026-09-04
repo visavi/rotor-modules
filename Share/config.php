@@ -33,8 +33,8 @@ return [
             'link'  => 'https://api.whatsapp.com/send?text={title}%20{url}',
         ],
         'x' => [
-            'name'  => 'X',
-            'icon'  => 'fa-brands fa-x-twitter',
+            'name' => 'X',
+            'icon' => 'fa-brands fa-x-twitter',
             // Логотип X одноцветный: наследуем цвет текста, иначе черный пропадет на темной теме
             'color' => 'currentColor',
             'link'  => 'https://x.com/intent/post?url={url}&text={title}',

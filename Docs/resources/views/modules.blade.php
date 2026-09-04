@@ -25,6 +25,7 @@
                 <select class="form-select form-select-sm" data-module-sort>
                     <option value="name">{{ __('main.sort') }}: {{ __('main.title') }}</option>
                     <option value="version">{{ __('main.sort') }}: {{ __('main.version') }}</option>
+                    <option value="released">{{ __('main.sort') }}: {{ __('main.date') }}</option>
                 </select>
             </div>
         </div>
@@ -38,7 +39,8 @@
             <div class="section mb-3 shadow" data-module-card
                  data-search="{{ $searchText }}"
                  data-name="{{ mb_strtolower($info['name'] ?? $name) }}"
-                 data-version="{{ $info['version'] ?? '0' }}">
+                 data-version="{{ $info['version'] ?? '0' }}"
+                 data-released="{{ $info['released_at'] ?? '' }}">
                 <div class="section-title d-flex align-items-center justify-content-between gap-2">
                     <div class="text-break" style="min-width: 0">
                         <i class="fas fa-cube text-muted"></i>
@@ -60,6 +62,10 @@
 
                     <div class="small text-muted">
                         {{ __('main.version') }}: <span class="text-body">{{ $info['version'] ?? '—' }}</span>
+                        @if (! empty($info['released_at']))
+                            <span class="mx-1">&middot;</span>
+                            {{ __('main.date') }}: <span class="text-body">{{ date('d.m.Y', strtotime($info['released_at'])) }}</span>
+                        @endif
                         <span class="mx-1">&middot;</span>
                         {{ __('main.author') }}: <span class="text-body">{{ $info['author'] ?? '—' }}</span>
                         @if (! empty($info['requires']))
@@ -81,6 +87,9 @@
                                 @foreach ($versions as $ver)
                                     <li class="d-flex align-items-center flex-wrap gap-2 py-1 border-top">
                                         <span class="badge bg-adaptive">{{ $ver['version'] ?? '—' }}</span>
+                                        @if (! empty($ver['released_at']))
+                                            <span class="text-muted">{{ date('d.m.Y', strtotime($ver['released_at'])) }}</span>
+                                        @endif
                                         @if (! empty($ver['requires']))
                                             <span class="text-muted">{{ __('docs::rotor.requires') }}: Rotor &ge; {{ $ver['requires'] }}</span>
                                         @endif
@@ -148,6 +157,17 @@
 
                         const mode = sort.value;
                         const sorted = cards.slice().sort((a, b) => {
+                            if (mode === 'released') {
+                                // Без даты (релиз до появления поля) — в конец, там по названию
+                                const da = a.dataset.released || '';
+                                const db = b.dataset.released || '';
+                                if (da === '' || db === '') {
+                                    return da === db
+                                        ? (a.dataset.name || '').localeCompare(b.dataset.name || '')
+                                        : (da === '' ? 1 : -1);
+                                }
+                                return db.localeCompare(da);
+                            }
                             if (mode === 'version') {
                                 return (b.dataset.version || '').localeCompare(a.dataset.version || '', undefined, { numeric: true });
                             }
