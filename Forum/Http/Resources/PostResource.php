@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Http\Resources;
 
+use App\Http\Resources\AuthorResource;
 use App\Http\Resources\FileResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,6 +17,8 @@ class PostResource extends JsonResource
     {
         return [
             'id'         => $this->id,
+            'user'       => AuthorResource::make($this->user),
+            // Устарели, оставлены для старых клиентов — данные есть в user
             'login'      => $this->user->login,
             'name'       => $this->user->getName(),
             'text'       => absolutizeUrls($this->text),

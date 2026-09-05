@@ -125,7 +125,7 @@ class TransferApiTest extends ModuleTestCase
 
         $this->assertSame('in', $response->json('data.0.type'));
         $this->assertSame('out', $response->json('data.1.type'));
-        $this->assertSame($this->recipient->login, $response->json('data.0.user'));
+        $this->assertSame($this->recipient->login, $response->json('data.0.user.login'));
     }
 
     public function testModulePublishesThreshold(): void

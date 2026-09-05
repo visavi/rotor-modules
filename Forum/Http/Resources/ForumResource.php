@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Http\Resources;
 
+use App\Http\Resources\AuthorResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Forum\Models\Forum;
@@ -27,6 +28,8 @@ class ForumResource extends JsonResource
             'count_posts'          => $this->count_posts,
             'last_topic_id'        => $this->last_topic_id,
             'last_topic_title'     => e($this->lastTopic->title),
+            'last_post_user'       => $this->lastTopic->lastPost->id ? AuthorResource::make($this->lastTopic->lastPost->user) : null,
+            // Устарели, оставлены для старых клиентов — данные есть в last_post_user
             'last_post_user_login' => $this->lastTopic->lastPost->id ? $this->lastTopic->lastPost->user->login : null,
             'last_post_user_name'  => $this->lastTopic->lastPost->id ? $this->lastTopic->lastPost->user->getName() : null,
             'last_post_at'         => $this->lastTopic->lastPost->id ? dateFixed($this->lastTopic->lastPost->created_at, 'c', true) : null,

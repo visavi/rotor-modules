@@ -43,8 +43,12 @@
                                                         ]
                                                     },
                                                     "user": {
-                                                        "type": "string",
-                                                        "description": "Логин второй стороны перевода"
+                                                        "description": "Вторая сторона перевода",
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/components/schemas/Author"
+                                                            }
+                                                        ]
                                                     },
                                                     "total": {
                                                         "type": "integer"

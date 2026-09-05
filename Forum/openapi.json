@@ -384,17 +384,32 @@
                             null
                         ]
                     },
+                    "last_post_user": {
+                        "description": "Автор последнего сообщения",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "last_post_user_login": {
                         "type": [
                             "string",
                             null
-                        ]
+                        ],
+                        "description": "Устарело, используйте last_post_user.login",
+                        "deprecated": true
                     },
                     "last_post_user_name": {
                         "type": [
                             "string",
                             null
-                        ]
+                        ],
+                        "description": "Устарело, используйте last_post_user.name",
+                        "deprecated": true
                     },
                     "last_post_at": {
                         "type": [
@@ -436,11 +451,23 @@
                     "title": {
                         "type": "string"
                     },
+                    "user": {
+                        "description": "Автор темы",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            }
+                        ]
+                    },
                     "login": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Устарело, используйте user.login",
+                        "deprecated": true
                     },
                     "name": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Устарело, используйте user.name",
+                        "deprecated": true
                     },
                     "closed": {
                         "type": "integer",
@@ -476,17 +503,32 @@
                             null
                         ]
                     },
+                    "last_post_user": {
+                        "description": "Автор последнего сообщения",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "last_post_user_login": {
                         "type": [
                             "string",
                             null
-                        ]
+                        ],
+                        "description": "Устарело, используйте last_post_user.login",
+                        "deprecated": true
                     },
                     "last_post_user_name": {
                         "type": [
                             "string",
                             null
-                        ]
+                        ],
+                        "description": "Устарело, используйте last_post_user.name",
+                        "deprecated": true
                     },
                     "close_user_id": {
                         "type": [
@@ -511,8 +553,23 @@
                     "id": {
                         "type": "integer"
                     },
+                    "user": {
+                        "description": "Автор сообщения",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Author"
+                            }
+                        ]
+                    },
                     "login": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Устарело, используйте user.login",
+                        "deprecated": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Устарело, используйте user.name",
+                        "deprecated": true
                     },
                     "text": {
                         "type": "string"
