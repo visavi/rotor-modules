@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Реальные имена индексов по колонкам: базы со старого движка держат
+     * индекс как <table>_<column>, а dropIndex(['column']) ищет
+     * <table>_<column>_index и падает с 1091 на чужом имени.
+     */
+    private function indexNames(string $table, array $columns): array
+    {
+        $names = [];
+
+        foreach (Schema::getIndexes($table) as $index) {
+            if (! $index['primary'] && ! $index['unique'] && in_array($index['columns'], $columns, true)) {
+                $names[] = $index['name'];
+            }
+        }
+
+        return $names;
+    }
+
+    /**
      * Создаёт только отсутствующие временные колонки: упавшая миграция могла
      * оставить их с прошлого запуска, повторный запуск не должен падать.
      */
@@ -48,12 +66,10 @@ return new class extends Migration {
         });
 
         // Индексы дропаем явно (created_at, expires_at), чтобы пересоздание не словило дубликат имени.
-        Schema::table('items', function (Blueprint $table) {
-            if (Schema::hasIndex('items', ['created_at'])) {
-                $table->dropIndex(['created_at']);
-            }
-            if (Schema::hasIndex('items', ['expires_at'])) {
-                $table->dropIndex(['expires_at']);
+        $indexes = $this->indexNames('items', [['created_at'], ['expires_at']]);
+        Schema::table('items', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at', 'expires_at']);
         });
@@ -88,12 +104,10 @@ return new class extends Migration {
             }
         });
 
-        Schema::table('items', function (Blueprint $table) {
-            if (Schema::hasIndex('items', ['created_at'])) {
-                $table->dropIndex(['created_at']);
-            }
-            if (Schema::hasIndex('items', ['expires_at'])) {
-                $table->dropIndex(['expires_at']);
+        $indexes = $this->indexNames('items', [['created_at'], ['expires_at']]);
+        Schema::table('items', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at', 'expires_at']);
         });

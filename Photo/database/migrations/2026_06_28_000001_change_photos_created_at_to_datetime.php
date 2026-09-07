@@ -7,6 +7,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Реальные имена индексов по колонкам: базы со старого движка держат
+     * индекс как <table>_<column>, а dropIndex(['column']) ищет
+     * <table>_<column>_index и падает с 1091 на чужом имени.
+     */
+    private function indexNames(string $table, array $columns): array
+    {
+        $names = [];
+
+        foreach (Schema::getIndexes($table) as $index) {
+            if (! $index['primary'] && ! $index['unique'] && in_array($index['columns'], $columns, true)) {
+                $names[] = $index['name'];
+            }
+        }
+
+        return $names;
+    }
+
     public function up(): void
     {
         if (Schema::getColumnType('photos', 'created_at') === 'datetime') {
@@ -31,9 +49,10 @@ return new class extends Migration {
             }
         });
 
-        Schema::table('photos', function (Blueprint $table) {
-            if (Schema::hasIndex('photos', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('photos', [['created_at']]);
+        Schema::table('photos', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn('created_at');
         });
@@ -59,9 +78,10 @@ return new class extends Migration {
             }
         });
 
-        Schema::table('photos', function (Blueprint $table) {
-            if (Schema::hasIndex('photos', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('photos', [['created_at']]);
+        Schema::table('photos', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at']);
         });

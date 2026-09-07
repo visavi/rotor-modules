@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Реальные имена индексов по колонкам: базы со старого движка держат
+     * индекс как <table>_<column>, а dropIndex(['column']) ищет
+     * <table>_<column>_index и падает с 1091 на чужом имени.
+     */
+    private function indexNames(string $table, array $columns): array
+    {
+        $names = [];
+
+        foreach (Schema::getIndexes($table) as $index) {
+            if (! $index['primary'] && ! $index['unique'] && in_array($index['columns'], $columns, true)) {
+                $names[] = $index['name'];
+            }
+        }
+
+        return $names;
+    }
+
+    /**
      * Чанковая конверсия с транзакцией на чанк: createFromTimestamp/parse сохраняют
      * историческую таймзону (старый DST), а батч-коммит убирает fsync-на-строку.
      */
@@ -50,9 +68,10 @@ return new class extends Migration {
 
         $this->addTempColumns('walls', 'dateTime', ['created_at_dt']);
         $this->convert('walls', ['created_at'], static fn ($r) => ['created_at_dt' => $toDt($r->created_at)]);
-        Schema::table('walls', function (Blueprint $table) {
-            if (Schema::hasIndex('walls', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('walls', [['created_at']]);
+        Schema::table('walls', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn('created_at');
         });
@@ -70,9 +89,10 @@ return new class extends Migration {
 
         $this->addTempColumns('walls', 'integer', ['created_at_int']);
         $this->convert('walls', ['created_at'], static fn ($r) => ['created_at_int' => $toInt($r->created_at)]);
-        Schema::table('walls', function (Blueprint $table) {
-            if (Schema::hasIndex('walls', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('walls', [['created_at']]);
+        Schema::table('walls', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn('created_at');
         });

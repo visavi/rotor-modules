@@ -7,6 +7,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Реальные имена индексов по колонкам: базы со старого движка держат
+     * индекс как <table>_<column>, а dropIndex(['column']) ищет
+     * <table>_<column>_index и падает с 1091 на чужом имени.
+     */
+    private function indexNames(string $table, array $columns): array
+    {
+        $names = [];
+
+        foreach (Schema::getIndexes($table) as $index) {
+            if (! $index['primary'] && ! $index['unique'] && in_array($index['columns'], $columns, true)) {
+                $names[] = $index['name'];
+            }
+        }
+
+        return $names;
+    }
+
     public function up(): void
     {
         if (Schema::getColumnType('guestbook', 'created_at') === 'datetime') {
@@ -34,12 +52,10 @@ return new class extends Migration {
 
         // Индексы дропаем явно: при удалении колонки из составного индекса MySQL
         // оставляет его имя (на остатке колонок) и пересоздание ловит дубликат имени.
-        Schema::table('guestbook', function (Blueprint $table) {
-            if (Schema::hasIndex('guestbook', ['active', 'created_at'])) {
-                $table->dropIndex(['active', 'created_at']);
-            }
-            if (Schema::hasIndex('guestbook', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('guestbook', [['active', 'created_at'], ['created_at']]);
+        Schema::table('guestbook', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at']);
         });
@@ -75,12 +91,10 @@ return new class extends Migration {
             }
         });
 
-        Schema::table('guestbook', function (Blueprint $table) {
-            if (Schema::hasIndex('guestbook', ['active', 'created_at'])) {
-                $table->dropIndex(['active', 'created_at']);
-            }
-            if (Schema::hasIndex('guestbook', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('guestbook', [['active', 'created_at'], ['created_at']]);
+        Schema::table('guestbook', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at']);
         });

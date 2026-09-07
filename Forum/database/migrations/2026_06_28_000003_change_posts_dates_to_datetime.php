@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
+     * Реальные имена индексов по колонкам: базы со старого движка держат
+     * индекс как <table>_<column>, а dropIndex(['column']) ищет
+     * <table>_<column>_index и падает с 1091 на чужом имени.
+     */
+    private function indexNames(string $table, array $columns): array
+    {
+        $names = [];
+
+        foreach (Schema::getIndexes($table) as $index) {
+            if (! $index['primary'] && ! $index['unique'] && in_array($index['columns'], $columns, true)) {
+                $names[] = $index['name'];
+            }
+        }
+
+        return $names;
+    }
+
+    /**
      * Чанковая конверсия с транзакцией на чанк: createFromTimestamp/parse сохраняют
      * историческую таймзону (старый DST), а батч-коммит на 5000 строк убирает
      * fsync-на-строку — на posts (~625k) это десятки раз быстрее.
@@ -40,18 +58,10 @@ return new class extends Migration {
             'created_at_dt' => $toDt($r->created_at),
             'updated_at_dt' => $toDt($r->updated_at),
         ]);
-        Schema::table('posts', function (Blueprint $table) {
-            if (Schema::hasIndex('posts', ['topic_id', 'created_at'])) {
-                $table->dropIndex(['topic_id', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['user_id', 'created_at'])) {
-                $table->dropIndex(['user_id', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['rating', 'created_at'])) {
-                $table->dropIndex(['rating', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('posts', [['topic_id', 'created_at'], ['user_id', 'created_at'], ['rating', 'created_at'], ['created_at']]);
+        Schema::table('posts', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at']);
         });
@@ -83,18 +93,10 @@ return new class extends Migration {
             'created_at_int' => $toInt($r->created_at),
             'updated_at_int' => $toInt($r->updated_at),
         ]);
-        Schema::table('posts', function (Blueprint $table) {
-            if (Schema::hasIndex('posts', ['topic_id', 'created_at'])) {
-                $table->dropIndex(['topic_id', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['user_id', 'created_at'])) {
-                $table->dropIndex(['user_id', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['rating', 'created_at'])) {
-                $table->dropIndex(['rating', 'created_at']);
-            }
-            if (Schema::hasIndex('posts', ['created_at'])) {
-                $table->dropIndex(['created_at']);
+        $indexes = $this->indexNames('posts', [['topic_id', 'created_at'], ['user_id', 'created_at'], ['rating', 'created_at'], ['created_at']]);
+        Schema::table('posts', function (Blueprint $table) use ($indexes) {
+            foreach ($indexes as $index) {
+                $table->dropIndex($index);
             }
             $table->dropColumn(['created_at', 'updated_at']);
         });
