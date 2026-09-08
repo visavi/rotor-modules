@@ -5,33 +5,33 @@ declare(strict_types=1);
 namespace Modules\PageEditor\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Module;
 use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\PageEditor\Support\FileWriter;
+use Modules\PageEditor\Support\PathResolver;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class FileController extends Controller
 {
+    private string $root;
+    private string $path;
     private string $file;
-    private ?string $path;
 
     /**
      * Конструктор
      */
     public function __construct(Request $request)
     {
-        $this->file = ltrim(check($request->input('file')), '/');
-        $this->path = rtrim(check($request->input('path')), '/');
+        $this->root = (string) $request->input('root', 'views');
+        $this->path = PathResolver::normalize((string) $request->input('path', ''));
+        $this->file = PathResolver::normalize((string) $request->input('file', ''));
 
-        if (
-            empty($this->path)
-            || Str::contains($this->path, '.')
-            || Str::startsWith($this->path, '/')
-            || ! file_exists(resource_path('views/' . $this->path))
-            || ! is_dir(resource_path('views/' . $this->path))
-        ) {
-            $this->path = null;
+        if (! isset(PathResolver::roots()[$this->root])) {
+            abort(404);
         }
     }
 
@@ -40,25 +40,56 @@ class FileController extends Controller
      */
     public function index(): View
     {
-        $path = $this->path;
-        $elements = preg_grep('/^([^.])/', scandir(resource_path('views/' . $path . $this->file), SCANDIR_SORT_ASCENDING));
+        $directory = PathResolver::resolve($this->root, $this->path);
 
-        $folders = [];
-        $files = [];
-
-        foreach ($elements as $element) {
-            if (is_dir(resource_path('views/' . $path . '/' . $element))) {
-                $folders[] = $element;
-            } else {
-                $files[] = $element;
-            }
+        // Каталог custom появляется только после первой правки:
+        // пустой каталог показываем как пустой список, а не как ошибку
+        if (! is_dir($directory) && $this->path !== '') {
+            abort(404, __('page_editor::files.directory_not_exist'));
         }
 
-        $files = array_merge($folders, $files);
+        /** @var list<array{name: string, dir: bool, size: int, lines: int, mtime: int, editable: bool, disabled: bool}> $entries */
+        $entries = [];
+        $maxSize = (int) config('page_editor.max_edit_size', 1048576);
 
-        $directories = explode('/', (string) $path);
+        $names = is_dir($directory) ? preg_grep('/^([^.])/', scandir($directory, SCANDIR_SORT_ASCENDING)) : [];
 
-        return view('page_editor::admin/files/index', compact('files', 'path', 'directories'));
+        // В корне modules каталог верхнего уровня — это модуль: помечаем выключенные,
+        // чтобы правка файлов без эффекта не выглядела поломкой
+        $modules = $this->root === 'modules' && $this->path === ''
+            ? array_keys(Module::getEnabledModules())
+            : null;
+
+        foreach ($names as $name) {
+            $full = $directory . '/' . $name;
+            $isDir = is_dir($full);
+            $editable = ! $isDir && PathResolver::isEditable($name);
+
+            $entries[] = [
+                'name' => $name,
+                'dir'  => $isDir,
+                'size' => $isDir ? count(array_diff(scandir($full), ['.', '..'])) : (int) filesize($full),
+                // Строки считаем только у небольших редактируемых файлов: в корне assets
+                // лежат шрифты, картинки и бандлы — file() затянул бы их целиком в память
+                'lines'    => $editable && filesize($full) <= $maxSize ? count(file($full) ?: []) : 0,
+                'mtime'    => (int) filemtime($full),
+                'editable' => $editable,
+                'disabled' => $modules !== null && $isDir && ! in_array($name, $modules, true),
+            ];
+        }
+
+        usort($entries, static fn (array $a, array $b) => [! $a['dir'], $a['name']] <=> [! $b['dir'], $b['name']]);
+
+        $root = $this->root;
+        $roots = array_keys(PathResolver::roots());
+        $path = $this->path;
+
+        // Поиск работает не по всем корням, поэтому строка поиска на листинге
+        // уходит в текущий корень только если он разрешён для поиска
+        $searchRoots = config('page_editor.search_roots', []);
+        $searchRoot = in_array($root, $searchRoots, true) ? $root : ($searchRoots[0] ?? null);
+
+        return view('page_editor::admin/files/index', compact('entries', 'root', 'roots', 'path', 'searchRoot'));
     }
 
     /**
@@ -66,41 +97,53 @@ class FileController extends Controller
      */
     public function edit(Request $request, Validator $validator): View|RedirectResponse
     {
-        $path = $this->path;
-        $file = $path ? '/' . $this->file : $this->file;
-        $writable = is_writable(resource_path('views/' . $path . $file . '.blade.php'));
+        $full = PathResolver::resolve($this->root, trim($this->path . '/' . $this->file, '/'));
 
-        if (
-            ($this->path && ! preg_match('#^([a-z0-9_\-/]+|)$#', $this->path))
-            || ! preg_match('#^[a-z0-9_\-/]+$#', $this->file)
-        ) {
+        if ($this->file === '' || ! PathResolver::isEditable($this->file)) {
             abort(404, __('page_editor::files.file_invalid'));
         }
 
-        if (! file_exists(resource_path('views/' . $this->path . $file . '.blade.php'))) {
+        if (! is_file($full)) {
             abort(404, __('page_editor::files.file_not_exist'));
         }
 
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
+        $writable = is_writable($full);
+        $params = ['root' => $this->root, 'path' => $this->path, 'file' => $this->file];
 
+        if ($request->isMethod('post')) {
             $validator->true($writable, ['msg' => __('page_editor::files.writable')]);
 
             if ($validator->isValid()) {
-                file_put_contents(resource_path('views/' . $this->path . $file . '.blade.php'), $msg);
+                try {
+                    FileWriter::put($full, (string) $request->input('msg'));
+                } catch (RuntimeException) {
+                    return redirect()->route('admin.files.edit', $params)
+                        ->withInput()
+                        ->with('flash.danger', __('page_editor::files.file_write_failed'));
+                }
 
-                return redirect('admin/files/edit?path=' . $this->path . '&file=' . $this->file)
-                    ->with('success', __('page_editor::files.file_success_saved'));
+                return redirect()->route('admin.files.edit', $params)
+                    ->with('flash.success', __('page_editor::files.file_success_saved'));
             }
 
-            return redirect('admin/files/edit?path=' . $this->path . '&file=' . $this->file)
+            return redirect()->route('admin.files.edit', $params)
                 ->withInput()
                 ->withErrors($validator->getErrors());
         }
 
-        $contest = file_get_contents(resource_path('views/' . $path . $file . '.blade.php'));
+        // Крупный .json или .svg целиком в память не читаем — вернём в листинг
+        if (filesize($full) > (int) config('page_editor.max_edit_size', 1048576)) {
+            return redirect()->route('admin.files.index', ['root' => $this->root, 'path' => $this->path])
+                ->with('flash.danger', __('page_editor::files.file_too_large'));
+        }
 
-        return view('page_editor::admin/files/edit', compact('contest', 'path', 'file', 'writable'));
+        $contest = file_get_contents($full);
+        $root = $this->root;
+        $path = $this->path;
+        $file = $this->file;
+        $line = (int) $request->input('line');
+
+        return view('page_editor::admin/files/edit', compact('contest', 'root', 'path', 'file', 'writable', 'line'));
     }
 
     /**
@@ -108,54 +151,76 @@ class FileController extends Controller
      */
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
-        if (! is_writable(resource_path('views/' . $this->path))) {
-            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path]));
+        $directory = PathResolver::resolve($this->root, $this->path);
+
+        // Каталог корня создаём по требованию: custom до первой правки
+        // перевода не существует, но создать в нём файл должно быть можно.
+        // Вложенные пути не создаём — их заводят кнопкой «создать директорию»
+        if ($this->path === '' && ! is_dir($directory)) {
+            $old = umask(0);
+            @mkdir($directory, 0755, true);
+            umask($old);
+        }
+
+        if (! is_dir($directory) || ! is_writable($directory)) {
+            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
         }
 
         if ($request->isMethod('post')) {
-            $filename = check($request->input('filename'));
-            $dirname = check($request->input('dirname'));
+            $filename = PathResolver::normalize((string) $request->input('filename'));
+            $dirname = PathResolver::normalize((string) $request->input('dirname'));
+            $pattern = '|^[a-z0-9_\-]+(\.[a-z0-9_\-]+)*$|i';
 
-            $fileName = $this->path ? '/' . $filename : $filename;
-            $dirName = $this->path ? '/' . $dirname : $dirname;
-
-            if ($filename) {
-                $validator->length($filename, 1, 30, ['filename' => __('page_editor::files.file_required')]);
-                $validator->false(file_exists(resource_path('views/' . $this->path . $fileName . '.blade.php')), ['filename' => __('page_editor::files.file_exist')]);
-                $validator->regex($filename, '|^[a-z0-9_\-]+$|', ['filename' => __('page_editor::files.file_invalid')]);
+            if ($filename !== '') {
+                $validator->length($filename, 1, 255, ['filename' => __('page_editor::files.file_required')]);
+                $validator->regex($filename, $pattern, ['filename' => __('page_editor::files.file_invalid')]);
+                $validator->true(PathResolver::isEditable($filename), ['filename' => __('page_editor::files.file_invalid')]);
+                $validator->false(file_exists($directory . '/' . $filename), ['filename' => __('page_editor::files.file_exist')]);
             } else {
-                $validator->length($dirname, 1, 30, ['dirname' => __('page_editor::files.directory_required')]);
-                $validator->false(file_exists(resource_path('views/' . $this->path . $dirName)), ['dirname' => __('page_editor::files.directory_exist')]);
-                $validator->regex($dirname, '|^[a-z0-9_\-]+$|', ['dirname' => __('page_editor::files.directory_invalid')]);
+                $validator->length($dirname, 1, 255, ['dirname' => __('page_editor::files.directory_required')]);
+                $validator->regex($dirname, $pattern, ['dirname' => __('page_editor::files.directory_invalid')]);
+                $validator->false(file_exists($directory . '/' . $dirname), ['dirname' => __('page_editor::files.directory_exist')]);
             }
 
             if ($validator->isValid()) {
-                if ($filename) {
-                    file_put_contents(resource_path('views/' . $this->path . $fileName . '.blade.php'), '');
-                    chmod(resource_path('views/' . $this->path . $fileName . '.blade.php'), 0644);
+                if ($filename !== '') {
+                    try {
+                        FileWriter::put($directory . '/' . $filename, '');
+                    } catch (RuntimeException) {
+                        return redirect()->route('admin.files.create', ['root' => $this->root, 'path' => $this->path])
+                            ->withInput()
+                            ->with('flash.danger', __('page_editor::files.file_write_failed'));
+                    }
 
-                    return redirect('admin/files/edit?path=' . $this->path . '&file=' . $filename)
-                        ->with('success', __('page_editor::files.file_success_created'));
+                    chmod($directory . '/' . $filename, 0644);
+
+                    return redirect()->route('admin.files.edit', [
+                        'root' => $this->root,
+                        'path' => $this->path,
+                        'file' => $filename,
+                    ])->with('flash.success', __('page_editor::files.file_success_created'));
                 }
 
                 $old = umask(0);
-                if (! mkdir($directory = resource_path('views/' . $this->path . $dirName), 0755, true) && ! is_dir($directory)) {
-                    $flash = ['danger', 'Directory "%s" was not created', $directory];
-                } else {
-                    $flash = ['success', __('page_editor::files.directory_success_created')];
-                }
-
+                $created = mkdir($target = $directory . '/' . $dirname, 0755, true) || is_dir($target);
                 umask($old);
 
-                return redirect('admin/files?path=' . $this->path . $dirName)->with(...$flash);
+                $flash = $created
+                    ? ['flash.success', __('page_editor::files.directory_success_created')]
+                    : ['flash.danger', __('page_editor::files.directory_not_writable', ['dir' => $dirname])];
+
+                return redirect()->route('admin.files.index', [
+                    'root' => $this->root,
+                    'path' => trim($this->path . '/' . $dirname, '/'),
+                ])->with(...$flash);
             }
 
-            return redirect('admin/files/create?path=' . $this->path)
+            return redirect()->route('admin.files.create', ['root' => $this->root, 'path' => $this->path])
                 ->withInput()
                 ->withErrors($validator->getErrors());
         }
 
-        return view('page_editor::admin/files/create', ['path' => $this->path]);
+        return view('page_editor::admin/files/create', ['root' => $this->root, 'path' => $this->path]);
     }
 
     /**
@@ -163,38 +228,89 @@ class FileController extends Controller
      */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
-        if (! is_writable(resource_path('views/' . $this->path))) {
-            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path]));
+        $directory = PathResolver::resolve($this->root, $this->path);
+        $params = ['root' => $this->root, 'path' => $this->path];
+
+        if (! is_writable($directory)) {
+            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
         }
 
-        $filename = check($request->input('filename'));
-        $dirname = check($request->input('dirname'));
+        $filename = PathResolver::normalize((string) $request->input('filename'));
+        $dirname = PathResolver::normalize((string) $request->input('dirname'));
 
-        $fileName = $this->path ? '/' . $filename : $filename;
-        $dirName = $this->path ? '/' . $dirname : $dirname;
-
-        if ($filename) {
-            $validator->true(file_exists(resource_path('views/' . $this->path . $fileName . '.blade.php')), __('page_editor::files.file_not_exist'));
-            $validator->regex($filename, '|^[a-z0-9_\-]+$|', __('page_editor::files.file_invalid'));
+        // Пустое имя обязано отсекаться: is_file/is_dir от "<каталог>/" дают true,
+        // и удаление ушло бы на сам текущий каталог
+        if ($filename !== '') {
+            $validator->true(is_file($directory . '/' . $filename), __('page_editor::files.file_not_exist'));
         } else {
-            $validator->true(file_exists(resource_path('views/' . $this->path . $dirName)), __('page_editor::files.directory_not_exist'));
-            $validator->regex($dirname, '|^[a-z0-9_\-]+$|', __('page_editor::files.directory_invalid'));
+            $validator->true($dirname !== '' && is_dir($directory . '/' . $dirname), __('page_editor::files.directory_not_exist'));
         }
 
         if (! $validator->isValid()) {
-            return redirect('admin/files?path=' . $this->path)
+            return redirect()->route('admin.files.index', $params)
                 ->withErrors($validator->getErrors());
         }
 
-        if ($filename) {
-            unlink(resource_path('views/' . $this->path . $fileName . '.blade.php'));
+        if ($filename !== '') {
+            try {
+                FileWriter::delete($directory . '/' . $filename);
+            } catch (RuntimeException) {
+                return redirect()->route('admin.files.index', $params)
+                    ->with('flash.danger', __('page_editor::files.file_delete_failed'));
+            }
+
             $status = __('page_editor::files.file_success_deleted');
         } else {
-            deleteDir(resource_path('views/' . $this->path . $dirName));
+            deleteDir($directory . '/' . $dirname);
             $status = __('page_editor::files.directory_success_deleted');
         }
 
-        return redirect('admin/files?path=' . $this->path)
-            ->with('success', $status);
+        return redirect()->route('admin.files.index', $params)
+            ->with('flash.success', $status);
+    }
+
+    /**
+     * Переименование файла или директории
+     */
+    public function rename(Request $request, Validator $validator): RedirectResponse
+    {
+        $directory = PathResolver::resolve($this->root, $this->path);
+        $params = ['root' => $this->root, 'path' => $this->path];
+
+        if (! is_writable($directory)) {
+            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
+        }
+
+        $name = PathResolver::normalize((string) $request->input('filename'));
+        $newName = PathResolver::normalize((string) $request->input('newname'));
+
+        $validator->true($name !== '' && file_exists($directory . '/' . $name), __('page_editor::files.file_not_exist'));
+        $validator->regex($newName, '|^[a-z0-9_\-]+(\.[a-z0-9_\-]+)*$|i', __('page_editor::files.file_invalid'));
+        $validator->false(file_exists($directory . '/' . $newName), __('page_editor::files.file_exist'));
+
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.files.index', $params)
+                ->withErrors($validator->getErrors());
+        }
+
+        rename($directory . '/' . $name, $directory . '/' . $newName);
+
+        return redirect()->route('admin.files.index', $params)
+            ->with('flash.success', __('page_editor::files.file_success_renamed'));
+    }
+
+    /**
+     * Скачивание файла
+     */
+    public function download(): BinaryFileResponse
+    {
+        $full = PathResolver::resolve($this->root, trim($this->path . '/' . $this->file, '/'));
+
+        if ($this->file === '' || ! is_file($full)) {
+            abort(404, __('page_editor::files.file_not_exist'));
+        }
+
+        // Имя вложения без каталогов: со слэшем HeaderUtils::makeDisposition бросает исключение
+        return response()->download($full, basename($this->file));
     }
 }

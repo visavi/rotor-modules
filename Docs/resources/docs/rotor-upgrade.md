@@ -41,6 +41,15 @@ npm run build
 php artisan optimize:clear
 ```
 
+## Что не перезаписывается
+
+Обновление сохраняет `.env`, `storage`, `public/uploads`, `modules`, `app/hooks.php`
+и `resources/custom`. Правки шаблонов и переводов, сложенные в `resources/custom`,
+переживают обновление ядра — см. «[Свои правки](/docs/rotor-custom)».
+
+Правки, внесённые прямо в файлы ядра (`resources/views`, `resources/lang`), будут
+перезаписаны.
+
 ## Проверка текущей версии
 
 ```bash

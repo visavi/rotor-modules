@@ -16,8 +16,8 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'user'       => AuthorResource::make($this->user),
+            'id'   => $this->id,
+            'user' => AuthorResource::make($this->user),
             // Устарели, оставлены для старых клиентов — данные есть в user
             'login'      => $this->user->login,
             'name'       => $this->user->getName(),

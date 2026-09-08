@@ -1,84 +1,111 @@
 @extends('layout')
 
-@section('title', $path ?? __('page_editor::files.page_editor'))
+@section('title', $path ?: __('page_editor::files.page_editor'))
 
 @section('header')
-    @if (getUser())
-        <div class="float-end">
-            <a class="btn btn-success" href="/admin/files/create?path={{ $path }}">{{ __('main.create') }}</a><br>
-        </div>
-    @endif
+    <div class="float-end">
+        <a class="btn btn-success" href="{{ route('admin.files.create', ['root' => $root, 'path' => $path]) }}">{{ __('main.create') }}</a>
+    </div>
 
-    <h1>{{ $path ?? __('page_editor::files.page_editor') }}</h1>
+    <h1>{{ $path ?: __('page_editor::files.page_editor') }}</h1>
 @stop
 
 @section('breadcrumb')
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
-
-            @if ($path)
-                <li class="breadcrumb-item"><a href="/admin/files">{{ __('page_editor::files.page_editor') }}</a></li>
-
-                <?php $dirNames = []; ?>
-                @foreach ($directories as $directory)
-                    <?php $dirNames[] = $directory; ?>
-                    @if ($path !== implode('/', $dirNames))
-                        <li class="breadcrumb-item"><a href="/admin/files?path={{ implode('/', $dirNames) }}">{{ implode('/', $dirNames) }}</a></li>
-                    @endif
-                @endforeach
-            @endif
-
-            <li class="breadcrumb-item active">{{ $path ?? __('page_editor::files.page_editor') }}</li>
-        </ol>
-    </nav>
+    @include('page_editor::admin/files/_breadcrumb')
 @stop
 
 @section('content')
-    @if ($files)
+    @include('page_editor::admin/files/_nav', ['active' => 'files'])
+
+    @if ($searchRoot)
+        <form class="mb-3" method="get" action="{{ route('admin.files.search') }}">
+            <input type="hidden" name="root" value="{{ $searchRoot }}">
+            <div class="input-group">
+                <input class="form-control" name="query" value="" placeholder="{{ __('page_editor::files.search_hint') }}">
+                <button class="btn btn-outline-secondary">
+                    <i class="fas fa-search"></i> {{ __('page_editor::files.search') }}
+                </button>
+            </div>
+        </form>
+    @endif
+
+    @if ($entries)
         <ul class="list-group">
-            @foreach ($files as $file)
-                <?php $fileName = $path ? '/' . $file : $file; ?>
-                @if (is_dir(resource_path('views/' . $path . $fileName)))
-                    <li class="list-group-item">
-                        <div class="float-end">
-                            <form action="/admin/files/delete" method="post" class="d-inline" onsubmit="return confirm('{{ __('page_editor::files.confirm_delete_dir') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <input type="hidden" name="path" value="{{ $path }}">
-                                <input type="hidden" name="dirname" value="{{ $file }}">
-                                <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                            </form>
-                        </div>
+            @foreach ($entries as $entry)
+                <li class="list-group-item">
+                    <div class="float-end">
+                        @unless ($entry['dir'])
+                            <a class="btn btn-link p-0 me-2" href="{{ route('admin.files.download', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}"><i class="fa fa-download"></i></a>
+                        @endunless
 
-                        <i class="fa fa-folder"></i> <b><a href="/admin/files?path={{ $path . $fileName }}">{{ $file }}</a></b><br>
-                        {{ __('page_editor::files.objects') }}: {{ count(array_diff(scandir(resource_path('views/' . $path . $fileName)), ['.', '..'])) }}
-                    </li>
-                @else
-                    <?php $size = formatSize(filesize(resource_path('views/' . $path . $fileName))); ?>
-                    <?php $string = count(file(resource_path('views/' . $path . $fileName))); ?>
+                        <form action="{{ route('admin.files.rename') }}" method="post" class="d-inline js-file-rename-form" data-name="{{ $entry['name'] }}" data-prompt="{{ __('page_editor::files.file_name') }}">
+                            @csrf
+                            <input type="hidden" name="root" value="{{ $root }}">
+                            <input type="hidden" name="path" value="{{ $path }}">
+                            <input type="hidden" name="filename" value="{{ $entry['name'] }}">
+                            <input type="hidden" name="newname" value="">
+                            <button class="btn btn-link p-0 me-2 js-file-rename-btn" type="button"><i class="fa fa-pen"></i></button>
+                        </form>
 
-                    <li class="list-group-item">
-                        <div class="float-end">
-                            <form action="/admin/files/delete" method="post" class="d-inline" onsubmit="return confirm('{{ __('page_editor::files.confirm_delete_file') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <input type="hidden" name="path" value="{{ $path }}">
-                                <input type="hidden" name="filename" value="{{ basename($file, '.blade.php') }}">
-                                <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                            </form>
-                        </div>
+                        <form action="{{ route('admin.files.delete') }}" method="post" class="d-inline js-file-delete-form" data-confirm="{{ $entry['dir'] ? __('page_editor::files.confirm_delete_dir') : __('page_editor::files.confirm_delete_file') }}">
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="root" value="{{ $root }}">
+                            <input type="hidden" name="path" value="{{ $path }}">
+                            <input type="hidden" name="{{ $entry['dir'] ? 'dirname' : 'filename' }}" value="{{ $entry['name'] }}">
+                            <button class="btn btn-link p-0 js-file-delete-btn"><i class="fa fa-times"></i></button>
+                        </form>
+                    </div>
 
+                    @if ($entry['dir'])
+                        <i class="fa fa-folder"></i>
+                        <b><a href="{{ route('admin.files.index', ['root' => $root, 'path' => trim($path . '/' . $entry['name'], '/')]) }}">{{ $entry['name'] }}</a></b>
+                        @if ($entry['disabled'])
+                            <i class="fas fa-power-off text-muted ms-1" title="{{ __('page_editor::files.module_disabled') }}"></i>
+                        @endif
+                        <br>
+                        {{ __('page_editor::files.objects') }}: {{ $entry['size'] }}
+                    @else
                         <i class="fa fa-file"></i>
-                        <b><a href="/admin/files/edit?path={{ $path }}&amp;file={{ basename($file, '.blade.php') }}">{{ $file }}</a></b> ({{ $size }})<br>
-                        {{ __('page_editor::files.lines') }}: {{ $string }} /
-                        {{ __('page_editor::files.changed') }}: {{ dateFixed(\Illuminate\Support\Carbon::createFromTimestamp(filemtime(resource_path('views/' . $path . $fileName)))) }}
-                    </li>
-                @endif
+                        @if ($entry['editable'])
+                            <b><a href="{{ route('admin.files.edit', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}">{{ $entry['name'] }}</a></b>
+                        @else
+                            <b>{{ $entry['name'] }}</b>
+                        @endif
+                        ({{ formatSize($entry['size']) }})<br>
+                        {{ __('page_editor::files.lines') }}: {{ $entry['lines'] }} /
+                        {{ __('page_editor::files.changed') }}: {{ dateFixed(\Illuminate\Support\Carbon::createFromTimestamp($entry['mtime'])) }}
+                    @endif
+                </li>
             @endforeach
         </ul>
     @else
         {{ showError(__('page_editor::files.empty_objects')) }}
     @endif
 @stop
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('.js-file-rename-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const form = btn.closest('form');
+                const newName = prompt(form.dataset.prompt, form.dataset.name);
+
+                if (! newName) {
+                    return;
+                }
+
+                form.elements.newname.value = newName;
+                form.submit();
+            });
+        });
+
+        document.querySelectorAll('.js-file-delete-form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                if (! confirm(form.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+@endpush

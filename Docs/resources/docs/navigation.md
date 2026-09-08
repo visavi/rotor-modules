@@ -9,6 +9,7 @@
     - [Интеграция с ядром](/docs/rotor-module-integration)
     - [Хуки](/docs/rotor-hooks)
     - [Шаблоны](/docs/rotor-templates)
+    - [Свои правки](/docs/rotor-custom)
     - [Сборка ресурсов](/docs/rotor-assets)
     - [Роли и права](/docs/rotor-permissions)
     - [Настройки сайта](/docs/rotor-settings)

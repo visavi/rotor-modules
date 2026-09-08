@@ -26,6 +26,37 @@ getAvailableThemes()    // список установленных тем
 У пользователя может быть своя тема (`$user->themes`) — она имеет приоритет над
 настройкой сайта. Подстановкой занимается middleware `ApplySettings`.
 
+## Переопределение шаблонов темой
+
+Тема может подменять шаблоны модулей, не трогая их файлы. Для этого рядом с
+`layout.blade.php` создаётся папка `views`, а внутри — папка с ключом модуля:
+
+```
+resources/views/themes/my-theme/
+├── layout.blade.php
+└── views/
+    └── blog/
+        └── index.blade.php     # вместо modules/Blog/resources/views/index.blade.php
+```
+
+Ключ модуля — его имя в snake_case, то же, что в неймспейсе шаблонов
+(`blog::index` -> папка `blog`). Подстановкой занимается middleware `ApplySettings`.
+
+Правка действует, только пока активна эта тема, и распространяется вместе с ней.
+Для правок конкретного сайта, которые не должны зависеть от темы и переживают
+обновление, есть каталог `resources/custom` — см. «[Свои правки](/docs/rotor-custom)».
+
+Так же переопределяются и шаблоны ядра — те, что вызываются без неймспейса.
+Путь внутри `views` повторяет путь оригинала:
+
+```
+resources/views/themes/my-theme/views/
+├── layout_simple.blade.php     # вместо resources/views/layout_simple.blade.php
+└── blog/index.blade.php        # вместо modules/Blog/resources/views/index.blade.php
+```
+
+Порядок поиска: `resources/custom` -> тема -> модуль (ядро).
+
 ## Основной layout
 
 Каждый `layout.blade.php` должен подключать глобальный `layout`:

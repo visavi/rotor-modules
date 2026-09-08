@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'name'        => 'Редактор страниц',
-    'description' => 'Редактор blade-шаблонов и директорий в resources/views',
+    'name'        => 'Редактор файлов',
+    'description' => 'Редактор файлов, поиск по коду и редактор переводов',
     'version'     => '1.0.4',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
@@ -10,6 +10,8 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/files' => 'Редактор страниц',
+        '/admin/files'              => 'Редактор файлов',
+        '/admin/files/search'       => 'Поиск по коду',
+        '/admin/files/translations' => 'Редактор переводов',
     ],
 ];
