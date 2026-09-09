@@ -11,7 +11,13 @@ return [
         'assets'  => public_path('assets'),
     ],
 
-    'search_roots' => ['views', 'lang'],
+    'search_roots' => ['views', 'lang', 'modules', 'app'],
+
+    // Корни только для поиска: открыть файл на редактирование нельзя,
+    // но найти использование ключа или хука в коде ядра нужно
+    'search_only_roots' => [
+        'app' => base_path('app'),
+    ],
 
     // Overlay переводов и резервные копии — боевые каталоги, тесты подменяют их через конфиг
     'overlay_path' => $customPath . '/lang',

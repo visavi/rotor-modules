@@ -5,6 +5,7 @@ namespace Modules\PageEditor\Tests\Feature;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
 use Modules\PageEditor\Support\CodeSearcher;
+use Modules\PageEditor\Support\PathResolver;
 use Tests\ModuleTestCase;
 
 class CodeSearchTest extends ModuleTestCase
@@ -160,5 +161,91 @@ class CodeSearchTest extends ModuleTestCase
 
         $response->assertOk();
         $response->assertSee('<mark>needle</mark>', false);
+    }
+
+    /**
+     * modules/* — символьные ссылки, без FOLLOW_SYMLINKS корень обходится пустым
+     */
+    public function testSearchFollowsModuleSymlinks(): void
+    {
+        $found = CodeSearcher::search('modules', 'page_editor::files.page_editor', '*');
+
+        $this->assertNotEmpty($found['results']);
+        $this->assertContains('PageEditor/hooks.php', array_column($found['results'], 'file'));
+    }
+
+    public function testWhereUsedLinkCarriesFullKey(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_where_used']);
+
+        $response = $this->actingAs($boss)->get(route('admin.files.translations', ['query' => 'page_editor']));
+
+        $response->assertOk();
+        // Ключ ищется в том виде, в каком пишется в коде, иначе поиск пуст
+        $response->assertSee('query=' . urlencode('page_editor::files.page_editor'), false);
+    }
+
+    public function testSearchFindsUsageInCoreCode(): void
+    {
+        $found = CodeSearcher::search('app', 'admin.modules.zip_no_module_file', '*');
+
+        $this->assertNotEmpty($found['results']);
+    }
+
+    /**
+     * Код ядра доступен поиску, но не редактору: ссылки на правку быть не должно
+     */
+    public function testCoreCodeRootIsReadOnly(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_app_readonly']);
+
+        $response = $this->actingAs($boss)->get(route('admin.files.search', [
+            'root'  => 'app',
+            'query' => 'admin.modules.zip_no_module_file',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('ModuleController.php');
+
+        $this->assertTrue(PathResolver::isReadOnly('app'));
+        $this->assertFalse(PathResolver::isReadOnly('views'));
+    }
+
+    /**
+     * Код ядра открывается на просмотр, но менять его нельзя ничем
+     */
+    public function testCoreCodeFileOpensReadOnly(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_app_view']);
+
+        $response = $this->actingAs($boss)->get(route('admin.files.edit', [
+            'root' => 'app',
+            'path' => 'Models',
+            'file' => 'User.php',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('page_editor::files.read_only'));
+        $response->assertDontSee(__('main.save'));
+    }
+
+    public function testCoreCodeRootRejectsChanges(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_app_edit']);
+        $original = file_get_contents(base_path('app/Models/User.php'));
+
+        $this->actingAs($boss)
+            ->get(route('admin.files.index', ['root' => 'app']))
+            ->assertNotFound();
+
+        $this->actingAs($boss)
+            ->post(route('admin.files.edit', ['root' => 'app', 'path' => 'Models', 'file' => 'User.php']), ['msg' => 'broken'])
+            ->assertNotFound();
+
+        $this->actingAs($boss)
+            ->delete(route('admin.files.delete'), ['root' => 'app', 'path' => 'Models', 'filename' => 'User.php'])
+            ->assertNotFound();
+
+        $this->assertSame($original, file_get_contents(base_path('app/Models/User.php')));
     }
 }

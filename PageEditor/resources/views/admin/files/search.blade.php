@@ -68,5 +68,16 @@
         </ul>
     @elseif ($query !== '')
         {{ showError(__('page_editor::files.search_empty')) }}
+
+        {{-- Один запрос ищется в одном корне, поэтому предлагаем соседние --}}
+        @if ($query !== '')
+            <div class="mb-3">
+                {{ __('page_editor::files.search_other_roots') }}:
+                @foreach ($roots as $item)
+                    @continue($item === $root)
+                    <a class="ms-1" href="{{ route('admin.files.search', ['root' => $item, 'query' => $query, 'mask' => $mask, 'case' => $case ? 1 : null, 'regex' => $regex ? 1 : null]) }}">{{ Lang::has($key = 'page_editor::files.roots.' . $item) ? __($key) : $item }}</a>
+                @endforeach
+            </div>
+        @endif
     @endif
 @stop

@@ -92,7 +92,7 @@ class TranslationOverlayTest extends ModuleTestCase
             'file_not_exist' => $original['file_not_exist'],
         ]);
 
-        $this->assertSame([], include TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
+        $this->assertFileDoesNotExist(TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
     }
 
     /**
@@ -126,7 +126,7 @@ class TranslationOverlayTest extends ModuleTestCase
 
         TranslationRepository::save('page_editor', 'files', 'en', ['page_editor_extra' => '']);
 
-        $this->assertSame([], include TranslationRepository::overlayPath('page_editor', 'files', 'en'));
+        $this->assertFileDoesNotExist(TranslationRepository::overlayPath('page_editor', 'files', 'en'));
     }
 
     /**
@@ -147,7 +147,7 @@ class TranslationOverlayTest extends ModuleTestCase
 
         TranslationRepository::save('page_editor', 'files', 'ru', ['file_not_exist' => 'Нет такого файла'], ['file_not_exist']);
 
-        $this->assertSame([], include TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
+        $this->assertFileDoesNotExist(TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
         $this->assertSame($original['file_not_exist'], __('page_editor::files.file_not_exist'));
     }
 

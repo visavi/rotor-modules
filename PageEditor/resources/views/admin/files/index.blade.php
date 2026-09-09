@@ -60,8 +60,9 @@
                     @if ($entry['dir'])
                         <i class="fa fa-folder"></i>
                         <b><a href="{{ route('admin.files.index', ['root' => $root, 'path' => trim($path . '/' . $entry['name'], '/')]) }}">{{ $entry['name'] }}</a></b>
-                        @if ($entry['disabled'])
-                            <i class="fas fa-power-off text-muted ms-1" title="{{ __('page_editor::files.module_disabled') }}"></i>
+                        @if ($entry['module'])
+                            <i class="fas fa-power-off ms-1 {{ $entry['disabled'] ? 'text-muted' : 'text-success' }}"
+                               title="{{ $entry['disabled'] ? __('page_editor::files.module_disabled') : __('page_editor::files.module_enabled') }}"></i>
                         @endif
                         <br>
                         {{ __('page_editor::files.objects') }}: {{ $entry['size'] }}
@@ -69,6 +70,9 @@
                         <i class="fa fa-file"></i>
                         @if ($entry['editable'])
                             <b><a href="{{ route('admin.files.edit', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}">{{ $entry['name'] }}</a></b>
+                            @if ($entry['overridden'])
+                                <i class="fas fa-code-branch text-warning ms-1" title="{{ __('page_editor::files.override_exists') }}"></i>
+                            @endif
                         @else
                             <b>{{ $entry['name'] }}</b>
                         @endif

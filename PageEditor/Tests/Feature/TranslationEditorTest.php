@@ -123,9 +123,8 @@ class TranslationEditorTest extends ModuleTestCase
             ],
         ])->assertRedirect();
 
-        $written = include TranslationRepository::overlayPath('page_editor', 'files', 'ru');
-
-        $this->assertArrayNotHasKey('file_not_exist', $written);
+        // Сброс был последним ключом, поэтому пустой overlay-файл не остаётся
+        $this->assertFileDoesNotExist(TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
 
         app('translator')->setLocale('ru');
         $this->assertSame($original['file_not_exist'], __('page_editor::files.file_not_exist'));
@@ -211,5 +210,26 @@ class TranslationEditorTest extends ModuleTestCase
         $response->assertNotFound();
         $this->assertFileDoesNotExist($outsideFile);
         $this->assertDirectoryDoesNotExist(TranslationRepository::overlayRoot());
+    }
+
+    public function testSaveWithoutChangesDoesNotCreateOverlayFile(): void
+    {
+        $path = TranslationRepository::overlayPath(null, 'index', 'ru');
+        $originals = TranslationRepository::originals(null, 'index', 'ru');
+
+        TranslationRepository::save(null, 'index', 'ru', $originals);
+
+        $this->assertFileDoesNotExist($path);
+    }
+
+    public function testSaveRemovesOverlayFileWhenLastKeyReset(): void
+    {
+        $path = TranslationRepository::overlayPath(null, 'index', 'ru');
+
+        TranslationRepository::save(null, 'index', 'ru', ['panel' => 'Своё']);
+        $this->assertFileExists($path);
+
+        TranslationRepository::save(null, 'index', 'ru', [], ['panel']);
+        $this->assertFileDoesNotExist($path);
     }
 }

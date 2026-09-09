@@ -18,29 +18,35 @@
 
     @if ($query !== '')
         @if ($found)
-            <table class="table table-sm">
+            <div class="table-responsive">
+            <table class="table table-sm" style="table-layout: fixed">
                 <thead>
                     <tr>
-                        <th>{{ __('page_editor::files.key') }}</th>
+                        <th style="width: 24%">{{ __('page_editor::files.key') }}</th>
                         @foreach ($locales as $locale)
                             <th>{{ $locale }}</th>
                         @endforeach
-                        <th></th>
+                        <th style="width: 40px"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($found as $item)
                         <tr>
-                            <td>
+                            <td class="font-monospace small" style="word-break: break-word">
                                 <a href="{{ route('admin.files.translations', ['group' => $item['namespace'] ? $item['namespace'] . '::' . $item['group'] : $item['group']]) }}">
                                     {{ $item['namespace'] ? $item['namespace'] . '::' : '' }}{{ $item['group'] }}.{{ $item['key'] }}
                                 </a>
                             </td>
                             @foreach ($locales as $locale)
-                                <td class="small">{{ $item['values'][$locale] ?? '' }}</td>
+                                {{-- Описания бывают длинными: без ограничения таблица уезжает за экран --}}
+                                {{-- Пути и ссылки внутри переводов длинные и без пробелов --}}
+                                <td class="small" style="word-break: break-word">{{ $item['values'][$locale] ?? '' }}</td>
                             @endforeach
                             <td>
-                                <a class="btn btn-link p-0" title="{{ __('page_editor::files.where_used') }}" href="{{ route('admin.files.search', ['root' => 'views', 'query' => $item['key'], 'mask' => '*.blade.php']) }}">
+                                {{-- Ищем ключ в том виде, в каком он пишется в коде: <группа>.<ключ> или <модуль>::<группа>.<ключ> --}}
+                                @php($usage = ($item['namespace'] ? $item['namespace'] . '::' : '') . $item['group'] . '.' . $item['key'])
+
+                                <a class="btn btn-link p-0" title="{{ __('page_editor::files.where_used') }}" href="{{ route('admin.files.search', ['root' => 'views', 'query' => $usage]) }}">
                                     <i class="fas fa-search"></i>
                                 </a>
                             </td>
@@ -48,6 +54,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @else
             {{ showError(__('page_editor::files.search_empty')) }}
         @endif
@@ -58,9 +65,11 @@
                     @foreach ($groups as $group)
                         <a class="list-group-item list-group-item-action{{ $current && $group['label'] === $current['label'] ? ' active' : '' }}"
                            href="{{ route('admin.files.translations', ['group' => $group['label']]) }}">{{ $group['label'] }}
-                            @unless ($group['enabled'])
-                                <i class="fas fa-power-off text-muted ms-1" title="{{ __('page_editor::files.module_disabled') }}"></i>
-                            @endunless
+                            {{-- Значок только у модулей: у групп ядра состояния нет --}}
+                            @if ($group['namespace'] !== null)
+                                <i class="fas fa-power-off ms-1 {{ $group['enabled'] ? 'text-success' : 'text-muted' }}"
+                                   title="{{ $group['enabled'] ? __('page_editor::files.module_enabled') : __('page_editor::files.module_disabled') }}"></i>
+                            @endif
                         </a>
                     @endforeach
                 </div>

@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\PageEditor\Support\FileWriter;
+use Modules\PageEditor\Support\OverrideResolver;
 use Modules\PageEditor\Support\PathResolver;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,7 +31,19 @@ class FileController extends Controller
         $this->path = PathResolver::normalize((string) $request->input('path', ''));
         $this->file = PathResolver::normalize((string) $request->input('file', ''));
 
-        if (! isset(PathResolver::roots()[$this->root])) {
+        // Корень, доступный только поиску, открывается на просмотр: сюда ведут
+        // результаты поиска. Всё, что меняет файлы, закрыто ниже
+        if (! isset(PathResolver::searchRoots()[$this->root])) {
+            abort(404);
+        }
+    }
+
+    /**
+     * Запрещает изменения в корне, доступном только для чтения
+     */
+    private function denyReadOnly(): void
+    {
+        if (PathResolver::isReadOnly($this->root)) {
             abort(404);
         }
     }
@@ -40,6 +53,8 @@ class FileController extends Controller
      */
     public function index(): View
     {
+        $this->denyReadOnly();
+
         $directory = PathResolver::resolve($this->root, $this->path);
 
         // Каталог custom появляется только после первой правки:
@@ -48,7 +63,7 @@ class FileController extends Controller
             abort(404, __('page_editor::files.directory_not_exist'));
         }
 
-        /** @var list<array{name: string, dir: bool, size: int, lines: int, mtime: int, editable: bool, disabled: bool}> $entries */
+        /** @var list<array{name: string, dir: bool, size: int, lines: int, mtime: int, editable: bool, module: bool, disabled: bool, overridden: bool}> $entries */
         $entries = [];
         $maxSize = (int) config('page_editor.max_edit_size', 1048576);
 
@@ -60,6 +75,9 @@ class FileController extends Controller
             ? array_keys(Module::getEnabledModules())
             : null;
 
+        // Переопределяются только шаблоны и переводы, для остальных корней проверку не делаем
+        $overridable = in_array($this->root, ['views', 'lang', 'modules'], true);
+
         foreach ($names as $name) {
             $full = $directory . '/' . $name;
             $isDir = is_dir($full);
@@ -68,13 +86,19 @@ class FileController extends Controller
             $entries[] = [
                 'name' => $name,
                 'dir'  => $isDir,
-                'size' => $isDir ? count(array_diff(scandir($full), ['.', '..'])) : (int) filesize($full),
+                // Счёт по тому же фильтру, что и листинг: скрытые файлы не показываются,
+                // иначе каталог с одним .gitignore выглядел бы непустым
+                'size' => $isDir ? count(preg_grep('/^([^.])/', scandir($full)) ?: []) : (int) filesize($full),
                 // Строки считаем только у небольших редактируемых файлов: в корне assets
                 // лежат шрифты, картинки и бандлы — file() затянул бы их целиком в память
                 'lines'    => $editable && filesize($full) <= $maxSize ? count(file($full) ?: []) : 0,
                 'mtime'    => (int) filemtime($full),
                 'editable' => $editable,
+                'module'   => $modules !== null && $isDir,
                 'disabled' => $modules !== null && $isDir && ! in_array($name, $modules, true),
+                // Правка в custom перебивает оригинал, поэтому её видно ещё в списке
+                'overridden' => ! $isDir && $overridable
+                    && (OverrideResolver::override($this->root, $this->path, $name)['exists'] ?? false),
             ];
         }
 
@@ -111,11 +135,27 @@ class FileController extends Controller
         $params = ['root' => $this->root, 'path' => $this->path, 'file' => $this->file];
 
         if ($request->isMethod('post')) {
-            $validator->true($writable, ['msg' => __('page_editor::files.writable')]);
+            $this->denyReadOnly();
+
+            // Вторая кнопка формы: содержимое уходит в custom, оригинал остаётся нетронутым
+            $toOverride = $request->input('target') === 'custom'
+                && $this->root !== 'custom'
+                && ($override = OverrideResolver::override($this->root, $this->path, $this->file)) !== null;
+
+            if ($toOverride) {
+                $target = PathResolver::resolve($override['root'], trim($override['path'] . '/' . $override['file'], '/'));
+                $params = ['root' => $override['root'], 'path' => $override['path'], 'file' => $override['file']];
+                $status = __('page_editor::files.override_saved');
+            } else {
+                $target = $full;
+                $status = __('page_editor::files.file_success_saved');
+
+                $validator->true($writable, ['msg' => __('page_editor::files.writable')]);
+            }
 
             if ($validator->isValid()) {
                 try {
-                    FileWriter::put($full, (string) $request->input('msg'));
+                    FileWriter::put($target, self::normalizeContent((string) $request->input('msg')));
                 } catch (RuntimeException) {
                     return redirect()->route('admin.files.edit', $params)
                         ->withInput()
@@ -123,7 +163,7 @@ class FileController extends Controller
                 }
 
                 return redirect()->route('admin.files.edit', $params)
-                    ->with('flash.success', __('page_editor::files.file_success_saved'));
+                    ->with('flash.success', $status);
             }
 
             return redirect()->route('admin.files.edit', $params)
@@ -143,7 +183,33 @@ class FileController extends Controller
         $file = $this->file;
         $line = (int) $request->input('line');
 
-        return view('page_editor::admin/files/edit', compact('contest', 'root', 'path', 'file', 'writable', 'line'));
+        // Плашка над редактором: какой слой открыт и где лежит второй
+        $override = $this->root === 'custom' ? null : OverrideResolver::override($this->root, $this->path, $this->file);
+        $original = $this->root === 'custom' ? OverrideResolver::original($this->path, $this->file) : null;
+
+        $readOnly = PathResolver::isReadOnly($this->root);
+
+        // Грамматика подсветки: blade и php идут одной, остальное — по расширению
+        $language = match (PathResolver::extension($this->file)) {
+            'php', 'blade.php'   => 'php',
+            'css', 'scss'        => 'css',
+            'js', 'json'         => 'javascript',
+            'xml', 'svg', 'html' => 'markup',
+            default              => 'none',
+        };
+
+        return view('page_editor::admin/files/edit', compact(
+            'contest',
+            'root',
+            'path',
+            'file',
+            'writable',
+            'line',
+            'override',
+            'original',
+            'readOnly',
+            'language',
+        ));
     }
 
     /**
@@ -151,6 +217,8 @@ class FileController extends Controller
      */
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
+        $this->denyReadOnly();
+
         $directory = PathResolver::resolve($this->root, $this->path);
 
         // Каталог корня создаём по требованию: custom до первой правки
@@ -228,6 +296,8 @@ class FileController extends Controller
      */
     public function delete(Request $request, Validator $validator): RedirectResponse
     {
+        $this->denyReadOnly();
+
         $directory = PathResolver::resolve($this->root, $this->path);
         $params = ['root' => $this->root, 'path' => $this->path];
 
@@ -274,6 +344,8 @@ class FileController extends Controller
      */
     public function rename(Request $request, Validator $validator): RedirectResponse
     {
+        $this->denyReadOnly();
+
         $directory = PathResolver::resolve($this->root, $this->path);
         $params = ['root' => $this->root, 'path' => $this->path];
 
@@ -304,6 +376,8 @@ class FileController extends Controller
      */
     public function download(): BinaryFileResponse
     {
+        $this->denyReadOnly();
+
         $full = PathResolver::resolve($this->root, trim($this->path . '/' . $this->file, '/'));
 
         if ($this->file === '' || ! is_file($full)) {
@@ -312,5 +386,18 @@ class FileController extends Controller
 
         // Имя вложения без каталогов: со слэшем HeaderUtils::makeDisposition бросает исключение
         return response()->download($full, basename($this->file));
+    }
+
+    /**
+     * Приводит содержимое из формы к виду обычного текстового файла
+     *
+     * Браузер отправляет переводы строк как CRLF, а завершающий перевод строки
+     * до контроллера не доезжает: TrimStrings обрезает поля запроса
+     */
+    private static function normalizeContent(string $content): string
+    {
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+
+        return rtrim($content, "\n") . "\n";
     }
 }

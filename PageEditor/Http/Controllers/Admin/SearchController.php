@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\PageEditor\Support\CodeSearcher;
+use Modules\PageEditor\Support\PathResolver;
 
 class SearchController extends Controller
 {
@@ -32,6 +33,7 @@ class SearchController extends Controller
 
         return view('page_editor::admin/files/search', [
             'roots'     => $roots,
+            'readOnly'  => PathResolver::isReadOnly($root),
             'root'      => $root,
             'query'     => $query,
             'mask'      => $mask,

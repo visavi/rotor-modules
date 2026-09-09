@@ -3,8 +3,8 @@
 return [
     'name'        => 'Редактор файлов',
     'description' => 'Редактор файлов, поиск по коду и редактор переводов',
-    'version'     => '1.0.4',
-    'requires'    => '14.3.0',
+    'version'     => '2.0.0',
+    'requires'    => '14.6.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

@@ -19,11 +19,29 @@ class PathResolver
     }
 
     /**
+     * Возвращает корни, доступные поиску: редактируемые плюс read-only
+     *
+     * @return array<string, string>
+     */
+    public static function searchRoots(): array
+    {
+        return self::roots() + config('page_editor.search_only_roots', []);
+    }
+
+    /**
+     * Сообщает, доступен ли корень только для чтения
+     */
+    public static function isReadOnly(string $root): bool
+    {
+        return ! isset(self::roots()[$root]) && isset(config('page_editor.search_only_roots', [])[$root]);
+    }
+
+    /**
      * Возвращает абсолютный путь корня
      */
     public static function rootPath(string $root): string
     {
-        $roots = self::roots();
+        $roots = self::searchRoots();
 
         if (! isset($roots[$root])) {
             abort(404);

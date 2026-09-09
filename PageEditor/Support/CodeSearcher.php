@@ -36,7 +36,7 @@ class CodeSearcher
             abort(404);
         }
 
-        $base = PathResolver::rootPath($root);
+        $base = PathResolver::searchRoots()[$root] ?? '';
         $maxSize = (int) config('page_editor.max_search_size', 1048576);
         $maxResults = (int) config('page_editor.max_search_results', 500);
 
@@ -58,12 +58,34 @@ class CodeSearcher
             }
         }
 
+        // FOLLOW_SYMLINKS обязателен: modules/* — символьные ссылки, без него
+        // корень modules обходится пустым
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($base, RecursiveDirectoryIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator(
+                $base,
+                RecursiveDirectoryIterator::SKIP_DOTS | RecursiveDirectoryIterator::FOLLOW_SYMLINKS,
+            ),
         );
+
+        // Ссылка может указывать на родителя и закольцевать обход
+        $visited = [];
 
         /** @var SplFileInfo $file */
         foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                $real = $file->getRealPath();
+
+                if ($real === false || isset($visited[$real])) {
+                    $iterator->getInnerIterator()->rewind();
+
+                    continue;
+                }
+
+                $visited[$real] = true;
+
+                continue;
+            }
+
             if (! $file->isFile() || $file->getSize() > $maxSize) {
                 continue;
             }

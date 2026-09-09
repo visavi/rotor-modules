@@ -278,7 +278,15 @@ class TranslationRepository
             Arr::set($result, $key, $value);
         }
 
-        FileWriter::put($path, PhpArrayDumper::dump($result));
+        // Пустой overlay не храним: файл с "return []" ничего не переопределяет,
+        // а каталог правок засоряет
+        if ($result === []) {
+            if (is_file($path)) {
+                FileWriter::delete($path);
+            }
+        } else {
+            FileWriter::put($path, PhpArrayDumper::dump($result));
+        }
 
         self::invalidate();
     }

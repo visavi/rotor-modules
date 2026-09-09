@@ -180,7 +180,8 @@ class PageEditorTest extends ModuleTestCase
             'file' => 'page_editor_fixture.blade.php',
         ]), ['msg' => 'hello'])->assertRedirect();
 
-        $this->assertSame('hello', file_get_contents($path));
+        // Файл сохраняется с завершающим переводом строки
+        $this->assertSame("hello\n", file_get_contents($path));
 
         $this->actingAs($this->boss)->delete(route('admin.files.delete'), [
             'root'     => 'views',
@@ -326,5 +327,32 @@ class PageEditorTest extends ModuleTestCase
         $response->assertOk();
         $response->assertViewHas('line', 5);
         $response->assertSee('data-goto-line="5"', false);
+    }
+
+    public function testEditKeepsTrailingNewline(): void
+    {
+        $file = resource_path('views/page_editor_newline.blade.php');
+        file_put_contents($file, "old\n");
+
+        $this->actingAs($this->boss)->post(route('admin.files.edit', [
+            'root' => 'views',
+            'file' => 'page_editor_newline.blade.php',
+        ]), ['msg' => "first\nsecond"])->assertRedirect();
+
+        // TrimStrings обрезает поле запроса, поэтому перевод строки ставится при сохранении
+        $this->assertSame("first\nsecond\n", file_get_contents($file));
+    }
+
+    public function testEditConvertsCrlfToLf(): void
+    {
+        $file = resource_path('views/page_editor_newline.blade.php');
+        file_put_contents($file, "old\n");
+
+        $this->actingAs($this->boss)->post(route('admin.files.edit', [
+            'root' => 'views',
+            'file' => 'page_editor_newline.blade.php',
+        ]), ['msg' => "first\r\nsecond\r\n"])->assertRedirect();
+
+        $this->assertSame("first\nsecond\n", file_get_contents($file));
     }
 }
