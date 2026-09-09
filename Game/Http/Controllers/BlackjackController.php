@@ -15,6 +15,11 @@ use Illuminate\View\View;
 class BlackjackController extends Controller
 {
     /**
+     * Банкир добирает карты, пока не наберёт столько очков
+     */
+    private const BANKER_STANDS = 17;
+
+    /**
      * Текущий пользователь
      */
     private User $user;
@@ -51,8 +56,8 @@ class BlackjackController extends Controller
         }
 
         $validator
-            ->gt($bet, 0, ['bet' => 'Вы не указали ставку!'])
-            ->gte($this->user->money, $bet, ['bet' => 'У вас недостаточно денег для игры!']);
+            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
+            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')]);
 
         if ($validator->isValid()) {
             $request->session()->put('blackjack.bet', $bet);
@@ -60,7 +65,7 @@ class BlackjackController extends Controller
             $this->user->decrement('money', $bet);
 
             return redirect('games/blackjack/game')
-                ->with('success', 'Ставка сделана!');
+                ->with('success', __('game::games.bj_bet_made'));
         }
 
         return redirect('games/blackjack')
@@ -78,7 +83,7 @@ class BlackjackController extends Controller
 
         if ($request->session()->missing('blackjack.bet')) {
             return redirect('games/blackjack')
-                ->with('danger', 'Необходимо сделать ставку!');
+                ->with('danger', __('game::games.bj_bet_needed'));
         }
 
         $scores = $this->takeCard($request->session(), $case);
@@ -99,36 +104,48 @@ class BlackjackController extends Controller
         }
 
         if ($scores['user'] > 21 && $scores['userCards'] !== 2) {
-            $text = 'У вас перебор!';
+            $text = __('game::games.bj_bust');
             $result = 'lost';
         }
         if ($scores['user'] === 22 && $scores['userCards'] === 2) {
-            $text = 'У вас 2 туза!';
+            $text = __('game::games.bj_two_aces');
             $result = 'victory';
-        }
-        if ($scores['banker'] === 22 && $scores['bankerCards'] === 2) {
-            $text = 'У банкира 2 туза!';
-            $result = 'lost';
         }
         if ($scores['user'] === 21) {
-            $text = 'У вас очко!';
+            $text = __('game::games.bj_blackjack');
             $result = 'victory';
         }
-        if ($scores['banker'] === 21) {
-            $text = 'У банкира очко!';
-            $result = 'lost';
-        }
-        if (($scores['user'] === 21 && $scores['banker'] === 21) || ($scores['user'] === 22 && $scores['banker'] === 22)) {
-            $result = 'draw';
+
+        // Рука банкира закрыта до вскрытия: иначе он выигрывал на своём доборе,
+        // пока игрок ещё решал, брать ли карту
+        if ($case === 'end') {
+            if ($scores['banker'] === 22 && $scores['bankerCards'] === 2) {
+                $text = __('game::games.bj_banker_two_aces');
+                $result = 'lost';
+            }
+            if ($scores['banker'] === 21) {
+                $text = __('game::games.bj_banker_blackjack');
+                $result = 'lost';
+            }
+            if (($scores['user'] === 21 && $scores['banker'] === 21) || ($scores['user'] === 22 && $scores['banker'] === 22)) {
+                $result = 'draw';
+            }
         }
 
         $blackjack = $request->session()->get('blackjack');
 
+        // Показываем движение по счёту: сколько зачислено за победу или ничью
+        // и сколько ушло при проигрыше. Победа забирает весь кон, как в правилах
+        $amount = null;
+
         if ($result !== null) {
+            $amount = $blackjack['bet'];
+
             if ($result === 'victory') {
-                $this->user->increment('money', $blackjack['bet'] * 2);
+                $amount = $this->payout($blackjack['bet'], $scores);
+                $this->user->increment('money', $amount);
             } elseif ($result === 'draw') {
-                $this->user->increment('money', $blackjack['bet']);
+                $this->user->increment('money', $amount);
             }
 
             $request->session()->forget('blackjack');
@@ -136,7 +153,7 @@ class BlackjackController extends Controller
 
         $user = $this->user;
 
-        return view('game::blackjack/game', compact('user', 'blackjack', 'scores', 'result', 'text'));
+        return view('game::blackjack/game', compact('user', 'blackjack', 'scores', 'result', 'text', 'amount'));
     }
 
     /**
@@ -145,6 +162,20 @@ class BlackjackController extends Controller
     public function rules(): View
     {
         return view('game::blackjack/rules');
+    }
+
+    /**
+     * Считает выплату за победу
+     *
+     * Очко и два туза оплачиваются как 3:2 — с учётом уже списанной ставки
+     * игрок получает две с половиной ставки, обычная победа приносит две
+     */
+    private function payout(int $bet, array $scores): int
+    {
+        $isBlackjack = $scores['user'] === 21
+            || ($scores['user'] === 22 && $scores['userCards'] === 2);
+
+        return $isBlackjack ? (int) ($bet * 2.5) : $bet * 2;
     }
 
     /**
@@ -176,7 +207,6 @@ class BlackjackController extends Controller
      */
     private function takeCard(Session $session, ?string $case): array
     {
-        $rand = random_int(16, 18);
         $isNewGame = $session->missing('blackjack.cards');
         $deck = $session->get('blackjack.deck', array_combine(range(1, 52), range(1, 52)));
         $cards = $session->get('blackjack.cards', []);
@@ -191,7 +221,7 @@ class BlackjackController extends Controller
             $cards[] = $card;
             unset($deck[$card]);
 
-            if ($this->cardsScore($bankerCards) < $rand) {
+            if ($this->cardsScore($bankerCards) < self::BANKER_STANDS) {
                 $card2 = array_rand($deck);
                 $bankerCards[] = $card2;
                 unset($deck[$card2]);
@@ -199,7 +229,7 @@ class BlackjackController extends Controller
         }
 
         if ($case === 'end') {
-            while ($this->cardsScore($bankerCards) < $rand) {
+            while ($this->cardsScore($bankerCards) < self::BANKER_STANDS) {
                 $card2 = array_rand($deck);
                 $bankerCards[] = $card2;
                 unset($deck[$card2]);

@@ -24,20 +24,20 @@
             <form action="/games/blackjack/bet" method="post">
                 @csrf
                 <div class="mb-3{{ hasError('bet') }}">
-                    <label for="bet" class="form-label">Ваша ставка:</label>
+                    <label for="bet" class="form-label">{{ __('game::games.bj_bet') }}</label>
                     <input class="form-control" name="bet" id="bet" value="{{ old('bet') }}" required>
                     <div class="invalid-feedback">{{ textError('bet') }}</div>
                 </div>
 
-                <button class="btn btn-primary">Играть</button>
+                <button class="btn btn-primary">{{ __('game::games.play') }}</button>
             </form>
         </div>
     @else
-        Ставки сделаны, на кону: {{ plural(session()->get('blackjack.bet') * 2, setting('moneyname')) }}<br><br>
-        <b><a href="/games/blackjack/game?rand={{ random_int(1000, 9999) }}">Вернитесь в игру</a></b><br><br>
+        {{ __('game::games.bj_bets_made', ['money' => plural(session()->get('blackjack.bet') * 2, setting('moneyname'))]) }}<br><br>
+        <b><a href="/games/blackjack/game?rand={{ random_int(1000, 9999) }}">{{ __('game::games.bj_return') }}</a></b><br><br>
     @endif
 
-    У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
+    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
 
-    <i class="fa fa-question-circle"></i> <a href="/games/blackjack/rules">Правила игры</a><br>
+    <i class="fa fa-question-circle"></i> <a href="/games/blackjack/rules">{{ __('game::games.rules') }}</a><br>
 @stop

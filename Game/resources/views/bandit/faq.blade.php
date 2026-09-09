@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Правила игры')
+@section('title', __('game::games.rules'))
 
 @section('breadcrumb')
     <nav>
@@ -8,25 +8,25 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/games">{{ __('game::games.module') }}</a></li>
             <li class="breadcrumb-item"><a href="/games/bandit">{{ __('game::games.slot') }}</a></li>
-            <li class="breadcrumb-item active">Правила игры</li>
+            <li class="breadcrumb-item active">{{ __('game::games.rules') }}</li>
         </ol>
     </nav>
 @stop
 
 @section('content')
-    Правила предельно просты. Нажимайте на кнопку Играть и выигрывайте деньги.<br>
-    За каждое нажатие у вас со счета списывают {{ plural(5, setting('moneyname')) }}<br>
-    Если у вам повезет и вы выиграете деньги, то то они сразу же будут перечислены вам на счет<br><br>
-    Комбинации картинок считаются по вертикали и горизонтали<br><br>
-    Список выигрышных комбинаций:<br>
+    {{ __('game::games.bandit_rules_simple') }}<br>
+    {{ __('game::games.bandit_rules_price', ['money' => plural(5, setting('moneyname'))]) }}<br>
+    {{ __('game::games.bandit_rules_payout') }}<br><br>
+    {{ __('game::games.bandit_rules_combos') }}<br><br>
+    {{ __('game::games.bandit_rules_list') }}<br>
 
-    <img src="/assets/modules/games/bandit/1.gif" alt="image"> * 3 вишенки = {{ plural(10, setting('moneyname')) }} средний ряд/столбец  (5 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/2.gif" alt="image"> * 3 апельсина = {{ plural(15, setting('moneyname')) }} средний ряд/столбец  (10 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/3.gif" alt="image"> * 3 винограда = {{ plural(25, setting('moneyname')) }} средний ряд/столбец  (15 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/4.gif" alt="image"> * 3 банана = {{ plural(35, setting('moneyname')) }} средний ряд/столбец  (25 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/5.gif" alt="image"> * 3 яблока = {{ plural(50, setting('moneyname')) }} средний ряд/столбец  (30 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/6.gif" alt="image"> * 3 BAR = {{ plural(70, setting('moneyname')) }} средний ряд/столбец  (50 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/8.gif" alt="image"> * 3 $$$ = {{ plural(100, setting('moneyname')) }} средний ряд/столбец  (60 - нижний или верхний ряд/столбец)<br>
-    <img src="/assets/modules/games/bandit/7.gif" alt="image"> * 3 777 = {{ plural(177, setting('moneyname')) }} средний столбец  (100 - правый или левый столбец)<br>
-    <img src="/assets/modules/games/bandit/7.gif" alt="image"> * 3 777 = {{ plural(777, setting('moneyname')) }} средний ряд  (177 - нижний или верхний ряд)<br>
+    <img src="/assets/modules/games/bandit/1.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.cherry'), 'money' => plural(10, setting('moneyname')), 'second' => 5]) }}<br>
+    <img src="/assets/modules/games/bandit/2.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.orange'), 'money' => plural(15, setting('moneyname')), 'second' => 10]) }}<br>
+    <img src="/assets/modules/games/bandit/3.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.grape'), 'money' => plural(25, setting('moneyname')), 'second' => 15]) }}<br>
+    <img src="/assets/modules/games/bandit/4.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.banana'), 'money' => plural(35, setting('moneyname')), 'second' => 25]) }}<br>
+    <img src="/assets/modules/games/bandit/5.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.apple'), 'money' => plural(50, setting('moneyname')), 'second' => 30]) }}<br>
+    <img src="/assets/modules/games/bandit/6.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.bar'), 'money' => plural(70, setting('moneyname')), 'second' => 50]) }}<br>
+    <img src="/assets/modules/games/bandit/8.gif" alt="image"> * {{ __('game::games.bandit_combo', ['symbol' => __('game::games.symbols_count.dollar'), 'money' => plural(100, setting('moneyname')), 'second' => 60]) }}<br>
+    <img src="/assets/modules/games/bandit/7.gif" alt="image"> * {{ __('game::games.bandit_combo_column', ['symbol' => __('game::games.symbols_count.seven'), 'money' => plural(177, setting('moneyname')), 'second' => 100]) }}<br>
+    <img src="/assets/modules/games/bandit/7.gif" alt="image"> * {{ __('game::games.bandit_combo_row', ['symbol' => __('game::games.symbols_count.seven'), 'money' => plural(777, setting('moneyname')), 'second' => 177]) }}<br>
 @stop

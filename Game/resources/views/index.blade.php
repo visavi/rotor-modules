@@ -52,6 +52,12 @@
                     <a href="/games/safe" class="h5">{{ __('game::games.safe') }}</a>
                 </div>
             </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="section my-3 shadow">
+                    <i class="fas fa-bomb fa-5x"></i>
+                    <a href="/games/miner" class="h5">{{ __('game::games.miner') }}</a>
+                </div>
+            </div>
             @hook('gamesEnd')
         </div>
 

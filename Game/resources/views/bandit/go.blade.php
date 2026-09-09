@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Ваш ход')
+@section('title', __('game::games.your_turn'))
 
 @section('breadcrumb')
     <nav>
@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/games">{{ __('game::games.module') }}</a></li>
             <li class="breadcrumb-item"><a href="/games/bandit">{{ __('game::games.slot') }}</a></li>
-            <li class="breadcrumb-item active">Ваш ход</li>
+            <li class="breadcrumb-item active">{{ __('game::games.your_turn') }}</li>
         </ol>
     </nav>
 @stop
@@ -25,10 +25,10 @@
             {{ $result }}<br>
         @endforeach
 
-        <i class="fas fa-trophy"></i> Ваш выигрыш составил: <b>{{ plural($sum, setting('moneyname')) }}</b><br><br>
+        <i class="fas fa-trophy"></i> {{ __('game::games.win_amount', ['money' => plural($sum, setting('moneyname'))]) }}<br><br>
     @endif
 
-    <a class="btn btn-primary" href="/games/bandit/go?rand={{ mt_rand(1000, 99999) }}">Играть</a><br><br>
+    <a class="btn btn-primary" href="/games/bandit/go?rand={{ mt_rand(1000, 99999) }}">{{ __('game::games.play') }}</a><br><br>
 
-    У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br>
+    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br>
 @stop

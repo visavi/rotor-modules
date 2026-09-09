@@ -13,14 +13,14 @@
 @stop
 
 @section('content')
-    У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
+    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
 
-    {{ $user->getName() }}, не торопись! Просто хорошо подумай<br>
-    <br><img src="/assets/modules/games/safe/safe-closed.png" alt="сейф"><br>
+    {{ __('game::games.safe_dont_rush', ['name' => $user->getName()]) }}<br>
+    <br><img src="/assets/modules/games/safe/safe-closed.png" alt="{{ __('game::games.safe_alt') }}"><br>
 
-    Всё готово для совершения взлома! Введите комбинацию цифр и нажмите ломать сейф!<br><br>
+    {{ __('game::games.safe_ready') }}<br><br>
 
-    Комбинация сейфа:<br>
+    {{ __('game::games.safe_combination') }}<br>
     <span class="badge bg-info">-</span>
     <span class="badge bg-info">-</span>
     <span class="badge bg-info">-</span>
@@ -47,14 +47,14 @@
                     <input class="form-control" name="code4" maxlength="1" value="{{ old('code4') }}" required>
                 </div>
             </div>
-            <button class="btn btn-primary">Ломать сейф</button>
+            <button class="btn btn-primary">{{ __('game::games.safe_button') }}</button>
         </form>
     </div>
 
-    Попробуй вскрыть наш сейф.<br>
-    В сейфе тебя ждёт: {{ plural(1000, setting('moneyname')) }}<br>
-    За попытку взлома ты заплатишь {{ plural(100, setting('moneyname')) }}<br>
-    Платишь 1 paз зa 5 попыток. Ну это чтобы купить себе необходимое для взлома оборудование.<br>
-    У тебя будет только 5 попыток чтобы подобрать код из 5-х цифр.<br>
-    Если тебя это устраивает, то ВПЕРЁД!<br>
+    {{ __('game::games.safe_try') }}<br>
+    {{ __('game::games.safe_prize', ['money' => plural($prize, setting('moneyname'))]) }}<br>
+    {{ __('game::games.safe_price', ['money' => plural($price, setting('moneyname'))]) }}<br>
+    {{ __('game::games.safe_price_info') }}<br>
+    {{ __('game::games.safe_attempts_info') }}<br>
+    {{ __('game::games.safe_forward') }}<br>
 @stop

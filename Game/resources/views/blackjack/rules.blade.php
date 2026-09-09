@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Правила игры')
+@section('title', __('game::games.rules'))
 
 @section('breadcrumb')
     <nav>
@@ -8,37 +8,30 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/games">{{ __('game::games.module') }}</a></li>
             <li class="breadcrumb-item"><a href="/games/blackjack">{{ __('game::games.blackjack') }}</a></li>
-            <li class="breadcrumb-item active">Правила игры</li>
+            <li class="breadcrumb-item active">{{ __('game::games.rules') }}</li>
         </ol>
     </nav>
 @stop
 
 @section('content')
-    Для участия в игре сделайте ставку и нажмите <b>Играть</b><br>
-    Ваша ставка будет получена Банкиром и он начнет сдавать Вам карты.<br>
-    В игре участвуют двое - Вы и Банкир, на кону - двойная ставка (Ваша ставка и ставка Банкира). Взяв карты, Вы подсчитываете суммарное количество их очков.<br><br>
+    {!! __('game::games.bj_rules_bet', ['button' => '<b>' . __('game::games.play') . '</b>']) !!}<br>
+    {{ __('game::games.bj_rules_dealing') }}<br>
+    {{ __('game::games.bj_rules_players') }}<br><br>
 
-    <b>Очки считаются следующим образом:</b><br>
-    <img src="/assets/modules/games/cards/3.png" alt="image"> двойка - 2 очка<br>
-    <img src="/assets/modules/games/cards/7.png" alt="image"> тройка - 3 очка<br>
-    <img src="/assets/modules/games/cards/11.png" alt="image"> четверка - 5 очка<br>
-    <img src="/assets/modules/games/cards/15.png" alt="image"> пятерка - 5 очков<br>
-    <img src="/assets/modules/games/cards/19.png" alt="image"> шестерка - 6 очков<br>
-    <img src="/assets/modules/games/cards/23.png" alt="image"> семерка - 7 очков<br>
-    <img src="/assets/modules/games/cards/27.png" alt="image"> восьмерка - 8 очков<br>
-    <img src="/assets/modules/games/cards/31.png" alt="image"> девятка - 9 очков<br>
-    <img src="/assets/modules/games/cards/35.png" alt="image"> десятка - 10 очков<br>
-    <img src="/assets/modules/games/cards/39.png" alt="image"> валет - 2 очка<br>
-    <img src="/assets/modules/games/cards/43.png" alt="image"> дама - 3 очка<br>
-    <img src="/assets/modules/games/cards/47.png" alt="image"> король - 4 очка<br>
-    <img src="/assets/modules/games/cards/51.png" alt="image"> туз - 11 очков<br><br>
+    <b>{{ __('game::games.bj_rules_scores') }}</b><br>
+    @foreach (__('game::games.bj_cards') as $index => $card)
+        <img src="/assets/modules/games/cards/{{ [3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51][$index] }}.png" alt="image"> {{ $card }}<br>
+    @endforeach
+    <br>
 
-    Сумма очков не зависит от масти карт.<br>
-    Для взятия очередной карты нужно нажать кнопку <b>Взять карту</b>.<br>
-    Если сумма Ваших очков больше 21, то Вы проиграли - перебор, исключение - 2 туза(22 очка).<br>
-    Очко(21) главнее чем 2 туза(22)!<br><br>
+    {{ __('game::games.bj_rules_suits') }}<br>
+    {!! __('game::games.bj_rules_take', ['button' => '<b>' . __('game::games.bj_take_card') . '</b>']) !!}<br>
+    {{ __('game::games.bj_rules_bust') }}<br>
+    {{ __('game::games.bj_rules_priority') }}<br><br>
 
-    Взяв необходимое количество карт, Вы нажимаете кнопку <b>Открыться</b>, и Банкир открывает свои карты (если Вы набираете 20, 21 или 22 (2 туза) очка то Банкир открывается автоматически).
-    Выигрывает тот, у кого больше очков. Победитель забирает кон размером в 2 ставки.
-    При равном количестве очков объявляется ничья!<br>
+    {!! __('game::games.bj_rules_open', ['button' => '<b>' . __('game::games.bj_open') . '</b>']) !!}
+    {{ __('game::games.bj_rules_winner') }}
+    {{ __('game::games.bj_rules_draw') }}<br><br>
+
+    {{ __('game::games.bj_rules_payout') }}<br>
 @stop

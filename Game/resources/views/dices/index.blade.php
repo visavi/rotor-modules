@@ -13,14 +13,14 @@
 @stop
 
 @section('content')
-    <img src="/assets/modules/games/dices/6.gif" alt="image"> и <img src="/assets/modules/games/dices/6.gif" alt="image"><br><br>
+    <img src="/assets/modules/games/dices/6.gif" alt="image"> {{ __('game::games.dices_and') }} <img src="/assets/modules/games/dices/6.gif" alt="image"><br><br>
 
-    <a class="btn btn-primary" href="/games/dices/go?rand={{ mt_rand(1000, 99999) }}">Играть</a><br><br>
+    <a class="btn btn-primary" href="/games/dices/go?rand={{ mt_rand(1000, 99999) }}">{{ __('game::games.play') }}</a><br><br>
 
-    У вас в наличии: {{ plural($user->money, setting('moneyname')) }}<br><br>
+    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
 
-    Для участия в игре нажмите "Играть"<br>
-    За каждый выигрыш вы получите {{ plural(10, setting('moneyname')) }}<br>
-    За каждый проигрыш у вас будут списывать по {{ plural(5, setting('moneyname')) }}<br>
-    Итак дерзайте!<br>
+    {{ __('game::games.press_play') }}<br>
+    {{ __('game::games.win_reward', ['money' => plural(10, setting('moneyname'))]) }}<br>
+    {{ __('game::games.lose_penalty', ['money' => plural(5, setting('moneyname'))]) }}<br>
+    {{ __('game::games.lets_go') }}<br>
 @stop

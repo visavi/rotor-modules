@@ -51,7 +51,7 @@ class DocsController extends Controller
         if (! file_exists(base_path('modules/Docs/resources/laravel-docs/installation.md'))) {
             $synced = false;
             $content = null;
-            $title = 'Документация не загружена';
+            $title = __('docs::rotor.docs_not_loaded');
             $section = 'laravel';
             $menu = $this->docs->buildMenu(null, null);
 

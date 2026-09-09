@@ -41,13 +41,13 @@ class DiceController extends Controller
     public function go(): View
     {
         if ($this->user->money < 5) {
-            abort(200, 'Вы не можете играть! У вас недостаточно средств!');
+            abort(200, __('game::games.cannot_play'));
         }
 
         $results = [
-            'victory' => '<span class="text-success">Вы выиграли</span>',
-            'lost'    => '<span class="text-danger">Вы проиграли</span>',
-            'draw'    => 'Ничья',
+            'victory' => '<span class="text-success">' . __('game::games.victory') . '</span>',
+            'lost'    => '<span class="text-danger">' . __('game::games.lost') . '</span>',
+            'draw'    => __('game::games.draw'),
         ];
 
         $num[0] = mt_rand(1, mt_rand(5, 6));

@@ -14,6 +14,12 @@ use Illuminate\View\View;
 class SafeController extends Controller
 {
     /**
+     * Цена пяти попыток и награда за вскрытый сейф
+     */
+    private const PRICE = 100;
+    private const PRIZE = 500;
+
+    /**
      * Текущий пользователь
      */
     private User $user;
@@ -35,7 +41,11 @@ class SafeController extends Controller
      */
     public function index(): View
     {
-        return view('game::safe/index', ['user' => $this->user]);
+        return view('game::safe/index', [
+            'user'  => $this->user,
+            'price' => self::PRICE,
+            'prize' => self::PRIZE,
+        ]);
     }
 
     /**
@@ -49,7 +59,7 @@ class SafeController extends Controller
         $code3 = int($request->input('code3'));
         $code4 = int($request->input('code4'));
 
-        $validator->gte($this->user->money, 100, ['guess' => 'У вас недостаточно денег для игры!']);
+        $validator->gte($this->user->money, self::PRICE, ['guess' => __('game::games.not_enough_money')]);
 
         if (! $validator->isValid()) {
             return redirect('games/safe')
@@ -60,115 +70,46 @@ class SafeController extends Controller
         if ($request->session()->missing('safe.cipher')) {
             $request->session()->put('safe.cipher', [mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9), mt_rand(0, 9)]);
             $request->session()->put('safe.try', 5);
-            $this->user->decrement('money', 100);
+            $this->user->decrement('money', self::PRICE);
         }
 
         $request->session()->decrement('safe.try');
 
         $safe = $request->session()->get('safe');
 
+        $cipher = $safe['cipher'];
+        $codes = [$code0, $code1, $code2, $code3, $code4];
+
         $hack = ['-', '-', '-', '-', '-'];
 
-        if ($code0 === $safe['cipher'][1] || $code0 === $safe['cipher'][2] || $code0 === $safe['cipher'][3] || $code0 === $safe['cipher'][4]) {
-            $hack[0] = '*';
-        }
-        if ($code1 === $safe['cipher'][0] || $code1 === $safe['cipher'][2] || $code1 === $safe['cipher'][3] || $code1 === $safe['cipher'][4]) {
-            $hack[1] = '*';
-        }
-        if ($code2 === $safe['cipher'][0] || $code2 === $safe['cipher'][1] || $code2 === $safe['cipher'][3] || $code2 === $safe['cipher'][4]) {
-            $hack[2] = '*';
-        }
-        if ($code3 === $safe['cipher'][0] || $code3 === $safe['cipher'][1] || $code3 === $safe['cipher'][2] || $code3 === $safe['cipher'][4]) {
-            $hack[3] = '*';
-        }
-        if ($code4 === $safe['cipher'][0] || $code4 === $safe['cipher'][1] || $code4 === $safe['cipher'][2] || $code3 === $safe['cipher'][3]) {
-            $hack[3] = '*';
+        // Метки идут тремя проходами, каждый следующий перебивает предыдущий:
+        // сначала «такая цифра есть», затем «на этом месте стоит ваша цифра»,
+        // и поверх всего — точное попадание
+        foreach ($codes as $position => $code) {
+            foreach ($cipher as $index => $digit) {
+                if ($position !== $index && $code === $digit) {
+                    $hack[$position] = '*';
+                }
+            }
         }
 
-        if ($code0 === $safe['cipher'][1]) {
-            $hack[1] = 'x';
-        }
-        if ($code0 === $safe['cipher'][2]) {
-            $hack[2] = 'x';
-        }
-        if ($code0 === $safe['cipher'][3]) {
-            $hack[3] = 'x';
-        }
-        if ($code0 === $safe['cipher'][4]) {
-            $hack[4] = 'x';
+        foreach ($codes as $position => $code) {
+            foreach ($cipher as $index => $digit) {
+                if ($position !== $index && $code === $digit) {
+                    $hack[$index] = 'x';
+                }
+            }
         }
 
-        if ($code1 === $safe['cipher'][0]) {
-            $hack[0] = 'x';
-        }
-        if ($code1 === $safe['cipher'][2]) {
-            $hack[2] = 'x';
-        }
-        if ($code1 === $safe['cipher'][3]) {
-            $hack[3] = 'x';
-        }
-        if ($code1 === $safe['cipher'][4]) {
-            $hack[4] = 'x';
-        }
-
-        if ($code2 === $safe['cipher'][0]) {
-            $hack[0] = 'x';
-        }
-        if ($code2 === $safe['cipher'][1]) {
-            $hack[1] = 'x';
-        }
-        if ($code2 === $safe['cipher'][3]) {
-            $hack[3] = 'x';
-        }
-        if ($code2 === $safe['cipher'][4]) {
-            $hack[4] = 'x';
-        }
-
-        if ($code3 === $safe['cipher'][0]) {
-            $hack[0] = 'x';
-        }
-        if ($code3 === $safe['cipher'][1]) {
-            $hack[1] = 'x';
-        }
-        if ($code3 === $safe['cipher'][2]) {
-            $hack[2] = 'x';
-        }
-        if ($code3 === $safe['cipher'][4]) {
-            $hack[4] = 'x';
-        }
-
-        if ($code4 === $safe['cipher'][0]) {
-            $hack[0] = 'x';
-        }
-        if ($code4 === $safe['cipher'][1]) {
-            $hack[1] = 'x';
-        }
-        if ($code4 === $safe['cipher'][2]) {
-            $hack[2] = 'x';
-        }
-        if ($code4 === $safe['cipher'][3]) {
-            $hack[3] = 'x';
-        }
-
-        if ($code0 === $safe['cipher'][0]) {
-            $hack[0] = $safe['cipher'][0];
-        }
-        if ($code1 === $safe['cipher'][1]) {
-            $hack[1] = $safe['cipher'][1];
-        }
-        if ($code2 === $safe['cipher'][2]) {
-            $hack[2] = $safe['cipher'][2];
-        }
-        if ($code3 === $safe['cipher'][3]) {
-            $hack[3] = $safe['cipher'][3];
-        }
-        if ($code4 === $safe['cipher'][4]) {
-            $hack[4] = $safe['cipher'][4];
+        foreach ($cipher as $index => $digit) {
+            if ($codes[$index] === $digit) {
+                $hack[$index] = $digit;
+            }
         }
 
         if (implode($safe['cipher']) === implode($hack)) {
             $request->session()->forget('safe');
-            $this->user->increment('money', 1000);
+            $this->user->increment('money', self::PRIZE);
         }
 
         if (empty($request->session()->get('safe.try'))) {
@@ -177,6 +118,6 @@ class SafeController extends Controller
 
         $user = $this->user;
 
-        return view('game::safe/go', compact('hack', 'safe', 'user'));
+        return view('game::safe/go', compact('hack', 'safe', 'user') + ['prize' => self::PRIZE]);
     }
 }

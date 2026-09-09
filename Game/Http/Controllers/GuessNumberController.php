@@ -52,8 +52,8 @@ class GuessNumberController extends Controller
         $guessNumber = int($request->input('guess'));
 
         $validator
-            ->between($guessNumber, 1, 100, ['guess' => 'Необходимо указать число!'])
-            ->gte($this->user->money, 3, ['guess' => 'У вас недостаточно денег для игры!']);
+            ->between($guessNumber, 1, 100, ['guess' => __('game::games.guess_number_required')])
+            ->gte($this->user->money, 3, ['guess' => __('game::games.not_enough_money')]);
 
         if (! $validator->isValid()) {
             return redirect('games/guess')
@@ -75,11 +75,11 @@ class GuessNumberController extends Controller
         if ($guessNumber !== $guess['number']) {
             if ($guess['count'] < 5) {
                 if ($guessNumber > $guess['number']) {
-                    $hint = 'большое число, введите меньше!';
+                    $hint = __('game::games.guess_hint_less');
                 }
 
                 if ($guessNumber < $guess['number']) {
-                    $hint = 'маленькое число, введите больше!';
+                    $hint = __('game::games.guess_hint_more');
                 }
             } else {
                 $request->session()->forget('guess');

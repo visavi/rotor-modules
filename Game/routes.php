@@ -6,6 +6,7 @@ use Modules\Game\Http\Controllers\BlackjackController;
 use Modules\Game\Http\Controllers\DiceController;
 use Modules\Game\Http\Controllers\GuessNumberController;
 use Modules\Game\Http\Controllers\IndexController;
+use Modules\Game\Http\Controllers\MinerController;
 use Modules\Game\Http\Controllers\SafeController;
 use Modules\Game\Http\Controllers\ThimbleController;
 
@@ -34,6 +35,12 @@ Route::middleware('web')
 
             Route::get('/guess', [GuessNumberController::class, 'index']);
             Route::match(['get', 'post'], '/guess/go', [GuessNumberController::class, 'go']);
+
+            Route::get('/miner', [MinerController::class, 'index']);
+            Route::get('/miner/game', [MinerController::class, 'game']);
+            Route::post('/miner/bet', [MinerController::class, 'bet']);
+            Route::post('/miner/go', [MinerController::class, 'go']);
+            Route::post('/miner/cash', [MinerController::class, 'cash']);
 
             Route::get('/safe', [SafeController::class, 'index']);
             Route::match(['get', 'post'], '/safe/go', [SafeController::class, 'go']);

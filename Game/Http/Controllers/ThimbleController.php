@@ -53,17 +53,17 @@ class ThimbleController extends Controller
         $thimble = int($request->input('thimble'));
 
         if ($this->user->money < 5) {
-            abort(200, 'Вы не можете играть! У вас недостаточно средств!');
+            abort(200, __('game::games.cannot_play'));
         }
 
         if (! $thimble) {
             return redirect('games/thimbles/choice')
-                ->with('danger', 'Необходимо выбрать один из наперстков!');
+                ->with('danger', __('game::games.thimbles_not_chosen'));
         }
 
         $results = [
-            'victory' => '<span class="text-success">Вы выиграли</span>',
-            'lost'    => '<span class="text-danger">Вы проиграли</span>',
+            'victory' => '<span class="text-success">' . __('game::games.victory') . '</span>',
+            'lost'    => '<span class="text-danger">' . __('game::games.lost') . '</span>',
         ];
 
         $randThimble = mt_rand(1, 3);

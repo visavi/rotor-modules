@@ -26,6 +26,7 @@ return [
     'downloads'        => 'downloads',
     'releases_error'   => 'Failed to fetch the latest versions!',
     'commits_error'    => 'Failed to fetch the latest changes!',
+    'docs_not_loaded'  => 'Documentation is not loaded',
 
     'features' => [
         ['title' => 'Light and fast',     'text' => 'Minimum resources, maximum speed even on weak hardware.'],

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="74" viewBox="0 0 220 74" role="img" aria-label="thimbles">
+    <defs>
+        <linearGradient id="brass3" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#9a7420"/>
+            <stop offset="0.32" stop-color="#f0d68a"/>
+            <stop offset="0.55" stop-color="#c9a33f"/>
+            <stop offset="1" stop-color="#8a651b"/>
+        </linearGradient>
+        <linearGradient id="brass-rim3" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8a651b"/>
+            <stop offset="0.5" stop-color="#e3c877"/>
+            <stop offset="1" stop-color="#7d5a16"/>
+        </linearGradient>
+
+        <g id="brass-cup">
+            <ellipse cx="43" cy="68" rx="31" ry="5" fill="#0b1220" opacity="0.22"/>
+            <path d="M26 20c0-9 34-9 34 0l9 40c0 7-52 7-52 0z" fill="url(#brass3)"/>
+            <path d="M26 20c0-9 34-9 34 0l1.5 9c-1 4-36 4-35 0z" fill="#ffffff" opacity="0.16"/>
+            <path d="M32 22c-1 0-1.7.6-1.8 1.5L25 58c-.1 1 .6 1.7 1.6 1.7.9 0 1.6-.6 1.7-1.4L33.5 23.6c.1-.9-.6-1.6-1.5-1.6z" fill="#fff6dc" opacity="0.45"/>
+            <ellipse cx="43" cy="60" rx="26" ry="5.5" fill="url(#brass-rim3)"/>
+            <ellipse cx="43" cy="59" rx="26" ry="5.5" fill="#f4e3ae" opacity="0.5"/>
+            <ellipse cx="43" cy="20" rx="17" ry="4" fill="#c9a33f"/>
+            <ellipse cx="43" cy="19.4" rx="17" ry="4" fill="#f7ecc8" opacity="0.75"/>
+        </g>
+    </defs>
+
+    <use href="#brass-cup" x="-14"/>
+    <use href="#brass-cup" x="53"/>
+    <use href="#brass-cup" x="120"/>
+</svg>
