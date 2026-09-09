@@ -16,16 +16,17 @@
     <div class="section-form mb-3 shadow">
         <form action="/gifts/send/{{ $gift->id }}" method="post">
             @csrf
-            @if ($user)
-                <i class="fas fa-gift"></i> {{ __('gift::gifts.gift_for') }} <b>{{ $user->getProfile() }}</b>:<br><br>
-                <input type="hidden" name="user" value="{{ $user->login }}">
-            @else
-                <div class="mb-3{{ hasError('user') }}">
-                    <label for="user" class="form-label">{{ __('main.user_login') }}:</label>
-                    <input name="user" class="form-control" id="user" maxlength="20" placeholder="{{ __('main.user_login') }}" value="{{ old('user') }}" required>
-                    <div class="invalid-feedback">{{ textError('user') }}</div>
-                </div>
-            @endif
+            @php $selected = old('users', $user ? [$user->login] : []); @endphp
+
+            <div class="mb-3{{ hasError('users') }}">
+                <label for="users" class="form-label">{{ __('gift::gifts.recipients') }}:</label>
+                <select class="form-select input-user" id="users" name="users[]" multiple data-server="{{ route('search-users') }}" data-value-field="login" data-label-field="login" data-max="{{ $maxUsers }}" data-placeholder="{{ __('main.user_login') }}">
+                    @foreach ($selected as $login)
+                        <option value="{{ $login }}" selected>{{ $login }}</option>
+                    @endforeach
+                </select>
+                <div class="invalid-feedback">{{ textError('users') }}</div>
+            </div>
 
             <div class="mb-3{{ hasError('msg') }}">
                 <label for="msg" class="form-label">{{ __('main.message') }}:</label>
@@ -36,10 +37,24 @@
 
             <div class="mb-3">
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                {{ __('gift::gifts.price') }}: <span class="badge bg-primary">{{ $gift->price }} {{ setting('currency') }}</span>
+                {{ __('gift::gifts.price') }}: <span class="badge bg-primary"><span id="total-price">{{ $gift->price }}</span> {{ setting('currency') }}</span>
             </div>
 
             <button class="btn btn-primary">{{ __('main.send') }}</button>
         </form>
     </div>
 @stop
+
+@push('scripts')
+    <script type="module">
+        const price = {{ $gift->price }};
+        const users = document.getElementById('users');
+        const total = document.getElementById('total-price');
+
+        // Теги шлют change на исходном select, пересчитываем сумму за всех получателей
+        const recount = () => total.textContent = String(price * users.selectedOptions.length);
+
+        recount();
+        users.addEventListener('change', recount);
+    </script>
+@endpush

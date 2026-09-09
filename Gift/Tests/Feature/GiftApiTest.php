@@ -48,15 +48,15 @@ class GiftApiTest extends ModuleTestCase
 
     public function testSendRequiresToken(): void
     {
-        $this->postJson('/api/gifts/' . $this->gift->id . '/send', ['user' => $this->recipient->login])
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', ['users' => [$this->recipient->login]])
             ->assertStatus(400);
     }
 
     public function testGiftIsSent(): void
     {
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
-            'user' => $this->recipient->login,
-            'text' => 'С праздником!',
+            'users' => [$this->recipient->login],
+            'text'  => 'С праздником!',
         ], $this->headers())
             ->assertStatus(201)
             ->assertJsonPath('money', 400);
@@ -71,12 +71,52 @@ class GiftApiTest extends ModuleTestCase
         $this->assertSame(1, $this->recipient->fresh()->getCountMessages());
     }
 
+    public function testGiftIsSentToSeveralUsers(): void
+    {
+        $second = User::factory()->create();
+
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
+            'users' => [$this->recipient->login, $second->login],
+        ], $this->headers())
+            ->assertStatus(201)
+            // Списывается за каждого получателя
+            ->assertJsonPath('money', 300);
+
+        $this->assertDatabaseCount('gifts_users', 2);
+        $this->assertSame(1, $this->recipient->fresh()->getCountMessages());
+        $this->assertSame(1, $second->fresh()->getCountMessages());
+    }
+
+    public function testUnknownRecipientBlocksWholeSend(): void
+    {
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
+            'users' => [$this->recipient->login, 'nobody'],
+        ], $this->headers())->assertStatus(404);
+
+        $this->assertDatabaseCount('gifts_users', 0);
+    }
+
+    public function testTooManyRecipientsAreRejected(): void
+    {
+        $logins = User::factory()
+            ->count((int) Gift::getConfig('max_users') + 1)
+            ->create()
+            ->pluck('login')
+            ->all();
+
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
+            'users' => $logins,
+        ], $this->headers())->assertStatus(422);
+
+        $this->assertDatabaseCount('gifts_users', 0);
+    }
+
     public function testGiftNeedsMoney(): void
     {
         $this->user->update(['money' => 10]);
 
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
-            'user' => $this->recipient->login,
+            'users' => [$this->recipient->login],
         ], $this->headers())->assertStatus(422);
 
         $this->assertDatabaseCount('gifts_users', 0);
@@ -84,13 +124,13 @@ class GiftApiTest extends ModuleTestCase
 
     public function testUnknownGiftIsNotFound(): void
     {
-        $this->postJson('/api/gifts/999999/send', ['user' => $this->recipient->login], $this->headers())
+        $this->postJson('/api/gifts/999999/send', ['users' => [$this->recipient->login]], $this->headers())
             ->assertStatus(404);
     }
 
     public function testUnknownRecipientIsNotFound(): void
     {
-        $this->postJson('/api/gifts/' . $this->gift->id . '/send', ['user' => 'nobody'], $this->headers())
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', ['users' => ['nobody']], $this->headers())
             ->assertStatus(404);
     }
 

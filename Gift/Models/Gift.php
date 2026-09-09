@@ -29,6 +29,14 @@ class Gift extends Model
     protected $guarded = [];
 
     /**
+     * Возвращает картинку подарка для вставки в уведомление
+     */
+    public function getImage(): string
+    {
+        return '<img src="' . e($this->path) . '" alt="' . e($this->name) . '">';
+    }
+
+    /**
      * Get config
      */
     public static function getConfig(?string $name = null): mixed

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Gift\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,46 +53,62 @@ class IndexController extends Controller
             abort(404, __('gift::gifts.gift_not_found'));
         }
 
-        $user = getUserByLogin($request->input('user'));
+        $maxUsers = (int) Gift::getConfig('max_users');
 
         if ($request->isMethod('post')) {
             $msg = $request->input('msg');
+            $logins = array_filter((array) $request->input('users', []));
+            $users = User::query()->whereIn('login', $logins)->get();
+            $total = $gift->price * $users->count();
 
             $validator
-                ->notEmpty($user, ['user' => __('validator.user')])
+                ->notEmpty($logins, ['users' => __('validator.user')])
+                ->equal($users->count(), count($logins), ['users' => __('gift::gifts.users_not_found')])
+                ->lte($users->count(), $maxUsers, ['users' => __('gift::gifts.max_users', ['max' => $maxUsers])])
                 ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
-                ->gte(getUser('money'), $gift->price, __('gift::gifts.money_not_enough'));
+                ->gte(getUser('money'), $total, __('gift::gifts.money_not_enough'));
 
             if ($validator->isValid()) {
                 GiftsUser::query()->where('deleted_at', '<', now())->delete();
 
                 $msg = antimat($msg);
 
-                DB::transaction(static function () use ($gift, $user, $msg) {
-                    getUser()->decrement('money', $gift->price);
+                DB::transaction(static function () use ($gift, $users, $msg, $total) {
+                    getUser()->decrement('money', $total);
 
-                    GiftsUser::query()->create([
-                        'gift_id'      => $gift->id,
-                        'user_id'      => $user->id,
-                        'send_user_id' => getUser('id'),
-                        'text'         => $msg,
-                        'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
-                    ]);
+                    foreach ($users as $user) {
+                        GiftsUser::query()->create([
+                            'gift_id'      => $gift->id,
+                            'user_id'      => $user->id,
+                            'send_user_id' => getUser('id'),
+                            'text'         => $msg,
+                            'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
+                        ]);
+                    }
                 });
 
-                $message = 'Пользователь @' . getUser('login') . ' отправил вам подарок!' . PHP_EOL . '[img]' . $gift->path . '[/img] ' . $msg . PHP_EOL . '[url=/gifts/' . $user->login . ']Мои подарки[/url]';
-                $user->sendMessage(null, $message);
+                foreach ($users as $user) {
+                    $user->sendMessage(null, textNotice('gift_send', [
+                        'login' => getUser('login'),
+                        'gift'  => $gift->getImage(),
+                        'text'  => (string) $msg,
+                        'url'   => '/gifts/' . $user->login,
+                        'title' => __('gift::gifts.my_gifts'),
+                    ]));
+                }
 
                 return redirect('gifts')
                     ->with('success', __('gift::gifts.gift_sent'));
             }
 
-            return redirect('gifts/send/' . $gift->id . '?user=' . $request->input('user'))
+            return redirect('gifts/send/' . $gift->id)
                 ->withInput()
                 ->withErrors($validator->getErrors());
         }
 
-        return view('gift::send', compact('gift', 'user'));
+        $user = getUserByLogin($request->input('user'));
+
+        return view('gift::send', compact('gift', 'user', 'maxUsers'));
     }
 
     /**

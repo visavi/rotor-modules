@@ -6,6 +6,7 @@ namespace Modules\Gift\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthorResource;
+use App\Models\User;
 use App\Traits\HandlesApiPagination;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,18 +79,24 @@ class GiftApiController extends Controller
             abort(404, __('gift::gifts.gift_not_found'));
         }
 
+        $maxUsers = (int) Gift::getConfig('max_users');
+
         $validated = $request->validate([
-            'user' => ['required', 'string'],
-            'text' => ['nullable', 'string', 'max:1000'],
+            'users'   => ['required', 'array', 'max:' . $maxUsers],
+            'users.*' => ['required', 'string'],
+            'text'    => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $recipient = getUserByLogin($validated['user']);
+        $logins = array_unique($validated['users']);
+        $recipients = User::query()->whereIn('login', $logins)->get();
 
-        if (! $recipient) {
+        if ($recipients->count() !== count($logins)) {
             abort(404, __('validator.user'));
         }
 
-        if ($user->money < $gift->price) {
+        $total = $gift->price * $recipients->count();
+
+        if ($user->money < $total) {
             abort(422, __('gift::gifts.money_not_enough'));
         }
 
@@ -98,21 +105,29 @@ class GiftApiController extends Controller
 
         $text = antimat($validated['text'] ?? '');
 
-        DB::transaction(static function () use ($gift, $user, $recipient, $text) {
-            $user->decrement('money', $gift->price);
+        DB::transaction(static function () use ($gift, $user, $recipients, $text, $total) {
+            $user->decrement('money', $total);
 
-            GiftsUser::query()->create([
-                'gift_id'      => $gift->id,
-                'user_id'      => $recipient->id,
-                'send_user_id' => $user->id,
-                'text'         => $text,
-                'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
-            ]);
-
-            $recipient->sendMessage(null, 'Пользователь @' . $user->login . ' отправил вам подарок!' . PHP_EOL
-                . '[img]' . $gift->path . '[/img] ' . $text . PHP_EOL
-                . '[url=/gifts/' . $recipient->login . ']Мои подарки[/url]');
+            foreach ($recipients as $recipient) {
+                GiftsUser::query()->create([
+                    'gift_id'      => $gift->id,
+                    'user_id'      => $recipient->id,
+                    'send_user_id' => $user->id,
+                    'text'         => $text,
+                    'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
+                ]);
+            }
         });
+
+        foreach ($recipients as $recipient) {
+            $recipient->sendMessage(null, textNotice('gift_send', [
+                'login' => $user->login,
+                'gift'  => $gift->getImage(),
+                'text'  => $text,
+                'url'   => '/gifts/' . $recipient->login,
+                'title' => __('gift::gifts.my_gifts'),
+            ]));
+        }
 
         return response()->json([
             'message' => __('gift::gifts.gift_sent'),
