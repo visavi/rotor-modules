@@ -4,7 +4,7 @@ return [
     'title'        => 'Lottery',
     'lottery_info' => 'Take part in the lottery! The jackpot grows every time<br>
             Become the lucky owner of the coveted sum!',
-    'jackpot_amount'         => 'The jackpot is: :jackpot',
+    'jackpot_amount'         => 'Jackpot: :jackpot',
     'winning_number'         => 'Winning number of the last round: :number',
     'winners'                => 'Winners',
     'jackpot_not_win'        => 'No one won the jackpot!',

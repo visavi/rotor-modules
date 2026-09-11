@@ -13,10 +13,10 @@
 @stop
 
 @section('content')
-    <img src="/assets/modules/games/cards/44.png" alt="image">
-    <img src="/assets/modules/games/cards/18.png" alt="image">
-    <img src="/assets/modules/games/cards/27.png" alt="image">
-    <img src="/assets/modules/games/cards/45.png" alt="image">
+    <img src="/assets/modules/games/cards/49.png" alt="image">
+    <img src="/assets/modules/games/cards/50.png" alt="image">
+    <img src="/assets/modules/games/cards/51.png" alt="image">
+    <img src="/assets/modules/games/cards/52.png" alt="image">
     <br><br>
 
     @if (session()->missing('blackjack.bet'))
@@ -38,6 +38,9 @@
     @endif
 
     {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
+
+    @include('game::blackjack/_payouts')
+    <br>
 
     <i class="fa fa-question-circle"></i> <a href="/games/blackjack/rules">{{ __('game::games.rules') }}</a><br>
 @stop

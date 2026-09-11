@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Console\Scheduling\Schedule;
+
 return [
     'name'        => 'Лотерея',
     'description' => 'Ежедневная лотерея: пользователи покупают билет со ставкой, победитель забирает банк, при нескольких — делят пропорционально',
@@ -16,10 +18,16 @@ $lottery = \Modules\Lottery\Models\Lottery::query()
 ?&gt;
 {{ plural($lottery-&gt;amount, setting('moneyname')) }}</code></pre>
 INFO,
-    'version'  => '1.0.3',
+    'version'  => '1.0.4',
     'requires' => '14.3.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
+
+    // Розыгрыш раз в сутки. Планировщик включен не везде, поэтому заход
+    // на страницу лотереи тоже разыгрывает тираж, если время пришло
+    'schedule' => function (Schedule $schedule) {
+        $schedule->command('lottery:draw')->dailyAt('00:05');
+    },
 
     'jackpot'     => 1000000,  // Сумма выигрыша
     'ticketPrice' => 50,       // Цена билета

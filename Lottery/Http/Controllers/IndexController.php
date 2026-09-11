@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Modules\Lottery\Models\Lottery;
+use Modules\Lottery\Services\LotteryService;
 use Throwable;
 
 class IndexController extends Controller
@@ -18,9 +19,10 @@ class IndexController extends Controller
     /**
      * Main page
      */
-    public function index(): View
+    public function index(LotteryService $service): View
     {
-        $this->rewardWinners();
+        // Подстраховка для сайтов без планировщика: тираж разыгрывается заходом
+        $service->draw();
 
         $lottery = Lottery::query()
             ->orderByDesc('day')
@@ -30,6 +32,11 @@ class IndexController extends Controller
         $lottery = $lottery->pad(2, null);
 
         [$today, $yesterday] = $lottery;
+
+        // Тираж мог не открыться, если розыгрыш прямо сейчас идёт в соседнем запросе
+        if (! $today) {
+            abort(200, __('lottery::lottery.lottery_not_activated'));
+        }
 
         if ($yesterday) {
             $yesterday->winners = $yesterday->lotteryUsers()
@@ -52,8 +59,11 @@ class IndexController extends Controller
      *
      * @throws Throwable
      */
-    public function buy(Request $request, Validator $validator): RedirectResponse
+    public function buy(Request $request, Validator $validator, LotteryService $service): RedirectResponse
     {
+        // Без планировщика тираж мог не смениться с прошлых суток
+        $service->draw();
+
         $number = int($request->input('number'));
         $ticketPrice = Lottery::getConfig('ticketPrice');
         $numberRange = Lottery::getConfig('numberRange');
@@ -80,8 +90,15 @@ class IndexController extends Controller
             ->between($number, $numberRange[0], $numberRange[1], ['number' => __('lottery::lottery.must_enter_number')]);
 
         if ($validator->isValid()) {
-            DB::transaction(
+            $bought = DB::transaction(
                 static function () use ($user, $number, $lottery, $ticketPrice) {
+                    // Блокировка тиража: двойной клик иначе покупал два билета
+                    $lottery = Lottery::query()->whereKey($lottery->id)->lockForUpdate()->first();
+
+                    if (! $lottery || $lottery->lotteryUsers()->where('user_id', $user->id)->exists()) {
+                        return false;
+                    }
+
                     $user->decrement('money', $ticketPrice);
                     $lottery->increment('amount', $ticketPrice);
 
@@ -89,8 +106,15 @@ class IndexController extends Controller
                         'user_id' => $user->id,
                         'number'  => $number,
                     ]);
+
+                    return true;
                 }
             );
+
+            if (! $bought) {
+                return redirect('lottery')
+                    ->withErrors(['number' => __('lottery::lottery.already_bought_ticket')]);
+            }
 
             return redirect('lottery')
                 ->with('success', __('lottery::lottery.ticket_success_purchased'));
@@ -99,47 +123,5 @@ class IndexController extends Controller
         return redirect('lottery')
             ->withInput()
             ->withErrors($validator->getErrors());
-    }
-
-    /**
-     * Reward winners
-     */
-    private function rewardWinners(): void
-    {
-        $amount = Lottery::getConfig('jackpot');
-        $range = Lottery::getConfig('numberRange');
-
-        $lottery = Lottery::query()
-            ->orderByDesc('day')
-            ->first();
-
-        if ($lottery && $lottery->day !== now()->format('Y-m-d')) {
-            // Search winners
-            $winners = $lottery->lotteryUsers()
-                ->where('number', $lottery->number)
-                ->get();
-
-            if ($winners->isNotEmpty()) {
-                $moneys = (int) ($lottery->amount / $winners->count());
-
-                $message = __('lottery::lottery.congratulations_winning', ['jackpot' => plural($moneys, setting('moneyname'))]);
-
-                foreach ($winners as $winner) {
-                    $winner->user->increment('money', $moneys);
-                    $winner->user->sendMessage(null, $message);
-                }
-            } else {
-                $amount = $lottery->amount;
-            }
-        }
-
-        if (! $lottery || $lottery->day !== now()->format('Y-m-d')) {
-            // Update lottery
-            Lottery::query()->create([
-                'day'    => now()->format('Y-m-d'),
-                'amount' => $amount,
-                'number' => mt_rand($range[0], $range[1]),
-            ]);
-        }
     }
 }

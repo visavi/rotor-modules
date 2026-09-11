@@ -13,7 +13,11 @@
 @stop
 
 @section('content')
-    <img src="/assets/modules/games/thimbles/thimbles.svg" width="220" height="74" alt="{{ __('game::games.thimbles') }}"><br><br>
+    {{-- Ряд собирается из одиночных напёрстков: средний поднят, под ним шарик --}}
+    @foreach (['thimble', 'thimble-ball', 'thimble'] as $thimble)
+        <img src="/assets/modules/games/thimbles/{{ $thimble }}.svg" width="86" height="74" alt="{{ __('game::games.thimbles') }}">
+    @endforeach
+    <br><br>
 
     <a class="btn btn-primary" href="/games/thimbles/choice">{{ __('game::games.play') }}</a><br><br>
 

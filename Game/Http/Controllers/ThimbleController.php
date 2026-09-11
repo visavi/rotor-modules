@@ -68,6 +68,9 @@ class ThimbleController extends Controller
 
         $randThimble = mt_rand(1, 3);
 
+        // Баланс до расчета: вьюха показывает его, пока напёрстки не подняты
+        $before = $this->user->money;
+
         if ($thimble === $randThimble) {
             $this->user->increment('money', 10);
             $result = $results['victory'];
@@ -78,6 +81,6 @@ class ThimbleController extends Controller
 
         $user = $this->user;
 
-        return view('game::thimbles/go', compact('user', 'randThimble', 'thimble', 'result'));
+        return view('game::thimbles/go', compact('user', 'randThimble', 'thimble', 'result', 'before'));
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -76,15 +77,56 @@ class BlackjackController extends Controller
     /**
      * Игра
      */
-    public function game(Request $request): View|RedirectResponse
+    public function game(Request $request): View|RedirectResponse|JsonResponse
+    {
+        return $this->play($request, null);
+    }
+
+    /**
+     * Ход игрока
+     *
+     * Ход меняет состояние партии, поэтому приходит только методом post:
+     * по ссылке его мог бы сделать чужой сайт или ускоритель браузера
+     */
+    public function move(Request $request): View|RedirectResponse|JsonResponse
     {
         $input = $request->input('case');
         $case = in_array($input, ['take', 'end'], true) ? $input : null;
 
+        return $this->play($request, $case);
+    }
+
+    /**
+     * Правила игры
+     */
+    public function rules(): View
+    {
+        return view('game::blackjack/rules');
+    }
+
+    /**
+     * Раздача и расчёт партии
+     */
+    private function play(Request $request, ?string $case): View|RedirectResponse|JsonResponse
+    {
         if ($request->session()->missing('blackjack.bet')) {
+            // Ajax сам уводит на страницу ставки, редирект в ответе он не поймёт
+            if ($request->ajax()) {
+                return response()->json([
+                    'success'  => true,
+                    'redirect' => url('games/blackjack'),
+                ]);
+            }
+
             return redirect('games/blackjack')
                 ->with('danger', __('game::games.bj_bet_needed'));
         }
+
+        // Карты, которые были на столе до хода, вьюха не анимирует заново
+        $shown = [
+            'user'   => count($request->session()->get('blackjack.cards', [])),
+            'banker' => count($request->session()->get('blackjack.bankercards', [])),
+        ];
 
         $scores = $this->takeCard($request->session(), $case);
 
@@ -138,6 +180,9 @@ class BlackjackController extends Controller
         // и сколько ушло при проигрыше. Победа забирает весь кон, как в правилах
         $amount = null;
 
+        // Баланс до расчета: вьюха показывает его, пока карты не открыты
+        $before = $this->user->money;
+
         if ($result !== null) {
             $amount = $blackjack['bet'];
 
@@ -151,17 +196,24 @@ class BlackjackController extends Controller
             $request->session()->forget('blackjack');
         }
 
+        // Вскрытие переворачивает всю руку банкира, поэтому она анимируется целиком
+        if ($result !== null) {
+            $shown['banker'] = 0;
+        }
+
         $user = $this->user;
 
-        return view('game::blackjack/game', compact('user', 'blackjack', 'scores', 'result', 'text', 'amount'));
-    }
+        $data = compact('user', 'blackjack', 'scores', 'result', 'text', 'amount', 'shown', 'before');
 
-    /**
-     * Правила игры
-     */
-    public function rules(): View
-    {
-        return view('game::blackjack/rules');
+        // Ход из игры приходит ajax-ом: отдаём только стол, чтобы страница не перезагружалась
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::blackjack/_table', $data)->render(),
+            ]);
+        }
+
+        return view('game::blackjack/game', $data);
     }
 
     /**

@@ -16,7 +16,7 @@ return [
 <p>Как сделать ссылку на отправку подарка</p>
 <pre class="code"><code>&lt;a href="/gifts?user={{ $user-&gt;login }}"&gt;Отправить подарок&lt;/a&gt;</code></pre>
 INFO,
-    'version'  => '1.2.0',
+    'version'  => '1.2.1',
     'requires' => '14.3.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',

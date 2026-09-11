@@ -1,12 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Game\Http\Controllers\BaccaratController;
 use Modules\Game\Http\Controllers\BanditController;
 use Modules\Game\Http\Controllers\BlackjackController;
 use Modules\Game\Http\Controllers\DiceController;
 use Modules\Game\Http\Controllers\GuessNumberController;
+use Modules\Game\Http\Controllers\HighLowController;
 use Modules\Game\Http\Controllers\IndexController;
+use Modules\Game\Http\Controllers\KenoController;
 use Modules\Game\Http\Controllers\MinerController;
+use Modules\Game\Http\Controllers\RouletteController;
 use Modules\Game\Http\Controllers\SafeController;
 use Modules\Game\Http\Controllers\ThimbleController;
 
@@ -31,7 +35,8 @@ Route::middleware('web')
             Route::get('/blackjack', [BlackjackController::class, 'index']);
             Route::get('/blackjack/rules', [BlackjackController::class, 'rules']);
             Route::get('/blackjack/game', [BlackjackController::class, 'game']);
-            Route::match(['get', 'post'], '/blackjack/bet', [BlackjackController::class, 'bet']);
+            Route::post('/blackjack/game', [BlackjackController::class, 'move']);
+            Route::post('/blackjack/bet', [BlackjackController::class, 'bet']);
 
             Route::get('/guess', [GuessNumberController::class, 'index']);
             Route::match(['get', 'post'], '/guess/go', [GuessNumberController::class, 'go']);
@@ -41,6 +46,23 @@ Route::middleware('web')
             Route::post('/miner/bet', [MinerController::class, 'bet']);
             Route::post('/miner/go', [MinerController::class, 'go']);
             Route::post('/miner/cash', [MinerController::class, 'cash']);
+
+            Route::get('/baccarat', [BaccaratController::class, 'index']);
+            Route::post('/baccarat/deal', [BaccaratController::class, 'deal']);
+            Route::post('/baccarat/decide', [BaccaratController::class, 'decide']);
+
+            Route::get('/highlow', [HighLowController::class, 'index']);
+            Route::get('/highlow/rules', [HighLowController::class, 'rules']);
+            Route::post('/highlow/bet', [HighLowController::class, 'bet']);
+            Route::post('/highlow/move', [HighLowController::class, 'move']);
+            Route::post('/highlow/cash', [HighLowController::class, 'cash']);
+
+            Route::get('/keno', [KenoController::class, 'index']);
+            Route::get('/keno/rules', [KenoController::class, 'rules']);
+            Route::post('/keno/play', [KenoController::class, 'play']);
+
+            Route::get('/roulette', [RouletteController::class, 'index']);
+            Route::post('/roulette/spin', [RouletteController::class, 'spin']);
 
             Route::get('/safe', [SafeController::class, 'index']);
             Route::match(['get', 'post'], '/safe/go', [SafeController::class, 'go']);

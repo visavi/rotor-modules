@@ -14,60 +14,47 @@
 @stop
 
 @section('content')
-    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
-
-    {{-- Как за столом: банкир напротив, свои карты ближе к себе --}}
-    <b>{{ __('game::games.bj_banker_cards') }}</b><br>
-
-    @foreach ($blackjack['bankercards'] as $card)
-        <img src="/assets/modules/games/cards/{{ $result ? $card : 0 }}.png" alt="image">
-    @endforeach
-
-    @if ($result)
-        <br>{{ plural($scores['banker'], __('game::games.bj_points')) }}
-    @endif
-
-    <br><br>
-
-    <b>{{ __('game::games.bj_your_cards') }}</b><br>
-
-    @foreach ($blackjack['cards'] as $card)
-        <img src="/assets/modules/games/cards/{{ $card }}.png" alt="image">
-    @endforeach
-
-    <br>{{ plural($scores['user'], __('game::games.bj_points')) }}<br>
-
-    @if ($result)
-        <div class="my-3 fw-bold">
-            @if ($text)
-                {{ $text }}<br>
-            @endif
-
-            @if ($result === 'victory')
-                <span class="text-success">{{ __('game::games.victory') }}</span><br>
-                {{ __('game::games.bj_won', ['money' => plural($amount, setting('moneyname'))]) }}
-            @elseif ($result === 'lost')
-                <span class="text-danger">{{ __('game::games.lost') }}</span><br>
-                {{ __('game::games.bj_lost', ['money' => plural($amount, setting('moneyname'))]) }}
-            @else
-                {{ __('game::games.draw') }}<br>
-                {{ __('game::games.bj_returned', ['money' => plural($amount, setting('moneyname'))]) }}
-            @endif
-        </div>
-
-        <form action="/games/blackjack/bet" method="post" class="d-inline">
-            @csrf
-            <input type="hidden" name="bet" value="{{ $blackjack['bet'] }}">
-            <button type="submit" class="btn btn-primary">{{ __('game::games.bj_repeat') }}</button>
-        </form>
-        <br><br>
-
-        <i class="fa fa-coins"></i> <a href="/games/blackjack">{{ __('game::games.bj_new_bet') }}</a><br>
-    @else
-        <div class="my-3">{{ __('game::games.bj_stake', ['money' => plural($blackjack['bet'] * 2, setting('moneyname'))]) }}</div>
-
-        <b><a class="btn btn-success" href="/games/blackjack/game?case=take&amp;rand={{ mt_rand(1000, 99999) }}">{{ __('game::games.bj_take_card') }}</a></b> {{ __('game::games.bj_or') }}
-        <b><a class="btn btn-danger" href="/games/blackjack/game?case=end&amp;rand={{ mt_rand(1000, 99999) }}">{{ __('game::games.bj_open') }}</a></b>
-        <br><br>
-    @endif
+    @include('game::blackjack/_table')
 @stop
+
+@push('styles')
+    <style>
+        /* Шаг задаётся разметкой, задержка считается от него — скрипт не нужен */
+        .bj-deal,
+        .bj-late {
+            animation: bj-deal 0.3s ease-out backwards;
+            animation-delay: calc(var(--step, 0) * 0.6s);
+        }
+
+        .bj-balance {
+            display: grid;
+        }
+
+        .bj-balance > * {
+            grid-area: 1 / 1;
+        }
+
+        .bj-balance-old {
+            animation: bj-gone 0.1s linear forwards;
+            animation-delay: calc(var(--step, 0) * 0.6s);
+        }
+
+        @keyframes bj-deal {
+            from { opacity: 0; transform: translateY(-1rem); }
+            to { opacity: 1; transform: none; }
+        }
+
+        @keyframes bj-gone {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .bj-deal,
+            .bj-late,
+            .bj-balance-old {
+                animation-duration: 0.01s;
+                animation-delay: 0s;
+            }
+        }
+    </style>
+@endpush

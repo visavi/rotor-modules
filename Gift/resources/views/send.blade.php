@@ -52,7 +52,8 @@
         const total = document.getElementById('total-price');
 
         // Теги шлют change на исходном select, пересчитываем сумму за всех получателей
-        const recount = () => total.textContent = String(price * users.selectedOptions.length);
+        // Пока получатели не выбраны, показываем цену одного подарка, а не 0
+        const recount = () => total.textContent = String(price * (users.selectedOptions.length || 1));
 
         recount();
         users.addEventListener('change', recount);

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int                          $id
  * @property string                       $day
  * @property int                          $amount
- * @property int                          $number
+ * @property int|null                     $number
  * @property Collection<int, LotteryUser> $winners
  */
 class Lottery extends Model

@@ -120,7 +120,7 @@ class GameSmokeTest extends ModuleTestCase
         $this->assertSame(4945, $this->user->fresh()->money, 'Раздача что-то списала');
 
         $content = (string) $this->actingAs($this->user)
-            ->get('/games/blackjack/game?case=end')
+            ->post('/games/blackjack/game', ['case' => 'end'])
             ->getContent();
 
         $money = $this->user->fresh()->money;
@@ -157,14 +157,14 @@ class GameSmokeTest extends ModuleTestCase
             $this->user->update(['money' => 5000]);
             $this->actingAs($this->user)->post('/games/blackjack/bet', ['bet' => 100]);
 
-            $response = $this->actingAs($this->user)->get('/games/blackjack/game?case=take');
+            $response = $this->actingAs($this->user)->post('/games/blackjack/game', ['case' => 'take']);
 
             $response->assertOk()
                 ->assertDontSee(__('game::games.bj_banker_blackjack'))
                 ->assertDontSee(__('game::games.bj_banker_two_aces'));
 
             // Проигрыш тоже называет сумму
-            $end = $this->actingAs($this->user)->get('/games/blackjack/game?case=end');
+            $end = $this->actingAs($this->user)->post('/games/blackjack/game', ['case' => 'end']);
 
             if (str_contains((string) $end->getContent(), __('game::games.lost'))) {
                 $end->assertSee(__('game::games.bj_lost', ['money' => plural(100, setting('moneyname'))]));
@@ -184,7 +184,7 @@ class GameSmokeTest extends ModuleTestCase
 
             for ($move = 0; $move < 10; $move++) {
                 $content = $this->actingAs($this->user)
-                    ->get('/games/blackjack/game?case=take')
+                    ->post('/games/blackjack/game', ['case' => 'take'])
                     ->getContent();
 
                 if (str_contains((string) $content, __('game::games.bj_blackjack'))) {
@@ -205,7 +205,7 @@ class GameSmokeTest extends ModuleTestCase
                 }
             }
 
-            $this->actingAs($this->user)->get('/games/blackjack/game?case=end');
+            $this->actingAs($this->user)->post('/games/blackjack/game', ['case' => 'end']);
         }
 
         $this->fail('За восемьдесят партий очко ни разу не выпало');
@@ -217,7 +217,7 @@ class GameSmokeTest extends ModuleTestCase
         $this->actingAs($this->user)->get('/games/blackjack/game')->assertSee('cards/0.png');
 
         $this->actingAs($this->user)
-            ->get('/games/blackjack/game?case=end')
+            ->post('/games/blackjack/game', ['case' => 'end'])
             ->assertOk()
             ->assertDontSee('cards/0.png');
     }
