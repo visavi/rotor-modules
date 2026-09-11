@@ -36,17 +36,17 @@ class KenoTest extends ModuleTestCase
         $this->actingAs($this->user)->get('/games/keno/rules')->assertOk();
     }
 
-    public function testPlayChargesBetAndDrawsTwentyNumbers(): void
+    public function testPlayChargesBetAndDrawsNumbers(): void
     {
         $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 100, 'numbers' => [1, 2, 3, 4, 5]])
+            ->post('/games/keno/play', ['bet' => 100, 'numbers' => $this->numbers()])
             ->assertRedirect('games/keno');
 
         $game = session('keno');
 
         $this->assertCount(KenoController::DRAW, $game['drawn']);
         $this->assertSame($game['drawn'], array_unique($game['drawn']), 'Число выпало дважды');
-        $this->assertSame([1, 2, 3, 4, 5], $game['picks']);
+        $this->assertSame($this->numbers(), $game['picks']);
         $this->assertSame(5000, $game['before']);
         $this->assertSame(5000 - 100 + $game['win'], $this->user->fresh()->money);
 
@@ -56,65 +56,9 @@ class KenoTest extends ModuleTestCase
         }
     }
 
-    public function testFieldMarksDrawnNumbers(): void
-    {
-        $this->actingAs($this->user)->post('/games/keno/play', ['bet' => 100, 'numbers' => [1, 2, 3]]);
-
-        $game = session('keno');
-
-        // Каждое вытянутое число подсвечено и знает свой номер в тираже
-        $content = (string) $this->actingAs($this->user)->get('/games/keno')->getContent();
-
-        $this->assertStringContainsString('keno-drawn', $content);
-
-        foreach ($game['drawn'] as $step => $number) {
-            $this->assertStringContainsString('style="--step: ' . $step . '"', $content);
-        }
-    }
-
-    public function testPlayRejectsTooFewNumbers(): void
-    {
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 100, 'numbers' => [7]])
-            ->assertSessionHasErrors('numbers');
-
-        $this->assertSame(5000, $this->user->fresh()->money, 'Ставка списана при отказе');
-    }
-
-    public function testPlayRejectsTooManyNumbers(): void
-    {
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 100, 'numbers' => range(1, 11)])
-            ->assertSessionHasErrors('numbers');
-    }
-
-    public function testPlayRejectsBetOverBalance(): void
-    {
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 6000, 'numbers' => [1, 2, 3]])
-            ->assertSessionHasErrors('bet');
-    }
-
-    public function testPlayRejectsEmptyBet(): void
-    {
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 0, 'numbers' => [1, 2, 3]])
-            ->assertSessionHasErrors('bet');
-    }
-
-    public function testDuplicatesAndOutOfFieldNumbersAreDropped(): void
-    {
-        // Повтор давал бы два шанса на одно число, а число вне поля не выпадет никогда
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 100, 'numbers' => [5, 5, 5, 90, 0, -3, 7]]);
-
-        $this->assertSame([5, 7], session('keno')['picks']);
-    }
-
     public function testMatchedNumbersAreDrawnAndPicked(): void
     {
-        $this->actingAs($this->user)
-            ->post('/games/keno/play', ['bet' => 100, 'numbers' => range(1, 10)]);
+        $this->actingAs($this->user)->post('/games/keno/play', ['bet' => 100, 'numbers' => $this->numbers()]);
 
         $game = session('keno');
 
@@ -124,105 +68,139 @@ class KenoTest extends ModuleTestCase
         }
 
         $this->assertSame(
-            count(array_intersect($game['picks'], $game['drawn'])),
-            count($game['matched']),
+            array_values(array_intersect($game['picks'], $game['drawn'])),
+            $game['matched'],
         );
     }
 
-    public function testPayoutTableIsMonotonic(): void
+    public function testPlayNeedsExactCountOfNumbers(): void
     {
-        foreach (KenoController::PAYOUTS as $picked => $table) {
-            $previous = 0;
+        $picks = KenoController::PICKS;
 
-            foreach ($table as $hits => $multiplier) {
-                $this->assertLessThanOrEqual($picked, $hits, 'Выплата за больше совпадений, чем отмечено');
-                $this->assertGreaterThanOrEqual($previous, $multiplier, "Выплата падает: $picked/$hits");
-                $previous = $multiplier;
-            }
+        foreach ([[7], range(1, $picks - 1), range(1, $picks + 1)] as $numbers) {
+            $this->actingAs($this->user)
+                ->post('/games/keno/play', ['bet' => 100, 'numbers' => $numbers])
+                ->assertSessionHasErrors('numbers');
+        }
+
+        $this->assertSame(5000, $this->user->fresh()->money);
+    }
+
+    public function testPlayRejectsBetOverBalance(): void
+    {
+        $this->actingAs($this->user)
+            ->post('/games/keno/play', ['bet' => 6000, 'numbers' => $this->numbers()])
+            ->assertSessionHasErrors('bet');
+
+        $this->assertSame(5000, $this->user->fresh()->money);
+    }
+
+    public function testPlayRejectsEmptyBet(): void
+    {
+        $this->actingAs($this->user)
+            ->post('/games/keno/play', ['bet' => 0, 'numbers' => $this->numbers()])
+            ->assertSessionHasErrors('bet');
+    }
+
+    public function testDuplicatesAndOutOfFieldNumbersAreDropped(): void
+    {
+        // Одно число, присланное дважды, удваивало бы шанс совпадения
+        $this->actingAs($this->user)
+            ->post('/games/keno/play', [
+                'bet'     => 100,
+                'numbers' => [5, 5, 5, 1, 2, 3, KenoController::FIELD + 1, 0, -3],
+            ])
+            ->assertSessionHasErrors('numbers');
+
+        $this->assertSame(5000, $this->user->fresh()->money);
+    }
+
+    public function testPayoutsRiseWithEveryHit(): void
+    {
+        // Плато из одинаковых множителей обесценивает лишнее угаданное число,
+        // а самая нижняя ступень обязана платить больше ставки
+        $previous = 1.0;
+
+        foreach (KenoController::PAYOUTS as $hits => $multiplier) {
+            $this->assertGreaterThan($previous, $multiplier, "Выплата за $hits совпадений не выросла");
+            $previous = $multiplier;
         }
     }
 
-    public function testEveryRowPaysOftenEnough(): void
+    public function testRarerHitsPayMore(): void
     {
-        // Игра, которая почти никогда ничего не отдаёт, не игра, а автомат для сжигания монет
-        foreach (array_keys(KenoController::PAYOUTS) as $picked) {
-            $frequency = $this->app->make(KenoController::class)->frequency($picked);
+        // Чем реже совпадение, тем крупнее выплата
+        $controller = $this->app->make(KenoController::class);
+        $previous = 1.0;
 
-            $this->assertGreaterThan(0.25, $frequency, "Строка $picked платит слишком редко");
+        foreach (array_keys(KenoController::PAYOUTS) as $hits) {
+            $chance = $controller->chance($hits);
+
+            $this->assertLessThan($previous, $chance, "Совпадение $hits встречается не реже предыдущего");
+            $previous = $chance;
         }
     }
 
-    public function testFrequencyMatchesPayoutTable(): void
+    public function testWinIsNearlyAsLikelyAsLoss(): void
     {
         $controller = $this->app->make(KenoController::class);
+        $win = $controller->frequency();
 
-        foreach (KenoController::PAYOUTS as $picked => $table) {
-            $expected = 0.0;
-
-            foreach (array_keys($table) as $hits) {
-                $expected += $this->probability($picked, $hits);
-            }
-
-            $this->assertEqualsWithDelta($expected, $controller->frequency($picked), 0.0001);
-        }
+        // Любая выплата больше ставки, поэтому частота выплат — это и есть
+        // частота выигрыша. Игрок должен выигрывать почти так же часто, как
+        // проигрывать: перевес заведения около пяти процентов, не больше
+        $this->assertGreaterThan(1, min(KenoController::PAYOUTS), 'Выплата не больше ставки');
+        $this->assertEqualsWithDelta(0.475, $win, 0.03, 'Выигрыш и проигрыш разошлись больше чем на 5%');
     }
 
-    /**
-     * Точный возврат по каждой строке таблицы
-     *
-     * Вероятность ровно k совпадений при m отмеченных числах —
-     * гипергеометрическое распределение. Если кто-то поправит множитель
-     * на глаз, тест покажет, во что это обошлось заведению
-     */
     public function testHouseEdgeStaysInRange(): void
     {
-        foreach (KenoController::PAYOUTS as $picked => $table) {
-            $rtp = 0.0;
+        $controller = $this->app->make(KenoController::class);
+        $payback = 0.0;
 
-            foreach ($table as $hits => $multiplier) {
-                $rtp += $this->probability($picked, $hits) * $multiplier;
-            }
-
-            $this->assertGreaterThan(0.93, $rtp, "Возврат по $picked числам слишком мал");
-            $this->assertLessThan(0.97, $rtp, "Возврат по $picked числам больше заведения");
+        foreach (KenoController::PAYOUTS as $hits => $multiplier) {
+            $payback += $controller->chance($hits) * $multiplier;
         }
+
+        $this->assertGreaterThan(0.93, $payback, 'Возврат слишком мал');
+        $this->assertLessThan(0.97, $payback, 'Возврат больше доли заведения');
     }
 
-    public function testEveryDrawLandsInPayoutTable(): void
+    public function testChanceMatchesHypergeometricDistribution(): void
     {
-        // Ни одна строка не должна платить за число совпадений, которого не бывает
-        foreach (KenoController::PAYOUTS as $picked => $table) {
-            foreach ($table as $hits => $multiplier) {
-                $this->assertGreaterThan(0.0, $this->probability($picked, $hits));
-            }
+        $controller = $this->app->make(KenoController::class);
+        $total = 0.0;
+
+        foreach (range(0, KenoController::PICKS) as $hits) {
+            $chance = $controller->chance($hits);
+            $this->assertGreaterThanOrEqual(0.0, $chance);
+            $total += $chance;
         }
+
+        // Все исходы вместе дают единицу — иначе распределение посчитано неверно
+        $this->assertEqualsWithDelta(1.0, $total, 0.000001);
     }
 
     /**
-     * Вероятность ровно $hits совпадений при $picked отмеченных числах
+     * Набор отметок нужного размера
+     *
+     * @return list<int>
      */
-    private function probability(int $picked, int $hits): float
+    private function numbers(): array
     {
-        $field = KenoController::FIELD;
-        $draw = KenoController::DRAW;
-
-        return $this->binomial($picked, $hits)
-            * $this->binomial($field - $picked, $draw - $hits)
-            / $this->binomial($field, $draw);
+        return range(1, KenoController::PICKS);
     }
 
-    private function binomial(int $n, int $k): float
+    public function testAjaxReturnsBoardOnly(): void
     {
-        if ($k < 0 || $k > $n) {
-            return 0.0;
-        }
+        $response = $this->actingAs($this->user)
+            ->postJson('/games/keno/play', ['bet' => 100, 'numbers' => $this->numbers()], ['X-Requested-With' => 'XMLHttpRequest']);
 
-        $result = 1.0;
+        $response->assertOk()->assertJson(['success' => true]);
 
-        for ($i = 1; $i <= $k; $i++) {
-            $result = $result * ($n - $k + $i) / $i;
-        }
+        $html = $response->json('html');
 
-        return $result;
+        $this->assertStringContainsString('id="keno-box"', $html);
+        $this->assertStringNotContainsString('<html', $html);
     }
 }

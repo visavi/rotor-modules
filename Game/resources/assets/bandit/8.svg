@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Seven">
+    <defs>
+        <linearGradient id="seven-face" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ff5252"/>
+            <stop offset="0.55" stop-color="#d32f2f"/>
+            <stop offset="1" stop-color="#8e0000"/>
+        </linearGradient>
+        <linearGradient id="seven-rim" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe082"/>
+            <stop offset="1" stop-color="#c49000"/>
+        </linearGradient>
+    </defs>
+    <path d="M7 6h34v9L26 44H12l15-29H7z" fill="none" stroke="url(#seven-rim)" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M7 6h34v9L26 44H12l15-29H7z" fill="url(#seven-face)"/>
+    <path d="M10 9h27v3.5H10z" fill="#ffffff" opacity=".35"/>
+    <path d="M25.5 17.5h4L17 41h-3z" fill="#ffffff" opacity=".2"/>
+</svg>

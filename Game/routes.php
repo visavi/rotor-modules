@@ -22,15 +22,14 @@ Route::middleware('web')
 
         Route::middleware('check.user')->group(function () {
             Route::get('/dices', [DiceController::class, 'index']);
-            Route::get('/dices/go', [DiceController::class, 'go']);
+            Route::post('/dices/roll', [DiceController::class, 'roll']);
 
             Route::get('/thimbles', [ThimbleController::class, 'index']);
-            Route::get('/thimbles/choice', [ThimbleController::class, 'choice']);
-            Route::get('/thimbles/go', [ThimbleController::class, 'go']);
+            Route::post('/thimbles/go', [ThimbleController::class, 'go']);
 
             Route::get('/bandit', [BanditController::class, 'index']);
             Route::get('/bandit/faq', [BanditController::class, 'faq']);
-            Route::get('/bandit/go', [BanditController::class, 'go']);
+            Route::post('/bandit/spin', [BanditController::class, 'spin']);
 
             Route::get('/blackjack', [BlackjackController::class, 'index']);
             Route::get('/blackjack/rules', [BlackjackController::class, 'rules']);
@@ -39,7 +38,8 @@ Route::middleware('web')
             Route::post('/blackjack/bet', [BlackjackController::class, 'bet']);
 
             Route::get('/guess', [GuessNumberController::class, 'index']);
-            Route::match(['get', 'post'], '/guess/go', [GuessNumberController::class, 'go']);
+            Route::post('/guess/go', [GuessNumberController::class, 'go']);
+            Route::post('/guess/reset', [GuessNumberController::class, 'reset']);
 
             Route::get('/miner', [MinerController::class, 'index']);
             Route::get('/miner/game', [MinerController::class, 'game']);
@@ -65,6 +65,6 @@ Route::middleware('web')
             Route::post('/roulette/spin', [RouletteController::class, 'spin']);
 
             Route::get('/safe', [SafeController::class, 'index']);
-            Route::match(['get', 'post'], '/safe/go', [SafeController::class, 'go']);
+            Route::post('/safe/go', [SafeController::class, 'go']);
         });
     });

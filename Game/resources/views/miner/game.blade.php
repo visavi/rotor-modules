@@ -14,82 +14,82 @@
 @stop
 
 @section('content')
-    {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}<br><br>
-
-    <div class="d-flex flex-wrap gap-3 mb-3">
-        <div>{{ __('game::games.miner_bet', ['money' => plural($miner['bet'], setting('moneyname'))]) }}</div>
-        <div>{{ __('game::games.miner_mines_count', ['count' => $miner['mines']]) }}</div>
-        <div>{{ __('game::games.miner_opened_count', ['count' => count($miner['opened'])]) }}</div>
-    </div>
-
-    <form action="/games/miner/go" method="post">
-        @csrf
-
-        {{-- Клетки — кнопки одной формы: по ссылкам браузер ходит сам при предзагрузке --}}
-        <div class="d-grid gap-1 mb-3" style="grid-template-columns: repeat(5, minmax(0, 1fr)); max-width: 20rem;">
-            @for ($cell = 0; $cell < $cells; $cell++)
-                @php
-                    $isOpen = in_array($cell, $miner['opened'], true);
-                    $isMine = in_array($cell, $miner['field'], true);
-                    $reveal = $miner['status'] !== null;
-                @endphp
-
-                @if ($isOpen && $isMine)
-                    <span class="btn btn-danger disabled"><i class="fas fa-bomb"></i></span>
-                @elseif ($isOpen)
-                    <span class="btn btn-success disabled"><i class="fas fa-gem"></i></span>
-                @elseif ($reveal && $isMine)
-                    <span class="btn btn-outline-danger disabled"><i class="fas fa-bomb"></i></span>
-                @elseif ($reveal)
-                    <span class="btn btn-outline-secondary disabled">&nbsp;</span>
-                @else
-                    <button class="btn btn-secondary" name="cell" value="{{ $cell }}">&nbsp;</button>
-                @endif
-            @endfor
-        </div>
-    </form>
-
-    @if ($miner['status'] === 'lost')
-        <div class="my-3 fw-bold">
-            <span class="text-danger">{{ __('game::games.miner_boom') }}</span><br>
-            {{ __('game::games.bj_lost', ['money' => plural($miner['bet'], setting('moneyname'))]) }}
-        </div>
-
-        <form action="/games/miner/bet" method="post" class="d-inline">
-            @csrf
-            <input type="hidden" name="bet" value="{{ $miner['bet'] }}">
-            <input type="hidden" name="mines" value="{{ $miner['mines'] }}">
-            <button class="btn btn-primary">{{ __('game::games.bj_repeat') }}</button>
-        </form>
-        <br><br>
-
-        <i class="fa fa-coins"></i> <a href="/games/miner">{{ __('game::games.miner_new_game') }}</a><br>
-    @elseif ($miner['status'] === 'won')
-        <div class="my-3 fw-bold">
-            <span class="text-success">{{ __('game::games.victory') }}</span><br>
-            {{ __('game::games.bj_won', ['money' => plural($reward, setting('moneyname'))]) }}
-        </div>
-
-        <form action="/games/miner/bet" method="post" class="d-inline">
-            @csrf
-            <input type="hidden" name="bet" value="{{ $miner['bet'] }}">
-            <input type="hidden" name="mines" value="{{ $miner['mines'] }}">
-            <button class="btn btn-primary">{{ __('game::games.bj_repeat') }}</button>
-        </form>
-        <br><br>
-
-        <i class="fa fa-coins"></i> <a href="/games/miner">{{ __('game::games.miner_new_game') }}</a><br>
-    @else
-        @if ($miner['opened'])
-            <form action="/games/miner/cash" method="post" class="d-inline">
-                @csrf
-                <button class="btn btn-success">
-                    {{ __('game::games.miner_cash', ['money' => plural($reward, setting('moneyname'))]) }}
-                </button>
-            </form>
-            <br><br>
-        @endif
-
-        {{ __('game::games.miner_next', ['money' => plural($next, setting('moneyname'))]) }}<br>
-    @endif
+    @include('game::miner/_field')
 @stop
+
+@push('styles')
+    <style>
+        .miner-field {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 4px;
+            max-width: 20rem;
+        }
+
+        /* Открытая клетка переворачивается, мина ещё и встряхивает поле */
+        .miner-flip {
+            animation: miner-flip 0.3s ease-out backwards;
+        }
+
+        .miner-boom {
+            animation: miner-boom 0.4s ease-out backwards;
+        }
+
+        /* Остальные мины проявляются волной после взрыва */
+        .miner-reveal {
+            animation: miner-show 0.25s ease-out backwards;
+            animation-delay: calc(var(--step) * 0.12s);
+        }
+
+        .miner-late {
+            animation: miner-show 0.3s ease-out backwards;
+            animation-delay: calc(var(--last, 0) * 0.12s + 0.3s);
+        }
+
+        .miner-balance {
+            display: grid;
+        }
+
+        .miner-balance > * {
+            grid-area: 1 / 1;
+        }
+
+        .miner-balance-old {
+            animation: miner-gone 0.1s linear forwards;
+            animation-delay: calc(var(--last, 0) * 0.12s + 0.3s);
+        }
+
+        @keyframes miner-flip {
+            from { opacity: 0; transform: rotateY(90deg); }
+            to { opacity: 1; transform: none; }
+        }
+
+        @keyframes miner-boom {
+            0% { transform: scale(0.6); }
+            40% { transform: scale(1.25); }
+            60% { transform: scale(1) translateX(-4px); }
+            80% { transform: translateX(4px); }
+            100% { transform: none; }
+        }
+
+        @keyframes miner-show {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes miner-gone {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .miner-flip,
+            .miner-boom,
+            .miner-reveal,
+            .miner-late,
+            .miner-balance-old {
+                animation-duration: 0.01s;
+                animation-delay: 0s;
+            }
+        }
+    </style>
+@endpush

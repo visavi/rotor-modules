@@ -15,10 +15,10 @@
 
 @section('content')
     @php
-        ['field' => $field, 'draw' => $draw, 'min' => $min, 'max' => $max] = $limits;
+        ['field' => $field, 'draw' => $draw, 'picks' => $picks] = $limits;
     @endphp
 
-    {{ __('game::games.keno_intro', ['min' => $min, 'max' => $max, 'field' => $field, 'draw' => $draw]) }}<br><br>
+    {{ __('game::games.keno_intro', ['picks' => $picks, 'field' => $field, 'draw' => $draw]) }}<br><br>
 
     <b>{{ __('game::games.keno_payouts') }}</b>
 
@@ -26,21 +26,15 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>{{ __('game::games.keno_marked') }}</th>
                     <th>{{ __('game::games.keno_hits') }}</th>
-                    <th class="text-nowrap">{{ __('game::games.keno_frequency') }}</th>
+                    <th>{{ __('game::games.keno_prize') }}</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($payouts as $picked => $table)
+                @foreach ($payouts as $hits => $multiplier)
                     <tr>
-                        <td class="fw-bold">{{ $picked }}</td>
-                        <td>
-                            @foreach ($table as $hits => $multiplier)
-                                <span class="text-nowrap me-3">{{ $hits }} &mdash; x{{ $multiplier }}</span>
-                            @endforeach
-                        </td>
-                        <td class="text-nowrap">{{ round($chances[$picked] * 100) }}%</td>
+                        <td class="fw-bold text-nowrap">{{ __('game::games.keno_hits_of', ['hits' => $hits, 'picks' => $picks]) }}</td>
+                        <td class="text-nowrap"><b>x{{ $multiplier }}</b></td>
                     </tr>
                 @endforeach
             </tbody>

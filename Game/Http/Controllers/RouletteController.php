@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RouletteController extends Controller
 {
+    use RejectsInvalidInput;
+
     /**
      * Порядок чисел на европейском колесе, по часовой стрелке от зеро
      */
@@ -70,23 +74,33 @@ class RouletteController extends Controller
      */
     public function index(Request $request): View
     {
+        return view('game::roulette/index', $this->data($request->session()->get('roulette')));
+    }
+
+    /**
+     * Данные для шаблона
+     *
+     * @return array<string, mixed>
+     */
+    private function data(?array $spin): array
+    {
         $wheel = array_map(
             fn (int $number) => ['number' => $number, 'color' => $this->color($number)],
             self::WHEEL,
         );
 
-        return view('game::roulette/index', [
+        return [
             'user'  => $this->user,
             'bets'  => self::BETS,
             'wheel' => $wheel,
-            'spin'  => $request->session()->get('roulette'),
-        ]);
+            'spin'  => $spin,
+        ];
     }
 
     /**
      * Спин
      */
-    public function spin(Request $request, Validator $validator): RedirectResponse
+    public function spin(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
     {
         $bet = int($request->input('bet'));
         $type = (string) $request->input('type');
@@ -102,6 +116,10 @@ class RouletteController extends Controller
         }
 
         if (! $validator->isValid()) {
+            if ($answer = $this->ajaxError($request, $validator)) {
+                return $answer;
+            }
+
             return redirect('games/roulette')
                 ->withInput()
                 ->withErrors($validator->getErrors());
@@ -117,17 +135,27 @@ class RouletteController extends Controller
             $this->user->increment('money', $win);
         }
 
+        $spin = [
+            'before' => $before,
+            'number' => $number,
+            'color'  => $this->color($number),
+            'bet'    => $bet,
+            'type'   => $type,
+            'guess'  => $guess,
+            'win'    => $win,
+        ];
+
+        // Спин уходит ajax-ом: колесо крутится на месте, без перезагрузки страницы
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::roulette/_wheel', $this->data($spin))->render(),
+            ]);
+        }
+
         return redirect('games/roulette')
             ->withInput()
-            ->with('roulette', [
-                'before' => $before,
-                'number' => $number,
-                'color'  => $this->color($number),
-                'bet'    => $bet,
-                'type'   => $type,
-                'guess'  => $guess,
-                'win'    => $win,
-            ]);
+            ->with('roulette', $spin);
     }
 
     /**

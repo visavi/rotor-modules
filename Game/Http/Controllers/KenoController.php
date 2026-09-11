@@ -5,50 +5,54 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class KenoController extends Controller
 {
+    use RejectsInvalidInput;
+
     /**
      * Размер поля
      */
-    public const FIELD = 80;
+    public const FIELD = 40;
 
     /**
      * Сколько чисел вытягивает автомат
      */
-    public const DRAW = 20;
+    public const DRAW = 10;
 
     /**
-     * Сколько чисел разрешено отметить
+     * Сколько чисел отмечает игрок
+     *
+     * Число закреплено: пока его выбирал игрок, у каждого количества была
+     * своя таблица выплат, и девять таблиц приходилось сравнивать между собой
      */
-    public const MIN_PICKS = 2;
-    public const MAX_PICKS = 10;
+    public const PICKS = 6;
 
     /**
-     * Выплаты: сколько отмечено => сколько угадано => множитель к ставке
+     * Выплаты: сколько угадано => множитель к ставке
      *
-     * Таблица подобрана под возврат около 95% в каждой строке. Вероятность
-     * ровно k совпадений считается гипергеометрическим распределением,
-     * точный возврат проверяет тест, поэтому править числа на глаз нельзя.
+     * Возврат по таблице около 95%. Вероятность ровно k совпадений считается
+     * гипергеометрическим распределением, точный возврат проверяет тест,
+     * поэтому править множители на глаз нельзя.
      *
-     * Выплата начинается с частых совпадений и возвращает ставку: партия,
-     * в которой не происходит вообще ничего, быстро отбивает охоту играть
+     * Нижняя ступень платит больше ставки, а число отметок выбрано так,
+     * чтобы выигрыш случался в 47% партий против 53% проигрышей. Игрок
+     * теряет деньги медленно и часто уходит в плюс, а редкий куш за полное
+     * совпадение держится на джекпоте, не влияя на эту частоту
      */
     public const PAYOUTS = [
-        2  => [1 => 1, 2 => 9.5],
-        3  => [1 => 1, 2 => 2.5, 3 => 12.5],
-        4  => [2 => 1, 3 => 12, 4 => 70],
-        5  => [2 => 1, 3 => 2, 4 => 25, 5 => 320],
-        6  => [2 => 1, 3 => 1, 4 => 5, 5 => 80, 6 => 950],
-        7  => [2 => 1, 3 => 1, 4 => 2, 5 => 15, 6 => 250, 7 => 1250],
-        8  => [3 => 1, 4 => 1, 5 => 6, 6 => 60, 7 => 1500, 8 => 35000],
-        9  => [3 => 1, 4 => 1, 5 => 2, 6 => 20, 7 => 250, 8 => 6000, 9 => 100000],
-        10 => [3 => 1, 4 => 1, 5 => 1, 6 => 6, 7 => 60, 8 => 800, 9 => 32000, 10 => 100000],
+        2 => 1.5,
+        3 => 2,
+        4 => 5,
+        5 => 20,
+        6 => 1000,
     ];
 
     /**
@@ -73,11 +77,21 @@ class KenoController extends Controller
      */
     public function index(Request $request): View
     {
-        return view('game::keno/index', [
+        return view('game::keno/index', $this->data($request->session()->get('keno')));
+    }
+
+    /**
+     * Данные для шаблона
+     *
+     * @return array<string, mixed>
+     */
+    private function data(?array $game): array
+    {
+        return [
             'user'   => $this->user,
-            'game'   => $request->session()->get('keno'),
+            'game'   => $game,
             'limits' => $this->limits(),
-        ]);
+        ];
     }
 
     /**
@@ -85,35 +99,30 @@ class KenoController extends Controller
      */
     public function rules(): View
     {
-        $chances = [];
-        foreach (self::PAYOUTS as $picked => $table) {
-            $chances[$picked] = $this->frequency($picked);
-        }
-
         return view('game::keno/rules', [
             'payouts' => self::PAYOUTS,
-            'chances' => $chances,
             'limits'  => $this->limits(),
         ]);
     }
 
     /**
-     * Размеры поля и границы отметок для шаблонов
+     * Размеры поля для шаблонов
+     *
+     * @return array<string, int>
      */
     private function limits(): array
     {
         return [
             'field' => self::FIELD,
             'draw'  => self::DRAW,
-            'min'   => self::MIN_PICKS,
-            'max'   => self::MAX_PICKS,
+            'picks' => self::PICKS,
         ];
     }
 
     /**
      * Тираж
      */
-    public function play(Request $request, Validator $validator): RedirectResponse
+    public function play(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
     {
         $bet = int($request->input('bet'));
         $picks = $this->picks($request);
@@ -121,12 +130,15 @@ class KenoController extends Controller
         $validator
             ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
             ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')])
-            ->between(count($picks), self::MIN_PICKS, self::MAX_PICKS, ['numbers' => __('game::games.keno_picks_invalid', [
-                'min' => self::MIN_PICKS,
-                'max' => self::MAX_PICKS,
+            ->true(count($picks) === self::PICKS, ['numbers' => __('game::games.keno_picks_invalid', [
+                'picks' => self::PICKS,
             ])]);
 
         if (! $validator->isValid()) {
+            if ($answer = $this->ajaxError($request, $validator)) {
+                return $answer;
+            }
+
             return redirect('games/keno')
                 ->withInput()
                 ->withErrors($validator->getErrors());
@@ -135,7 +147,7 @@ class KenoController extends Controller
         $before = $this->user->money;
         $drawn = $this->draw();
         $matched = array_values(array_intersect($picks, $drawn));
-        $win = $this->payout($bet, count($picks), count($matched));
+        $win = $this->payout($bet, count($matched));
 
         $this->user->decrement('money', $bet);
 
@@ -143,16 +155,26 @@ class KenoController extends Controller
             $this->user->increment('money', $win);
         }
 
+        $game = [
+            'before'  => $before,
+            'bet'     => $bet,
+            'picks'   => $picks,
+            'drawn'   => $drawn,
+            'matched' => $matched,
+            'win'     => $win,
+        ];
+
+        // Тираж уходит ajax-ом: страница не перезагружается, шары не гаснут на релоаде
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::keno/_board', $this->data($game))->render(),
+            ]);
+        }
+
         return redirect('games/keno')
             ->withInput()
-            ->with('keno', [
-                'before'  => $before,
-                'bet'     => $bet,
-                'picks'   => $picks,
-                'drawn'   => $drawn,
-                'matched' => $matched,
-                'win'     => $win,
-            ]);
+            ->with('keno', $game);
     }
 
     /**
@@ -198,29 +220,29 @@ class KenoController extends Controller
     }
 
     /**
-     * Доля партий, в которых строка таблицы хоть что-то платит
+     * Доля партий, в которых автомат хоть что-то платит
      */
-    public function frequency(int $picked): float
+    public function frequency(): float
     {
         $chance = 0.0;
 
-        foreach (self::PAYOUTS[$picked] ?? [] as $matched => $multiplier) {
-            $chance += $this->chance($picked, $matched);
+        foreach (array_keys(self::PAYOUTS) as $matched) {
+            $chance += $this->chance($matched);
         }
 
         return $chance;
     }
 
     /**
-     * Вероятность ровно $matched совпадений при $picked отмеченных числах
+     * Вероятность ровно $matched совпадений
      *
      * Гипергеометрическое распределение: из поля тянут DRAW чисел без
      * возврата, поэтому биномиальное здесь дало бы завышенный хвост
      */
-    public function chance(int $picked, int $matched): float
+    public function chance(int $matched): float
     {
-        return $this->binomial($picked, $matched)
-            * $this->binomial(self::FIELD - $picked, self::DRAW - $matched)
+        return $this->binomial(self::PICKS, $matched)
+            * $this->binomial(self::FIELD - self::PICKS, self::DRAW - $matched)
             / $this->binomial(self::FIELD, self::DRAW);
     }
 
@@ -245,9 +267,9 @@ class KenoController extends Controller
     /**
      * Выплата по числу совпадений
      */
-    private function payout(int $bet, int $picked, int $matched): int
+    private function payout(int $bet, int $matched): int
     {
-        $multiplier = self::PAYOUTS[$picked][$matched] ?? 0;
+        $multiplier = self::PAYOUTS[$matched] ?? 0;
 
         return (int) ($bet * $multiplier);
     }

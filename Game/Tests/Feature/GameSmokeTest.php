@@ -56,7 +56,7 @@ class GameSmokeTest extends ModuleTestCase
     {
         // Ничья оставляет деньги на месте, поэтому играем до первого исхода
         for ($i = 0; $i < 20; $i++) {
-            $this->actingAs($this->user)->get('/games/dices/go')->assertOk();
+            $this->actingAs($this->user)->post('/games/dices/roll')->assertOk();
 
             if ($this->user->fresh()->money !== 5000) {
                 return;
@@ -71,30 +71,22 @@ class GameSmokeTest extends ModuleTestCase
         $this->user->update(['money' => 1]);
 
         $this->actingAs($this->user)
-            ->get('/games/dices/go')
+            ->post('/games/dices/roll')
             ->assertSee(__('game::games.cannot_play'));
     }
 
     public function testSafeMarksEveryPosition(): void
     {
-        // Пятая позиция раньше не получала метку «*»: в условии стояла чужая
-        // переменная, а результат писался в четвёртую ячейку
-        $this->actingAs($this->user)->get('/games/safe');
+        // Сдвинутый шифр: каждая цифра есть в коде, поэтому прочерков быть не может
+        $this->actingAs($this->user)->post('/games/safe/go', array_fill_keys(
+            ['code0', 'code1', 'code2', 'code3', 'code4'],
+            0,
+        ));
 
         $cipher = session('safe.cipher');
 
-        if ($cipher === null) {
-            $this->actingAs($this->user)->post('/games/safe/go', array_fill_keys(
-                ['code0', 'code1', 'code2', 'code3', 'code4'],
-                0,
-            ));
-
-            $cipher = session('safe.cipher');
-        }
-
         $this->assertIsArray($cipher);
 
-        // Сдвигаем шифр на позицию: каждая цифра есть в коде, но стоит не на своём месте
         $shifted = [$cipher[1], $cipher[2], $cipher[3], $cipher[4], $cipher[0]];
 
         $response = $this->actingAs($this->user)->post('/games/safe/go', [
@@ -102,9 +94,9 @@ class GameSmokeTest extends ModuleTestCase
             'code3' => $shifted[3], 'code4' => $shifted[4],
         ]);
 
-        $hack = $response->original->getData()['hack'];
+        $marks = $response->original->getData()['game']['marks'];
 
-        foreach ($hack as $position => $mark) {
+        foreach ($marks as $position => $mark) {
             $this->assertNotSame('-', $mark, "Позиция {$position} осталась без подсказки");
         }
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class HighLowController extends Controller
 {
+    use RejectsInvalidInput;
+
     /**
      * Доля заведения: каждый шаг оплачивается на 5% дешевле честной цены
      */
@@ -60,7 +63,7 @@ class HighLowController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request, Validator $validator): RedirectResponse
+    public function bet(Request $request, Validator $validator): RedirectResponse|JsonResponse
     {
         if ($request->session()->has('highlow')) {
             return redirect('games/highlow');
@@ -73,6 +76,10 @@ class HighLowController extends Controller
             ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')]);
 
         if (! $validator->isValid()) {
+            if ($answer = $this->ajaxError($request, $validator)) {
+                return $answer;
+            }
+
             return redirect('games/highlow')
                 ->withInput()
                 ->withErrors($validator->getErrors());

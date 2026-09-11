@@ -5,13 +5,39 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
+use App\Support\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ThimbleController extends Controller
 {
+    use RejectsInvalidInput;
+
+    /**
+     * Ставка и выплата за найденный шарик
+     */
+    public const BET = 5;
+    public const WIN = 10;
+
+    /**
+     * Число напёрстков
+     */
+    public const THIMBLES = 3;
+
+    /**
+     * Шанс победы в тысячных долях
+     *
+     * Напёрсточник кладёт шарик после выбора игрока, поэтому шанс задаётся
+     * прямо, а не числом напёрстков: честная треть оставляла игрока в минусе
+     * две партии из трёх, а здесь он выигрывает почти так же часто, как
+     * проигрывает, и при выплате вдвое теряет около 5% ставки
+     */
+    public const WIN_CHANCE = 475;
+
     /**
      * Текущий пользователь
      */
@@ -30,57 +56,93 @@ class ThimbleController extends Controller
     }
 
     /**
-     * Наперстки
+     * Напёрстки
      */
     public function index(): View
     {
-        return view('game::thimbles/index', ['user' => $this->user]);
+        return view('game::thimbles/index', $this->data());
     }
 
     /**
-     * Выбор наперстка
+     * Игра в напёрстки
      */
-    public function choice(): View
+    public function go(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
     {
-        return view('game::thimbles/choice', ['user' => $this->user]);
-    }
+        // int() из «abc» сделал бы ноль, поэтому обычный каст и проверка диапазона
+        $thimble = (int) $request->input('thimble');
 
-    /**
-     * Игра в наперстки
-     */
-    public function go(Request $request): View|RedirectResponse
-    {
-        $thimble = int($request->input('thimble'));
+        $validator
+            ->between($thimble, 1, self::THIMBLES, ['thimble' => __('game::games.thimbles_not_chosen')])
+            ->gte($this->user->money, self::BET, ['thimble' => __('game::games.not_enough_money')]);
 
-        if ($this->user->money < 5) {
-            abort(200, __('game::games.cannot_play'));
+        if (! $validator->isValid()) {
+            if ($answer = $this->ajaxError($request, $validator)) {
+                return $answer;
+            }
+
+            return redirect('games/thimbles')
+                ->withErrors($validator->getErrors());
         }
 
-        if (! $thimble) {
-            return redirect('games/thimbles/choice')
-                ->with('danger', __('game::games.thimbles_not_chosen'));
+        $before = $this->user->money;
+        $ball = $this->ball($thimble);
+        $won = $thimble === $ball;
+
+        $this->user->decrement('money', self::BET);
+
+        if ($won) {
+            $this->user->increment('money', self::WIN);
         }
 
-        $results = [
-            'victory' => '<span class="text-success">' . __('game::games.victory') . '</span>',
-            'lost'    => '<span class="text-danger">' . __('game::games.lost') . '</span>',
+        $game = [
+            'before'  => $before,
+            'thimble' => $thimble,
+            'ball'    => $ball,
+            'result'  => $won ? 'won' : 'lost',
         ];
 
-        $randThimble = mt_rand(1, 3);
+        $data = $this->data($game);
 
-        // Баланс до расчета: вьюха показывает его, пока напёрстки не подняты
-        $before = $this->user->money;
-
-        if ($thimble === $randThimble) {
-            $this->user->increment('money', 10);
-            $result = $results['victory'];
-        } else {
-            $this->user->decrement('money', 5);
-            $result = $results['lost'];
+        // Ход уходит ajax-ом: страница не перезагружается, анимация не рвётся
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::thimbles/_table', $data)->render(),
+            ]);
         }
 
-        $user = $this->user;
+        return view('game::thimbles/index', $data);
+    }
 
-        return view('game::thimbles/go', compact('user', 'randThimble', 'thimble', 'result', 'before'));
+    /**
+     * Под каким напёрстком оказался шарик
+     *
+     * Шарик кладётся уже после выбора: сначала решается, выиграл ли игрок,
+     * и только потом шарику ищется место
+     */
+    private function ball(int $thimble): int
+    {
+        if (random_int(1, 1000) <= self::WIN_CHANCE) {
+            return $thimble;
+        }
+
+        $others = array_values(array_diff(range(1, self::THIMBLES), [$thimble]));
+
+        return $others[random_int(0, count($others) - 1)];
+    }
+
+    /**
+     * Данные для шаблона
+     *
+     * @return array<string, mixed>
+     */
+    private function data(?array $game = null): array
+    {
+        return [
+            'user' => $this->user,
+            'game' => $game,
+            'bet'  => self::BET,
+            'win'  => self::WIN,
+        ];
     }
 }

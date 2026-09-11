@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MinerController extends Controller
 {
+    use RejectsInvalidInput;
+
     /**
      * Размер поля и допустимое количество мин
      */
@@ -72,7 +76,7 @@ class MinerController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request, Validator $validator): RedirectResponse
+    public function bet(Request $request, Validator $validator): RedirectResponse|JsonResponse
     {
         $bet = int($request->input('bet'));
         $mines = int($request->input('mines'));
@@ -92,6 +96,10 @@ class MinerController extends Controller
             ->true(in_array($mines, self::MINES, true), ['mines' => __('game::games.miner_mines_invalid')]);
 
         if (! $validator->isValid()) {
+            if ($answer = $this->ajaxError($request, $validator)) {
+                return $answer;
+            }
+
             return redirect('games/miner')
                 ->withInput()
                 ->withErrors($validator->getErrors());
@@ -99,13 +107,23 @@ class MinerController extends Controller
 
         $this->user->decrement('money', $bet);
 
-        $request->session()->put('miner', [
+        $miner = [
             'bet'    => $bet,
             'mines'  => $mines,
             'field'  => (array) array_rand(array_fill(0, self::CELLS, true), $mines),
             'opened' => [],
             'status' => null,
-        ]);
+        ];
+
+        $request->session()->put('miner', $miner);
+
+        // Повтор ставки с доигранного поля тоже уходит ajax-ом
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::miner/_field', $this->data($miner))->render(),
+            ]);
+        }
 
         return redirect('games/miner/game')
             ->with('success', __('game::games.bj_bet_made'));
@@ -123,19 +141,46 @@ class MinerController extends Controller
                 ->with('danger', __('game::games.bj_bet_needed'));
         }
 
-        return view('game::miner/game', [
+        return view('game::miner/game', $this->data($miner));
+    }
+
+    /**
+     * Данные для шаблона
+     *
+     * @return array<string, mixed>
+     */
+    private function data(array $miner, ?int $fresh = null, ?int $before = null): array
+    {
+        return [
             'user'   => $this->user,
             'miner'  => $miner,
             'cells'  => self::CELLS,
             'reward' => $this->reward($miner),
             'next'   => $this->reward($miner, 1),
-        ]);
+            'fresh'  => $fresh,
+            'before' => $before ?? $this->user->money,
+        ];
+    }
+
+    /**
+     * Ответ хода: ajax подменяет только поле, иначе прежний редирект
+     */
+    private function respond(Request $request, array $miner, ?int $fresh = null, ?int $before = null): RedirectResponse|JsonResponse
+    {
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html'    => view('game::miner/_field', $this->data($miner, $fresh, $before))->render(),
+            ]);
+        }
+
+        return redirect('games/miner/game');
     }
 
     /**
      * Открытие клетки
      */
-    public function go(Request $request): RedirectResponse
+    public function go(Request $request): RedirectResponse|JsonResponse
     {
         $miner = $request->session()->get('miner');
         $cell = int($request->input('cell'));
@@ -148,12 +193,14 @@ class MinerController extends Controller
             return redirect('games/miner/game');
         }
 
+        $before = $this->user->money;
+
         if (in_array($cell, $miner['field'], true)) {
             $miner['status'] = 'lost';
             $miner['opened'][] = $cell;
             $request->session()->put('miner', $miner);
 
-            return redirect('games/miner/game');
+            return $this->respond($request, $miner, $cell, $before);
         }
 
         $miner['opened'][] = $cell;
@@ -166,13 +213,13 @@ class MinerController extends Controller
 
         $request->session()->put('miner', $miner);
 
-        return redirect('games/miner/game');
+        return $this->respond($request, $miner, $cell, $before);
     }
 
     /**
      * Забрать выигрыш
      */
-    public function cash(Request $request): RedirectResponse
+    public function cash(Request $request): RedirectResponse|JsonResponse
     {
         $miner = $request->session()->get('miner');
 
@@ -180,12 +227,13 @@ class MinerController extends Controller
             return redirect('games/miner/game');
         }
 
+        $before = $this->user->money;
         $this->user->increment('money', $this->reward($miner));
 
         $miner['status'] = 'won';
         $request->session()->put('miner', $miner);
 
-        return redirect('games/miner/game');
+        return $this->respond($request, $miner, null, $before);
     }
 
     /**

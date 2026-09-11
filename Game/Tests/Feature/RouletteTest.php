@@ -183,4 +183,17 @@ class RouletteTest extends ModuleTestCase
 
         $this->markTestSkipped('За 200 спинов семёрка не выпала');
     }
+
+    public function testAjaxReturnsWheelOnly(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->postJson('/games/roulette/spin', ['bet' => 100, 'type' => 'red'], ['X-Requested-With' => 'XMLHttpRequest']);
+
+        $response->assertOk()->assertJson(['success' => true]);
+
+        $html = $response->json('html');
+
+        $this->assertStringContainsString('id="roulette-box"', $html);
+        $this->assertStringNotContainsString('<html', $html);
+    }
 }

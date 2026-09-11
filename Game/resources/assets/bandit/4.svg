@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Lemon">
+    <path d="M24 14c9 0 16 5 16 12s-7 12-16 12-16-5-16-12 7-12 16-12z" fill="#fdd835"/>
+    <path d="M8 26c0-5 4-9 10-11-4 3-6 7-6 11 0 4 2 8 6 11-6-2-10-6-10-11z" fill="#fbc02d"/>
+    <path d="M39.5 26.5c1.6 0 3-.8 3.4-2.3.2-.9-.7-1.6-1.5-1.2-.8.5-1.8.8-2.9.9z" fill="#f9a825"/>
+    <path d="M8.5 26.5c-1.6 0-3-.8-3.4-2.3-.2-.9.7-1.6 1.5-1.2.8.5 1.8.8 2.9.9z" fill="#fbc02d"/>
+    <ellipse cx="19" cy="21" rx="5" ry="3" fill="#fff59d" opacity=".75" transform="rotate(-20 19 21)"/>
+</svg>

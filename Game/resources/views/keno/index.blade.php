@@ -13,71 +13,11 @@
 @stop
 
 @section('content')
-    @php
-        ['field' => $field, 'draw' => $draw, 'min' => $min, 'max' => $max] = $limits;
+    @php ['field' => $field, 'draw' => $draw, 'picks' => $picks] = $limits; @endphp
 
-        // Шары загораются по очереди: номер шара задаёт задержку, всё остальное делает CSS
-        $steps = $game ? array_flip($game['drawn']) : [];
-        $picks = $game['picks'] ?? array_map('intval', (array) old('numbers', []));
-    @endphp
+    {{ __('game::games.keno_intro', ['picks' => $picks, 'field' => $field, 'draw' => $draw]) }}<br><br>
 
-    {{ __('game::games.keno_intro', ['min' => $min, 'max' => $max, 'field' => $field, 'draw' => $draw]) }}<br><br>
-
-    <form action="/games/keno/play" method="post">
-        @csrf
-
-        <div class="keno-field mb-3">
-            @for ($number = 1; $number <= $field; $number++)
-                <label class="keno-cell @isset($steps[$number]) keno-drawn @endisset" @isset($steps[$number]) style="--step: {{ $steps[$number] }}" @endisset>
-                    <input type="checkbox" name="numbers[]" value="{{ $number }}"@checked(in_array($number, $picks, true))>
-                    <span>{{ $number }}</span>
-                </label>
-            @endfor
-        </div>
-
-        <div class="mb-3">
-            <span id="keno-counter">{{ __('game::games.keno_picked', ['count' => count($picks)]) }}</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="keno-clear">{{ __('game::games.keno_clear') }}</button>
-        </div>
-
-        @if ($errors->has('numbers'))
-            <div class="text-danger mb-3">{{ textError('numbers') }}</div>
-        @endif
-
-        <div class="section-form mb-3 shadow">
-            <div class="mb-3{{ hasError('bet') }}">
-                <label for="bet" class="form-label">{{ __('game::games.bj_bet') }}</label>
-                <input class="form-control" name="bet" id="bet" value="{{ old('bet') }}" required>
-                <div class="invalid-feedback">{{ textError('bet') }}</div>
-            </div>
-
-            <button class="btn btn-primary">{{ __('game::games.keno_play') }}</button>
-        </div>
-    </form>
-
-    @if ($game)
-        {{-- Итог ждёт последний шар, иначе он известен раньше, чем поле догорело --}}
-        <div class="fw-bold mb-3 keno-late" style="--last: {{ $draw }}">
-            {{ __('game::games.keno_matched', ['count' => count($game['matched'])]) }}<br>
-
-            @if ($game['win'] > $game['bet'])
-                <span class="text-success">
-                    <i class="fas fa-trophy"></i> {{ __('game::games.win_amount', ['money' => plural($game['win'], setting('moneyname'))]) }}
-                </span>
-            @elseif ($game['win'])
-                <span class="text-warning">{{ __('game::games.keno_refund', ['money' => plural($game['win'], setting('moneyname'))]) }}</span>
-            @else
-                <span class="text-danger">{{ __('game::games.lost') }}</span>
-            @endif
-        </div>
-
-        <div class="keno-balance" style="--last: {{ $draw }}">
-            <span class="keno-balance-old">{{ __('game::games.balance', ['money' => plural($game['before'], setting('moneyname'))]) }}</span>
-            <span class="keno-late">{{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}</span>
-        </div>
-    @else
-        {{ __('game::games.balance', ['money' => plural($user->money, setting('moneyname'))]) }}
-    @endif
+    @include('game::keno/_board')
 
     <br>
     <i class="fa fa-question-circle"></i> <a href="/games/keno/rules">{{ __('game::games.rules') }}</a>
@@ -87,9 +27,9 @@
     <style>
         .keno-field {
             display: grid;
-            grid-template-columns: repeat(10, minmax(0, 1fr));
-            gap: 4px;
-            max-width: 520px;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 5px;
+            max-width: 440px;
         }
 
         /* На узком экране десять колонок не читаются, поэтому поле складывается вдвое */
@@ -178,29 +118,39 @@
 
 @push('scripts')
     <script type="module">
-        // Больше максимума не отметить: лишние клетки просто не отмечаются
-        const max = {{ $max }};
-        const field = document.querySelector('.keno-field');
-        const counter = document.getElementById('keno-counter');
-        const boxes = () => [...field.querySelectorAll('input')]
-        const template = @json(__('game::games.keno_picked', ['count' => ':count']));
+        // Поле подменяется ajax-ом, поэтому слушатели висят на документе,
+        // а элементы ищутся заново при каждом событии
+        const max = {{ $picks }};
+        const template = @json(__('game::games.keno_picked', ['count' => ':count', 'picks' => $picks]));
+
+        const boxes = () => [...document.querySelectorAll('.keno-field input')]
 
         const recount = () => {
-            const checked = boxes().filter(box => box.checked)
-            counter.textContent = template.replace(':count', String(checked.length))
+            const counter = document.querySelector('.keno-counter')
+
+            if (counter) {
+                counter.textContent = template.replace(':count', String(boxes().filter(box => box.checked).length))
+            }
         }
 
-        field.addEventListener('change', (event) => {
-            const checked = boxes().filter(box => box.checked)
+        document.addEventListener('change', (event) => {
+            if (! event.target.closest('.keno-field')) {
+                return
+            }
 
-            if (checked.length > max) {
+            // Больше максимума не отметить: лишняя клетка просто не отмечается
+            if (boxes().filter(box => box.checked).length > max) {
                 event.target.checked = false
             }
 
             recount()
         })
 
-        document.getElementById('keno-clear').addEventListener('click', () => {
+        document.addEventListener('click', (event) => {
+            if (! event.target.closest('.keno-clear')) {
+                return
+            }
+
             boxes().forEach(box => box.checked = false)
             recount()
         })

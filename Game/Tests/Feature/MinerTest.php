@@ -268,4 +268,19 @@ class MinerTest extends ModuleTestCase
 
         $this->fail('Свободных клеток не осталось');
     }
+
+    public function testAjaxReturnsFieldOnly(): void
+    {
+        $this->actingAs($this->user)->post('/games/miner/bet', ['bet' => 100, 'mines' => 3]);
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/games/miner/go', ['cell' => $this->safeCell()], ['X-Requested-With' => 'XMLHttpRequest']);
+
+        $response->assertOk()->assertJson(['success' => true]);
+
+        $html = $response->json('html');
+
+        $this->assertStringContainsString('id="miner-box"', $html);
+        $this->assertStringNotContainsString('<html', $html);
+    }
 }
