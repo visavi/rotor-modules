@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +14,6 @@ use Illuminate\View\View;
 
 class MinerController extends Controller
 {
-    use RejectsInvalidInput;
-
     /**
      * Размер поля и допустимое количество мин
      */
@@ -96,8 +93,13 @@ class MinerController extends Controller
             ->true(in_array($mines, self::MINES, true), ['mines' => __('game::games.miner_mines_invalid')]);
 
         if (! $validator->isValid()) {
-            if ($answer = $this->ajaxError($request, $validator)) {
-                return $answer;
+            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
+            // ошибка возвращается тем же json, что понимает ajax ядра
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => implode(' ', $validator->getErrors()),
+                ]);
             }
 
             return redirect('games/miner')

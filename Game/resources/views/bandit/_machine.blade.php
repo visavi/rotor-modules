@@ -50,18 +50,19 @@
     </div>
 
     @if ($spin)
-        {{-- Итог ждёт последний барабан, иначе выигрыш известен раньше остановки --}}
-        <div class="fw-bold bandit-late mb-3">
+        {{-- Итог ждёт последний барабан, иначе выигрыш известен раньше остановки.
+             Обе развязки занимают ровно две строки: разная высота выдавала бы
+             результат заранее и двигала кнопку --}}
+        <div class="fw-bold mb-3 bandit-late">
             @if ($spin['sum'] > 0)
-                @foreach ($spin['results'] as $result)
-                    {{ $result['text'] }}<br>
-                @endforeach
+                {{ implode(', ', array_column($spin['results'], 'text')) }}<br>
 
                 <span class="text-success">
                     <i class="fas fa-trophy"></i> {{ __('game::games.win_amount', ['money' => plural($spin['sum'], setting('moneyname'))]) }}
                 </span>
             @else
-                <span class="text-danger">{{ __('game::games.lost') }}</span>
+                <span class="text-danger">{{ __('game::games.lost') }}</span><br>
+                {{ __('game::games.bj_lost', ['money' => plural(BanditController::BET, setting('moneyname'))]) }}
             @endif
         </div>
     @endif

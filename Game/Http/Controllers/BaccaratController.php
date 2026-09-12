@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Modules\Game\Http\Concerns\RejectsInvalidInput;
 use App\Models\User;
 use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +14,6 @@ use Illuminate\View\View;
 
 class BaccaratController extends Controller
 {
-    use RejectsInvalidInput;
-
     /**
      * Типы ставок и множители выплаты вместе с возвратом ставки
      *
@@ -78,8 +75,13 @@ class BaccaratController extends Controller
             ->true(isset(self::BETS[$type]), ['type' => __('game::games.baccarat_bet_invalid')]);
 
         if (! $validator->isValid()) {
-            if ($answer = $this->ajaxError($request, $validator)) {
-                return $answer;
+            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
+            // ошибка возвращается тем же json, что понимает ajax ядра
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => implode(' ', $validator->getErrors()),
+                ]);
             }
 
             return redirect('games/baccarat')

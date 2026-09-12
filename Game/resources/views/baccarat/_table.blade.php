@@ -71,8 +71,8 @@
                 {{ __('game::games.baccarat_decision') }}
 
                 <div class="mt-2">
-                    <a class="btn btn-success" href="/games/baccarat/decide?draw=1"
-                       data-ajax data-ajax-method="post" data-ajax-draw="1"
+                    <a class="btn btn-success" href="/games/baccarat/decide"
+                       data-ajax data-ajax-method="post" data-draw="1"
                        data-ajax-replace="#baccarat-table" data-ajax-swap="outer">{{ __('game::games.bj_take_card') }}</a>
                     {{ __('game::games.bj_or') }}
                     <a class="btn btn-danger" href="/games/baccarat/decide"
