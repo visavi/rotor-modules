@@ -119,10 +119,24 @@
                             </tbody>
                         </table>
 
-                        <button class="btn btn-primary">{{ __('main.save') }}</button>
+                        {{-- Группа занимает несколько экранов, поэтому кнопка едет вместе со страницей --}}
+                        <div class="translations-save py-2">
+                            <button class="btn btn-primary">{{ __('main.save') }}</button>
+                        </div>
                     </form>
                 @endif
             </div>
         </div>
     @endif
 @stop
+
+@push('styles')
+    <style>
+        .translations-save {
+            position: sticky;
+            bottom: 0;
+            background: var(--bs-body-bg);
+            border-top: 1px solid var(--bs-border-color);
+        }
+    </style>
+@endpush

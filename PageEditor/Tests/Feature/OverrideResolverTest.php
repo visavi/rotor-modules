@@ -128,6 +128,47 @@ class OverrideResolverTest extends ModuleTestCase
         File::deleteDirectory(resource_path('views/page_editor_probe'));
     }
 
+    public function testEditorWarnsWhenOriginalIsMissing(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_orphan']);
+
+        // Правка осталась, а оригинал переименовали или удалили
+        File::ensureDirectoryExists(resource_path('custom/views/page_editor_probe'));
+        File::put(resource_path('custom/views/page_editor_probe/a.blade.php'), 'x');
+
+        $response = $this->actingAs($boss)->get(route('admin.files.edit', [
+            'root' => 'custom',
+            'path' => 'views/page_editor_probe',
+            'file' => 'a.blade.php',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('page_editor::files.override_orphan'));
+        $response->assertDontSee(__('page_editor::files.override_of'));
+    }
+
+    public function testEditorShowsOriginalWhenItExists(): void
+    {
+        $boss = User::factory()->boss()->create(['login' => 'boss_original']);
+
+        File::ensureDirectoryExists(resource_path('custom/views/page_editor_probe'));
+        File::put(resource_path('custom/views/page_editor_probe/a.blade.php'), 'x');
+        File::ensureDirectoryExists(resource_path('views/page_editor_probe'));
+        File::put(resource_path('views/page_editor_probe/a.blade.php'), 'original');
+
+        $response = $this->actingAs($boss)->get(route('admin.files.edit', [
+            'root' => 'custom',
+            'path' => 'views/page_editor_probe',
+            'file' => 'a.blade.php',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('page_editor::files.override_of'));
+        $response->assertDontSee(__('page_editor::files.override_orphan'));
+
+        File::deleteDirectory(resource_path('views/page_editor_probe'));
+    }
+
     public function testSaveToCustomKeepsOriginalUntouched(): void
     {
         $boss = User::factory()->boss()->create(['login' => 'boss_save_custom']);

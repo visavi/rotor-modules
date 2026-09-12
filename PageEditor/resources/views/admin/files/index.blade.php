@@ -34,27 +34,35 @@
             @foreach ($entries as $entry)
                 <li class="list-group-item">
                     <div class="float-end">
-                        @unless ($entry['dir'])
-                            <a class="btn btn-link p-0 me-2" href="{{ route('admin.files.download', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}"><i class="fa fa-download"></i></a>
+                        {{-- Каталог модуля удаляется и переименовывается только из админки модулей --}}
+                        @unless ($entry['module'])
+                            @unless ($entry['dir'])
+                                <a class="btn btn-link p-0 me-2" href="{{ route('admin.files.download', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}"><i class="fa fa-download"></i></a>
+                            @endunless
+
+                            <form action="{{ route('admin.files.rename') }}" method="post" class="d-inline">
+                                @csrf
+                                <input type="hidden" name="root" value="{{ $root }}">
+                                <input type="hidden" name="path" value="{{ $path }}">
+                                <input type="hidden" name="filename" value="{{ $entry['name'] }}">
+                                <input type="hidden" name="newname" value="">
+                                <button class="btn btn-link p-0 me-2" type="button" onclick="return promptAction(this)"
+                                        data-prompt="{{ __('page_editor::files.file_name') }}"
+                                        data-value="{{ $entry['name'] }}"
+                                        data-field="newname"><i class="fa fa-pen"></i></button>
+                            </form>
+
+                            <form action="{{ route('admin.files.delete') }}" method="post" class="d-inline"
+                                  onsubmit="return confirmAction(this)"
+                                  data-confirm="{{ $entry['dir'] ? __('page_editor::files.confirm_delete_dir') : __('page_editor::files.confirm_delete_file') }}">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="root" value="{{ $root }}">
+                                <input type="hidden" name="path" value="{{ $path }}">
+                                <input type="hidden" name="{{ $entry['dir'] ? 'dirname' : 'filename' }}" value="{{ $entry['name'] }}">
+                                <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
+                            </form>
                         @endunless
-
-                        <form action="{{ route('admin.files.rename') }}" method="post" class="d-inline js-file-rename-form" data-name="{{ $entry['name'] }}" data-prompt="{{ __('page_editor::files.file_name') }}">
-                            @csrf
-                            <input type="hidden" name="root" value="{{ $root }}">
-                            <input type="hidden" name="path" value="{{ $path }}">
-                            <input type="hidden" name="filename" value="{{ $entry['name'] }}">
-                            <input type="hidden" name="newname" value="">
-                            <button class="btn btn-link p-0 me-2 js-file-rename-btn" type="button"><i class="fa fa-pen"></i></button>
-                        </form>
-
-                        <form action="{{ route('admin.files.delete') }}" method="post" class="d-inline js-file-delete-form" data-confirm="{{ $entry['dir'] ? __('page_editor::files.confirm_delete_dir') : __('page_editor::files.confirm_delete_file') }}">
-                            @csrf
-                            @method('DELETE')
-                            <input type="hidden" name="root" value="{{ $root }}">
-                            <input type="hidden" name="path" value="{{ $path }}">
-                            <input type="hidden" name="{{ $entry['dir'] ? 'dirname' : 'filename' }}" value="{{ $entry['name'] }}">
-                            <button class="btn btn-link p-0 js-file-delete-btn"><i class="fa fa-times"></i></button>
-                        </form>
                     </div>
 
                     @if ($entry['dir'])
@@ -72,12 +80,16 @@
                             <b><a href="{{ route('admin.files.edit', ['root' => $root, 'path' => $path, 'file' => $entry['name']]) }}">{{ $entry['name'] }}</a></b>
                             @if ($entry['overridden'])
                                 <i class="fas fa-code-branch text-warning ms-1" title="{{ __('page_editor::files.override_exists') }}"></i>
+                            @elseif ($entry['orphan'])
+                                <i class="fas fa-unlink text-warning ms-1" title="{{ __('page_editor::files.override_orphan') }}"></i>
                             @endif
                         @else
                             <b>{{ $entry['name'] }}</b>
                         @endif
                         ({{ formatSize($entry['size']) }})<br>
-                        {{ __('page_editor::files.lines') }}: {{ $entry['lines'] }} /
+                        @if ($entry['editable'])
+                            {{ __('page_editor::files.lines') }}: {{ $entry['lines'] }} /
+                        @endif
                         {{ __('page_editor::files.changed') }}: {{ dateFixed(\Illuminate\Support\Carbon::createFromTimestamp($entry['mtime'])) }}
                     @endif
                 </li>
@@ -87,29 +99,3 @@
         {{ showError(__('page_editor::files.empty_objects')) }}
     @endif
 @stop
-
-@push('scripts')
-    <script>
-        document.querySelectorAll('.js-file-rename-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                const form = btn.closest('form');
-                const newName = prompt(form.dataset.prompt, form.dataset.name);
-
-                if (! newName) {
-                    return;
-                }
-
-                form.elements.newname.value = newName;
-                form.submit();
-            });
-        });
-
-        document.querySelectorAll('.js-file-delete-form').forEach(function (form) {
-            form.addEventListener('submit', function (e) {
-                if (! confirm(form.dataset.confirm)) {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
-@endpush

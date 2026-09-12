@@ -49,6 +49,21 @@ class FileController extends Controller
     }
 
     /**
+     * Сообщает, что имя принадлежит каталогу модуля
+     *
+     * Модуль удаляется и переименовывается только из админки модулей: там
+     * снимаются настройки, таблицы и хуки. Здесь за крестиком осталась бы
+     * установленная запись без файлов
+     */
+    private function isModuleDirectory(string $name): bool
+    {
+        return $this->root === 'modules'
+            && $this->path === ''
+            && $name !== ''
+            && is_dir(PathResolver::resolve($this->root, $name));
+    }
+
+    /**
      * Главная страница
      */
     public function index(): View
@@ -99,6 +114,11 @@ class FileController extends Controller
                 // Правка в custom перебивает оригинал, поэтому её видно ещё в списке
                 'overridden' => ! $isDir && $overridable
                     && (OverrideResolver::override($this->root, $this->path, $name)['exists'] ?? false),
+                // Обратный случай: оригинал переименован или удалён, и правка уже ничего
+                // не подменяет. Без пометки это видно, только открыв файл
+                'orphan' => ! $isDir && $this->root === 'custom'
+                    && ($original = OverrideResolver::original($this->path, $name)) !== null
+                    && ! $original['exists'],
             ];
         }
 
@@ -108,10 +128,10 @@ class FileController extends Controller
         $roots = array_keys(PathResolver::roots());
         $path = $this->path;
 
-        // Поиск работает не по всем корням, поэтому строка поиска на листинге
-        // уходит в текущий корень только если он разрешён для поиска
-        $searchRoots = config('page_editor.search_roots', []);
-        $searchRoot = in_array($root, $searchRoots, true) ? $root : ($searchRoots[0] ?? null);
+        // Поиск работает не по всем корням: в assets лежат картинки и шрифты, искать
+        // в них нечего. Раньше поле молча уходило в первый корень из списка, то есть
+        // из «Ресурсов» искало по шаблонам — теперь его там просто нет
+        $searchRoot = in_array($root, config('page_editor.search_roots', []), true) ? $root : null;
 
         return view('page_editor::admin/files/index', compact('entries', 'root', 'roots', 'path', 'searchRoot'));
     }
@@ -292,6 +312,51 @@ class FileController extends Controller
     }
 
     /**
+     * Загрузка файла
+     */
+    public function upload(Request $request, Validator $validator): RedirectResponse
+    {
+        $this->denyReadOnly();
+
+        $directory = PathResolver::resolve($this->root, $this->path);
+        $params = ['root' => $this->root, 'path' => $this->path];
+
+        if (! is_dir($directory) || ! is_writable($directory)) {
+            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
+        }
+
+        $file = $request->file('file');
+        $name = $file ? PathResolver::normalize($file->getClientOriginalName()) : '';
+
+        // Картинки и шрифты редактор не открывает, но положить их в корень нужно,
+        // поэтому список расширений шире редактируемых
+        $extensions = array_unique(array_merge(
+            (array) config('page_editor.editable', []),
+            (array) config('page_editor.uploadable', []),
+        ));
+
+        $validator
+            ->file($file, [
+                'extensions' => $extensions,
+                'maxsize'    => (int) config('page_editor.max_upload_size', 5242880),
+            ], ['file' => __('page_editor::files.file_invalid')])
+            ->regex($name, '|^[a-z0-9_\-]+(\.[a-z0-9_\-]+)*$|i', ['file' => __('page_editor::files.file_invalid')])
+            ->false(file_exists($directory . '/' . $name), ['file' => __('page_editor::files.file_exist')]);
+
+        if (! $validator->isValid()) {
+            return redirect()->route('admin.files.create', $params)
+                ->withInput()
+                ->withErrors($validator->getErrors());
+        }
+
+        $file->move($directory, $name);
+        chmod($directory . '/' . $name, 0644);
+
+        return redirect()->route('admin.files.index', $params)
+            ->with('flash.success', __('page_editor::files.file_success_uploaded'));
+    }
+
+    /**
      * Удаление файла
      */
     public function delete(Request $request, Validator $validator): RedirectResponse
@@ -314,6 +379,7 @@ class FileController extends Controller
             $validator->true(is_file($directory . '/' . $filename), __('page_editor::files.file_not_exist'));
         } else {
             $validator->true($dirname !== '' && is_dir($directory . '/' . $dirname), __('page_editor::files.directory_not_exist'));
+            $validator->false($this->isModuleDirectory($dirname), __('page_editor::files.module_directory_protected'));
         }
 
         if (! $validator->isValid()) {
@@ -359,6 +425,14 @@ class FileController extends Controller
         $validator->true($name !== '' && file_exists($directory . '/' . $name), __('page_editor::files.file_not_exist'));
         $validator->regex($newName, '|^[a-z0-9_\-]+(\.[a-z0-9_\-]+)*$|i', __('page_editor::files.file_invalid'));
         $validator->false(file_exists($directory . '/' . $newName), __('page_editor::files.file_exist'));
+
+        $validator->false($this->isModuleDirectory($name), __('page_editor::files.module_directory_protected'));
+
+        // Расширение проверяем той же меркой, что и при создании: иначе файл уезжает
+        // в нередактируемые, и открыть его, чтобы вернуть имя, уже нельзя
+        if (is_file($directory . '/' . $name)) {
+            $validator->true(PathResolver::isEditable($newName), __('page_editor::files.file_invalid'));
+        }
 
         if (! $validator->isValid()) {
             return redirect()->route('admin.files.index', $params)

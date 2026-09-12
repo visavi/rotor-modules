@@ -23,7 +23,13 @@
         </div>
     @endif
 
-    @if ($original)
+    @if ($original && ! $original['exists'])
+        {{-- Правка без оригинала: файл переименовали или удалили, подменять нечего --}}
+        <div class="alert alert-warning">
+            <i class="fas fa-unlink"></i>
+            {{ __('page_editor::files.override_orphan') }}
+        </div>
+    @elseif ($original)
         <div class="alert alert-info">
             <i class="fas fa-code-branch"></i>
             {{ __('page_editor::files.override_of') }}
@@ -182,6 +188,44 @@
         const language = textarea?.dataset.language || 'none';
         const line = parseInt(textarea?.dataset.gotoLine || '0', 10);
 
+        // Смещение в тексте указывает внутрь одного из текстовых узлов подсветки
+        const pointAt = (element, offset) => {
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+            let passed = 0;
+
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                const length = node.textContent.length;
+
+                if (passed + length >= offset) {
+                    return [node, offset - passed];
+                }
+
+                passed += length;
+            }
+
+            return null;
+        };
+
+        const selectRange = (element, from, to) => {
+            const start = pointAt(element, from);
+            const end = pointAt(element, to);
+
+            if (! start || ! end) {
+                return false;
+            }
+
+            const range = document.createRange();
+            range.setStart(start[0], start[1]);
+            range.setEnd(end[0], end[1]);
+
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            return true;
+        };
+
         // Поиск по открытому файлу: выделяет совпадение прямо в редакторе
         const initSearch = (toolbar, editor) => {
             const input = toolbar.querySelector('.js-editor-search');
@@ -213,40 +257,10 @@
                 }
             };
 
-            // Смещение в тексте указывает внутрь одного из текстовых узлов подсветки
-            const pointAt = (offset) => {
-                const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
-                let passed = 0;
-
-                while (walker.nextNode()) {
-                    const node = walker.currentNode;
-                    const length = node.textContent.length;
-
-                    if (passed + length >= offset) {
-                        return [node, offset - passed];
-                    }
-
-                    passed += length;
-                }
-
-                return null;
-            };
-
             const select = (index) => {
-                const start = pointAt(matches[index]);
-                const end = pointAt(matches[index] + input.value.length);
-
-                if (! start || ! end) {
+                if (! selectRange(editor, matches[index], matches[index] + input.value.length)) {
                     return;
                 }
-
-                const range = document.createRange();
-                range.setStart(start[0], start[1]);
-                range.setEnd(end[0], end[1]);
-
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
 
                 const line = editor.textContent.slice(0, matches[index]).split('\n').length;
                 const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight) || 18;
@@ -287,6 +301,25 @@
                 const lineHeight = parseFloat(window.getComputedStyle(element).lineHeight) || 18;
                 element.scrollTop = Math.max(0, (line - 3) * lineHeight);
             }
+        };
+
+        // Переход из поиска по коду: строка выделяется, а не только подкручивается.
+        // Короткий файл прокручивать некуда, и без выделения непонятно, куда вёл результат
+        const gotoLine = (element) => {
+            const lines = element.textContent.split('\n');
+
+            if (line < 1 || line > lines.length) {
+                return;
+            }
+
+            let offset = 0;
+
+            for (let i = 0; i < line - 1; i++) {
+                offset += lines[i].length + 1;
+            }
+
+            selectRange(element, offset, offset + lines[line - 1].length);
+            scrollToLine(element);
         };
 
         if (textarea && language !== 'none' && window.Prism) {
@@ -376,7 +409,7 @@
                 initSearch(toolbar, editor);
             }
 
-            scrollToLine(editor);
+            gotoLine(editor);
         } else if (textarea) {
             // Двоичные и незнакомые расширения правятся обычной textarea
             textarea.addEventListener('keydown', function (e) {
@@ -389,7 +422,7 @@
                 }
             });
 
-            if (line) {
+            if (line > 0) {
                 const lines = textarea.value.split('\n');
                 let offset = 0;
 

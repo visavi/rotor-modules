@@ -9,7 +9,7 @@
 @section('content')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="section-form mb-3 shadow">
                     <form action="{{ route('admin.files.create', ['root' => $root, 'path' => $path]) }}" method="post">
                         @csrf
@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="section-form mb-3 shadow">
                     <form action="{{ route('admin.files.create', ['root' => $root, 'path' => $path]) }}" method="post">
                         @csrf
@@ -38,8 +38,24 @@
                     </form>
                 </div>
             </div>
+
+            <div class="col-md-4">
+                <div class="section-form mb-3 shadow">
+                    <form action="{{ route('admin.files.upload', ['root' => $root, 'path' => $path]) }}" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <div class="mb-3{{ hasError('file') }}">
+                            <label for="file" class="form-label">{{ __('page_editor::files.upload_file') }}:</label>
+                            <input type="file" class="form-control" id="file" name="file" required>
+                            <div class="invalid-feedback">{{ textError('file') }}</div>
+                        </div>
+
+                        <button class="btn btn-primary">{{ __('page_editor::files.upload') }}</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <p class="text-muted fst-italic">{{ __('page_editor::files.create_hint') }}</p>
+        <p class="text-muted fst-italic">{{ __('page_editor::files.upload_hint', ['size' => formatSize((int) config('page_editor.max_upload_size'))]) }}</p>
     </div>
 @stop

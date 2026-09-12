@@ -11,7 +11,7 @@ return [
         'assets'  => public_path('assets'),
     ],
 
-    'search_roots' => ['views', 'lang', 'modules', 'app'],
+    'search_roots' => ['views', 'lang', 'custom', 'modules', 'app'],
 
     // Корни только для поиска: открыть файл на редактирование нельзя,
     // но найти использование ключа или хука в коде ядра нужно
@@ -28,6 +28,10 @@ return [
         'md', 'txt', 'xml', 'svg', 'html', 'yml',
     ],
 
+    // Загрузить можно и то, что редактор не открывает: картинки, шрифты, иконки
+    'uploadable' => ['png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'woff', 'woff2', 'ttf', 'otf', 'eot'],
+
+    'max_upload_size'    => 5242880,
     'max_edit_size'      => 1048576,
     'max_search_size'    => 1048576,
     'max_search_results' => 500,

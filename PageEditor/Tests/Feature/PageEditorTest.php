@@ -3,6 +3,7 @@
 namespace Modules\PageEditor\Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Tests\ModuleTestCase;
 
@@ -291,6 +292,144 @@ class PageEditorTest extends ModuleTestCase
         $this->assertSame('from-body', file_get_contents($from));
         $this->assertFileExists($existing);
         $this->assertSame('existing-body', file_get_contents($existing));
+    }
+
+    public function testRenameRejectsNotEditableExtension(): void
+    {
+        $from = resource_path('views/page_editor_from.blade.php');
+        file_put_contents($from, 'body');
+
+        $this->actingAs($this->boss)->post(route('admin.files.rename'), [
+            'root'     => 'views',
+            'filename' => 'page_editor_from.blade.php',
+            'newname'  => 'page_editor_from.tpl',
+        ])->assertRedirect();
+
+        // Иначе файл уезжает в нередактируемые и открыть его, чтобы вернуть имя, нельзя
+        $this->assertFileExists($from);
+        $this->assertFileDoesNotExist(resource_path('views/page_editor_from.tpl'));
+    }
+
+    public function testRenameAllowsDirectoryWithoutExtension(): void
+    {
+        $from = resource_path('views/page_editor_dir');
+        File::ensureDirectoryExists($from);
+
+        $this->actingAs($this->boss)->post(route('admin.files.rename'), [
+            'root'     => 'views',
+            'filename' => 'page_editor_dir',
+            'newname'  => 'page_editor_dir_renamed',
+        ])->assertRedirect();
+
+        $this->assertDirectoryDoesNotExist($from);
+        $this->assertDirectoryExists(resource_path('views/page_editor_dir_renamed'));
+
+        File::deleteDirectory(resource_path('views/page_editor_dir_renamed'));
+    }
+
+    public function testUploadStoresFile(): void
+    {
+        $response = $this->actingAs($this->boss)->post(route('admin.files.upload', [
+            'root' => 'views',
+        ]), [
+            'file' => UploadedFile::fake()->create('page_editor_upload.blade.php', 1),
+        ]);
+
+        $response->assertRedirect();
+        $this->assertFileExists(resource_path('views/page_editor_upload.blade.php'));
+    }
+
+    public function testUploadRejectsForbiddenExtension(): void
+    {
+        $this->actingAs($this->boss)->post(route('admin.files.upload', [
+            'root' => 'views',
+        ]), [
+            'file' => UploadedFile::fake()->create('page_editor_upload.exe', 1),
+        ])->assertRedirect();
+
+        $this->assertFileDoesNotExist(resource_path('views/page_editor_upload.exe'));
+    }
+
+    public function testUploadKeepsExistingFile(): void
+    {
+        $existing = resource_path('views/page_editor_upload.blade.php');
+        file_put_contents($existing, 'existing-body');
+
+        $this->actingAs($this->boss)->post(route('admin.files.upload', [
+            'root' => 'views',
+        ]), [
+            'file' => UploadedFile::fake()->create('page_editor_upload.blade.php', 1),
+        ])->assertRedirect();
+
+        $this->assertSame('existing-body', file_get_contents($existing));
+    }
+
+    public function testDeleteKeepsModuleDirectory(): void
+    {
+        $this->actingAs($this->boss)->delete(route('admin.files.delete'), [
+            'root'    => 'modules',
+            'dirname' => 'PageEditor',
+        ])->assertRedirect();
+
+        // Модуль сносится из админки модулей, иначе останется запись без файлов
+        $this->assertDirectoryExists(base_path('modules/PageEditor'));
+    }
+
+    public function testRenameKeepsModuleDirectory(): void
+    {
+        $this->actingAs($this->boss)->post(route('admin.files.rename'), [
+            'root'     => 'modules',
+            'filename' => 'PageEditor',
+            'newname'  => 'PageEditorRenamed',
+        ])->assertRedirect();
+
+        $this->assertDirectoryExists(base_path('modules/PageEditor'));
+        $this->assertDirectoryDoesNotExist(base_path('modules/PageEditorRenamed'));
+    }
+
+    public function testSubdirectoryOfModuleStaysRemovable(): void
+    {
+        $directory = base_path('modules/PageEditor/page_editor_probe');
+        File::ensureDirectoryExists($directory);
+
+        $this->actingAs($this->boss)->delete(route('admin.files.delete'), [
+            'root'    => 'modules',
+            'path'    => 'PageEditor',
+            'dirname' => 'page_editor_probe',
+        ])->assertRedirect();
+
+        $this->assertDirectoryDoesNotExist($directory);
+    }
+
+    public function testListingHidesSearchForRootWithoutSearch(): void
+    {
+        // В assets лежат картинки и шрифты: поле уходило бы поиском по шаблонам
+        $this->actingAs($this->boss)->get(route('admin.files.index', ['root' => 'assets']))
+            ->assertOk()
+            ->assertDontSee(__('page_editor::files.search_hint'));
+    }
+
+    public function testListingShowsSearchForSearchableRoot(): void
+    {
+        $this->actingAs($this->boss)->get(route('admin.files.index', ['root' => 'views']))
+            ->assertOk()
+            ->assertSee(__('page_editor::files.search_hint'));
+    }
+
+    public function testListingMarksOrphanOverride(): void
+    {
+        File::ensureDirectoryExists(resource_path('custom/views/page_editor_probe'));
+        File::put(resource_path('custom/views/page_editor_probe/a.blade.php'), 'x');
+
+        $response = $this->actingAs($this->boss)->get(route('admin.files.index', [
+            'root' => 'custom',
+            'path' => 'views/page_editor_probe',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('page_editor::files.override_orphan'));
+
+        File::deleteDirectory(resource_path('custom/views/page_editor_probe'));
     }
 
     public function testDownloadReturnsFile(): void

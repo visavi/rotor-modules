@@ -18,6 +18,7 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
                 Route::match(['get', 'post'], '/create', 'create')->name('create');
                 Route::delete('/delete', 'delete')->name('delete');
                 Route::post('/rename', 'rename')->name('rename');
+                Route::post('/upload', 'upload')->name('upload');
                 Route::get('/download', 'download')->name('download');
             });
 
