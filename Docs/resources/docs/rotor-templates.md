@@ -170,9 +170,23 @@ resources/views/themes/my-theme/views/
 @yield('titlebar')
 @yield('flash')
 @yield('content')
+@yield('footer')             {{-- @includeIf('theme::footer') --}}
 @stack('styles')
 @stack('scripts')            {{-- сюда попадают модалки языка и правки комментариев --}}
 @hook('head') @hook('footer') @hook('contentStart') @hook('contentEnd')
+```
+
+Шапка, меню и футер подключаются секциями, а не через `@include` напрямую:
+так страница может их погасить. На этом построен `layout_simple` — он наследует
+макет темы (значит, стили подключает сама тема) и отдаёт пустые секции:
+
+```blade
+@extends('theme::layout')
+
+@section('navbar')@stop
+@section('sidebar')@stop
+@section('titlebar')@stop
+@section('footer')@stop
 ```
 
 ## Хелперы в шаблонах

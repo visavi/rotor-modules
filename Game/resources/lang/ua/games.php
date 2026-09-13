@@ -214,7 +214,7 @@ return [
         'black' => 'Чорне',
         'zero'  => 'Зеро',
     ],
-    'roulette_bets'           => [
+    'roulette_bets' => [
         'red'     => 'Червоне',
         'black'   => 'Чорне',
         'even'    => 'Парне',

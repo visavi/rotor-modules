@@ -239,7 +239,7 @@ class GuessNumberTest extends ModuleTestCase
         // иначе игрок жмёт кнопку и не понимает, почему ничего не происходит
         $response = $this->actingAs($this->user)->postJson(
             '/games/guess/go',
-            ['guess' => GuessNumberController::MAX + 50],
+            ['guess'            => GuessNumberController::MAX + 50],
             ['X-Requested-With' => 'XMLHttpRequest'],
         );
 

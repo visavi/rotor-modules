@@ -102,6 +102,7 @@ class GuestbookController extends Controller
 
             return redirect()
                 ->route('guestbook.index')
+                ->withFragment('post_' . $guestbook->id)
                 ->with('success', $active ? __('main.message_added_success') : __('main.message_publish_moderation'));
         }
 
@@ -142,6 +143,7 @@ class GuestbookController extends Controller
 
                 return redirect()
                     ->route('guestbook.index')
+                    ->withFragment('post_' . $post->id)
                     ->with('success', __('main.message_edited_success'));
             }
 

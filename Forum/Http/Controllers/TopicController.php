@@ -195,6 +195,7 @@ class TopicController extends Controller
         $topic->refresh();
 
         return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $this->lastPage($topic)])
+            ->withFragment('post_' . $post->id)
             ->with('success', __('main.message_added_success'));
     }
 
@@ -484,6 +485,7 @@ class TopicController extends Controller
                 ]);
 
                 return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => $page])
+                    ->withFragment('post_' . $post->id)
                     ->with('success', __('main.message_edited_success'));
             }
 

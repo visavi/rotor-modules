@@ -34,7 +34,7 @@
         @endif
 
         @foreach ($posts as $post)
-            <div class="section mb-3 shadow">
+            <div class="section mb-3 shadow" id="post_{{ $post->id }}">
                 <div class="user-avatar">
                     @if ($post->user_id)
                         {{ $post->user->getAvatar() }}

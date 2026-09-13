@@ -248,9 +248,9 @@ class BaccaratController extends Controller
         $rank = intdiv($card - 1, 4);
 
         return match (true) {
-            $rank <= 7 => $rank + 2,
+            $rank <= 7   => $rank + 2,
             $rank === 12 => 1,
-            default    => 0,
+            default      => 0,
         };
     }
 
