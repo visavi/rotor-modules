@@ -7,6 +7,7 @@ return new class extends Migration {
     public function up(): void
     {
         DB::table('settings')->insertOrIgnore([
+            ['name' => 'rekuseractive',   'value' => 1],
             ['name' => 'rekusershow',     'value' => 1],
             ['name' => 'rekuserprice',    'value' => 1000],
             ['name' => 'rekuserpoint',    'value' => 50],
@@ -20,7 +21,7 @@ return new class extends Migration {
     public function down(): void
     {
         DB::table('settings')->whereIn('name', [
-            'rekusershow', 'rekuserprice', 'rekuserpoint',
+            'rekuseractive', 'rekusershow', 'rekuserprice', 'rekuserpoint',
             'rekuseroptprice', 'rekusertime', 'rekusertotal', 'rekuserpost',
         ])->delete();
     }

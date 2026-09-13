@@ -21,11 +21,14 @@ Hook::add('advertTop', static function (): string {
         $html .= view('advert::adverts/_admin_links', compact('result'));
     }
 
+    if (! setting('rekuseractive')) {
+        return $html;
+    }
+
     $userAdverts = Advert::statUserAdverts();
     $result = '';
     if ($userAdverts) {
-        $total = count($userAdverts);
-        $show = setting('rekusershow') > $total ? $total : setting('rekusershow');
+        $show = min(count($userAdverts), (int) setting('rekusershow'));
         $links = Arr::random($userAdverts, $show);
         $result = implode('<br>', $links);
     }

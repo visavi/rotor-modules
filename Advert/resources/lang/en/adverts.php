@@ -12,7 +12,7 @@ return [
     'name'          => 'Title',
     'buy_for'       => 'Buy for',
     'rules_text'    => '
-     Cost of posting links :price for :time hours<br>
+     Cost of posting links :price for :time<br>
      Color and bold text optional, cost of each option :optprice<br>
      The link scrolls on all pages of the site with other user links<br>
      It is forbidden to use any profanity and obscene words in the title of the link<br>
@@ -31,6 +31,7 @@ return [
     'settings_user'  => 'User advertising settings',
     'settings_admin' => 'Admin advertising settings',
 
+    'adverts_active'      => 'User advertising enabled',
     'adverts_count_links' => 'Qty. sponsored links',
     'adverts_price'       => 'Advertising price',
     'adverts_points'      => 'Asset for advertising',

@@ -48,7 +48,7 @@ class AdvertController extends AdminController
 
             $validator
                 ->regex($site, '|^https?://([а-яa-z0-9_\-\.])+(\.([а-яa-z0-9\/\-?_=#])+)+$|iu', ['site' => __('validator.url')])
-                ->length($site, 5, 50, ['site' => __('validator.url_text')])
+                ->length($site, 5, 100, ['site' => __('validator.url_text')])
                 ->length($name, 5, 35, ['name' => __('validator.text')])
                 ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false);
 

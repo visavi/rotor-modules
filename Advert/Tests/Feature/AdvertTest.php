@@ -18,6 +18,7 @@ class AdvertTest extends ModuleTestCase
     {
         parent::setUp();
 
+        $this->overrideSetting('rekuseractive', 1);
         $this->overrideSetting('rekusershow', 5);
         $this->overrideSetting('rekuserpost', 10);
         $this->overrideSetting('rekuserpoint', 10);
@@ -106,7 +107,7 @@ class AdvertTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->get('/adverts/create')
-            ->assertSee(__('advert::adverts.advert_point', ['point' => plural(50, setting('scorename'))]));
+            ->assertSee(__('advert::adverts.advert_point', ['point' => plural(10, setting('scorename'))]));
 
         $this->assertDatabaseCount('adverts', 0);
     }
@@ -149,13 +150,46 @@ class AdvertTest extends ModuleTestCase
         $this->assertSame(now()->addDays(3)->format('Y-m-d H:i'), $advert->deleted_at->format('Y-m-d H:i'));
     }
 
+    public function testAdminAdvertsAreSeparatePerAdmin(): void
+    {
+        $first = User::factory()->create(['level' => User::BOSS]);
+        $second = User::factory()->create(['level' => User::BOSS]);
+
+        $this->actingAs($first)
+            ->post('/admin/admin-adverts', ['site' => 'https://first.test', 'name' => 'Первая ссылка'])
+            ->assertRedirect('admin/admin-adverts');
+
+        $this->actingAs($second)
+            ->post('/admin/admin-adverts', ['site' => 'https://second.test', 'name' => 'Вторая ссылка'])
+            ->assertRedirect('admin/admin-adverts');
+
+        // Второй админ не должен перетирать рекламу первого
+        $this->assertDatabaseHas('adverts', ['user_id' => $first->id, 'name' => 'Первая ссылка']);
+        $this->assertDatabaseHas('adverts', ['user_id' => $second->id, 'name' => 'Вторая ссылка']);
+    }
+
     public function testSectionIsClosedWithoutSetting(): void
     {
-        $this->overrideSetting('rekusershow', 0);
+        $this->overrideSetting('rekuseractive', 0);
 
         $this->actingAs($this->user)
             ->get('/adverts')
             ->assertSee(__('advert::adverts.advert_closed'));
+    }
+
+    public function testDisabledSettingHidesBlockInLayout(): void
+    {
+        $this->advert(['name' => 'Реклама в шапке']);
+        $this->overrideSetting('rekuseractive', 0);
+        Cache::forget('adverts');
+
+        // Блок с предложением разместить рекламу виден только авторизованным
+        $this->actingAs($this->user);
+
+        $html = (string) Hook::call('advertTop');
+
+        $this->assertStringNotContainsString('Реклама в шапке', $html);
+        $this->assertStringNotContainsString(__('advert::adverts.create_advert'), $html);
     }
 
     public function testGuestIsRejected(): void

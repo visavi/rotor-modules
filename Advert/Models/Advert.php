@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Cache;
  * @property string          $site
  * @property string          $name
  * @property string          $color
- * @property int             $bold
+ * @property bool            $bold
  * @property string          $type
  * @property int             $user_id
  * @property CarbonImmutable $created_at
@@ -45,6 +45,7 @@ class Advert extends Model
     {
         return [
             'user_id'    => 'int',
+            'bold'       => 'bool',
             'deleted_at' => 'datetime',
         ];
     }
@@ -62,39 +63,11 @@ class Advert extends Model
      */
     public static function statUserAdverts(): array
     {
-        if (! setting('rekusershow')) {
+        if (! setting('rekuseractive')) {
             return [];
         }
 
-        return Cache::remember('adverts', 1800, static function () {
-            $data = self::query()
-                ->where('type', self::TYPE_USER)
-                ->where('deleted_at', '>', now())
-                ->get();
-
-            if ($data->isEmpty()) {
-                return [];
-            }
-
-            $links = [];
-            foreach ($data as $val) {
-                $name = check($val->name);
-
-                if ($val->color) {
-                    $name = '<span style="color:' . $val->color . '">' . $name . '</span>';
-                }
-
-                $link = '<a href="' . $val->site . '" target="_blank" rel="nofollow">' . $name . '</a>';
-
-                if ($val->bold) {
-                    $link = '<b>' . $link . '</b>';
-                }
-
-                $links[] = $link;
-            }
-
-            return $links;
-        });
+        return Cache::remember('adverts', 1800, static fn () => self::buildLinks(self::TYPE_USER));
     }
 
     /**
@@ -102,32 +75,37 @@ class Advert extends Model
      */
     public static function statAdminAdverts(): array
     {
-        return Cache::remember('adminAdverts', 1800, static function () {
-            $data = self::query()
-                ->where('type', self::TYPE_ADMIN)
-                ->where('deleted_at', '>', now())
-                ->get();
+        return Cache::remember('adminAdverts', 1800, static fn () => self::buildLinks(self::TYPE_ADMIN));
+    }
 
-            $links = [];
-            if ($data->isNotEmpty()) {
-                foreach ($data as $val) {
-                    $name = check($val->name);
+    /**
+     * Формирует html ссылок рекламы
+     */
+    private static function buildLinks(string $type): array
+    {
+        $adverts = self::query()
+            ->where('type', $type)
+            ->where('deleted_at', '>', now())
+            ->get();
 
-                    if ($val->color) {
-                        $name = '<span style="color:' . $val->color . '">' . $name . '</span>';
-                    }
+        $links = [];
+        foreach ($adverts as $advert) {
+            $name = check($advert->name);
 
-                    $link = '<a href="' . $val->site . '" target="_blank">' . $name . '</a>';
-
-                    if ($val->bold) {
-                        $link = '<b>' . $link . '</b>';
-                    }
-
-                    $links[] = $link;
-                }
+            if ($advert->color) {
+                $name = '<span style="color:' . e($advert->color) . '">' . $name . '</span>';
             }
 
-            return $links;
-        });
+            $rel = $type === self::TYPE_USER ? ' rel="nofollow"' : '';
+            $link = '<a href="' . e($advert->site) . '" target="_blank"' . $rel . '>' . $name . '</a>';
+
+            if ($advert->bold) {
+                $link = '<b>' . $link . '</b>';
+            }
+
+            $links[] = $link;
+        }
+
+        return $links;
     }
 }

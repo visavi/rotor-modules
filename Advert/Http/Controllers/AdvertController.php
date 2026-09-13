@@ -29,7 +29,7 @@ class AdvertController extends Controller
             return $next($request);
         });
 
-        if (! setting('rekusershow')) {
+        if (! setting('rekuseractive')) {
             abort(200, __('advert::adverts.advert_closed'));
         }
     }
@@ -55,7 +55,7 @@ class AdvertController extends Controller
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
         if ($this->user->point < setting('rekuserpoint')) {
-            abort(200, __('advert::adverts.advert_point', ['point' => plural(50, setting('scorename'))]));
+            abort(200, __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]));
         }
 
         Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', now())->delete();
@@ -86,7 +86,7 @@ class AdvertController extends Controller
             }
 
             $validator
-                ->gte($this->user->point, setting('rekuserpoint'), __('advert::adverts.advert_point', ['point' => plural(50, setting('scorename'))]))
+                ->gte($this->user->point, setting('rekuserpoint'), __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]))
                 ->true(captchaVerify(), ['protect' => __('validator.captcha')])
                 ->regex($site, '|^https?://([а-яa-z0-9_\-\.])+(\.([а-яa-z0-9\/\-?_=#])+)+$|iu', ['site' => __('validator.url')])
                 ->length($site, 5, 100, ['site' => __('validator.url_text')])

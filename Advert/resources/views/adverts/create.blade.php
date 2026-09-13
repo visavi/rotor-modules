@@ -53,7 +53,7 @@
     </div>
 
     <div class="text-muted fst-italic">
-        {!! __('advert::adverts.rules_text', ['price' => plural(setting('rekuserprice'), setting('moneyname')), 'time' => setting('rekusertime'), 'optprice' => plural(setting('rekuseroptprice'), setting('moneyname'))]) !!}
+        {!! __('advert::adverts.rules_text', ['price' => plural(setting('rekuserprice'), setting('moneyname')), 'time' => plural(setting('rekusertime'), __('main.plural_hours')), 'optprice' => plural(setting('rekuseroptprice'), setting('moneyname'))]) !!}
     </div>
 @stop
 

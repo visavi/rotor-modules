@@ -41,17 +41,16 @@ class AdminAdvertController extends AdminController
                     ->withInput();
             }
 
-            Advert::query()
-                ->where('type', Advert::TYPE_ADMIN)
-                ->updateOrCreate([], [
-                    'site'       => $site,
-                    'name'       => $name,
-                    'color'      => $color,
-                    'bold'       => $bold,
-                    'type'       => Advert::TYPE_ADMIN,
-                    'user_id'    => getUser('id'),
-                    'deleted_at' => now()->addDays((int) setting('rekadmintime')),
-                ]);
+            Advert::query()->updateOrCreate([
+                'type'    => Advert::TYPE_ADMIN,
+                'user_id' => getUser('id'),
+            ], [
+                'site'       => $site,
+                'name'       => $name,
+                'color'      => $color,
+                'bold'       => $bold,
+                'deleted_at' => now()->addDays((int) setting('rekadmintime')),
+            ]);
 
             clearCache('adminAdverts');
 

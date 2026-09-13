@@ -19,9 +19,15 @@
 
             <h5 class="mb-3">{{ __('advert::adverts.settings_user') }}</h5>
 
+            <div class="form-check form-switch mb-3">
+                <input type="hidden" value="0" name="sets[rekuseractive]">
+                <input type="checkbox" class="form-check-input" value="1" name="sets[rekuseractive]" id="rekuseractive"{{ old('sets.rekuseractive', $settings['rekuseractive'] ?? 1) ? ' checked' : '' }}>
+                <label class="form-check-label" for="rekuseractive">{{ __('advert::adverts.adverts_active') }}</label>
+            </div>
+
             <div class="mb-3{{ hasError('sets[rekusershow]') }}">
                 <label for="rekusershow" class="form-label">{{ __('advert::adverts.adverts_count_links') }}:</label>
-                <input type="number" class="form-control" id="rekusershow" name="sets[rekusershow]" maxlength="2" value="{{ old('sets.rekusershow', $settings['rekusershow'] ?? 1) }}" required>
+                <input type="number" class="form-control" id="rekusershow" name="sets[rekusershow]" min="1" value="{{ old('sets.rekusershow', $settings['rekusershow'] ?? 1) }}" required>
                 <div class="invalid-feedback">{{ textError('sets[rekusershow]') }}</div>
             </div>
 
