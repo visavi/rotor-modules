@@ -8,7 +8,7 @@
 
         <div class="rotor-hero__inner">
             @if ($release)
-                <a class="rotor-badge" href="/rotor/releases">
+                <a class="rotor-badge" href="/rotor/releases/{{ rawurlencode($release['tag_name']) }}">
                     <span class="rotor-badge__dot"></span>
                     {{ __('docs::rotor.new_version', ['version' => $release['tag_name']]) }}
                     <i class="fas fa-arrow-right ms-1"></i>

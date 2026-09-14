@@ -10,6 +10,7 @@ Route::middleware('web')->group(function () {
         ->group(function () {
             Route::get('/', 'index');
             Route::get('/releases', 'releases');
+            Route::get('/releases/{tag}', 'release');
             Route::get('/commits', 'commits');
             Route::get('/modules', 'modules');
         });

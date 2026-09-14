@@ -42,6 +42,28 @@ class RotorController extends Controller
     }
 
     /**
+     * Страница одного релиза
+     *
+     * Постоянная ссылка на версию: в списке релиз со временем уезжает
+     * на дальние страницы, а этот адрес не меняется
+     */
+    public function release(string $tag): View
+    {
+        $releases = $this->githubService->getLatestReleases();
+
+        $index = array_search($tag, array_column($releases, 'tag_name'), true);
+
+        if ($index === false) {
+            abort(404, __('docs::rotor.release_not_found'));
+        }
+
+        $release = $releases[$index];
+        $latest = $index === 0;
+
+        return view('docs::release', compact('release', 'latest'));
+    }
+
+    /**
      * Главная страница
      */
     public function commits(Request $request): View
