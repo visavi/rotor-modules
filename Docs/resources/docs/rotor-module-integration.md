@@ -218,6 +218,88 @@ Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
 </div>');
 ```
 
+### onSendMessage — пришло личное сообщение
+
+Вызывается после создания диалогов и увеличения счётчика непрочитанных. `$user` — получатель,
+автор берётся из `$message->author`, у системного письма `author_id` равен нулю.
+
+Через это письмо проходят не только личные сообщения: уведомления о подарке, переводе денег,
+ответе на комментарий и бане тоже приходят им.
+
+```php
+use App\Models\Message;
+use App\Models\User;
+
+Registry::onSendMessage(function (Message $message, User $user): void {
+    if (! $message->author_id) {
+        return; // системные не пересылаем
+    }
+
+    Telegram::notify($user, $message->text);
+});
+```
+
+### onSaveStatistic — учёт посещения
+
+Вызывается, когда ядро сохраняет визит. `$newHost` — признак нового хоста, `$hits` — просмотры,
+накопленные сессией с прошлого сохранения:
+
+```php
+Registry::onSaveStatistic(function (bool $newHost, int $hits): void {
+    (new CounterStatistic())->save($newHost, $hits);
+});
+```
+
+### onAdminLog — действие администратора
+
+Вызывается после отправки ответа, чтобы запись в журнал не задерживала страницу:
+
+```php
+use Illuminate\Http\Request;
+
+Registry::onAdminLog(function (Request $request): void {
+    Log::query()->create([
+        'user_id' => auth()->id(),
+        'request' => Str::substr($request->getRequestUri(), 0, 191),
+    ]);
+});
+```
+
+### onProfileValidate — проверка своих полей профиля
+
+Поля добавляются через `Hook::add('profileFields', ...)`. `$strict` равен `false`, когда профиль
+сохраняет администратор — обязательность полей тогда не проверяется:
+
+```php
+use App\Support\Validator;
+
+Registry::onProfileValidate(function (User $user, Request $request, Validator $validator, bool $strict): void {
+    $validator->length($request->input('city'), 0, 50, ['city' => 'Слишком длинное название']);
+});
+```
+
+### onProfileSave — сохранение своих полей профиля
+
+Вызывается после успешной валидации:
+
+```php
+Registry::onProfileSave(function (User $user, Request $request): void {
+    UserField::query()->updateOrCreate(['user_id' => $user->id], ['city' => $request->input('city')]);
+});
+```
+
+### backgroundPath — фоновый путь
+
+Помечает адрес как опрашиваемый скриптом, а не человеком: визит по нему не сохраняется,
+пользователь не поднимается в онлайне, счётчики хостов и хитов не крутятся.
+
+Нужен для api-маршрутов: там визит пишет `CheckToken`, снять её через `withoutMiddleware` нельзя,
+она же и авторизует. В вебе то же самое достигается исключением `SaveStatistic` у маршрута.
+
+```php
+Registry::backgroundPath('api/notifier/check');
+```
+
 ## Морф-имена
 
 Каждая модель, участвующая в Registry, объявляет морф-имя:
