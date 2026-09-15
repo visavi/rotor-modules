@@ -12,9 +12,10 @@
         <circle cx="161" cy="7" r="2" fill="#22c55e"/>
         <text fill="var(--bs-body-color)" x="119" y="25" font-size="14" font-weight="700">{{ formatShortNum($online) }}</text>
         @foreach($bars as $i => $bar)
-            <rect fill="{{ $bar['c'] }}" x="{{ 5 + $i * 23 }}" y="{{ 49 - $bar['h'] }}" width="20" height="{{ $bar['h'] }}" rx="1"/>
-            <rect fill="{{ $bar['c'] }}" x="{{ 5 + $i * 23 }}" y="47" width="20" height="2"/>
-            <text fill="#ffffff" x="{{ 15 + $i * 23 }}" y="48" font-size="6" text-anchor="middle" font-weight="700">{{ $bar['l'] }}</text>
+            @if($bar['h'])
+                <rect fill="{{ $bar['c'] }}" x="{{ 5 + $i * 23 }}" y="{{ 49 - $bar['h'] }}" width="20" height="{{ $bar['h'] }}" rx="1"/>
+            @endif
+            <text fill="#ffffff" stroke="#000000" stroke-opacity="0.65" stroke-width="1.8" stroke-linejoin="round" paint-order="stroke" x="{{ 15 + $i * 23 }}" y="48" font-size="6" text-anchor="middle" font-weight="700">{{ $bar['l'] }}</text>
         @endforeach
     </svg>
 </a></div>
