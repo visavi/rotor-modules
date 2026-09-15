@@ -33,17 +33,31 @@ Hook::add('counter', static function (): ?string {
 
     $week = statsWeek();
 
-    $maxHosts = $week->max('hosts') ?: 1;
-    $bars = [];
+    // Активные сутки счётчика: пока они не закрыты, их итогов нет в архиве
+    $today = date('Y-m-d 00:00:00', strtotime($counter['period'] ?? 'now'));
+
+    $days = [];
     for ($i = 6; $i >= 0; $i--) {
-        $ts = now()->subDays($i)->timestamp;
-        $date = date('Y-m-d 00:00:00', $ts);
-        $dow = date('D', $ts);
-        $hosts = $week->get($date)?->hosts;
+        $day = now()->subDays($i);
+        $date = $day->format('Y-m-d 00:00:00');
+
+        // За текущий день записи в архиве ещё нет, счётчик берётся из активных суток
+        $days[] = [
+            'hosts' => $date === $today
+                ? (int) ($counter['dayhosts'] ?? 0)
+                : (int) $week->get($date)?->hosts,
+            'dow' => $day->format('D'),
+        ];
+    }
+
+    $maxHosts = max(array_column($days, 'hosts')) ?: 1;
+
+    $bars = [];
+    foreach ($days as $day) {
         $bars[] = [
-            'h' => max(7, (int) round($hosts / $maxHosts * 20)),
-            'c' => $barColors[$dow] ?? '#0d6efd',
-            'l' => __('main.' . strtolower(substr($dow, 0, 2))),
+            'h' => $day['hosts'] ? 7 + (int) round($day['hosts'] / $maxHosts * 13) : 7,
+            'c' => $barColors[$day['dow']] ?? '#0d6efd',
+            'l' => __('main.' . strtolower(substr($day['dow'], 0, 2))),
         ];
     }
 

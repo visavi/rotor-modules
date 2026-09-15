@@ -3,7 +3,7 @@
 return [
     'name'        => 'Счетчик посещений',
     'description' => 'Счётчик хостов и хитов с графиками посещаемости и блоком в футере',
-    'version'     => '1.0.3',
+    'version'     => '1.0.4',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

@@ -19,10 +19,14 @@ class CounterController extends Controller
         $count = statsCounter();
         $online = statsOnline();
 
+        // Активный период счётчика: пока он не закрыт, его итогов нет в архиве
+        $hour = $count['period'] ?? now()->format('Y-m-d H:00:00');
+        $today = date('Y-m-d 00:00:00', strtotime($hour));
+
         $counts31 = [];
         $counters = Counter31::query()
+            ->where('period', '>=', now()->subDays(29)->format('Y-m-d 00:00:00'))
             ->orderByDesc('period')
-            ->limit(30)
             ->get()
             ->keyBy('period');
 
@@ -31,15 +35,16 @@ class CounterController extends Controller
 
             $cnt = $counters->get($curDate);
 
-            $counts31['hits'][] = $cnt->hits ?? 0;
-            $counts31['hosts'][] = $cnt->hosts ?? 0;
+            // Текущие сутки в архив ещё не ушли, данные берутся из активного счётчика
+            $counts31['hits'][] = $curDate === $today ? (int) ($count['dayhits'] ?? 0) : (int) ($cnt->hits ?? 0);
+            $counts31['hosts'][] = $curDate === $today ? (int) ($count['dayhosts'] ?? 0) : (int) ($cnt->hosts ?? 0);
             $counts31['labels'][] = date('M j', strtotime($curDate));
         }
 
         $counts24 = [];
         $counters = Counter24::query()
+            ->where('period', '>=', now()->subHours(23)->format('Y-m-d H:00:00'))
             ->orderByDesc('period')
-            ->limit(24)
             ->get()
             ->keyBy('period');
 
@@ -48,8 +53,9 @@ class CounterController extends Controller
 
             $cnt = $counters->get($curHour);
 
-            $counts24['hits'][] = $cnt->hits ?? 0;
-            $counts24['hosts'][] = $cnt->hosts ?? 0;
+            // Текущий час в архив ещё не ушёл, данные берутся из активного счётчика
+            $counts24['hits'][] = $curHour === $hour ? (int) ($count['hits24'] ?? 0) : (int) ($cnt->hits ?? 0);
+            $counts24['hosts'][] = $curHour === $hour ? (int) ($count['hosts24'] ?? 0) : (int) ($cnt->hosts ?? 0);
             $counts24['labels'][] = date('H', strtotime($curHour));
         }
 

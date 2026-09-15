@@ -29,8 +29,8 @@ if (! function_exists('statsWeek')) {
     {
         return Cache::remember('counter_week', 600, static function () {
             return Counter31::query()
+                ->where('period', '>=', now()->subDays(6)->format('Y-m-d 00:00:00'))
                 ->orderByDesc('period')
-                ->limit(7)
                 ->get(['period', 'hosts'])
                 ->keyBy('period');
         });
