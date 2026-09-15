@@ -76,14 +76,43 @@ class RotorController extends Controller
 
     /**
      * Публичный каталог модулей
-     *
-     * Агрегирует модули из активных реестров. В отличие от админского
-     * marketplace не фильтрует по версии сайта (это магазин — версия клиента
-     * неизвестна) и отдаёт все версии модуля для выбора под свой Rotor.
      */
     public function modules(Request $request): View
     {
-        $force = (bool) $request->input('refresh');
+        $modules = $this->collectModules((bool) $request->input('refresh'));
+
+        return view('docs::modules', compact('modules'));
+    }
+
+    /**
+     * Страница одного модуля
+     *
+     * Постоянная ссылка: каталог фильтруется на клиенте, а этим адресом
+     * модуль можно дать ссылкой — со своим заголовком и без поиска по списку
+     */
+    public function module(Request $request, string $module): View
+    {
+        $modules = $this->collectModules((bool) $request->input('refresh'));
+
+        if (! isset($modules[$module])) {
+            abort(404, __('docs::rotor.module_not_found'));
+        }
+
+        $info = $modules[$module];
+        $name = $module;
+
+        return view('docs::module', compact('info', 'name'));
+    }
+
+    /**
+     * Агрегирует модули из активных реестров
+     *
+     * В отличие от админского marketplace не фильтрует по версии сайта
+     * (это магазин — версия клиента неизвестна) и отдаёт все версии модуля
+     * для выбора под свой Rotor.
+     */
+    private function collectModules(bool $force): array
+    {
         $modules = [];
 
         $registries = ModuleRegistry::query()->where('active', true)->get();
@@ -120,6 +149,6 @@ class RotorController extends Controller
 
         ksort($modules);
 
-        return view('docs::modules', compact('modules'));
+        return $modules;
     }
 }

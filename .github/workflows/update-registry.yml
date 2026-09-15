@@ -6,6 +6,7 @@ name: Update Registry
 on:
   push:
     branches: [master]
+  workflow_dispatch:
   workflow_call:
     inputs:
       registry-name:
@@ -27,8 +28,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           REGISTRY_NAME: ${{ inputs.registry-name || 'Official Rotor Modules' }}
+          BRANCH: ${{ github.event.repository.default_branch || 'master' }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: |
-          CHANGED=0
+          # Ручной запуск пересобирает реестр даже без новых версий: так в него
+          # попадают поля, добавленные в сам воркфлоу
+          CHANGED=$FORCE
           MODULES="[]"
           FOUND=()
           TODAY=$(date -u +%F)
@@ -76,6 +81,15 @@ jobs:
               ' "$CL_FILE")
             fi
 
+            # Скриншоты отдаются raw-ссылками на ветку по умолчанию: архив модуля
+            # распаковывается только после установки, а каталогу картинки нужны до неё.
+            # Ссылка на ветку, а не на коммит — иначе реестр переписывался бы каждый пуш
+            SHOTS=$(find "$MODULE/screenshots" -maxdepth 1 -type f \
+              \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' -o -iname '*.webp' \) 2>/dev/null \
+              | sort \
+              | sed "s|^|https://raw.githubusercontent.com/$REPO/$BRANCH/|" \
+              | jq -R . | jq -s .)
+
             VERSION_ENTRY=$(jq -n \
               --arg version   "$VERSION" \
               --arg requires  "$(get requires)" \
@@ -96,6 +110,7 @@ jobs:
               --arg email    "$(get email)" \
               --arg homepage "$(get homepage)" \
               --arg today    "$TODAY" \
+              --argjson shots "$SHOTS" \
               --argjson ver  "$VERSION_ENTRY" \
               '
               def verkey: split(".") | map(tonumber? // 0);
@@ -124,6 +139,7 @@ jobs:
                       author:      $author,
                       email:       $email,
                       homepage:    $homepage,
+                      screenshots: $shots,
                       versions: (
                         [(.versions // [])[] | select(.version != $ver.version)]
                         + [released([(.versions // [])[] | select(.version == $ver.version)] | first)]
@@ -140,6 +156,7 @@ jobs:
                   author:      $author,
                   email:       $email,
                   homepage:    $homepage,
+                  screenshots: $shots,
                   versions:    [released(null)]
                 }]
               end

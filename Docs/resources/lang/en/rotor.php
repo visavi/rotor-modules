@@ -27,6 +27,8 @@ return [
     'downloads'         => 'downloads',
     'permalink'         => 'Permalink',
     'release_not_found' => 'Release not found!',
+    'module_not_found'  => 'Module not found!',
+    'changelog'         => 'Changelog',
     'releases_error'    => 'Failed to fetch the latest versions!',
     'commits_error'     => 'Failed to fetch the latest changes!',
     'docs_not_loaded'   => 'Documentation is not loaded',

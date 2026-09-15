@@ -62,6 +62,47 @@ class DocsTest extends ModuleTestCase
         // Версия без released_at остаётся без даты — в сортировке уходит в конец
         $response->assertSee('data-released=""', false);
         $response->assertSee('<option value="released">', false);
+        // Из каталога ведёт постоянная ссылка на страницу модуля
+        $response->assertSee('href="/rotor/modules/Dated"', false);
+    }
+
+    public function testModulePageIsRendered(): void
+    {
+        \App\Models\ModuleRegistry::query()->truncate();
+
+        Http::fake([
+            '*' => Http::response([
+                'name'    => 'Test Registry',
+                'modules' => [
+                    [
+                        'module'      => 'Dated',
+                        'name'        => 'Модуль с датой',
+                        'description' => 'Описание модуля',
+                        'screenshots' => ['https://example.com/shot.png'],
+                        'versions'    => [
+                            ['version' => '1.1.0', 'requires' => '', 'released_at' => '2020-01-02', 'changelog' => 'Что нового'],
+                            ['version' => '1.0.0', 'requires' => '', 'released_at' => '2019-03-04'],
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        \App\Models\ModuleRegistry::query()->create(['url' => 'https://registry.example.com/modules.json', 'active' => true]);
+
+        $this->get('/rotor/modules/Dated')
+            ->assertOk()
+            ->assertSee('Модуль с датой')
+            ->assertSee('Описание модуля')
+            ->assertSee('Что нового')
+            ->assertSee('https://example.com/shot.png')
+            // Прошлые версии на своей странице раскрыты
+            ->assertSee('04.03.2019');
+
+        // В общем каталоге скриншоты не выводятся — список остаётся компактным
+        $this->get('/rotor/modules')->assertOk()->assertDontSee('https://example.com/shot.png');
+
+        $this->get('/rotor/modules/Missing')->assertNotFound();
     }
 
     public function testPageIsRendered(): void

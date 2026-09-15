@@ -13,6 +13,7 @@ Route::middleware('web')->group(function () {
             Route::get('/releases/{tag}', 'release');
             Route::get('/commits', 'commits');
             Route::get('/modules', 'modules');
+            Route::get('/modules/{module}', 'module')->where('module', '[A-Za-z0-9_-]+');
         });
 
     Route::controller(DocsController::class)
