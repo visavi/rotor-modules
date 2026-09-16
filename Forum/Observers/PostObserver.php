@@ -49,6 +49,24 @@ class PostObserver
     }
 
     /**
+     * Handle the Post "updated" event.
+     *
+     * Лента кеширует сами модели, поэтому правка текста иначе висит до конца TTL.
+     * В ленте видно только последнее сообщение темы — остальные кеш не роняют,
+     * как и правки при выключенных в ленте темах
+     */
+    public function updated(Post $post): void
+    {
+        if (! $post->wasChanged('text') || ! setting('feed_topics_show')) {
+            return;
+        }
+
+        if ($post->topic->last_post_id === $post->id) {
+            cache()->increment('feed_version');
+        }
+    }
+
+    /**
      * Handle the Post "deleted" event.
      */
     public function deleted(Post $post): void
