@@ -1,13 +1,50 @@
 <?php
 
+use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
+use Modules\Counter\Models\Counter31;
 use Modules\Counter\Services\CounterStatistic;
 
 // Учёт хостов и хитов при сохранении статистики
 Registry::onSaveStatistic(static function (bool $newHost, int $hits): void {
     (new CounterStatistic())->save($newHost, $hits);
 });
+
+// Виджет посещаемости на главной админки
+Registry::widget('counter', static function (int $days): array {
+    // Оба периода читаются разом: текущий рисуется графиком, прошлый нужен для сравнения
+    $archive = Counter31::query()
+        ->where('period', '>=', now()->subDays($days * 2 - 1)->format('Y-m-d 00:00:00'))
+        ->pluck('hosts', 'period')
+        ->all();
+
+    $counter = statsCounter();
+    // Текущие сутки ещё не закрыты, их итогов в архиве нет
+    $today = date('Y-m-d 00:00:00', strtotime($counter['period'] ?? 'now'));
+
+    $hosts = [];
+    foreach (DashboardService::dates($days * 2) as $day) {
+        $period = $day . ' 00:00:00';
+
+        $hosts[] = $period === $today
+            ? (int) ($counter['dayhosts'] ?? 0)
+            : (int) ($archive[$period] ?? 0);
+    }
+
+    $series = array_slice($hosts, $days);
+
+    return [
+        'label'    => __('counter::counters.visits'),
+        'icon'     => 'fas fa-users',
+        'color'    => '#0d6efd',
+        'type'     => 'line',
+        'url'      => '/counters',
+        'value'    => array_sum($series),
+        'series'   => $series,
+        'previous' => array_sum(array_slice($hosts, 0, $days)),
+    ];
+}, 10);
 
 // Счётчик посещений в футере
 Hook::add('counter', static function (): ?string {

@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\User;
+use App\Services\DashboardService;
 use App\Support\Hook;
+use App\Support\Registry;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
+use Modules\Payment\Services\YooKassaService;
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="/admin/payment-settings">' . __('payment::payments.settings') . '</a>');
@@ -43,3 +47,19 @@ Hook::add('advertForum', static fn () => ($ad = PaidAdvert::renderAdvert(PaidAdv
 Hook::add('sidebarFooterEnd', static fn () => '<li class="mt-3 text-center">
         <a class="btn btn-sm btn-adaptive w-100" href="/payments/advert" rel="nofollow"><i class="fas fa-ad"></i> ' . __('payment::payments.paid_adverts.site_advert') . '</a>
     </li>', -100);
+
+// Виджет платежей на главной админки: считается сумма, а не число заказов
+Registry::widget('orders', static fn (int $days): array => [
+    'label' => __('payment::payments.payment'),
+    'icon'  => 'fas fa-shopping-cart',
+    'color' => '#198754',
+    'type'  => 'bar',
+    'url'   => '/admin/orders',
+    'level' => User::BOSS,
+    'unit'  => setting('currency'),
+    ...DashboardService::trend(
+        Order::query()->where('status', YooKassaService::SUCCEEDED),
+        $days,
+        sum: 'amount',
+    ),
+]);

@@ -14,6 +14,7 @@ return [
     'dynamics_day'       => 'Динамика за сутки',
     'dynamics_month'     => 'Динамика за месяц',
     'hosts'              => 'Хосты',
+    'visits'             => 'Посещения',
     'hits'               => 'Хиты',
     'settings'           => 'Настройки счетчика',
     'counters_enable'    => 'Отображение счетчика',

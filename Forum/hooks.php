@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
 use App\Support\Restatement;
@@ -97,3 +98,16 @@ Hook::add('adminBlockEditor', static function () {
 
 // Ссылка на настройки в навигации настроек
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('forum.settings') . '">' . __('forum::forums.settings') . '</a>');
+
+// Совмещённый виджет форума на главной админки
+Registry::widget('forum', static fn (int $days): array => [
+    'label' => __('forum::forums.forum'),
+    'icon'  => 'fas fa-comments',
+    'color' => '#0d6efd',
+    'type'  => 'line',
+    'url'   => route('forums.index'),
+    ...DashboardService::trends([
+        ['label' => __('forum::forums.topics'), 'color' => '#0d6efd', 'query' => Topic::query()],
+        ['label' => __('forum::forums.posts'), 'color' => '#6610f2', 'query' => Post::query()],
+    ], $days),
+]);

@@ -24,8 +24,8 @@ return [
 
 <p>Ссылки будут созданы автоматически с помощью хуков</p>
 INFO,
-    'version'  => '1.0.3',
-    'requires' => '14.3.0',
+    'version'  => '1.0.4',
+    'requires' => '14.7.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

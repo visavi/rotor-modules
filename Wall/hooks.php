@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
 use Illuminate\Support\Facades\Cache;
@@ -27,3 +28,12 @@ Hook::add('userActionStart', static function ($user) {
 
 // Admin settings nav link
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('wall.settings') . '">' . __('wall::walls.settings') . '</a>');
+
+// Виджет записей на стенах на главной админки
+Registry::widget('walls', static fn (int $days): array => [
+    'label' => __('wall::walls.wall_posts'),
+    'icon'  => 'fas fa-comment-dots',
+    'color' => '#20c997',
+    'type'  => 'line',
+    ...DashboardService::trend(Wall::query(), $days),
+]);

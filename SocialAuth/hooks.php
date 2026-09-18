@@ -1,6 +1,9 @@
 <?php
 
+use App\Services\DashboardService;
 use App\Support\Hook;
+use App\Support\Registry;
+use Modules\SocialAuth\Models\Social;
 
 Hook::add('adminSettingsNav', static function () {
     return '<a class="nav-link" href="' . route('social_auth.settings') . '">'
@@ -41,3 +44,12 @@ Hook::add('userPersonalEnd', static function () {
         . __('social_auth::social_auth.linked_accounts')
         . '</a><br>';
 });
+
+// Виджет привязок соцсетей на главной админки
+Registry::widget('socials', static fn (int $days): array => [
+    'label' => __('social_auth::social_auth.widget'),
+    'icon'  => 'fas fa-share-nodes',
+    'color' => '#0dcaf0',
+    'type'  => 'bar',
+    ...DashboardService::trend(Social::query(), $days),
+]);

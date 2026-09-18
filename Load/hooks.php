@@ -1,9 +1,20 @@
 <?php
 
+use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
 use Illuminate\Support\Facades\Cache;
 use Modules\Load\Models\Down;
+
+// Виджет новых файлов на главной админки
+Registry::widget('downs', static fn (int $days): array => [
+    'label' => __('load::loads.downs'),
+    'icon'  => 'fas fa-download',
+    'color' => '#6f42c1',
+    'type'  => 'bar',
+    'url'   => route('downs.new-files'),
+    ...DashboardService::trend(Down::query()->active(), $days),
+]);
 
 Registry::sitemap('downs', static function () {
     return Cache::remember('DownsSitemap', 600, static function () {

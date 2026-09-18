@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'widget'                     => 'Social',
     'module_name'     => 'Social Auth',
     'settings'        => 'Social Auth Settings',
     'settings_saved'  => 'Settings saved successfully',

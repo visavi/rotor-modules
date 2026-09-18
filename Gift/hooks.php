@@ -1,6 +1,8 @@
 <?php
 
+use App\Services\DashboardService;
 use App\Support\Hook;
+use App\Support\Registry;
 use Modules\Gift\Models\GiftsUser;
 
 // Добавляем ссылку на подарки в меню сайта
@@ -20,3 +22,13 @@ Hook::add('userActionMiddle', static function ($user) {
 
 // Добавляем ссылку на отправку подарка пользователю
 Hook::add('userNotPersonalStart', static fn ($user) => '<i class="fas fa-gift"></i> <a href="/gifts?user=' . $user->login . '">Отправить подарок</a><br>');
+
+// Виджет подарков на главной админки
+Registry::widget('gifts', static fn (int $days): array => [
+    'label' => __('gift::gifts.title'),
+    'icon'  => 'fas fa-gift',
+    'color' => '#d63384',
+    'type'  => 'bar',
+    'url'   => '/gifts',
+    ...DashboardService::trend(GiftsUser::query(), $days),
+]);

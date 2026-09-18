@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\User;
+use App\Services\DashboardService;
 use App\Support\Hook;
+use App\Support\Registry;
+use Modules\Transfer\Models\Transfer;
 
 // Ссылка на перевод денег в анкете пользователя
 Hook::add('userNotPersonalStart', static function ($user) {
@@ -28,3 +32,14 @@ Hook::add('adminBlockModer', static function () {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('transfer.settings') . '">' . __('transfer::transfers.settings') . '</a>');
+
+// Виджет денежных переводов на главной админки
+Registry::widget('transfers', static fn (int $days): array => [
+    'label' => __('transfer::transfers.widget'),
+    'icon'  => 'fas fa-coins',
+    'color' => '#ffc107',
+    'type'  => 'bar',
+    'url'   => route('admin.transfers.index'),
+    'level' => User::MODER,
+    ...DashboardService::trend(Transfer::query(), $days),
+]);

@@ -14,6 +14,7 @@ return [
     'dynamics_day'       => 'Dynamics per day',
     'dynamics_month'     => 'Dynamics for the month',
     'hosts'              => 'Hosts',
+    'visits'             => 'Visits',
     'hits'               => 'Hits',
     'settings'           => 'Counter settings',
     'counters_enable'    => 'Counter display',
