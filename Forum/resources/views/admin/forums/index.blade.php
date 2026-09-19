@@ -22,57 +22,18 @@
 
 @section('content')
     @if ($forums->isNotEmpty())
-        @foreach ($forums as $forum)
-            <div class="section mb-3 shadow">
-                <div class="section-title">
-                    <i class="fa fa-file-alt fa-lg text-muted"></i>
-                    <a href="{{ route('admin.forums.forum', ['id' => $forum->id]) }}">{{ $forum->title }}</a>
-                    <span class="badge bg-adaptive">{{ $forum->count_topics }}/{{ $forum->count_posts }}</span>
-
-                    @if (isAdmin('boss'))
-                        <div class="float-end">
-                            <a href="{{ route('admin.forums.edit', ['id' => $forum->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.forums.delete', ['id' => $forum->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                            </form>
-                        </div>
-                    @endif
-                </div>
-
-                @if ($forum->description)
-                    <div class="section-description text-muted fst-italic small">{{ renderText($forum->description) }}</div>
-                @endif
-
-                <div class="section-content">
-                    @if ($forum->children->isNotEmpty())
-                        @foreach ($forum->children as $child)
-                            <i class="fa fa-copy text-muted"></i> <b><a href="{{ route('admin.forums.forum', ['id' => $child->id ]) }}">{{ $child->title }}</a></b>
-                            <span class="badge bg-adaptive">{{ $child->count_topics }}/{{ $child->count_posts }}</span>
-
-                            @if (isAdmin('boss'))
-                                <a href="{{ route('admin.forums.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                                <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                                </form>
-                            @endif
-                            <br>
-                        @endforeach
-                    @endif
-
-                    @if ($forum->lastTopic->lastPost->id)
-                            {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
-                        <br>
-                            {{ __('forum::forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
-                    @else
-                        {{ __('forum::forums.empty_posts') }}
-                    @endif
-                </div>
+        <div class="section mb-3 shadow">
+            <div class="section-body">
+                <x-category-tree :items="$forums"
+                                 :action="route('admin.forums.sort')"
+                                 row="forum::admin/forums/_row"
+                                 :sortable="isAdmin('boss')" />
             </div>
-        @endforeach
+        </div>
+
+        @if (isAdmin('boss'))
+            @each('forum::admin/forums/_delete', $forums, 'forum')
+        @endif
     @else
         {{ showError(__('forum::forums.empty_forums')) }}
     @endif

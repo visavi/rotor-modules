@@ -92,7 +92,12 @@ class HighLowTest extends ModuleTestCase
     public function testMoveTakesOneCard(): void
     {
         $this->actingAs($this->user)->post('/games/highlow/bet', ['bet' => 100]);
-        $this->actingAs($this->user)->post('/games/highlow/move', ['guess' => 'higher']);
+
+        // На тузе «больше» не предлагается, и ход бы не состоялся: без выбора
+        // по рангу тест падал на каждой четырнадцатой раздаче
+        $guess = $this->rank(session('highlow')['cards'][0]) < 6 ? 'higher' : 'lower';
+
+        $this->actingAs($this->user)->post('/games/highlow/move', ['guess' => $guess]);
 
         $game = session('highlow') ?? session('highlow_result');
 

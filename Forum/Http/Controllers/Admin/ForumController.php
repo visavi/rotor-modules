@@ -7,6 +7,7 @@ namespace Modules\Forum\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\File;
 use App\Models\User;
+use App\Support\CategoryTree;
 use App\Support\Restatement;
 use App\Support\Validator;
 use Illuminate\Database\Query\JoinClause;
@@ -30,12 +31,9 @@ class ForumController extends AdminController
      */
     public function index(): View
     {
-        $forums = Forum::query()
-            ->where('parent_id', 0)
-            ->with('lastTopic.lastPost.user')
-            ->with('children')
-            ->orderBy('sort')
-            ->get();
+        // Дерево строит компонент: он же собирает поле порядка и обязан видеть
+        // тот же список, поэтому раскладывать его здесь незачем
+        $forums = Forum::query()->orderBy('sort')->get();
 
         return view('forum::admin/forums/index', compact('forums'));
     }
@@ -89,7 +87,6 @@ class ForumController extends AdminController
             $parent = int($request->input('parent'));
             $title = $request->input('title');
             $description = $request->input('description');
-            $sort = int($request->input('sort'));
             $closed = empty($request->input('closed')) ? 0 : 1;
 
             $validator
@@ -106,7 +103,6 @@ class ForumController extends AdminController
                     'parent_id'   => $parent,
                     'title'       => $title,
                     'description' => $description,
-                    'sort'        => $sort,
                     'closed'      => $closed,
                 ]);
 
@@ -155,6 +151,22 @@ class ForumController extends AdminController
 
         return redirect()->route('admin.forums.index')
             ->with('success', __('forum::forums.forum_success_deleted'));
+    }
+
+    /**
+     * Сохраняет порядок и вложенность разделов
+     */
+    public function sort(Request $request): RedirectResponse
+    {
+        if (! isAdmin(User::BOSS)) {
+            abort(403, __('errors.forbidden'));
+        }
+
+        CategoryTree::reorder(Forum::class, $request->string('order')->toString());
+
+        return redirect()
+            ->route('admin.forums.index')
+            ->with('success', __('forum::forums.forums_success_sorted'));
     }
 
     /**

@@ -74,6 +74,7 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.forums.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
+                Route::post('/sort', 'sort')->name('sort');
                 Route::get('/{id}', 'forum')->name('forum');
                 Route::post('/create', 'create')->name('create');
                 Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
