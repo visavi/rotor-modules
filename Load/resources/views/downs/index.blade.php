@@ -41,44 +41,56 @@
 
     @foreach ($categories as $category)
         <div class="section mb-3 shadow">
-            <div class="section-title">
-                <i class="fa fa-folder-open"></i>
-                <a href="{{ route('loads.load', ['id' => $category->id]) }}">{{ $category->name }}</a>
+            <div class="section-header d-flex align-items-start position-relative">
+                <div class="flex-grow-1">
+                    <i class="fa fa-folder-open text-muted"></i>
+                    <a href="{{ route('loads.load', ['id' => $category->id]) }}" class="section-title position-relative">{{ $category->name }}</a>
 
-                @if ($category->new)
-                    <span class="badge bg-adaptive">{{ $category->count_downs + $category->children->sum('count_downs') }}/<span style="color:#ff0000">+{{ $category->new->count_downs }}</span></span>
-                @else
-                    <span class="badge bg-adaptive">{{ $category->count_downs + $category->children->sum('count_downs') }}</span>
-                @endif
-            </div>
+                    @if ($category->new)
+                        <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }} / {{ __('main.new') }}">{{ $category->total_downs }}/<span class="text-danger">+{{ $category->new->count_downs }}</span></span>
+                    @else
+                        <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }} / {{ __('main.new') }}">{{ $category->total_downs }}</span>
+                    @endif
+                </div>
 
-            <div>
                 @if ($category->children->isNotEmpty())
-                    @php $category->children->load('children'); @endphp
-                    @foreach ($category->children as $child)
-                        <div>
-                            <i class="fa fa-angle-right"></i> <b><a href="{{ route('loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a></b>
-                            @if ($child->new)
-                                <span class="badge bg-adaptive">{{ $child->count_downs + $child->children->sum('count_downs') }}/<span style="color:#ff0000">+{{ $child->new->count_downs }}</span></span>
-                            @else
-                                <span class="badge bg-adaptive">{{ $child->count_downs + $child->children->sum('count_downs') }}</span>
-                            @endif
-                        </div>
-                    @endforeach
+                    <div>
+                        <a data-bs-toggle="collapse" class="stretched-link" href="#section_{{ $category->id }}">
+                            <i class="treeview-indicator fas fa-angle-down"></i>
+                        </a>
+                    </div>
                 @endif
             </div>
+
+            @if ($category->children->isNotEmpty())
+                <div class="collapse" id="section_{{ $category->id }}">
+                    <div class="section-content border-top p-2">
+                        @foreach ($category->children as $child)
+                            <div>
+                                <i class="fas fa-angle-right"></i>
+                                <a href="{{ route('loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a>
+
+                                @if ($child->new)
+                                    <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }} / {{ __('main.new') }}">{{ $child->total_downs }}/<span class="text-danger">+{{ $child->new->count_downs }}</span></span>
+                                @else
+                                    <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }} / {{ __('main.new') }}">{{ $child->total_downs }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <div class="section-body border-top">
                 @if ($category->lastDown)
-                    {{ __('load::loads.down') }}: <a href="{{ route('downs.view', ['id' => $category->lastDown->id]) }}">{{ $category->lastDown->title }}</a>
+                    <a href="{{ route('downs.view', ['id' => $category->lastDown->id]) }}">{{ $category->lastDown->title }}</a>
 
                     @if ($category->lastDown->isNew())
                         <span class="badge text-bg-success">NEW</span>
                     @endif
-                    <br>
-                    {{ __('main.author') }}: {{ $category->lastDown->user->getProfile() }}
-                    <small class="section-date text-muted fst-italic">
-                        {{ dateFixed($category->lastDown->created_at) }}
+                    <small class="text-muted">
+                        — {{ $category->lastDown->user->getProfile() }}
+                        <span class="section-date fst-italic">{{ dateFixed($category->lastDown->created_at) }}</span>
                     </small>
                 @else
                     {{ __('load::loads.empty_downs') }}

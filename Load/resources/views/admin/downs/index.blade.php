@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        <a class="btn btn-adaptive" href="{{ route('loads.index') }}"><i class="fas fa-wrench"></i></a>
+        <a class="btn btn-adaptive" href="{{ route('loads.index') }}"><i class="fas fa-eye"></i></a>
     </div>
 
     <h1>{{ __('load::loads.loads') }}</h1>
@@ -27,76 +27,18 @@
     @endif
 
     @if ($categories->isNotEmpty())
-        @foreach ($categories as $category)
-            <div class="section mb-3 shadow">
-                <div class="section-title">
-                    <i class="fa fa-folder-open"></i>
-                    <a href="{{ route('admin.loads.load', ['id' => $category->id]) }}">{{ $category->name }}</a>
-                    @if ($category->new)
-                        <span class="badge bg-adaptive">{{ $category->count_downs + $category->children->sum('count_downs') }}/<span style="color:#ff0000">+{{ $category->new->count_downs }}</span></span>
-                    @else
-                        <span class="badge bg-adaptive">{{ $category->count_downs + $category->children->sum('count_downs') }}</span>
-                    @endif
-
-                    @if ($category->closed)
-                        <span class="badge bg-danger">{{ __('load::loads.closed_load') }}</span>
-                    @endif
-
-                    @if (isAdmin('boss'))
-                        <div class="float-end">
-                            <a href="{{ route('admin.loads.edit', ['id' => $category->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.loads.delete', ['id' => $category->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('load::loads.confirm_delete_load') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                            </form>
-                        </div>
-                    @endif
-                </div>
-
-                <div>
-                    @if ($category->children->isNotEmpty())
-                        @php $category->children->load('children'); @endphp
-                        @foreach ($category->children as $child)
-                            <div>
-                                <i class="fa fa-angle-right"></i> <b><a href="{{ route('admin.loads.load', ['id' => $child->id]) }}">{{ $child['name'] }}</a></b>
-                                @if ($child->new)
-                                    <span class="badge bg-adaptive">{{ $child->count_downs + $child->children->sum('count_downs') }}/<span style="color:#ff0000">+{{ $child->new->count_downs }}</span></span>
-                                @else
-                                    <span class="badge bg-adaptive">{{ $child->count_downs + $child->children->sum('count_downs') }}</span>
-                                @endif
-
-                                @if (isAdmin('boss'))
-                                    <a href="{{ route('admin.loads.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                                    <form action="{{ route('admin.loads.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('load::loads.confirm_delete_load') }}')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                                    </form>
-                                @endif
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-
-                <div class="section-body border-top">
-                    @if ($category->lastDown)
-                        {{ __('load::loads.down') }}: <a href="{{ route('downs.view', ['id' => $category->lastDown->id]) }}">{{ $category->lastDown->title }}</a>
-
-                        @if ($category->lastDown->isNew())
-                            <span class="badge text-bg-success">NEW</span>
-                        @endif
-                        <br>
-                        {{ __('main.author') }}: {{ $category->lastDown->user->getProfile() }}
-                        <small class="section-date text-muted fst-italic">
-                            {{ dateFixed($category->lastDown->created_at) }}
-                        </small>
-                    @else
-                        {{ __('load::loads.empty_downs') }}
-                    @endif
-                </div>
+        <div class="section mb-3 shadow">
+            <div class="section-body">
+                <x-category-tree :items="$categories"
+                                 :action="route('admin.loads.sort')"
+                                 row="load::admin/downs/_row"
+                                 :sortable="isAdmin('boss')" />
             </div>
-        @endforeach
+        </div>
+
+        @if (isAdmin('boss'))
+            @each('load::admin/downs/_delete', $categories, 'load')
+        @endif
     @else
         {{ showError(__('load::loads.empty_loads')) }}
     @endif

@@ -7,6 +7,7 @@ namespace Modules\Forum\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
+use App\Support\CategoryTree;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
@@ -27,11 +28,19 @@ class ForumController extends Controller
      */
     public function index(): View
     {
-        $forums = Forum::query()
-            ->where('parent_id', 0)
-            ->with('children.children', 'lastTopic.lastPost.user')
+        // Дерево берётся целиком: счётчик раздела складывает всю ветку,
+        // а связи детей раздаются из памяти, без запроса на раздел
+        $categories = Forum::query()
+            ->with('lastTopic.lastPost.user')
             ->orderBy('sort')
             ->get();
+
+        CategoryTree::totals($categories, [
+            'count_topics' => 'total_topics',
+            'count_posts'  => 'total_posts',
+        ]);
+
+        $forums = CategoryTree::nest($categories);
 
         if ($forums->isEmpty()) {
             abort(200, __('forum::forums.empty_forums'));
@@ -45,7 +54,20 @@ class ForumController extends Controller
      */
     public function forum(int $id): View
     {
-        $forum = Forum::query()->with('parent', 'children.lastTopic.lastPost.user')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Forum::query()
+            ->orderBy('sort')
+            ->with('lastTopic.lastPost.user')
+            ->get();
+
+        CategoryTree::totals($categories, [
+            'count_topics' => 'total_topics',
+            'count_posts'  => 'total_posts',
+        ]);
+
+        CategoryTree::nest($categories);
+
+        $forum = $categories->firstWhere('id', $id);
 
         if (! $forum) {
             abort(404, __('forum::forums.forum_not_exist'));
@@ -65,6 +87,8 @@ class ForumController extends Controller
             ->orderByDesc('locked')
             ->orderByDesc('updated_at')
             ->with('lastPost.user')
+            // Иконке в списке нужен только факт наличия опроса, сам он не грузится
+            ->withExists('vote')
             ->paginate(setting('forumtem'));
 
         return view('forum::forums/forum', compact('forum', 'topics'));

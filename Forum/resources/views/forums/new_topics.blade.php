@@ -32,6 +32,10 @@
                 <i class="fa {{ $data->getIcon() }} text-muted"></i>
                 <a href="{{ route('topics.topic', ['id' => $data->id]) }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_posts }}</span>
 
+                @if ($data->vote_exists)
+                    <span data-bs-toggle="tooltip" title="{{ __('forum::forums.has_vote') }}"><i class="fa-solid fa-square-poll-vertical fa-xs text-muted"></i></span>
+                @endif
+
                 {{ $data->pagination() }}
                 {{ __('main.views') }}: <span class="badge bg-adaptive">{{ $data->visits }}</span><br>
                 {{ __('forum::forums.forum') }}: <a href="{{ route('forums.forum', ['id' => $data->forum->id ]) }}">{{ $data->forum->title }}</a><br>

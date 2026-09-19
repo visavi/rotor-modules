@@ -7,6 +7,7 @@ namespace Modules\Load\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\File;
 use App\Models\User;
+use App\Support\CategoryTree;
 use App\Support\Restatement;
 use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
@@ -22,17 +23,38 @@ class LoadController extends AdminController
      */
     public function index(): View
     {
+        // Дерево строит компонент: он же собирает поле порядка и обязан видеть
+        // тот же список, поэтому раскладывать его здесь незачем
         $categories = Load::query()
-            ->where('parent_id', 0)
-            ->with('children', 'new', 'children.new', 'lastDown.user')
             ->orderBy('sort')
+            ->with('new', 'lastDown.user')
             ->get();
+
+        // Счётчик раздела показывает всю ветку: вложенные загрузки принадлежат
+        // ему не меньше собственных
+        CategoryTree::totals($categories, ['count_downs' => 'total_downs']);
 
         $new = Down::query()
             ->active(false)
             ->count();
 
         return view('load::admin/downs/index', compact('categories', 'new'));
+    }
+
+    /**
+     * Сохраняет порядок и вложенность разделов
+     */
+    public function sort(Request $request): RedirectResponse
+    {
+        if (! isAdmin(User::BOSS)) {
+            abort(403, __('errors.forbidden'));
+        }
+
+        CategoryTree::reorder(Load::class, $request->string('order')->toString());
+
+        return redirect()
+            ->route('admin.loads.index')
+            ->with('success', __('load::loads.loads_success_sorted'));
     }
 
     /**
@@ -83,7 +105,6 @@ class LoadController extends AdminController
         if ($request->isMethod('post')) {
             $parent = int($request->input('parent'));
             $name = $request->input('name');
-            $sort = int($request->input('sort'));
             $closed = empty($request->input('closed')) ? 0 : 1;
 
             $validator
@@ -94,7 +115,6 @@ class LoadController extends AdminController
                 $load->update([
                     'parent_id' => $parent,
                     'name'      => $name,
-                    'sort'      => $sort,
                     'closed'    => $closed,
                 ]);
 
@@ -166,7 +186,13 @@ class LoadController extends AdminController
      */
     public function load(int $id, Request $request): View
     {
-        $category = Load::query()->with('parent')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Load::query()->orderBy('sort')->get();
+
+        CategoryTree::totals($categories, ['count_downs' => 'total_downs']);
+        CategoryTree::nest($categories);
+
+        $category = $categories->firstWhere('id', $id);
 
         if (! $category) {
             abort(404, __('load::loads.load_not_exist'));

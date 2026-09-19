@@ -46,19 +46,23 @@
                 <div class="invalid-feedback">{{ textError('name') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sort') }}">
-                <label for="sort" class="form-label">{{ __('main.position') }}:</label>
-                <input type="number" class="form-control" name="sort" id="sort" maxlength="3" value="{{ old('sort', $category->sort) }}" required>
-                <div class="invalid-feedback">{{ textError('sort') }}</div>
-            </div>
-
             <div class="form-check">
                 <input type="hidden" value="0" name="closed">
                 <input type="checkbox" class="form-check-input" value="1" name="closed" id="closed"{{ old('closed', $category->closed) ? ' checked' : '' }}>
                 <label class="form-check-label" for="closed">{{ __('main.close') }}</label>
             </div>
 
-            <button class="btn btn-primary">{{ __('main.change') }}</button>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-primary">{{ __('main.change') }}</button>
+
+                {{-- Форма удаления идёт ниже, вложить её сюда нельзя: <form> в <form> невалидна.
+                     Кнопка связана с ней атрибутом form и потому стоит в одной строке с «Изменить» --}}
+                <button class="btn btn-danger" form="blog-delete-{{ $category->id }}">
+                    <i class="fa fa-times"></i> {{ __('main.delete') }}
+                </button>
+            </div>
         </form>
+
+        @include('blog::admin/articles/_delete', ['blog' => $category])
     </div>
 @stop

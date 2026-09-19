@@ -32,7 +32,12 @@ class BookmarkController extends Controller
             ->select('bookmarks.count_posts as bookmark_posts', 'bookmarks.topic_id', 'topics.*')
             ->where('bookmarks.user_id', getUser('id'))
             ->leftJoin('topics', 'bookmarks.topic_id', 'topics.id')
-            ->with('topic.user', 'topic.lastPost.user')
+            ->with([
+                // Иконке в списке нужен только факт наличия опроса, сам он не грузится
+                'topic' => static fn ($query) => $query->withExists('vote'),
+                'topic.user',
+                'topic.lastPost.user',
+            ])
             ->orderByDesc('updated_at')
             ->paginate(setting('forumtem'));
 

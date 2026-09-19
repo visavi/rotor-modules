@@ -5,7 +5,7 @@
 @section('header')
     <div class="float-end">
         <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forum::forums.create_topic') }}</a>
-        <a class="btn btn-adaptive" href="{{ route('forums.forum', ['id' => $forum->id, 'page' => $topics->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
+        <a class="btn btn-adaptive" href="{{ route('forums.forum', ['id' => $forum->id, 'page' => $topics->currentPage()]) }}"><i class="fas fa-eye"></i></a>
     </div>
 
     <h1>{{ $forum->title }}</h1>
@@ -38,7 +38,7 @@
                         <div class="section-title">
                             <i class="fa fa-file-alt fa-lg text-muted"></i>
                             <a href="{{ route('admin.forums.forum', ['id' => $child->id ]) }}">{{ $child->title }}</a>
-                            <span class="badge bg-adaptive">{{ $child->count_topics }}/{{ $child->count_posts }}</span>
+                            <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('forum::forums.topics') }} / {{ __('forum::forums.posts') }}">{{ formatShortNum($child->total_topics) }}/{{ formatShortNum($child->total_posts) }}</span>
                         </div>
                     </div>
 

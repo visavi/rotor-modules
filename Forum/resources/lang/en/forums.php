@@ -22,6 +22,7 @@ return [
     'answer'               => 'Answer',
     'votes'                => 'Votes',
     'vote'                 => 'Vote',
+    'has_vote'             => 'The topic has a poll',
     'total_votes'          => 'Total Voted',
     'topics'               => 'Topics',
     'posts'                => 'Messages',

@@ -53,7 +53,7 @@
                     <div class="flex-grow-1">
                         <i class="fa fa-file-alt fa-lg text-muted"></i>
                         <a href="{{ route('forums.forum', ['id' => $forum->id]) }}" class="section-title position-relative">{{ $forum->title }}</a>
-                        <span class="badge bg-adaptive">{{ formatShortNum($forum->count_topics + $forum->children->sum('count_topics')) }}/{{ formatShortNum($forum->count_posts + $forum->children->sum('count_posts')) }}</span>
+                        <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('forum::forums.topics') }} / {{ __('forum::forums.posts') }}">{{ formatShortNum($forum->total_topics) }}/{{ formatShortNum($forum->total_posts) }}</span>
 
                         @if ($forum->description)
                             <div class="section-description text-muted fst-italic small">{{ renderText($forum->description) }}</div>
@@ -75,7 +75,7 @@
                                 @foreach ($forum->children as $child)
                                     <div>
                                         <i class="fas fa-angle-right"></i> <a href="{{ route('forums.forum', ['id' => $child->id]) }}">{{ $child->title }}</a>
-                                        <span class="badge bg-adaptive">{{ $child->count_topics + $child->children->sum('count_topics') }}/{{ $child->count_posts + $child->children->sum('count_posts') }}</span>
+                                        <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('forum::forums.topics') }} / {{ __('forum::forums.posts') }}">{{ formatShortNum($child->total_topics) }}/{{ formatShortNum($child->total_posts) }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -85,9 +85,11 @@
 
                 <div class="section-body border-top">
                     @if ($forum->lastTopic->lastPost->id)
-                        {{ __('forum::forums.topic') }}: <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
-                        <br>
-                        {{ __('forum::forums.post') }}: {{ $forum->lastTopic->lastPost->user->getName() }} <small class="section-date text-muted fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</small>
+                        <a href="{{ route('topics.topic', ['id' => $forum->lastTopic->id]) }}">{{ $forum->lastTopic->title }}</a>
+                        <small class="text-muted">
+                            — {{ $forum->lastTopic->lastPost->user->getProfile() }}
+                            <span class="section-date fst-italic">{{ dateFixed($forum->lastTopic->lastPost->created_at) }}</span>
+                        </small>
                     @else
                         {{ __('forum::forums.empty_topics') }}
                     @endif

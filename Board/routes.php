@@ -39,6 +39,7 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->group(function () {
                 Route::get('/{id?}', 'index')->name('index');
                 Route::get('/categories', 'categories')->name('categories');
+                Route::post('/sort', 'sort')->name('sort');
                 Route::post('/create', 'create')->name('create');
                 Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
                 Route::delete('/{id}/delete', 'delete')->name('delete');

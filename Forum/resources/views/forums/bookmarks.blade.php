@@ -22,6 +22,10 @@
 
                     <i class="fa {{ $topic->topic->getIcon() }} text-muted"></i>
                     <b><a href="{{ route('topics.topic', ['id' => $topic->id]) }}">{{ $topic->title }}</a></b>
+
+                    @if ($topic->topic->vote_exists)
+                        <span data-bs-toggle="tooltip" title="{{ __('forum::forums.has_vote') }}"><i class="fa-solid fa-square-poll-vertical fa-xs text-muted"></i></span>
+                    @endif
                     ({{ $topic->count_posts }}{!! ($topic->count_posts > $topic->bookmark_posts) ? '/<span style="color:#00cc00">+' . ($topic->count_posts - $topic->bookmark_posts) . '</span>' : '' !!})
 
                     {{ $topic->topic->pagination() }}

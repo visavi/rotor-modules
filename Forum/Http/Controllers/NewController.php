@@ -26,6 +26,8 @@ class NewController extends Controller
         $topics = Topic::query()
             ->orderBy(...$orderBy)
             ->with('forum', 'user', 'lastPost.user')
+            // Иконке в списке нужен только факт наличия опроса, сам он не грузится
+            ->withExists('vote')
             ->limit(1000)
             ->get();
 

@@ -44,49 +44,60 @@
 
     @foreach ($categories as $key => $category)
         <div class="section mb-3 shadow">
-            <div class="section-title">
-                <i class="fa fa-folder-open"></i>
-                <a href="{{ route('blogs.blog', ['id' => $category->id]) }}">{{ $category->name }}</a>
+            <div class="section-header d-flex align-items-start position-relative">
+                <div class="flex-grow-1">
+                    <i class="fa fa-folder-open text-muted"></i>
+                    <a href="{{ route('blogs.blog', ['id' => $category->id]) }}" class="section-title position-relative">{{ $category->name }}</a>
 
-                <span class="badge bg-adaptive">
-                    @if ($category->new)
-                        {{ $category->count_articles + $category->children->sum('count_articles') }}/<span style="color:#ff0000">+{{ $category->new->count_articles }}</span>
-                    @else
-                        {{ $category->count_articles + $category->children->sum('count_articles') }}
-                    @endif
-                </span>
-            </div>
+                    <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('blog::blogs.articles') }} / {{ __('main.new') }}">
+                        @if ($category->new)
+                            {{ $category->total_articles }}/<span class="text-danger">+{{ $category->new->count_articles }}</span>
+                        @else
+                            {{ $category->total_articles }}
+                        @endif
+                    </span>
+                </div>
 
-            <div class="section-content">
                 @if ($category->children->isNotEmpty())
-                    @foreach ($category->children as $child)
-                        <div>
-                            <i class="fa fa-angle-right"></i>
-                            <b><a href="{{ route('blogs.blog', ['id' => $child->id]) }}">{{ $child->name }}</a></b>
-
-                            <span class="badge bg-adaptive">
-                                @if ($child->new)
-                                    {{ $child->count_articles }}/<span style="color:#ff0000">+{{ $child->new->count_articles }}</span>
-                                @else
-                                    {{ $child->count_articles }}
-                                @endif
-                            </span>
-                        </div>
-                    @endforeach
+                    <div>
+                        <a data-bs-toggle="collapse" class="stretched-link" href="#section_{{ $category->id }}">
+                            <i class="treeview-indicator fas fa-angle-down"></i>
+                        </a>
+                    </div>
                 @endif
             </div>
 
+            @if ($category->children->isNotEmpty())
+                <div class="collapse" id="section_{{ $category->id }}">
+                    <div class="section-content border-top p-2">
+                        @foreach ($category->children as $child)
+                            <div>
+                                <i class="fas fa-angle-right"></i>
+                                <a href="{{ route('blogs.blog', ['id' => $child->id]) }}">{{ $child->name }}</a>
+
+                                <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('blog::blogs.articles') }} / {{ __('main.new') }}">
+                                    @if ($child->new)
+                                        {{ $child->total_articles }}/<span class="text-danger">+{{ $child->new->count_articles }}</span>
+                                    @else
+                                        {{ $child->total_articles }}
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="section-body border-top">
                 @if ($category->lastArticle)
-                    {{ __('blog::blogs.article') }}: <a href="{{ route('articles.view', ['slug' => $category->lastArticle->slug]) }}">{{ $category->lastArticle->title }}</a>
+                    <a href="{{ route('articles.view', ['slug' => $category->lastArticle->slug]) }}">{{ $category->lastArticle->title }}</a>
 
                     @if ($category->lastArticle->isNew())
                         <span class="badge text-bg-success">NEW</span>
                     @endif
-                    <br>
-                    {{ __('main.author') }}: {{ $category->lastArticle->user->getProfile() }}
-                    <small class="section-date text-muted fst-italic">
-                        {{ dateFixed($category->lastArticle->created_at) }}
+                    <small class="text-muted">
+                        — {{ $category->lastArticle->user->getProfile() }}
+                        <span class="section-date fst-italic">{{ dateFixed($category->lastArticle->created_at) }}</span>
                     </small>
                 @else
                     {{ __('blog::blogs.empty_articles') }}

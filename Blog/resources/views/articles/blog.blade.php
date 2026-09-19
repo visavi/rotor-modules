@@ -58,22 +58,21 @@
                         <div class="section-title">
                             <i class="fa fa-file-alt fa-lg text-muted"></i>
                             <a href="{{ route('blogs.blog', ['id' => $child->id]) }}">{{ $child->name }}</a>
-                            <span class="badge bg-adaptive">{{ $child->count_articles + $child->children->sum('count_articles') }}</span>
+                            <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('blog::blogs.articles') }}">{{ $child->total_articles }}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-body border-top">
                     @if ($child->lastArticle)
-                        {{ __('blog::blogs.article') }}: <a href="{{ route('articles.view', ['slug' => $child->lastArticle->slug]) }}">{{ $child->lastArticle->title }}</a>
+                        <a href="{{ route('articles.view', ['slug' => $child->lastArticle->slug]) }}">{{ $child->lastArticle->title }}</a>
 
                         @if ($child->lastArticle->isNew())
                             <span class="badge text-bg-success">NEW</span>
                         @endif
-                        <br>
-                        {{ __('main.author') }}: {{ $child->lastArticle->user->getProfile() }}
-                        <small class="section-date text-muted fst-italic">
-                            {{ dateFixed($child->lastArticle->created_at) }}
+                        <small class="text-muted">
+                            — {{ $child->lastArticle->user->getProfile() }}
+                            <span class="section-date fst-italic">{{ dateFixed($child->lastArticle->created_at) }}</span>
                         </small>
                     @else
                         {{ __('blog::blogs.empty_articles') }}

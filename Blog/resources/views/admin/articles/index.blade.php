@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        <a class="btn btn-adaptive" href="{{ route('blogs.index') }}"><i class="fas fa-wrench"></i></a>
+        <a class="btn btn-adaptive" href="{{ route('blogs.index') }}"><i class="fas fa-eye"></i></a>
     </div>
 
     <h1>{{ __('blog::blogs.blogs') }}</h1>
@@ -26,74 +26,22 @@
         <hr>
     @endif
 
-    @foreach ($categories as $key => $category)
+    @if ($categories->isNotEmpty())
         <div class="section mb-3 shadow">
-            <div class="section-title">
-                <i class="fa fa-folder-open"></i>
-                <a href="{{ route('admin.blogs.blog', ['id' => $category->id]) }}">{{ $category->name }}</a>
-
-                @if ($category->new)
-                    <span class="badge bg-adaptive">{{ $category->count_articles }}/<span style="color:#ff0000">+{{ $category->new->count_articles }}</span></span>
-                @else
-                    <span class="badge bg-adaptive">{{ $category->count_articles }}</span>
-                @endif
-
-                @if (isAdmin('boss'))
-                    <div class="float-end">
-                        <a href="{{ route('admin.blogs.edit', ['id' => $category->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                        <form action="{{ route('admin.blogs.delete', ['id' => $category->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_delete_blog') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                        </form>
-                    </div>
-                @endif
-            </div>
-
-            <div class="section-content">
-                @if ($category->children->isNotEmpty())
-                    @foreach ($category->children as $child)
-                        <div>
-                            <i class="fa fa-angle-right"></i>
-                            <b><a href="{{ route('admin.blogs.blog', ['id' => $child->id]) }}">{{ $child->name }}</a></b>
-
-                            @if ($child->new)
-                                <span class="badge bg-adaptive">{{ $child->count_articles }}/<span style="color:#ff0000">+{{ $child->new->count_articles }}</span></span>
-                            @else
-                                <span class="badge bg-adaptive">{{ $child->count_articles }}</span>
-                            @endif
-
-                            @if (isAdmin('boss'))
-                                <a href="{{ route('admin.blogs.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                                <form action="{{ route('admin.blogs.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_delete_blog') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
-                                </form>
-                            @endif
-                        </div>
-                    @endforeach
-                @endif
-            </div>
-
-            <div class="section-body border-top">
-                @if ($category->lastArticle)
-                    {{ __('blog::blogs.article') }}: <a href="{{ route('articles.view', ['slug' => $category->lastArticle->slug]) }}">{{ $category->lastArticle->title }}</a>
-
-                    @if ($category->lastArticle->isNew())
-                        <span class="badge text-bg-success">NEW</span>
-                    @endif
-                    <br>
-                    {{ __('main.author') }}: {{ $category->lastArticle->user->getProfile() }}
-                    <small class="section-date text-muted fst-italic">
-                        {{ dateFixed($category->lastArticle->created_at) }}
-                    </small>
-                @else
-                    {{ __('blog::blogs.empty_articles') }}
-                @endif
+            <div class="section-body">
+                <x-category-tree :items="$categories"
+                                 :action="route('admin.blogs.sort')"
+                                 row="blog::admin/articles/_row"
+                                 :sortable="isAdmin('boss')" />
             </div>
         </div>
-    @endforeach
+
+        @if (isAdmin('boss'))
+            @each('blog::admin/articles/_delete', $categories, 'blog')
+        @endif
+    @else
+        {{ showError(__('blog::blogs.empty_blogs')) }}
+    @endif
 
     @if (isAdmin('boss'))
         <div class="section-form my-3 shadow">

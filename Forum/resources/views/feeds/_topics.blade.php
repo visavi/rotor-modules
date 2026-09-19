@@ -16,8 +16,12 @@
 
     <div class="section-header d-flex align-items-start">
         <div class="flex-grow-1">
-            <div class="section-title">
+            <div class="section-title d-flex align-items-baseline">
                 <h3><a class="post-title" href="{{ route('topics.topic', ['id' => $post->id, 'pid' => $post->lastPost->id]) }}">{{ $post->title }}</a></h3>
+
+                @if ($post->vote->exists)
+                    <span class="ms-2" data-bs-toggle="tooltip" title="{{ __('forum::forums.has_vote') }}"><i class="fa-solid fa-square-poll-vertical fa-xs"></i></span>
+                @endif
             </div>
         </div>
 
@@ -35,9 +39,9 @@
             {{ $post->lastPost->text ? $post->lastPost->getText() : __('main.deleted') }}
         </div>
 
-        {{-- Тема всплывает в ленте с каждым ответом, поэтому опрос показывается
-             только тому, кто ещё не голосовал: гостю isVoted() отвечает true --}}
-        @if ($post->vote->exists && ! $post->vote->isVoted())
+        {{-- Блок сам решает, что рисовать: форму тому, кто ещё не голосовал,
+             и результаты остальным — проголосовавшим и гостям --}}
+        @if ($post->vote->exists)
             @include('forum::forums/_vote', ['vote' => $post->vote])
         @endif
 

@@ -6,6 +6,7 @@ namespace Modules\Blog\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
+use App\Support\CategoryTree;
 use App\Support\Restatement;
 use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
@@ -24,11 +25,16 @@ class ArticleController extends AdminController
      */
     public function index(): View
     {
+        // Дерево строит компонент: он же собирает поле порядка и обязан видеть
+        // тот же список, поэтому раскладывать его здесь незачем
         $categories = Blog::query()
-            ->where('parent_id', 0)
             ->orderBy('sort')
-            ->with('children', 'new', 'children.new', 'lastArticle.user')
+            ->with('new', 'lastArticle.user')
             ->get();
+
+        // Счётчик раздела показывает всю ветку: вложенные статьи принадлежат
+        // ему не меньше собственных
+        CategoryTree::totals($categories, ['count_articles' => 'total_articles']);
 
         $new = Article::query()
             ->active(false)
@@ -36,6 +42,22 @@ class ArticleController extends AdminController
             ->count();
 
         return view('blog::admin/articles/index', compact('categories', 'new'));
+    }
+
+    /**
+     * Сохраняет порядок и вложенность разделов
+     */
+    public function sort(Request $request): RedirectResponse
+    {
+        if (! isAdmin(User::BOSS)) {
+            abort(403, __('errors.forbidden'));
+        }
+
+        CategoryTree::reorder(Blog::class, $request->string('order')->toString());
+
+        return redirect()
+            ->route('admin.blogs.index')
+            ->with('success', __('blog::blogs.categories_success_sorted'));
     }
 
     /**
@@ -88,7 +110,6 @@ class ArticleController extends AdminController
         if ($request->isMethod('post')) {
             $parent = int($request->input('parent'));
             $name = $request->input('name');
-            $sort = int($request->input('sort'));
             $closed = empty($request->input('closed')) ? 0 : 1;
 
             $validator
@@ -99,7 +120,6 @@ class ArticleController extends AdminController
                 $category->update([
                     'parent_id' => $parent,
                     'name'      => $name,
-                    'sort'      => $sort,
                     'closed'    => $closed,
                 ]);
 
@@ -169,7 +189,13 @@ class ArticleController extends AdminController
      */
     public function blog(int $id): View
     {
-        $category = Blog::query()->with('parent')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Blog::query()->orderBy('sort')->get();
+
+        CategoryTree::totals($categories, ['count_articles' => 'total_articles']);
+        CategoryTree::nest($categories);
+
+        $category = $categories->firstWhere('id', $id);
 
         if (! $category) {
             abort(404, __('blog::blogs.category_not_exist'));

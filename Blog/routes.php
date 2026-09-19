@@ -60,6 +60,9 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.blogs.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
+
+                // Строго до GET /{id}: иначе сортировка ушла бы в blog с id = 'sort'
+                Route::post('/sort', 'sort')->name('sort');
                 Route::get('/{id}', 'blog')->name('blog');
                 Route::post('/create', 'create')->name('create');
                 Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Load\Http\Controllers\Load;
 
 use App\Http\Controllers\Controller;
+use App\Support\CategoryTree;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -18,11 +19,16 @@ class LoadController extends Controller
      */
     public function index(): View
     {
+        // Дерево берётся целиком: счётчик раздела складывает всю ветку,
+        // а связи детей раздаются из памяти, без запроса на раздел
         $categories = Load::query()
-            ->where('parent_id', 0)
-            ->with('children', 'new', 'children.new', 'lastDown.user')
+            ->with('new', 'lastDown.user')
             ->orderBy('sort')
             ->get();
+
+        CategoryTree::totals($categories, ['count_downs' => 'total_downs']);
+
+        $categories = CategoryTree::nest($categories);
 
         if ($categories->isEmpty()) {
             abort(200, __('load::loads.empty_loads'));
@@ -36,7 +42,13 @@ class LoadController extends Controller
      */
     public function load(int $id, Request $request): View
     {
-        $category = Load::query()->with('parent')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Load::query()->orderBy('sort')->with('new')->get();
+
+        CategoryTree::totals($categories, ['count_downs' => 'total_downs']);
+        CategoryTree::nest($categories);
+
+        $category = $categories->firstWhere('id', $id);
 
         if (! $category) {
             abort(404, __('load::loads.load_not_exist'));

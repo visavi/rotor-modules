@@ -52,6 +52,8 @@ class ActiveController extends Controller
             ->where('user_id', $user->id)
             ->orderBy(...$orderBy)
             ->with('forum', 'user', 'lastPost.user')
+            // Иконке в списке нужен только факт наличия опроса, сам он не грузится
+            ->withExists('vote')
             ->paginate(setting('forumtem'))
             ->appends(['user' => $user->login, 'sort' => $sort, 'order' => $order]);
 

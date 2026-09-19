@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Support\CategoryTree;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -23,10 +24,16 @@ class BoardController extends Controller
      */
     public function index(Request $request, ?int $id = null): View
     {
+        // Дерево целиком: счётчик категории складывает всю её ветку
+        $categories = Board::query()->orderBy('sort')->get();
+
+        CategoryTree::totals($categories, ['count_items' => 'total_items']);
+        CategoryTree::nest($categories);
+
         $board = null;
 
         if ($id) {
-            $board = Board::query()->find($id);
+            $board = $categories->firstWhere('id', $id);
 
             if (! $board) {
                 abort(404, __('board::boards.category_not_exist'));
@@ -48,10 +55,7 @@ class BoardController extends Controller
             ->paginate(setting('boards_per_page'))
             ->appends(compact('sort', 'order'));
 
-        $boards = Board::query()
-            ->where('parent_id', $board->id ?? 0)
-            ->with('children')
-            ->get();
+        $boards = $board ? $board->children : $categories->where('parent_id', 0)->values();
 
         return view('board::boards/index', compact('items', 'board', 'boards', 'sorting'));
     }

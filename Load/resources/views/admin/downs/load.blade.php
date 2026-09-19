@@ -7,7 +7,7 @@
         @if (! $category->closed)
             <a class="btn btn-success" href="{{ route('downs.create', ['category' => $category->id]) }}">{{ __('main.add') }}</a>
         @endif
-        <a class="btn btn-adaptive" href="{{ route('loads.load', ['id' => $category->id, 'page' => $downs->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
+        <a class="btn btn-adaptive" href="{{ route('loads.load', ['id' => $category->id, 'page' => $downs->currentPage()]) }}"><i class="fas fa-eye"></i></a>
     </div>
 
     <h1>{{ $category->name }}</h1>
@@ -47,7 +47,7 @@
             <div class="section mb-3 shadow border-start border-info border-5">
                 <div class="section-title">
                     <i class="fa fa-folder-open"></i>
-                    <a href="{{ route('admin.loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a> <span class="badge bg-adaptive">{{ $child->count_downs }}</span>
+                    <a href="{{ route('admin.loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a> <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }}">{{ $child->total_downs }}</span>
 
                     @if ($child->closed)
                         <span class="badge bg-danger">{{ __('load::loads.closed_load') }}</span>

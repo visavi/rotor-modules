@@ -51,20 +51,19 @@
             <div class="section mb-3 shadow border-start border-info border-5">
                 <div class="section-title">
                     <i class="fa fa-folder-open"></i>
-                    <a href="{{ route('loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a> <span class="badge bg-adaptive">{{ $child->count_downs + $child->children->sum('count_downs') }}</span>
+                    <a href="{{ route('loads.load', ['id' => $child->id]) }}">{{ $child->name }}</a> <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('load::loads.downs') }}">{{ $child->total_downs }}</span>
                 </div>
 
                 <div class="section-body border-top">
                     @if ($child->lastDown)
-                        {{ __('load::loads.down') }}: <a href="{{ route('downs.view', ['id' => $child->lastDown->id]) }}">{{ $child->lastDown->title }}</a>
+                        <a href="{{ route('downs.view', ['id' => $child->lastDown->id]) }}">{{ $child->lastDown->title }}</a>
 
                         @if ($child->lastDown->isNew())
                             <span class="badge text-bg-success">NEW</span>
                         @endif
-                        <br>
-                        {{ __('main.author') }}: {{ $child->lastDown->user->getProfile() }}
-                        <small class="section-date text-muted fst-italic">
-                            {{ dateFixed($child->lastDown->created_at) }}
+                        <small class="text-muted">
+                            — {{ $child->lastDown->user->getProfile() }}
+                            <span class="section-date fst-italic">{{ dateFixed($child->lastDown->created_at) }}</span>
                         </small>
                     @else
                         {{ __('load::loads.empty_downs') }}

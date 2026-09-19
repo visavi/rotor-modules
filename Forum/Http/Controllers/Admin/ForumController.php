@@ -33,7 +33,17 @@ class ForumController extends AdminController
     {
         // Дерево строит компонент: он же собирает поле порядка и обязан видеть
         // тот же список, поэтому раскладывать его здесь незачем
-        $forums = Forum::query()->orderBy('sort')->get();
+        $forums = Forum::query()
+            ->orderBy('sort')
+            ->with('lastTopic.lastPost.user')
+            ->get();
+
+        // Счётчик раздела показывает всю ветку: вложенные темы и сообщения
+        // принадлежат ему не меньше собственных
+        CategoryTree::totals($forums, [
+            'count_topics' => 'total_topics',
+            'count_posts'  => 'total_posts',
+        ]);
 
         return view('forum::admin/forums/index', compact('forums'));
     }
@@ -93,10 +103,6 @@ class ForumController extends AdminController
                 ->length($title, setting('forum_category_min'), setting('forum_category_max'), ['title' => __('validator.text')])
                 ->length($description, setting('forum_description_min'), setting('forum_description_max'), ['description' => __('validator.text')])
                 ->notEqual($parent, $forum->id, ['parent' => __('forum::forums.forum_invalid')]);
-
-            if (! empty($parent) && $forum->children->isNotEmpty()) {
-                $validator->addError(['parent' => __('forum::forums.forum_has_subforums')]);
-            }
 
             if ($validator->isValid()) {
                 $forum->update([
@@ -190,7 +196,20 @@ class ForumController extends AdminController
      */
     public function forum(int $id): View
     {
-        $forum = Forum::query()->with('parent', 'children.lastTopic.lastPost.user')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Forum::query()
+            ->orderBy('sort')
+            ->with('lastTopic.lastPost.user')
+            ->get();
+
+        CategoryTree::totals($categories, [
+            'count_topics' => 'total_topics',
+            'count_posts'  => 'total_posts',
+        ]);
+
+        CategoryTree::nest($categories);
+
+        $forum = $categories->firstWhere('id', $id);
 
         if (! $forum) {
             abort(404, __('forum::forums.forum_not_exist'));

@@ -58,6 +58,7 @@ return [
     'load_parent_invalid'      => 'Invalid parent category selection!',
     'load_has_subcategories'   => 'This section has subsections!',
     'load_success_edited'      => 'Section edited successfully!',
+    'loads_success_sorted'     => 'Sections order saved successfully!',
     'load_has_downs'           => 'There are downloads in this section!',
     'load_success_deleted'     => 'Section deleted successfully!',
     'down_success_deleted'     => 'Download successfully deleted!',

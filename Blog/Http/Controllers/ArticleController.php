@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Support\CategoryTree;
 use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Database\Eloquent\Model;
@@ -43,11 +44,16 @@ class ArticleController extends Controller
      */
     public function index(): View
     {
+        // Дерево берётся целиком: счётчик раздела складывает всю ветку,
+        // а связи детей раздаются из памяти, без запроса на раздел
         $categories = Blog::query()
-            ->where('parent_id', 0)
             ->orderBy('sort')
-            ->with('children', 'new', 'children.new', 'lastArticle.user')
+            ->with('new', 'lastArticle.user')
             ->get();
+
+        CategoryTree::totals($categories, ['count_articles' => 'total_articles']);
+
+        $categories = CategoryTree::nest($categories);
 
         if ($categories->isEmpty()) {
             abort(200, __('blog::blogs.categories_not_created'));
@@ -61,7 +67,13 @@ class ArticleController extends Controller
      */
     public function blog(int $id, Request $request): View
     {
-        $category = Blog::query()->with('parent')->find($id);
+        // Дерево целиком: счётчик подраздела складывает всю его ветку
+        $categories = Blog::query()->orderBy('sort')->with('new')->get();
+
+        CategoryTree::totals($categories, ['count_articles' => 'total_articles']);
+        CategoryTree::nest($categories);
+
+        $category = $categories->firstWhere('id', $id);
 
         if (! $category) {
             abort(404, __('blog::blogs.category_not_exist'));

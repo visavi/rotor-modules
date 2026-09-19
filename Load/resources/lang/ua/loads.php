@@ -58,6 +58,7 @@ return [
     'load_parent_invalid'      => 'Неприпустимий вибір батьківської категорії!',
     'load_has_subcategories'   => 'Цей розділ має підрозділи!',
     'load_success_edited'      => 'Розділ успішно змінено!',
+    'loads_success_sorted'     => 'Порядок розділів успішно збережено!',
     'load_has_downs'           => 'У цьому розділі є завантаження!',
     'load_success_deleted'     => 'Розділ успішно видалено!',
     'down_success_deleted'     => 'Завантаження успішно видалено!',

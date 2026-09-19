@@ -49,7 +49,7 @@
                     </div>
 
                     <div class="text-end">
-                        <span class="badge bg-adaptive">{{ $child->count_topics + $child->children->sum('count_topics') }}/{{ $child->count_posts + $child->children->sum('count_posts') }}</span>
+                        <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('forum::forums.topics') }} / {{ __('forum::forums.posts') }}">{{ formatShortNum($child->total_topics) }}/{{ formatShortNum($child->total_posts) }}</span>
                     </div>
                 </div>
 
@@ -80,6 +80,10 @@
                         <div class="section-title">
                             <i class="fa {{ $topic->getIcon() }} text-muted"></i>
                             <a href="{{ route('topics.topic', ['id' => $topic->id]) }}">{{ $topic->title }}</a>
+
+                            @if ($topic->vote_exists)
+                                <span data-bs-toggle="tooltip" title="{{ __('forum::forums.has_vote') }}"><i class="fa-solid fa-square-poll-vertical fa-xs text-muted"></i></span>
+                            @endif
                         </div>
                     </div>
                     <div class="text-end">

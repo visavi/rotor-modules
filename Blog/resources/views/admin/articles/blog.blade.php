@@ -8,7 +8,7 @@
             <a class="btn btn-success" href="{{ route('blogs.create', ['cid' => $category->id]) }}">{{ __('blog::blogs.add') }}</a>
         @endif
 
-        <a class="btn btn-adaptive" href="{{ route('blogs.blog', ['id' => $category->id, 'page' => $articles->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
+        <a class="btn btn-adaptive" href="{{ route('blogs.blog', ['id' => $category->id, 'page' => $articles->currentPage()]) }}"><i class="fas fa-eye"></i></a>
     </div>
 
     <h1>{{ $category->name }} <small>({{ __('blog::blogs.all_articles') }}: {{ $category->count_articles }})</small></h1>
@@ -42,7 +42,7 @@
                         <div class="section-title">
                             <i class="fa fa-file-alt fa-lg text-muted"></i>
                             <a href="{{ route('admin.blogs.blog', ['id' => $child->id]) }}">{{ $child->name }}</a>
-                            <span class="badge bg-adaptive">{{ $child->count_articles }}</span>
+                            <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('blog::blogs.articles') }}">{{ $child->total_articles }}</span>
                         </div>
                     </div>
 

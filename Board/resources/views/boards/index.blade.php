@@ -14,7 +14,7 @@
     </div>
 
     @if ($board)
-        <h1>{{ $board->name }} <small>({{ __('board::boards.boards') }}: {{ $board->count_items }})</small></h1>
+        <h1>{{ $board->name }} <small>({{ __('board::boards.boards') }}: {{ $board->total_items }})</small></h1>
     @else
         <h1>{{ __('board::boards.boards') }}</h1>
     @endif
@@ -48,7 +48,7 @@
             @foreach ($boards as $child)
                 <div class="col">
                     <a href="{{ route('boards.index', ['id' => $child->id]) }}">{{ $child->name }}</a>
-                    <span class="badge bg-adaptive">{{ $child->count_items + $child->children->sum('count_items') }}</span>
+                    <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('board::boards.boards') }}">{{ $child->total_items }}</span>
                 </div>
             @endforeach
         </div>

@@ -6,6 +6,7 @@ namespace Modules\Board\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
+use App\Support\CategoryTree;
 use App\Support\Restatement;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,13 +64,31 @@ class BoardController extends AdminController
             abort(403, __('errors.forbidden'));
         }
 
-        $boards = Board::query()
-            ->where('parent_id', 0)
-            ->orderBy('sort')
-            ->with('children')
-            ->get();
+        // Дерево строит компонент: он же собирает поле порядка и обязан видеть
+        // тот же список, поэтому раскладывать его здесь незачем
+        $boards = Board::query()->orderBy('sort')->get();
+
+        // Счётчик категории показывает всю ветку: вложенные объявления
+        // принадлежат ей не меньше собственных
+        CategoryTree::totals($boards, ['count_items' => 'total_items']);
 
         return view('board::admin/boards/categories', compact('boards'));
+    }
+
+    /**
+     * Сохраняет порядок и вложенность категорий
+     */
+    public function sort(Request $request): RedirectResponse
+    {
+        if (! isAdmin(User::BOSS)) {
+            abort(403, __('errors.forbidden'));
+        }
+
+        CategoryTree::reorder(Board::class, $request->string('order')->toString());
+
+        return redirect()
+            ->route('admin.boards.categories')
+            ->with('success', __('board::boards.categories_success_sorted'));
     }
 
     /**
@@ -120,22 +139,16 @@ class BoardController extends AdminController
         if ($request->isMethod('post')) {
             $parent = int($request->input('parent'));
             $name = $request->input('name');
-            $sort = int($request->input('sort'));
             $closed = empty($request->input('closed')) ? 0 : 1;
 
             $validator
                 ->length($name, setting('board_category_min'), setting('board_category_max'), ['name' => __('validator.text')])
                 ->notEqual($parent, $board->id, ['parent' => __('board::boards.category_parent_invalid')]);
 
-            if (! empty($parent) && $board->children->isNotEmpty()) {
-                $validator->addError(['parent' => __('board::boards.category_has_subsections')]);
-            }
-
             if ($validator->isValid()) {
                 $board->update([
                     'parent_id' => $parent,
                     'name'      => $name,
-                    'sort'      => $sort,
                     'closed'    => $closed,
                 ]);
 

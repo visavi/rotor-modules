@@ -54,17 +54,19 @@ class VoteTest extends ModuleTestCase
         $this->assertStringContainsString(route('topics.vote', ['id' => $topic->id]), $feed);
     }
 
-    public function testFeedHidesVoteFromGuest(): void
+    public function testFeedShowsResultsToGuest(): void
     {
-        $this->createTopicWithVote();
+        [$topic] = $this->createTopicWithVote();
 
         $feed = (string) (new FeedService())->getFeed();
 
         $this->assertStringContainsString('Test topic', $feed);
-        $this->assertStringNotContainsString('Любимый цвет?', $feed);
+        // Голосовать гость не может, но результаты видит
+        $this->assertStringContainsString('Любимый цвет?', $feed);
+        $this->assertStringNotContainsString(route('topics.vote', ['id' => $topic->id]), $feed);
     }
 
-    public function testFeedHidesVoteAfterUserVoted(): void
+    public function testFeedKeepsVoteAfterUserVoted(): void
     {
         [$topic, , $answers] = $this->createTopicWithVote();
 
@@ -72,12 +74,47 @@ class VoteTest extends ModuleTestCase
             ->post(route('topics.vote', ['id' => $topic->id]), ['poll' => $answers[0]->id], ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertJsonPath('success', true);
 
-        // Тема всплывает в ленте с каждым ответом, повторно опрос показывать незачем
+        // Опрос остаётся в ленте и после голоса, но уже результатами
         $this->actingAs($this->user);
         $feed = (string) (new FeedService())->getFeed();
 
         $this->assertStringContainsString('Test topic', $feed);
-        $this->assertStringNotContainsString('Любимый цвет?', $feed);
+        $this->assertStringContainsString('Любимый цвет?', $feed);
+        $this->assertStringNotContainsString(route('topics.vote', ['id' => $topic->id]), $feed);
+    }
+
+    public function testForumListMarksTopicWithVote(): void
+    {
+        $this->overrideSetting('forumtem', 10);
+        $this->overrideSetting('forumpost', 20);
+        [$topic] = $this->createTopicWithVote();
+
+        $this->get(route('forums.forum', ['id' => $topic->forum_id]))
+            ->assertOk()
+            ->assertSee('fa-square-poll-vertical', false);
+    }
+
+    public function testForumListHasNoMarkWithoutVote(): void
+    {
+        $this->overrideSetting('forumtem', 10);
+        $this->overrideSetting('forumpost', 20);
+        [$topic] = $this->createTopicWithVote();
+        Vote::query()->where('topic_id', $topic->id)->delete();
+
+        $this->get(route('forums.forum', ['id' => $topic->forum_id]))
+            ->assertOk()
+            ->assertDontSee('fa-square-poll-vertical', false);
+    }
+
+    public function testNewTopicsListMarksTopicWithVote(): void
+    {
+        $this->overrideSetting('forumtem', 10);
+        $this->overrideSetting('forumpost', 20);
+        $this->createTopicWithVote();
+
+        $this->get(route('topics.index'))
+            ->assertOk()
+            ->assertSee('fa-square-poll-vertical', false);
     }
 
     public function testAjaxVoteReturnsResults(): void

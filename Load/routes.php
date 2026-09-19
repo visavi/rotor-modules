@@ -66,6 +66,9 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.loads.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
+
+                // Строго до GET /{id}: иначе сортировка ушла бы в load с id = 'sort'
+                Route::post('/sort', 'sort')->name('sort');
                 Route::post('/create', 'create')->name('create');
                 Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
                 Route::delete('/{id}/delete', 'delete')->name('delete');
