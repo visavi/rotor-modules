@@ -45,6 +45,17 @@ Hook::add('userPersonalEnd', static function () {
         . '</a><br>';
 });
 
+// Плитка привязок соцсетей в админ-панели (блок админа)
+Hook::add('adminBlockAdmin', static function () {
+    return '<div class="col">
+        <a href="' . route('social_auth.socials') . '" class="app-tile">
+            <div class="app-tile-icon" style="background:#0dcaf0"><i class="fas fa-share-nodes"></i></div>
+            <div class="app-tile-label">' . __('social_auth::social_auth.socials')
+                . '<span class="badge bg-adaptive app-tile-badge">' . Social::query()->count() . '</span></div>
+        </a>
+    </div>';
+});
+
 // Виджет привязок соцсетей на главной админки
 Registry::widget('socials', static fn (int $days): array => [
     'label' => __('social_auth::social_auth.widget'),

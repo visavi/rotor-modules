@@ -12,12 +12,13 @@ use Illuminate\Support\Carbon;
 /**
  * Class Social
  *
- * @property int    $id
- * @property int    $user_id
- * @property string $provider
- * @property string $provider_id
- * @property string $token
- * @property Carbon $created_at
+ * @property int     $id
+ * @property int     $user_id
+ * @property string  $provider
+ * @property string  $provider_id
+ * @property string  $token
+ * @property Carbon  $created_at
+ * @property ?Carbon $last_login_at
  * @property-read ?User $user
  */
 class Social extends Model
@@ -34,7 +35,8 @@ class Social extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'token' => 'encrypted',
+        'token'         => 'encrypted',
+        'last_login_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

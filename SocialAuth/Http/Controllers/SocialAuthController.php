@@ -105,7 +105,7 @@ class SocialAuthController extends Controller
                 return redirect('login')->with('danger', __('social_auth::social_auth.account_banned'));
             }
 
-            $social->update(['token' => $token]);
+            $social->update(['token' => $token, 'last_login_at' => now()]);
 
             Auth::login($user, true);
             $request->session()->regenerate();
@@ -241,7 +241,7 @@ class SocialAuthController extends Controller
 
         Social::query()->updateOrCreate(
             ['provider' => $provider, 'user_id' => $user->id],
-            ['provider_id' => $providerId, 'token' => $token]
+            ['provider_id' => $providerId, 'token' => $token, 'last_login_at' => now()]
         );
 
         return redirect()->route('social.accounts')
@@ -309,10 +309,11 @@ class SocialAuthController extends Controller
         }
 
         Social::query()->create([
-            'user_id'     => $user->id,
-            'provider'    => $provider,
-            'provider_id' => $providerId,
-            'token'       => $token,
+            'user_id'       => $user->id,
+            'provider'      => $provider,
+            'provider_id'   => $providerId,
+            'token'         => $token,
+            'last_login_at' => now(),
         ]);
 
         Auth::login($user, true);
@@ -341,10 +342,11 @@ class SocialAuthController extends Controller
         ]);
 
         Social::query()->create([
-            'user_id'     => $user->id,
-            'provider'    => $provider,
-            'provider_id' => $providerId,
-            'token'       => $token,
+            'user_id'       => $user->id,
+            'provider'      => $provider,
+            'provider_id'   => $providerId,
+            'token'         => $token,
+            'last_login_at' => now(),
         ]);
 
         $textNotice = textNotice('register', ['username' => $login]);

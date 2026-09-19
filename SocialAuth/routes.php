@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Modules\SocialAuth\Http\Controllers\Admin\SocialAuthSettingController;
+use Modules\SocialAuth\Http\Controllers\Admin\SocialController;
 use Modules\SocialAuth\Http\Controllers\SocialAuthController;
 
 Route::middleware('web')
@@ -31,4 +32,11 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->group(function () {
         Route::get('/social-auth-settings', 'index')->name('social_auth.settings');
         Route::post('/social-auth-settings', 'update')->name('social_auth.settings.update');
+    });
+
+Route::middleware(['web', 'check.admin', 'admin.logger'])
+    ->controller(SocialController::class)
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/socials', 'index')->name('social_auth.socials')->withoutMiddleware('admin.logger');
     });

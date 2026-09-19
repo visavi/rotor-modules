@@ -171,7 +171,7 @@ class RegistrationTest extends ModuleTestCase
     public function testExistingSocialLogsInWithoutCreatingUser(): void
     {
         $user = User::factory()->create(['email' => 'exist@example.com']);
-        Social::query()->create([
+        $social = Social::query()->create([
             'user_id'     => $user->id,
             'provider'    => 'google',
             'provider_id' => 'G-100',
@@ -195,6 +195,7 @@ class RegistrationTest extends ModuleTestCase
         $response->assertRedirect('/');
         $this->assertAuthenticatedAs($user);
         $this->assertSame($countBefore, User::query()->count(), 'Новый пользователь не создаётся');
+        $this->assertNotNull($social->fresh()->last_login_at, 'Вход через провайдера отмечается в last_login_at');
     }
 
     public function testAutolinkByEmail(): void

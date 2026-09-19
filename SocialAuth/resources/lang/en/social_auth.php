@@ -30,4 +30,13 @@ return [
 
     'complete_title' => 'Complete registration',
     'complete_hint'  => 'The provider did not share your email. Enter it to complete registration.',
+
+    'socials'       => 'Social links',
+    'provider'      => 'Provider',
+    'linked_at'     => 'Linked',
+    'last_login_at' => 'Last login',
+    'active_month'  => 'Active this month',
+    'reset_filter'  => 'Reset filter',
+    'empty_socials' => 'No social links yet',
+    'user_deleted'  => 'User deleted',
 ];
