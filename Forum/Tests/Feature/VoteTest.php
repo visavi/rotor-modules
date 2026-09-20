@@ -83,6 +83,28 @@ class VoteTest extends ModuleTestCase
         $this->assertStringNotContainsString(route('topics.vote', ['id' => $topic->id]), $feed);
     }
 
+    public function testFeedHidesVoteWhenTopicHasReply(): void
+    {
+        [$topic] = $this->createTopicWithVote();
+
+        // Ответ в теме сдвигает запись ленты на второе сообщение — опрос там не нужен
+        $reply = Post::query()->create([
+            'topic_id' => $topic->id,
+            'user_id'  => $this->user->id,
+            'text'     => 'Ответ в теме',
+            'ip'       => '127.0.0.1',
+            'brow'     => 'test',
+        ]);
+
+        $topic->update(['last_post_id' => $reply->id, 'count_posts' => 2]);
+
+        $this->actingAs($this->user);
+        $feed = (string) (new FeedService())->getFeed();
+
+        $this->assertStringContainsString('Test topic', $feed);
+        $this->assertStringNotContainsString('Любимый цвет?', $feed);
+    }
+
     public function testForumListMarksTopicWithVote(): void
     {
         $this->overrideSetting('forumtem', 10);
@@ -189,7 +211,7 @@ class VoteTest extends ModuleTestCase
             'brow'     => 'test',
         ]);
 
-        $topic->update(['last_post_id' => $post->id]);
+        $topic->update(['last_post_id' => $post->id, 'count_posts' => 1]);
 
         $vote = Vote::query()->create([
             'topic_id'   => $topic->id,

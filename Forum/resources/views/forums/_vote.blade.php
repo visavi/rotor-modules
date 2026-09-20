@@ -2,8 +2,9 @@
     $voted = $vote->isVoted();
     $page = $page ?? 1;
 @endphp
-{{-- После голоса сервер отдаёт этот же блок целиком, клиент подменяет его по .js-vote --}}
-<div class="js-vote">
+{{-- После голоса сервер отдаёт этот же блок целиком, клиент подменяет его по .js-vote-<id>:
+     класс уникален для голосования, иначе ответ подменил бы все опросы ленты разом --}}
+<div class="js-vote-{{ $vote->id }}">
     <h5>{{ $vote->title }}</h5>
 
     <div class="mb-3">
@@ -13,7 +14,7 @@
                 {{ progressBar($result['width'], $result['percent'] . '%') }}
             @endforeach
         @else
-            <form class="mb-3" action="{{ route('topics.vote', ['id' => $vote->topic_id]) }}" method="post" data-ajax data-ajax-replace=".js-vote" data-ajax-swap="outer">
+            <form class="mb-3" action="{{ route('topics.vote', ['id' => $vote->topic_id]) }}" method="post" data-ajax data-ajax-replace=".js-vote-{{ $vote->id }}" data-ajax-swap="outer">
                 @csrf
                 <input type="hidden" name="page" value="{{ $page }}">
                 @foreach ($vote->answers as $answer)
