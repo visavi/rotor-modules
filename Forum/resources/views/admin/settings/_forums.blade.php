@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('forum::forums.settings'))
 
@@ -12,7 +12,7 @@
     </nav>
 @stop
 
-@section('content')
+@section('settings')
 <form action="{{ route('forum.settings.update') }}" method="post">
     @csrf
     <div class="mb-3{{ hasError('sets[forumtem]') }}">

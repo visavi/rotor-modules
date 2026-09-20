@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('load::loads.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('load::loads.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('load.settings.update') }}">
     @csrf
     <div class="mb-3{{ hasError('sets[downlist]') }}">

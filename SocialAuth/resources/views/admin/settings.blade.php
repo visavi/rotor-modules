@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('social_auth::social_auth.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('social_auth::social_auth.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('social_auth.settings.update') }}">
     @csrf
 

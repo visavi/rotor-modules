@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('board::boards.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('board::boards.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('board.settings.update') }}">
     @csrf
     <div class="form-check mb-3">

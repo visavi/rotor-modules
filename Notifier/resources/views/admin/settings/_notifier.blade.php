@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('notifier::notifier.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('notifier::notifier.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
     @php
         $interval = (int) old('sets.notifier_interval', $settings['notifier_interval'] ?? \Modules\Notifier\Support\Notifier::DEFAULT_INTERVAL);
         $sound = (string) old('sets.notifier_sound', $settings['notifier_sound'] ?? '');

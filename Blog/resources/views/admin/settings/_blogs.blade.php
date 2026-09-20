@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('blog::blogs.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('blog::blogs.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('blog.settings.update') }}">
     @csrf
     <div class="mb-3{{ hasError('sets[blogpost]') }}">

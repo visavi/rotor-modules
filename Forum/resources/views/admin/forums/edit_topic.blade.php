@@ -43,8 +43,8 @@
                         <option value="{{ $curator }}" selected>{{ $curator }}</option>
                     @endforeach
                 </select>
-                <span class="text-muted fst-italic">{{ __('forum::forums.curators_note') }}</span>
                 <div class="invalid-feedback">{{ textError('moderators') }}</div>
+                <div class="form-text">{{ __('forum::forums.curators_note') }}</div>
             </div>
 
             <div class="form-check">

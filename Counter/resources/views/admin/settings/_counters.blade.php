@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('counter::counters.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('counter::counters.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('counter.settings.update') }}">
     @csrf
     <?php

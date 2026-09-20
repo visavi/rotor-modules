@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('guestbook::guestbook.settings'))
 
@@ -16,7 +16,7 @@
     <h1>{{ __('guestbook::guestbook.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
     <form method="post" action="{{ route('guestbook.settings.update') }}">
         @csrf
         <div class="form-check mb-3">

@@ -7,7 +7,7 @@ return [
     'name'        => 'Предложения и проблемы',
     'description' => 'Предложения и сообщения о проблемах от пользователей с голосованием и официальным ответом',
     'version'     => '1.2.2',
-    'requires'    => '14.3.0',
+    'requires'    => '14.7.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

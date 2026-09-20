@@ -300,6 +300,42 @@ Registry::onProfileSave(function (User $user, Request $request): void {
 Registry::backgroundPath('api/notifier/check');
 ```
 
+## Страница настроек модуля
+
+Настройки модуля живут на отдельном маршруте, но выглядят как раздел настроек сайта:
+слева та же панель с переходами, справа форма модуля.
+
+Шаблон наследует layout ядра и отдаёт содержимое в секцию `settings`:
+
+```blade
+@extends('admin/settings/layout')
+
+@section('title', __('mymodule::mymodule.settings'))
+
+@section('breadcrumb')
+    ...
+@stop
+
+@section('settings')
+    <form method="post" action="{{ route('mymodule.settings.update') }}">
+        @csrf
+        ...
+    </form>
+@stop
+```
+
+Ссылка в панель добавляется хуком `adminSettingsNav` — модульные пункты
+собираются в группу «Модули» под ядровыми:
+
+```php
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="'
+    . route('mymodule.settings') . '">' . __('mymodule::mymodule.settings') . '</a>');
+```
+
+Активный пункт подсвечивается по текущему URL, специально помечать ссылку не нужно.
+Модуль, оставшийся на `@extends('layout')` с секцией `content`, продолжает работать
+как отдельная страница — просто без боковой панели.
+
 ## Морф-имена
 
 Каждая модель, участвующая в Registry, объявляет морф-имя:

@@ -4,7 +4,7 @@ return [
     'name'        => 'Реклама',
     'description' => 'Платные рекламные ссылки пользователей за деньги или баллы и админские блоки с ограниченным сроком показа',
     'version'     => '1.0.6',
-    'requires'    => '14.3.0',
+    'requires'    => '14.7.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

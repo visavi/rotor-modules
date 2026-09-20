@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('rating::ratings.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('rating::ratings.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post" action="{{ route('rating.settings.update') }}">
     @csrf
     <div class="mb-3{{ hasError('sets[editratingpoint]') }}">

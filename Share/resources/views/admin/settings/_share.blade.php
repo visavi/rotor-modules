@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('share::share.settings'))
 
@@ -18,7 +18,7 @@
     <h1>{{ __('share::share.settings') }}</h1>
 @stop
 
-@section('content')
+@section('settings')
     <form method="post" action="{{ route('share.settings.update') }}">
         @csrf
 

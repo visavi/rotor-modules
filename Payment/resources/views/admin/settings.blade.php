@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('payment::payments.settings'))
 
@@ -14,7 +14,7 @@
     </nav>
 @stop
 
-@section('content')
+@section('settings')
     <form method="post" action="{{ route('payment.settings.update') }}">
         @csrf
 

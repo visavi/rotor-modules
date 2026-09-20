@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('header')
     <h1>{{ __('offer::offers.settings') }}</h1>
@@ -16,7 +16,7 @@
     </nav>
 @stop
 
-@section('content')
+@section('settings')
 <form method="post">
     @csrf
     <div class="mb-3{{ hasError('sets[postoffers]') }}">

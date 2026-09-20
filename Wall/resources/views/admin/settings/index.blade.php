@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('admin/settings/layout')
 
 @section('title', __('wall::walls.settings'))
 
@@ -12,7 +12,7 @@
     </nav>
 @endsection
 
-@section('content')
+@section('settings')
     <div class="section-form mb-3 shadow">
         <form method="post" action="{{ route('wall.settings.update') }}">
             @csrf

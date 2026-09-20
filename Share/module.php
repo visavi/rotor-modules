@@ -9,7 +9,7 @@ return [
         <p>Набор соцсетей настраивается в разделе «Настройки модуля».</p>
         <p>Точки вставки — хук <code>share</code> в модулях Блоги, Новости, Загрузки, Фотогалерея и Объявления.</p>',
     'version'  => '1.0.0',
-    'requires' => '14.5.0',
+    'requires' => '14.7.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',

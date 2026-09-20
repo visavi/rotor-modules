@@ -23,8 +23,8 @@
             @endif
         @endforeach
     </div>
-    <span class="text-muted fst-italic">{{ __('forum::forums.vote_hint_answers') }}</span>
     <div class="invalid-feedback">{{ textError('answers') }}</div>
+    <div class="form-text">{{ __('forum::forums.vote_hint_answers') }}</div>
 </div>
 
 @push('scripts')
