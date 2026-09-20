@@ -39,11 +39,6 @@ class SocialAuthSettingController extends Controller
             Setting::query()->updateOrInsert(['name' => 'social_' . $provider . '_enabled'], ['value' => (int) $enabled]);
         }
 
-        Setting::query()->updateOrInsert(
-            ['name' => 'social_autolink_email'],
-            ['value' => (int) $request->boolean('sets.social_autolink_email')]
-        );
-
         clearCache('settings');
 
         if ($errors) {

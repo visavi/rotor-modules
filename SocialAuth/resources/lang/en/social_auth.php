@@ -18,8 +18,6 @@ return [
     'no_providers_enabled' => 'No providers enabled',
 
     'email_already_exists'       => 'This email is already registered. Sign in with your password and link the social account in account settings.',
-    'autolink_email'             => 'Auto-link account by email',
-    'autolink_email_hint'        => 'If the provider email matches an existing user — sign in without creating a new account',
     'error_credentials_required' => 'fill in Client ID and Client Secret before enabling',
     'provider_disabled'          => 'This provider is disabled',
     'access_denied'              => 'You denied access',

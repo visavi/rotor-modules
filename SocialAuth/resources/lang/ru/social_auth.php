@@ -18,8 +18,6 @@ return [
     'no_providers_enabled' => 'Нет доступных провайдеров',
 
     'email_already_exists'       => 'Этот email уже зарегистрирован. Войдите паролем и привяжите соцсеть в настройках аккаунта.',
-    'autolink_email'             => 'Автоматически привязывать аккаунт по email',
-    'autolink_email_hint'        => 'Если email от провайдера совпадает с существующим пользователем — вход без создания нового аккаунта',
     'error_credentials_required' => 'заполните Client ID и Client Secret перед включением',
     'provider_disabled'          => 'Данный провайдер отключён',
     'access_denied'              => 'Вы отказали в доступе',

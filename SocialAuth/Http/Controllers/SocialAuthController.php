@@ -7,6 +7,8 @@ namespace Modules\SocialAuth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\BlackList;
 use App\Models\User;
+use App\Services\MailService;
+use App\Services\UserService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -205,12 +207,6 @@ class SocialAuthController extends Controller
 
         $email = strtolower($request->validated('email'));
 
-        $existing = User::query()->where('email', $email)->first();
-
-        if ($existing && setting('social_autolink_email')) {
-            return $this->attachAndLogin($existing, $pending['provider'], $pending['provider_id'], $pending['token'], $request);
-        }
-
         if (! setting('openreg')) {
             return redirect('login')->with('danger', __('users.registration_suspended'));
         }
@@ -221,7 +217,8 @@ class SocialAuthController extends Controller
             $pending['provider'],
             $pending['provider_id'],
             $pending['token'],
-            $request
+            $request,
+            false
         );
     }
 
@@ -266,13 +263,11 @@ class SocialAuthController extends Controller
                 return redirect('login')->with('danger', __('users.domain_is_blacklisted'));
             }
 
+            // Адрес подтверждён провайдером, значит владелец ящика доказан —
+            // пускаем в существующий аккаунт, а не плодим второй
             $existing = User::query()->where('email', $oauthUser['email'])->first();
 
-            if ($existing && ! setting('social_autolink_email')) {
-                return redirect('login')->with('danger', __('social_auth::social_auth.email_already_exists'));
-            }
-
-            if ($existing && setting('social_autolink_email')) {
+            if ($existing) {
                 return $this->attachAndLogin($existing, $provider, $providerId, $token, $request);
             }
         }
@@ -323,22 +318,39 @@ class SocialAuthController extends Controller
             ->with('success', __('users.welcome', ['login' => $user->getName()], $user->language));
     }
 
-    private function createUserWithSocial(string $email, string $name, string $provider, string $providerId, string $token, Request $request): RedirectResponse
-    {
+    /**
+     * Заводит аккаунт и привязывает к нему соцсеть
+     *
+     * $emailVerified говорит, чей это адрес: подтверждённый провайдером или введённый
+     * руками. Во втором случае сайт с обязательным подтверждением обязан прислать письмо —
+     * иначе через соцсеть заводился бы аккаунт на чужой ящик в обход общего правила
+     */
+    private function createUserWithSocial(
+        string $email,
+        string $name,
+        string $provider,
+        string $providerId,
+        string $token,
+        Request $request,
+        bool $emailVerified = true,
+    ): RedirectResponse {
         $login = $this->generateLogin($name);
+        $needsConfirm = ! $emailVerified && UserService::isEmailConfirm();
+        $confirmToken = $needsConfirm ? Str::random(32) : null;
 
         $user = User::query()->create([
-            'login'      => $login,
-            'password'   => Hash::make(Str::random(32)),
-            'email'      => $email,
-            'level'      => User::USER,
-            'gender'     => User::MALE,
-            'themes'     => setting('themes'),
-            'point'      => 0,
-            'language'   => setting('language'),
-            'money'      => setting('registermoney'),
-            'subscribe'  => Str::random(32),
-            'updated_at' => now(),
+            'login'         => $login,
+            'password'      => Hash::make(Str::random(32)),
+            'email'         => $email,
+            'level'         => $needsConfirm ? User::PENDED : User::USER,
+            'gender'        => User::MALE,
+            'themes'        => setting('themes'),
+            'point'         => 0,
+            'language'      => setting('language'),
+            'money'         => setting('registermoney'),
+            'subscribe'     => Str::random(32),
+            'confirm_token' => $confirmToken,
+            'updated_at'    => now(),
         ]);
 
         Social::query()->create([
@@ -354,6 +366,22 @@ class SocialAuthController extends Controller
 
         Auth::login($user, true);
         $request->session()->regenerate();
+
+        if ($needsConfirm) {
+            // Пароля у аккаунта нет, вход только через провайдера — в письме звёздочки,
+            // как это делает повторная отправка в ядре
+            app(MailService::class)->queue('mailer.register', [
+                'to'         => $email,
+                'subject'    => 'Регистрация на ' . setting('title'),
+                'login'      => $login,
+                'password'   => '*****',
+                'confirmUrl' => route('confirm', ['token' => $confirmToken]),
+            ]);
+
+            // CheckUserState сам удержит аккаунт на странице подтверждения
+            return redirect()->route('verify')
+                ->with('success', __('users.confirm_code_success_sent'));
+        }
 
         return redirect('/')
             ->with('success', __('users.welcome', ['login' => $login], $user->language));

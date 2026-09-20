@@ -27,13 +27,12 @@ class RegistrationTest extends ModuleTestCase
     }
 
     /**
-     * Включает все провайдеры и автолинковку поверх дефолтных настроек
+     * Включает все провайдеры поверх дефолтных настроек
      */
     private function seedSettings(): void
     {
         $settings = [
-            'openreg'               => 1,
-            'social_autolink_email' => 1,
+            'openreg' => 1,
         ];
 
         foreach (['google', 'github', 'yandex', 'vk'] as $provider) {
@@ -263,6 +262,72 @@ class RegistrationTest extends ModuleTestCase
             'user_id'     => $user->id,
             'provider'    => 'google',
             'provider_id' => 'G-COMPLETE',
+        ]);
+    }
+
+    public function testCompleteRequiresConfirmationWhenSiteDoesNotTrustEmail(): void
+    {
+        Setting::query()->updateOrInsert(['name' => 'email_mode'], ['value' => 'confirm']);
+        clearCache('settings');
+
+        $response = $this->withoutMiddleware(PreventRequestForgery::class)
+            ->withSession(['social_pending' => [
+                'provider'    => 'google',
+                'provider_id' => 'G-CONFIRM',
+                'token'       => 'tok',
+                'name'        => 'Needs Confirm',
+            ]])
+            ->post(route('social.complete.post'), ['email' => 'confirm@example.com']);
+
+        $response->assertRedirect(route('verify'));
+
+        $user = User::query()->where('email', 'confirm@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertSame(User::PENDED, $user->level, 'Аккаунт ждёт подтверждения почты');
+        $this->assertNotEmpty($user->confirm_token, 'Токен подтверждения выписан');
+    }
+
+    public function testProviderEmailSkipsConfirmation(): void
+    {
+        Setting::query()->updateOrInsert(['name' => 'email_mode'], ['value' => 'confirm']);
+        clearCache('settings');
+
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-TRUSTED',
+                'email'          => 'trusted@example.com',
+                'verified_email' => true,
+                'name'           => 'Trusted',
+            ]),
+        ]);
+
+        $this->hitCallback('google')->assertRedirect('/');
+
+        $user = User::query()->where('email', 'trusted@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertSame(User::USER, $user->level, 'Адрес подтверждён провайдером, письмо не нужно');
+        $this->assertEmpty($user->confirm_token, 'Токен подтверждения не нужен');
+    }
+
+    public function testCompleteRejectsExistingEmail(): void
+    {
+        $victim = User::factory()->create(['email' => 'victim@example.com']);
+
+        $response = $this->withoutMiddleware(PreventRequestForgery::class)
+            ->withSession(['social_pending' => [
+                'provider'    => 'google',
+                'provider_id' => 'G-TAKEOVER',
+                'token'       => 'tok',
+                'name'        => 'Attacker',
+            ]])
+            ->post(route('social.complete.post'), ['email' => 'victim@example.com']);
+
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertDatabaseMissing('socials', [
+            'user_id'  => $victim->id,
+            'provider' => 'google',
         ]);
     }
 

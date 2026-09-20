@@ -22,22 +22,6 @@
 <form method="post" action="{{ route('social_auth.settings.update') }}">
     @csrf
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="form-check">
-                <input type="hidden" value="0" name="sets[social_autolink_email]">
-                <input type="checkbox" class="form-check-input" value="1"
-                       name="sets[social_autolink_email]"
-                       id="social_autolink_email"
-                    {{ ! empty($settings['social_autolink_email']) ? ' checked' : '' }}>
-                <label class="form-check-label" for="social_autolink_email">
-                    {{ __('social_auth::social_auth.autolink_email') }}
-                </label>
-                <div class="form-text">{{ __('social_auth::social_auth.autolink_email_hint') }}</div>
-            </div>
-        </div>
-    </div>
-
     @foreach(['google', 'github', 'yandex', 'vk'] as $provider)
     <div class="card mb-4">
         <div class="card-header d-flex align-items-center gap-2">

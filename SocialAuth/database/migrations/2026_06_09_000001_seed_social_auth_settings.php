@@ -19,7 +19,6 @@ return new class extends Migration {
         'social_vk_client_id',
         'social_vk_client_secret',
         'social_vk_enabled',
-        'social_autolink_email',
     ];
 
     public function up(): void

@@ -24,10 +24,10 @@ class CompleteRequest extends FormRequest
                         $fail(__('users.email_is_blacklisted'));
                     } elseif (BlackList::isBlacklisted('domain', $domain)) {
                         $fail(__('users.domain_is_blacklisted'));
-                    } elseif (! setting('social_autolink_email')) {
-                        if (\App\Models\User::query()->where('email', $email)->exists()) {
-                            $fail(__('social_auth::social_auth.email_already_exists'));
-                        }
+                    } elseif (\App\Models\User::query()->where('email', $email)->exists()) {
+                        // Адрес введён руками и никем не подтверждён: привязка к чужому
+                        // аккаунту была бы захватом, поэтому только отказ
+                        $fail(__('social_auth::social_auth.email_already_exists'));
                     }
                 },
             ],
