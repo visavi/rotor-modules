@@ -84,6 +84,8 @@ Hook::add('sidebarMenu', function () {
 |-----|----------|
 | `userStart` | Начало анкеты |
 | `userEnd` | Конец анкеты |
+| `userStats` | Плитки метрик в шапке анкеты (компонент `profile.stat`) |
+| `userSections` | Свои секции между разделами и блоком действий |
 | `userProfileLinks` | Ссылки в анкете (передаётся `$user`) |
 | `userActionStart` | Начало блока действий |
 | `userActionMiddle` | Середина блока действий |
@@ -92,6 +94,59 @@ Hook::add('sidebarMenu', function () {
 | `userPersonalEnd` | Конец личного блока |
 | `userNotPersonalStart` | Начало блока чужого профиля |
 | `userNotPersonalEnd` | Конец блока чужого профиля |
+
+### Настройки, аккаунт и регистрация
+| Хук | Описание |
+|-----|----------|
+| `settingsFields` | Поля модуля на странице настроек (передаётся `$user`) |
+| `accountSections` | Свои секции на странице «Мои данные» |
+| `registerFields` | Поля модуля в форме регистрации |
+| `profileFields` | Поля модуля в форме профиля (передаётся `$user`) |
+
+Поля этих форм ядро не сохраняет — модуль подписывается на колбэки `Registry`:
+
+```php
+Registry::onSettingsValidate(fn (User $user, Request $request, Validator $validator) => ...);
+Registry::onSettingsSave(fn (User $user, Request $request) => ...);
+
+// При регистрации пользователя ещё нет, поэтому валидация без него
+Registry::onRegisterValidate(fn (Request $request, Validator $validator) => ...);
+Registry::onRegisterSave(fn (User $user, Request $request) => ...);
+```
+
+### Список пользователей
+| Хук | Описание |
+|-----|----------|
+| `userCardStats` | Метрики в карточке списка (передаётся `$user`) |
+
+### Личные сообщения
+| Хук | Описание |
+|-----|----------|
+| `messageActions` | Действия над собеседником над перепиской (компонент `profile.action`) |
+| `messageFormEnd` | Кнопки в форме отправки, перед «Написать» |
+
+Блоки разделов и действий рисуют компоненты ядра, поэтому хук возвращает готовый компонент, а не свою вёрстку:
+
+```php
+// Карточка раздела в блоке «Активность» (userProfileLinks)
+return view('components.profile.link', [
+    'icon'  => 'far fa-comment-alt',
+    'label' => 'Форум',
+    'url'   => route('forums.active-topics', ['user' => $user->login]),
+    'count' => $topics,
+    'extra' => ['label' => 'Сообщения', 'url' => $postsUrl, 'count' => $posts],
+])->render();
+
+// Строка в блоке действий (userAction*, userPersonal*, userNotPersonal*)
+return view('components.profile.action', [
+    'icon'  => 'fa fa-envelope',
+    'label' => 'Написать',
+    'url'   => '/messages/talk/' . $user->login,
+    'badge' => $count, // необязательный счётчик у правого края
+])->render();
+```
+
+Строку с собственной вёрсткой хуки принимают по-прежнему — она просто рисуется без рамки и стрелки.
 
 ### Вход и регистрация
 | Хук | Описание |

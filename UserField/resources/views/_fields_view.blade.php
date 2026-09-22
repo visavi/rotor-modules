@@ -1,9 +1,6 @@
-@foreach($fields as $field)
-    {{ $field->name }}:
-    @if ($field->type === 'textarea')
-        {{ renderHtml($field->value) }}
-    @else
-        {{ $field->value }}
-    @endif
-    <br>
+@foreach ($fields as $field)
+    <x-profile.field
+        :label="$field->name"
+        :value="$field->type === 'textarea' ? renderHtml($field->value) : e($field->value)"
+    />
 @endforeach

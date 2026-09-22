@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\Comment;
 use App\Models\User;
 use App\Support\Hook;
 use App\Support\Registry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Modules\Photo\Models\Photo;
 
 Registry::onAdminDeleteUser(function (User $user, Request $request): void {
@@ -24,8 +26,26 @@ Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
 
 // Ссылки на фото пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('photos.user-albums', ['user' => $user->login]) . '">' . __('photo::photos.photos') . '</a></b>'
-        . ' (<a href="' . route('photos.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
+    // Счётчики живут 5 минут: анкету открывают часто, а два COUNT на каждый показ ни к чему
+    [$photos, $comments] = Cache::remember('photo_profile_links_' . $user->id, 300, static fn () => [
+        Photo::query()->where('user_id', $user->id)->count(),
+        Comment::query()
+            ->where('relate_type', Photo::$morphName)
+            ->where('user_id', $user->id)
+            ->count(),
+    ]);
+
+    return view('components.profile.link', [
+        'icon'  => 'far fa-image',
+        'label' => __('photo::photos.photos'),
+        'url'   => route('photos.user-albums', ['user' => $user->login]),
+        'count' => $photos,
+        'extra' => [
+            'label' => __('main.comments'),
+            'url'   => route('photos.user-comments', ['user' => $user->login]),
+            'count' => $comments,
+        ],
+    ])->render();
 });
 
 // Ссылка в боковом меню

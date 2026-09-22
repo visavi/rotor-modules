@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Comment;
 use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
@@ -38,8 +39,26 @@ Registry::sitemap('downs', static function () {
 
 // Ссылки на файлы пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('downs.active-files', ['user' => $user->login]) . '">' . __('load::loads.loads') . '</a></b>'
-        . ' (<a href="' . route('downs.active-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
+    // Счётчики живут 5 минут: анкету открывают часто, а два COUNT на каждый показ ни к чему
+    [$downs, $comments] = Cache::remember('load_profile_links_' . $user->id, 300, static fn () => [
+        Down::query()->where('user_id', $user->id)->count(),
+        Comment::query()
+            ->where('relate_type', Down::$morphName)
+            ->where('user_id', $user->id)
+            ->count(),
+    ]);
+
+    return view('components.profile.link', [
+        'icon'  => 'fas fa-download',
+        'label' => __('load::loads.loads'),
+        'url'   => route('downs.active-files', ['user' => $user->login]),
+        'count' => $downs,
+        'extra' => [
+            'label' => __('main.comments'),
+            'url'   => route('downs.active-comments', ['user' => $user->login]),
+            'count' => $comments,
+        ],
+    ])->render();
 });
 
 // Ссылка в боковом меню

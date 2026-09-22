@@ -105,15 +105,15 @@
         <div class="invalid-feedback">{{ textError('sets[editforumpoint]') }}</div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[forum_merge_posts]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[forum_merge_posts]" id="forum_merge_posts"{{ old('sets.forum_merge_posts', $settings['forum_merge_posts']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[forum_merge_posts]" id="forum_merge_posts"{{ old('sets.forum_merge_posts', $settings['forum_merge_posts']) ? ' checked' : '' }}>
         <label class="form-check-label" for="forum_merge_posts">{{ __('forum::forums.forum_merge_posts') }}</label>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[feed_topics_show]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_topics_show]" id="feed_topics_show"{{ ! empty($settings['feed_topics_show']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_topics_show]" id="feed_topics_show"{{ ! empty($settings['feed_topics_show']) ? ' checked' : '' }}>
         <label class="form-check-label" for="feed_topics_show">{{ __('forum::forums.feed_topics_show') }}</label>
     </div>
 

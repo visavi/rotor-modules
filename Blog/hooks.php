@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Comment;
 use App\Support\Hook;
 use App\Support\Registry;
 use Illuminate\Support\Facades\Cache;
@@ -28,8 +29,26 @@ Registry::sitemap('articles', static function () {
 
 // Ссылки на публикации пользователя в анкете
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('articles.user-articles', ['user' => $user->login]) . '">' . __('blog::blogs.blogs') . '</a></b>'
-        . ' (<a href="' . route('articles.user-comments', ['user' => $user->login]) . '">' . __('main.comments') . '</a>)</li>';
+    // Счётчики живут 5 минут: анкету открывают часто, а два COUNT на каждый показ ни к чему
+    [$articles, $comments] = Cache::remember('blog_profile_links_' . $user->id, 300, static fn () => [
+        Article::query()->where('user_id', $user->id)->count(),
+        Comment::query()
+            ->where('relate_type', Article::$morphName)
+            ->where('user_id', $user->id)
+            ->count(),
+    ]);
+
+    return view('components.profile.link', [
+        'icon'  => 'far fa-sticky-note',
+        'label' => __('blog::blogs.blogs'),
+        'url'   => route('articles.user-articles', ['user' => $user->login]),
+        'count' => $articles,
+        'extra' => [
+            'label' => __('main.comments'),
+            'url'   => route('articles.user-comments', ['user' => $user->login]),
+            'count' => $comments,
+        ],
+    ])->render();
 });
 
 // Ссылка в боковом меню и горизонтальной навигации

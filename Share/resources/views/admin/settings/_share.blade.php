@@ -27,7 +27,7 @@
         @foreach (config('share.networks') as $key => $network)
             <div class="form-check form-switch mb-2">
                 <input type="hidden" value="0" name="sets[share_{{ $key }}]">
-                <input type="checkbox" class="form-check-input" value="1" name="sets[share_{{ $key }}]" id="share_{{ $key }}"{{ old('sets.share_' . $key, $settings['share_' . $key] ?? 0) ? ' checked' : '' }}>
+                <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[share_{{ $key }}]" id="share_{{ $key }}"{{ old('sets.share_' . $key, $settings['share_' . $key] ?? 0) ? ' checked' : '' }}>
                 <label class="form-check-label" for="share_{{ $key }}">
                     <i class="{{ $network['icon'] }} fa-fw" style="color: {{ $network['color'] }}"></i> {{ $network['name'] }}
                 </label>
@@ -36,7 +36,7 @@
 
         <div class="form-check form-switch mb-3">
             <input type="hidden" value="0" name="sets[share_copy]">
-            <input type="checkbox" class="form-check-input" value="1" name="sets[share_copy]" id="share_copy"{{ old('sets.share_copy', $settings['share_copy'] ?? 0) ? ' checked' : '' }}>
+            <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[share_copy]" id="share_copy"{{ old('sets.share_copy', $settings['share_copy'] ?? 0) ? ' checked' : '' }}>
             <label class="form-check-label" for="share_copy">
                 <i class="fas fa-link fa-fw"></i> {{ __('main.copy_link') }}
             </label>

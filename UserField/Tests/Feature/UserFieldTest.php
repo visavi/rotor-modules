@@ -147,6 +147,50 @@ class UserFieldTest extends ModuleTestCase
     }
 
     /**
+     * Порядок полей меняется перетаскиванием в админке
+     */
+    public function testAdminSortsFields(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+
+        $second = UserField::query()->create([
+            'sort'     => 2,
+            'type'     => UserField::INPUT,
+            'name'     => 'Город',
+            'min'      => 0,
+            'max'      => 50,
+            'required' => false,
+        ]);
+
+        $this->actingAs($boss)
+            ->post('/admin/user-fields/sort', ['order' => $second->id . ',' . $this->field->id])
+            ->assertRedirect('admin/user-fields');
+
+        $this->assertSame(1, $second->fresh()->sort);
+        $this->assertSame(2, $this->field->fresh()->sort);
+    }
+
+    /**
+     * Положения в форме нет: новое поле встаёт последним
+     */
+    public function testCreatedFieldGoesLast(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+
+        $this->actingAs($boss)
+            ->post('/admin/user-fields', [
+                'type'     => UserField::INPUT,
+                'name'     => 'Город',
+                'min'      => 0,
+                'max'      => 50,
+                'required' => 0,
+            ])
+            ->assertRedirect('admin/user-fields');
+
+        $this->assertSame(2, UserField::query()->where('name', 'Город')->value('sort'));
+    }
+
+    /**
      * Профиль сохраняется целиком, поля модуля идут вместе с полями ядра
      */
     private function profile(array $fields): array

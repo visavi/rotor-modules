@@ -28,9 +28,9 @@
             <strong>{{ ucfirst($provider) }}</strong>
         </div>
         <div class="card-body">
-            <div class="form-check mb-3">
+            <div class="form-check form-switch mb-3">
                 <input type="hidden" value="0" name="sets[social_{{ $provider }}_enabled]">
-                <input type="checkbox" class="form-check-input" value="1"
+                <input type="checkbox" role="switch" class="form-check-input" value="1"
                        name="sets[social_{{ $provider }}_enabled]"
                        id="{{ $provider }}_enabled"
                     {{ ! empty($settings['social_' . $provider . '_enabled']) ? ' checked' : '' }}>

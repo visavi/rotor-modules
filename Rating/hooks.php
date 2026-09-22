@@ -13,21 +13,37 @@ Registry::onDeleteUser(function (User $user): void {
         ->delete();
 });
 
-// Блок репутации в анкете пользователя
-Hook::add('userEnd', static function (User $user) {
-    if (getUser()) {
-        $html = '<a href="/ratings/' . $user->login . '">' . __('main.reputation') . ': <b>' . formatNum($user->rating) . '</b> (+' . $user->posrating . '/-' . $user->negrating . ')</a><br>';
+// Плитка репутации в шапке анкеты, рядом с баллами и монетами
+Hook::add('userStats', static fn (User $user) => view('components.profile.stat', [
+    'value' => ($user->rating > 0 ? '+' : '') . formatShortNum($user->rating),
+    'label' => __('main.reputation'),
+    'url'   => '/ratings/' . $user->login,
+    'class' => $user->rating >= 0 ? 'text-success' : 'text-danger',
+])->render());
 
-        if (getUser('login') !== $user->login) {
-            $html .= '<a href="/users/' . $user->login . '/rating?vote=plus"><i class="fa fa-arrow-up"></i><span style="color:#0099cc"> ' . __('main.plus') . '</span></a> / '
-                . '<a href="/users/' . $user->login . '/rating?vote=minus"><span style="color:#ff0000">' . __('main.minus') . '</span> <i class="fa fa-arrow-down"></i></a><br>';
-        }
+// Репутация в карточке списка пользователей
+Hook::add('userCardStats', static fn (User $user) => '<span data-bs-toggle="tooltip" title="' . __('main.reputation') . '">'
+    . '<i class="fas fa-star"></i> ' . formatNum($user->rating)
+    . '</span>');
 
-        return $html;
-    }
+// Блок репутации: итог, доля плюсов и голосование
+Hook::add('userSections', static function (User $user) {
+    $canVote = getUser() && getUser('login') !== $user->login;
 
-    return __('main.reputation') . ': <b>' . formatNum($user->rating) . '</b> (+' . $user->posrating . '/-' . $user->negrating . ')<br>';
-}, 10);
+    $rating = view('components.profile.rating', [
+        'rating'   => $user->rating,
+        'positive' => $user->posrating,
+        'negative' => $user->negrating,
+        'url'      => '/ratings/' . $user->login,
+        'plusUrl'  => $canVote ? '/users/' . $user->login . '/rating?vote=plus' : null,
+        'minusUrl' => $canVote ? '/users/' . $user->login . '/rating?vote=minus' : null,
+    ])->render();
+
+    return '<div class="section mb-3 shadow">'
+        . '<div class="section-title"><i class="fas fa-award"></i> ' . __('main.reputation') . '</div>'
+        . '<div class="section-body">' . $rating . '</div>'
+        . '</div>';
+});
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('rating.settings') . '">' . __('rating::ratings.settings') . '</a>');

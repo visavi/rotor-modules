@@ -8,7 +8,11 @@ use Modules\Transfer\Models\Transfer;
 
 // Ссылка на перевод денег в анкете пользователя
 Hook::add('userNotPersonalStart', static function ($user) {
-    return '<i class="fas fa-coins"></i> <a href="' . route('transfers.index', ['user' => $user->login]) . '">' . __('transfer::transfers.money_transfer') . '</a><br>';
+    return view('components.profile.action', [
+        'icon'  => 'fas fa-coins',
+        'label' => __('transfer::transfers.money_transfer'),
+        'url'   => route('transfers.index', ['user' => $user->login]),
+    ])->render();
 });
 
 // Ссылка на операции пользователя в анкете (для модератора)
@@ -17,8 +21,19 @@ Hook::add('userNotPersonalEnd', static function ($user) {
         return '';
     }
 
-    return '<i class="fa-solid fa-money-bill-transfer"></i> <a href="' . route('admin.transfers.view', ['user' => $user->login]) . '">' . __('transfer::transfers.cash_transactions') . '</a><br>';
+    return view('components.profile.action', [
+        'icon'  => 'fa-solid fa-money-bill-transfer',
+        'label' => __('transfer::transfers.cash_transactions'),
+        'url'   => route('admin.transfers.view', ['user' => $user->login]),
+    ])->render();
 });
+
+// Перевод денег доступен прямо из переписки
+Hook::add('messageActions', static fn ($user) => view('components.profile.action', [
+    'icon'  => 'fas fa-coins',
+    'label' => __('transfer::transfers.money_transfer'),
+    'url'   => route('transfers.index', ['user' => $user->login]),
+])->render());
 
 // Плитка денежных операций в админ-панели (блок модератора)
 Hook::add('adminBlockModer', static function () {

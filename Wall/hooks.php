@@ -23,7 +23,12 @@ Registry::complaint(Wall::$morphName, function (int $id, mixed $page): array {
 
 // User profile action link
 Hook::add('userActionStart', static function ($user) {
-    return '<i class="fa fa-sticky-note"></i> <a href="/walls/' . $user->login . '">' . __('wall::walls.wall_posts') . '</a> <span class="badge bg-adaptive">' . Cache::remember('wall_count_' . $user->id, 300, static fn () => Wall::query()->where('user_id', $user->id)->count()) . '</span><br>';
+    return view('components.profile.action', [
+        'icon'  => 'fa fa-sticky-note',
+        'label' => __('wall::walls.wall_posts'),
+        'url'   => '/walls/' . $user->login,
+        'badge' => Cache::remember('wall_count_' . $user->id, 300, static fn () => Wall::query()->where('user_id', $user->id)->count()),
+    ])->render();
 }, 10);
 
 // Admin settings nav link

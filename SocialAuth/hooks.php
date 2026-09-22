@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use App\Services\DashboardService;
 use App\Support\Hook;
 use App\Support\Registry;
@@ -27,22 +28,27 @@ Hook::add('loginButtons', static function () {
     return view('social_auth::_buttons', compact('providers'))->render();
 });
 
-Hook::add('userPersonalEnd', static function () {
-    $hasEnabled = false;
-    foreach (['google', 'github', 'yandex', 'vk'] as $provider) {
-        if (setting('social_' . $provider . '_enabled')) {
-            $hasEnabled = true;
-            break;
-        }
-    }
+// Привязки соцсетей живут на странице «Мои данные»: это настройки входа, а не анкета
+Hook::add('accountSections', static function (User $user) {
+    $availableProviders = array_values(array_filter(
+        array_keys(Social::PROVIDERS),
+        static fn ($provider) => (bool) setting('social_' . $provider . '_enabled'),
+    ));
 
-    if (! $hasEnabled) {
+    if (! $availableProviders) {
         return null;
     }
 
-    return '<i class="fa-solid fa-link"></i> <a href="' . route('social.accounts') . '">'
-        . __('social_auth::social_auth.linked_accounts')
-        . '</a><br>';
+    $socials = Social::query()
+        ->where('user_id', $user->id)
+        ->pluck('provider_id', 'provider');
+
+    $list = view('social_auth::_accounts_list', compact('availableProviders', 'socials'))->render();
+
+    return '<div class="section-form mb-3 shadow">'
+        . '<div class="section-title"><i class="fa-solid fa-link"></i> ' . __('social_auth::social_auth.linked_accounts') . '</div>'
+        . $list
+        . '</div>';
 });
 
 // Плитка привязок соцсетей в админ-панели (блок админа)

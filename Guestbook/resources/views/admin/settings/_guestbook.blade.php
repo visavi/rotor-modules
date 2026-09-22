@@ -19,15 +19,15 @@
 @section('settings')
     <form method="post" action="{{ route('guestbook.settings.update') }}">
         @csrf
-        <div class="form-check mb-3">
+        <div class="form-check form-switch mb-3">
             <input type="hidden" value="0" name="sets[bookadds]">
-            <input type="checkbox" class="form-check-input" value="1" name="sets[bookadds]" id="bookadds"{{ old('sets.bookadds', $settings['bookadds']) ? ' checked' : '' }}>
+            <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[bookadds]" id="bookadds"{{ old('sets.bookadds', $settings['bookadds']) ? ' checked' : '' }}>
             <label class="form-check-label" for="bookadds">{{ __('guestbook::guestbook.guestbook_guests_allow') }}</label>
         </div>
 
-        <div class="form-check mb-3">
+        <div class="form-check form-switch mb-3">
             <input type="hidden" value="0" name="sets[guest_moderation]">
-            <input type="checkbox" class="form-check-input" value="1" name="sets[guest_moderation]" id="guest_moderation"{{ old('sets.guest_moderation', $settings['guest_moderation']) ? ' checked' : '' }}>
+            <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[guest_moderation]" id="guest_moderation"{{ old('sets.guest_moderation', $settings['guest_moderation']) ? ' checked' : '' }}>
             <label class="form-check-label" for="guest_moderation">{{ __('guestbook::guestbook.guestbook_moderation') }}</label>
         </div>
 

@@ -33,9 +33,9 @@
         <div class="invalid-feedback">{{ textError('sets[photogroup]') }}</div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[photos_create]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[photos_create]" id="photos_create"{{ old('sets.photos_create', $settings['photos_create']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[photos_create]" id="photos_create"{{ old('sets.photos_create', $settings['photos_create']) ? ' checked' : '' }}>
         <label class="form-check-label" for="photos_create">{{ __('photo::photos.settings_photos_create') }}</label>
     </div>
 
@@ -63,9 +63,9 @@
         </div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[feed_photos_show]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_photos_show]" id="feed_photos_show"{{ ! empty($settings['feed_photos_show']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_photos_show]" id="feed_photos_show"{{ ! empty($settings['feed_photos_show']) ? ' checked' : '' }}>
         <label class="form-check-label" for="feed_photos_show">{{ __('photo::photos.feed_photos_show') }}</label>
     </div>
 

@@ -71,8 +71,23 @@ Hook::add('adminUserDeleteFields', static fn () => '<div class="form-check">
 
 // Ссылки на форум в анкете пользователя
 Hook::add('userProfileLinks', static function ($user) {
-    return '<li class="list-inline-item"><b><a href="' . route('forums.active-topics', ['user' => $user->login]) . '">' . __('forum::forums.forums') . '</a></b>'
-        . ' (<a href="' . route('forums.active-posts', ['user' => $user->login]) . '">' . __('main.messages') . '</a>)</li>';
+    // Счётчики живут 5 минут: анкету открывают часто, а два COUNT на каждый показ ни к чему
+    [$topics, $posts] = Cache::remember('forum_profile_links_' . $user->id, 300, static fn () => [
+        Topic::query()->where('user_id', $user->id)->count(),
+        Post::query()->where('user_id', $user->id)->count(),
+    ]);
+
+    return view('components.profile.link', [
+        'icon'  => 'far fa-comment-alt',
+        'label' => __('forum::forums.forums'),
+        'url'   => route('forums.active-topics', ['user' => $user->login]),
+        'count' => $topics,
+        'extra' => [
+            'label' => __('main.messages'),
+            'url'   => route('forums.active-posts', ['user' => $user->login]),
+            'count' => $posts,
+        ],
+    ])->render();
 });
 
 // Ссылка в боковом меню

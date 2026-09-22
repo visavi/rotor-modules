@@ -15,13 +15,27 @@ Hook::add('sidebarMenu', static fn () => '<li>
 
 // Добавляем ссылку на мои подарки в личный кабинет
 Hook::add('userActionMiddle', static function ($user) {
-    $giftsCount = GiftsUser::query()->where('user_id', $user->id)->count();
-
-    return '<i class="fas fa-gift"></i> <a href="/gifts/' . $user->login . '">Подарки</a> (' . $giftsCount . ')<br>';
+    return view('components.profile.action', [
+        'icon'  => 'fas fa-gift',
+        'label' => 'Подарки',
+        'url'   => '/gifts/' . $user->login,
+        'badge' => GiftsUser::query()->where('user_id', $user->id)->count(),
+    ])->render();
 });
 
 // Добавляем ссылку на отправку подарка пользователю
-Hook::add('userNotPersonalStart', static fn ($user) => '<i class="fas fa-gift"></i> <a href="/gifts?user=' . $user->login . '">Отправить подарок</a><br>');
+Hook::add('userNotPersonalStart', static fn ($user) => view('components.profile.action', [
+    'icon'  => 'fas fa-gift',
+    'label' => 'Отправить подарок',
+    'url'   => '/gifts?user=' . $user->login,
+])->render());
+
+// Подарок можно отправить прямо из переписки
+Hook::add('messageActions', static fn ($user) => view('components.profile.action', [
+    'icon'  => 'fas fa-gift',
+    'label' => 'Отправить подарок',
+    'url'   => '/gifts?user=' . $user->login,
+])->render());
 
 // Виджет подарков на главной админки
 Registry::widget('gifts', static fn (int $days): array => [

@@ -45,15 +45,15 @@
         <div class="invalid-feedback">{{ textError('sets[blog_money]') }}</div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[blog_create]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[blog_create]" id="blog_create"{{ old('sets.blog_create', $settings['blog_create']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[blog_create]" id="blog_create"{{ old('sets.blog_create', $settings['blog_create']) ? ' checked' : '' }}>
         <label class="form-check-label" for="blog_create">{{ __('blog::blogs.settings_blogs_publish') }}</label>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[article_moderation]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[article_moderation]" id="article_moderation"{{ old('sets.article_moderation', $settings['article_moderation']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[article_moderation]" id="article_moderation"{{ old('sets.article_moderation', $settings['article_moderation']) ? ' checked' : '' }}>
         <label class="form-check-label" for="article_moderation">{{ __('blog::blogs.settings_blog_moderation') }}</label>
     </div>
 
@@ -105,9 +105,9 @@
         </div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[feed_articles_show]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[feed_articles_show]" id="feed_articles_show"{{ ! empty($settings['feed_articles_show']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_articles_show]" id="feed_articles_show"{{ ! empty($settings['feed_articles_show']) ? ' checked' : '' }}>
         <label class="form-check-label" for="feed_articles_show">{{ __('blog::blogs.feed_articles_show') }}</label>
     </div>
 

@@ -289,9 +289,15 @@ Hook::add('head', static function () {
     return '<link rel="stylesheet" href="/assets/modules/my-module/style.css">';
 });
 
-// С аргументом из @hook('userProfileLinks', $user)
+// С аргументом из @hook('userProfileLinks', $user).
+// Блок разделов в анкете рисует компонент ядра
 Hook::add('userProfileLinks', static function ($user) {
-    return ' / <a href="/my-module/' . $user->login . '">Мои записи</a>';
+    return view('components.profile.link', [
+        'icon'  => 'fas fa-star',
+        'label' => 'Мои записи',
+        'url'   => '/my-module/' . $user->login,
+        'count' => $count,
+    ])->render();
 });
 
 // Третий аргумент — приоритет (выше → раньше). По умолчанию 0

@@ -19,12 +19,6 @@
 </div>
 
 <div class="mb-3">
-    <label for="sort" class="form-label">{{ __('main.position') }}:</label>
-    <input type="number" name="sort" class="form-control{{ hasError('sort') }}" id="sort" maxlength="2" value="{{ old('sort', $field->sort ?? 0) }}" required>
-    <div class="invalid-feedback">{{ textError('sort') }}</div>
-</div>
-
-<div class="mb-3">
     <label for="min" class="form-label">{{ __('main.min') }}:</label>
     <input type="number" name="min" class="form-control{{ hasError('min') }}" id="min" value="{{ old('min', $field->min) }}" required>
     <div class="invalid-feedback">{{ textError('min') }}</div>

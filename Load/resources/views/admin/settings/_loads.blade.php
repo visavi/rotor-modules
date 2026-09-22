@@ -27,21 +27,21 @@
         <div class="invalid-feedback">{{ textError('sets[downlist]') }}</div>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[downupload]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[downupload]" id="downupload"{{ old('sets.downupload', $settings['downupload']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[downupload]" id="downupload"{{ old('sets.downupload', $settings['downupload']) ? ' checked' : '' }}>
         <label for="downupload" class="form-check-label">{{ __('load::loads.loads_files_allow') }}</label>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[down_guest_download]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[down_guest_download]" id="down_guest_download"{{ old('sets.down_guest_download', $settings['down_guest_download']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[down_guest_download]" id="down_guest_download"{{ old('sets.down_guest_download', $settings['down_guest_download']) ? ' checked' : '' }}>
         <label for="down_guest_download" class="form-check-label">{{ __('load::loads.loads_guests_download_allow') }}</label>
     </div>
 
-    <div class="form-check mb-3">
+    <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[down_allow_links]">
-        <input type="checkbox" class="form-check-input" value="1" name="sets[down_allow_links]" id="down_allow_links"{{ old('sets.down_allow_links', $settings['down_allow_links']) ? ' checked' : '' }}>
+        <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[down_allow_links]" id="down_allow_links"{{ old('sets.down_allow_links', $settings['down_allow_links']) ? ' checked' : '' }}>
         <label for="down_allow_links" class="form-check-label">{{ __('load::loads.down_allow_links') }}</label>
     </div>
 
@@ -107,9 +107,9 @@
 
     <div class="mb-3{{ hasError('sets[feed_downs_show]') }}">
         <label class="form-label">{{ __('load::loads.feed_downs_show') }}:</label>
-        <div class="form-check">
+        <div class="form-check form-switch">
             <input type="hidden" value="0" name="sets[feed_downs_show]">
-            <input type="checkbox" class="form-check-input" value="1" name="sets[feed_downs_show]" id="feed_downs_show"{{ old('sets.feed_downs_show', $settings['feed_downs_show']) ? ' checked' : '' }}>
+            <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_downs_show]" id="feed_downs_show"{{ old('sets.feed_downs_show', $settings['feed_downs_show']) ? ' checked' : '' }}>
             <label for="feed_downs_show" class="form-check-label">{{ __('load::loads.feed_downs_show') }}</label>
         </div>
     </div>
