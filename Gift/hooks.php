@@ -26,14 +26,14 @@ Hook::add('userActionMiddle', static function ($user) {
 // Добавляем ссылку на отправку подарка пользователю
 Hook::add('userNotPersonalStart', static fn ($user) => view('components.profile.action', [
     'icon'  => 'fas fa-gift',
-    'label' => 'Отправить подарок',
+    'label' => __('gift::gifts.send_gift'),
     'url'   => '/gifts?user=' . $user->login,
 ])->render());
 
 // Подарок можно отправить прямо из переписки
 Hook::add('messageActions', static fn ($user) => view('components.profile.action', [
     'icon'  => 'fas fa-gift',
-    'label' => 'Отправить подарок',
+    'label' => __('gift::gifts.send_gift'),
     'url'   => '/gifts?user=' . $user->login,
 ])->render());
 
