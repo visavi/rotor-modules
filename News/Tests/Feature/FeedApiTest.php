@@ -22,7 +22,7 @@ class FeedApiTest extends ModuleTestCase
 
         // Комментарий виден в ленте, только если тип записи зарегистрирован
         Relation::morphMap([News::$morphName => News::class]);
-        Registry::label(News::$morphName, __('news::news.news'));
+        Registry::setLabel(News::$morphName, 'news::news.news');
 
         $this->overrideSetting('feed_comments_show', 1);
         $this->overrideSetting('feed_per_page', 20);

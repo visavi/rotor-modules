@@ -47,7 +47,7 @@ return [
     // Модели модуля и их возможности
     'models' => [
         \Modules\MyModule\Models\MyEntity::class => [
-            'label'  => 'Статья',
+            'label'  => 'my_module::my_module.article',
             'search' => ['view' => 'my-module::search/_items', 'with' => ['user']],
             'feed'   => ['with' => ['user', 'files'], 'view' => 'my-module::feeds/_items'],
             'upload' => 'media',
@@ -61,9 +61,9 @@ return [
         \Modules\MyModule\Models\MyEntity::class => \Modules\MyModule\Observers\MyEntityObserver::class,
     ],
 
-    // Ссылки-действия на странице модуля в админке
+    // Ссылки-действия на странице модуля в админке (ключ перевода)
     'actions' => [
-        '/admin/my-module' => 'Мой модуль',
+        '/admin/my-module' => 'my_module::my_module.title',
     ],
 
     // Расписание (cron)
@@ -95,10 +95,12 @@ return [
 ### `label`
 
 ```php
-'label' => 'Статья',
+'label' => 'my_module::my_module.article',
 ```
 
 Человекочитаемое имя типа. Ядро складывает в общие списки записи из разных модулей (поиск, очередь спама, рейтинг) — `label` показывается там вместо технического `articles`.
+
+Пишите ключ перевода, а не `__('...')` — как имя шаблона в `view`: `module.php` подключается до выбора языка пользователя, и переведённая там строка осталась бы на языке сайта. Ядро переводит ключ при выводе (`Registry::label()`). То же для `actions`.
 
 ### `search`
 

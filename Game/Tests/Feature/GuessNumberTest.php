@@ -34,6 +34,7 @@ class GuessNumberTest extends ModuleTestCase
 
     public function testEveryAttemptIsCharged(): void
     {
+        $this->startGame();
         $this->guess(1);
         $this->assertSame(5000 - GuessNumberController::PRICE, $this->user->fresh()->money);
 
@@ -70,46 +71,45 @@ class GuessNumberTest extends ModuleTestCase
         $this->assertSame(5000, $this->user->fresh()->money);
     }
 
-    public function testNumberIsKeptBetweenAttempts(): void
+    public function testNewGameHidesNumberInRange(): void
     {
         $this->guess(1);
-        $number = session('guess.number');
 
+        // Загаданную единицу первый ход угадывает сразу — партия закрыта, число ушло из сессии
+        $number = session('guess.number') ?? 1;
+
+        $this->assertGreaterThanOrEqual(GuessNumberController::MIN, $number);
+        $this->assertLessThanOrEqual(GuessNumberController::MAX, $number);
+    }
+
+    public function testNumberIsKeptBetweenAttempts(): void
+    {
+        $this->startGame();
+        $this->guess(1);
         $this->guess(2);
 
-        $this->assertSame($number, session('guess.number'));
+        $this->assertSame(50, session('guess.number'));
     }
 
     public function testHintsPointToTheNumber(): void
     {
+        $this->startGame();
         $this->guess(1);
+        $this->guess(99);
 
-        // Единицей можно угадать с первой попытки — тогда партия закрыта,
-        // а число уходит из сессии вместе с историей
-        $number = session('guess.number');
-
-        if ($number === null) {
-            $this->assertSame(
-                5000 - GuessNumberController::PRICE + GuessNumberController::PRIZE,
-                $this->user->fresh()->money,
-            );
-
-            return;
-        }
-
-        // Число загадано случайно, поэтому проверяем подсказку по нему самому
         $history = session('guess.history');
 
-        $this->assertSame($number > 1 ? 'more' : 'less', $history[0]['hint']);
+        $this->assertSame('more', $history[0]['hint']);
+        $this->assertSame('less', $history[1]['hint']);
     }
 
     public function testWinPaysPrizeAndClosesGame(): void
     {
+        $this->startGame();
         $this->guess(1);
-        $number = session('guess.number');
         $money = $this->user->fresh()->money;
 
-        $this->guess($number);
+        $this->guess(50);
 
         $this->assertSame($money - GuessNumberController::PRICE + GuessNumberController::PRIZE, $this->user->fresh()->money);
         $this->assertNull(session('guess'));
@@ -117,15 +117,10 @@ class GuessNumberTest extends ModuleTestCase
 
     public function testGameEndsAfterLastAttempt(): void
     {
-        $this->guess(1);
-        $number = session('guess.number');
+        $this->startGame();
 
-        // Заведомо мимо: соседнее число всегда в диапазоне
-        $wrong = $number === GuessNumberController::MAX ? $number - 1 : $number + 1;
-
-        // Первая попытка уже сделана, до конца партии осталось TRIES - 1
-        foreach (range(2, GuessNumberController::TRIES) as $ignored) {
-            $response = $this->guess($wrong);
+        foreach (range(1, GuessNumberController::TRIES) as $ignored) {
+            $response = $this->guess(1);
         }
 
         $this->assertNull(session('guess'));
@@ -134,6 +129,7 @@ class GuessNumberTest extends ModuleTestCase
 
     public function testAttemptsAreCountedDown(): void
     {
+        $this->startGame();
         $this->guess(1);
 
         $this->assertSame(GuessNumberController::TRIES - 1, session('guess.try'));
@@ -141,6 +137,7 @@ class GuessNumberTest extends ModuleTestCase
 
     public function testResetDropsTheGame(): void
     {
+        $this->startGame();
         $this->guess(1);
         $this->assertNotNull(session('guess'));
 
@@ -164,13 +161,13 @@ class GuessNumberTest extends ModuleTestCase
 
     public function testUnfinishedNumberIsNotLeakedToPage(): void
     {
+        $this->startGame();
         $this->guess(1);
-        $number = session('guess.number');
 
         $html = $this->actingAs($this->user)->get('/games/guess')->getContent();
 
         // Подсказка «между» может совпасть с числом, поэтому ищем его как значение поля
-        $this->assertStringNotContainsString('value="' . $number . '"', $html);
+        $this->assertStringNotContainsString('value="50"', $html);
     }
 
     public function testOptimalPlayWinsAboutThirdOfGames(): void
@@ -208,22 +205,14 @@ class GuessNumberTest extends ModuleTestCase
         // Приз фиксированный: угадано с первой попытки или с последней — платится одно и то же
         foreach (range(1, GuessNumberController::TRIES - 1) as $misses) {
             $user = User::factory()->create(['money' => 5000]);
+            $this->startGame();
 
-            $this->actingAs($user)->post('/games/guess/go', ['guess' => 1]);
-            $number = session('guess.number');
-
-            if ($number === null) {
-                continue;
-            }
-
-            $wrong = $number === GuessNumberController::MAX ? $number - 1 : $number + 1;
-
-            foreach (range(1, $misses - 1) as $ignored) {
-                $this->actingAs($user)->post('/games/guess/go', ['guess' => $wrong]);
+            foreach (range(1, $misses) as $ignored) {
+                $this->actingAs($user)->post('/games/guess/go', ['guess' => 1]);
             }
 
             $money = $user->fresh()->money;
-            $this->actingAs($user)->post('/games/guess/go', ['guess' => $number]);
+            $this->actingAs($user)->post('/games/guess/go', ['guess' => 50]);
 
             $this->assertSame(
                 $money - GuessNumberController::PRICE + GuessNumberController::PRIZE,
@@ -247,6 +236,19 @@ class GuessNumberTest extends ModuleTestCase
 
         $this->assertNotEmpty($response->json('message'));
         $this->assertSame(5000, $this->user->fresh()->money);
+    }
+
+    /**
+     * Начинает партию с известным числом: со случайным ход единицей
+     * мог угадать его сразу и закрыть партию раньше, чем тест её проверит
+     */
+    private function startGame(int $number = 50): void
+    {
+        $this->withSession(['guess' => [
+            'number'  => $number,
+            'try'     => GuessNumberController::TRIES,
+            'history' => [],
+        ]]);
     }
 
     private function guess(mixed $number): TestResponse

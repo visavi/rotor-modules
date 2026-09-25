@@ -25,7 +25,7 @@ class NewsApiTest extends ModuleTestCase
 
         // Типы регистрирует ModuleServiceProvider, в тестах модуль поднимается вручную
         Registry::ratingType(News::$morphName);
-        Registry::label(News::$morphName, __('news::news.news'));
+        Registry::setLabel(News::$morphName, 'news::news.news');
 
         $this->user = User::factory()->create();
     }

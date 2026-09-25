@@ -10,8 +10,8 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/admin-adverts'   => __('index.admin_advertising'),
-        '/admin/adverts'         => __('index.advertising'),
-        '/admin/advert-settings' => __('advert::adverts.settings'),
+        '/admin/admin-adverts'   => 'index.admin_advertising',
+        '/admin/adverts'         => 'index.advertising',
+        '/admin/advert-settings' => 'advert::adverts.settings',
     ],
 ];

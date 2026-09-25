@@ -14,7 +14,7 @@ return [
 
     'models' => [
         Photo::class => [
-            'label'  => __('photo::photos.photos'),
+            'label'  => 'photo::photos.photos',
             'search' => ['view' => 'photo::search/_photos'],
             'feed'   => ['with' => ['user', 'files'], 'view' => 'photo::feeds/_photos'],
             'upload' => 'media',
@@ -24,8 +24,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/photos'         => __('photo::photos.photos'),
-        '/admin/photo-settings' => __('photo::photos.settings'),
+        '/admin/photos'         => 'photo::photos.photos',
+        '/admin/photo-settings' => 'photo::photos.settings',
     ],
 
     'restatement' => [

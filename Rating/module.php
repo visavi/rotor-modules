@@ -10,6 +10,6 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/rating-settings' => __('rating::ratings.settings'),
+        '/admin/rating-settings' => 'rating::ratings.settings',
     ],
 ];

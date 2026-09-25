@@ -13,7 +13,7 @@ return [
 
     'models' => [
         Guestbook::class => [
-            'label'  => __('guestbook::guestbook.guestbook'),
+            'label'  => 'guestbook::guestbook.guestbook',
             'search' => ['view' => 'guestbook::search/_guestbooks'],
             'upload' => 'media',
             'spam'   => true,
@@ -29,7 +29,7 @@ return [
     ],
 
     'actions' => [
-        '/admin/guestbook'          => __('guestbook::guestbook.guestbook'),
-        '/admin/guestbook-settings' => __('guestbook::guestbook.settings'),
+        '/admin/guestbook'          => 'guestbook::guestbook.guestbook',
+        '/admin/guestbook-settings' => 'guestbook::guestbook.settings',
     ],
 ];

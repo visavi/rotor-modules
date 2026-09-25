@@ -4,12 +4,12 @@ return [
     'name'        => 'Шаблон',
     'description' => 'Минимальный модуль-шаблон для создания новых модулей',
     'version'     => '1.0.6',
-    'requires'    => '14.3.0',
+    'requires'    => '14.7.0',
     'author'      => 'Автор модуля',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/template' => __('template::template.manage_records'),
+        '/admin/template' => 'template::template.manage_records',
     ],
 ];

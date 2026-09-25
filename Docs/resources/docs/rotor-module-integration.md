@@ -14,8 +14,9 @@ use App\Support\Registry;
 Registry::fileType(string $morphName);                // тип принимает файлы
 Registry::mediaType(string $morphName);               // тип принимает фото/видео
 Registry::ratingType(string $morphName);              // тип поддерживает рейтинг
-Registry::spamType(string $morphName);                // тип — источник жалоб на спам (метка берётся из labelTypes)
-Registry::label(string $morphName, string $label);    // отображаемое название типа
+Registry::spamType(string $morphName);                // тип — источник жалоб на спам (метка берётся из labels)
+Registry::setLabel(string $morphName, string $label); // отображаемое название типа (ключ перевода)
+Registry::label(string $morphName): ?string;          // название на текущем языке
 Registry::feed(string $class, array $config);         // запись в ленте, ключи конфига — ниже
 Registry::search(string $class, string $view, array $with = []); // полнотекстовый поиск
 ```
@@ -144,7 +145,7 @@ $articles = Article::query()
 | `'upload' => 'media'` | `mediaType()` |
 | `'rating' => true` | `ratingType()` |
 | `'spam' => true` | `spamType()` |
-| `'label' => '...'` | `label()` |
+| `'label' => '...'` | `setLabel()` |
 | `'feed' => [...]` | `feed()` |
 | `'search' => [...]` | `search()` |
 | `'api' => [...]` | `apiConfig()` |

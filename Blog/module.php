@@ -17,7 +17,7 @@ return [
 
     'models' => [
         Article::class => [
-            'label'  => __('blog::blogs.blogs'),
+            'label'  => 'blog::blogs.blogs',
             'search' => ['view' => 'blog::search/_articles', 'with' => ['category']],
             'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'blog::feeds/_articles'],
             'upload' => 'media',
@@ -32,8 +32,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/blogs'         => __('blog::blogs.blogs'),
-        '/admin/blog-settings' => __('blog::blogs.settings'),
+        '/admin/blogs'         => 'blog::blogs.blogs',
+        '/admin/blog-settings' => 'blog::blogs.settings',
     ],
 
     'schedule' => function (Schedule $schedule) {

@@ -10,6 +10,6 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/notifier-settings' => __('notifier::notifier.settings'),
+        '/admin/notifier-settings' => 'notifier::notifier.settings',
     ],
 ];

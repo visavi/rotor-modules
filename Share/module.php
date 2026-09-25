@@ -15,6 +15,6 @@ return [
     'homepage' => 'https://visavi.net',
 
     'actions' => [
-        '/admin/share-settings' => __('share::share.settings'),
+        '/admin/share-settings' => 'share::share.settings',
     ],
 ];

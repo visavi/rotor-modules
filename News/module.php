@@ -14,7 +14,7 @@ return [
 
     'models' => [
         News::class => [
-            'label'  => __('news::news.news'),
+            'label'  => 'news::news.news',
             'search' => ['view' => 'news::search/_news'],
             'feed'   => ['with' => ['user', 'files'], 'view' => 'news::feeds/_news'],
             'upload' => 'media',
@@ -24,8 +24,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/news'          => __('news::news.news'),
-        '/admin/news-settings' => __('news::news.settings'),
+        '/admin/news'          => 'news::news.news',
+        '/admin/news-settings' => 'news::news.settings',
     ],
 
     'restatement' => [

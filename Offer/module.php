@@ -14,7 +14,7 @@ return [
 
     'models' => [
         Offer::class => [
-            'label'  => __('offer::offers.section'),
+            'label'  => 'offer::offers.section',
             'search' => ['view' => 'offer::search/_offers'],
             'feed'   => [
                 'with' => ['user'],
@@ -28,8 +28,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/offers'         => __('offer::offers.section'),
-        '/admin/offer-settings' => __('offer::offers.settings'),
+        '/admin/offers'         => 'offer::offers.section',
+        '/admin/offer-settings' => 'offer::offers.settings',
     ],
 
     'restatement' => [

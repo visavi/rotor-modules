@@ -10,7 +10,7 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/social-auth-settings' => __('social_auth::social_auth.settings'),
-        '/admin/socials'              => __('social_auth::social_auth.socials'),
+        '/admin/social-auth-settings' => 'social_auth::social_auth.settings',
+        '/admin/socials'              => 'social_auth::social_auth.socials',
     ],
 ];

@@ -16,6 +16,6 @@ return [
     ],
 
     'actions' => [
-        '/admin/transfer-settings' => __('transfer::transfers.settings'),
+        '/admin/transfer-settings' => 'transfer::transfers.settings',
     ],
 ];

@@ -16,7 +16,7 @@ return [
 
     'models' => [
         Item::class => [
-            'label'  => __('board::boards.boards'),
+            'label'  => 'board::boards.boards',
             'search' => ['view' => 'board::search/_items'],
             'feed'   => [
                 'with'  => ['user', 'files', 'category.parent'],
@@ -33,8 +33,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/boards'         => __('board::boards.boards'),
-        '/admin/board-settings' => __('board::boards.settings'),
+        '/admin/boards'         => 'board::boards.boards',
+        '/admin/board-settings' => 'board::boards.settings',
     ],
 
     'schedule' => function (Schedule $schedule) {

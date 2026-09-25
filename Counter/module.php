@@ -10,6 +10,6 @@ return [
     'homepage'    => 'https://visavi.net',
 
     'actions' => [
-        '/admin/counter-settings' => __('counter::counters.settings'),
+        '/admin/counter-settings' => 'counter::counters.settings',
     ],
 ];

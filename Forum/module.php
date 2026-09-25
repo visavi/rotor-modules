@@ -37,7 +37,7 @@ return [
 
     'models' => [
         Topic::class => [
-            'label'  => __('forum::forums.topics'),
+            'label'  => 'forum::forums.topics',
             'search' => ['view' => 'forum::search/_topics', 'with' => ['forum', 'lastPost']],
             'feed'   => [
                 // Варианты ответов грузятся заранее, а голос пользователя — нет:
@@ -55,7 +55,7 @@ return [
             'stat' => true,
         ],
         Post::class => [
-            'label'  => __('forum::forums.forum_posts'),
+            'label'  => 'forum::forums.forum_posts',
             'search' => ['view' => 'forum::search/_posts', 'with' => ['topic']],
             'upload' => 'file',
             'rating' => true,
@@ -71,8 +71,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/forums'         => __('forum::forums.forums'),
-        '/admin/forum-settings' => __('forum::forums.settings'),
+        '/admin/forums'         => 'forum::forums.forums',
+        '/admin/forum-settings' => 'forum::forums.settings',
     ],
 
     'restatement' => [

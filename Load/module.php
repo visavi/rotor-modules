@@ -17,7 +17,7 @@ return [
 
     'models' => [
         Down::class => [
-            'label'  => __('load::loads.loads'),
+            'label'  => 'load::loads.loads',
             'search' => ['view' => 'load::search/_downs', 'with' => ['category']],
             'feed'   => ['with' => ['user', 'files', 'category.parent'], 'view' => 'load::feeds/_downs'],
             'upload' => 'file',
@@ -32,8 +32,8 @@ return [
     ],
 
     'actions' => [
-        '/admin/loads'         => __('load::loads.loads'),
-        '/admin/load-settings' => __('load::loads.settings'),
+        '/admin/loads'         => 'load::loads.loads',
+        '/admin/load-settings' => 'load::loads.settings',
     ],
 
     'restatement' => [

@@ -21,7 +21,7 @@ INFO,
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',
     'actions'  => [
-        '/admin/gifts' => __('gift::gifts.title'),
+        '/admin/gifts' => 'gift::gifts.title',
     ],
 
     'per_page'  => 24, // Кол. подарков на страниц

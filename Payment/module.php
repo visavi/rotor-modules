@@ -30,7 +30,7 @@ INFO,
     'email'    => 'admin@visavi.net',
     'homepage' => 'https://visavi.net',
     'actions'  => [
-        '/admin/orders'           => __('payment::payments.orders'),
-        '/admin/payment-settings' => __('payment::payments.settings'),
+        '/admin/orders'           => 'payment::payments.orders',
+        '/admin/payment-settings' => 'payment::payments.settings',
     ],
 ];
