@@ -116,7 +116,7 @@ class TopicController extends Controller
      */
     public function create(int $id, Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
-        $msg = $request->input('msg');
+        $msg = (string) $request->input('msg');
 
         if (! $user = getUser()) {
             abort(403, __('main.not_authorized'));
@@ -145,8 +145,6 @@ class TopicController extends Controller
                 ->withInput()
                 ->withErrors($validator->getErrors());
         }
-
-        $msg = antimat($msg);
 
         $countFiles = File::query()
             ->where('relate_type', Post::$morphName)
@@ -381,9 +379,6 @@ class TopicController extends Controller
             }
 
             if ($validator->isValid()) {
-                $title = antimat($title);
-                $msg = antimat($msg);
-
                 $topic->update(['title' => $title]);
 
                 if ($post) {
@@ -480,7 +475,7 @@ class TopicController extends Controller
 
             if ($validator->isValid()) {
                 $post->update([
-                    'text'         => antimat($msg),
+                    'text'         => $msg,
                     'edit_user_id' => $user->id,
                 ]);
 

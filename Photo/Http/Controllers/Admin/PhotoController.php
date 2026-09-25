@@ -50,8 +50,6 @@ class PhotoController extends AdminController
                 ->length($text, setting('photo_text_min'), setting('photo_text_max'), ['text' => __('validator.text_long')]);
 
             if ($validator->isValid()) {
-                $text = antimat($text);
-
                 $photo->update([
                     'title'  => $title,
                     'text'   => $text,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Photo\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\TextCast;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
@@ -95,6 +96,7 @@ class Photo extends Model
     protected function casts(): array
     {
         return [
+            'title'   => TextCast::class,
             'user_id' => 'int',
             'closed'  => 'bool',
             'text'    => HtmlCast::class,

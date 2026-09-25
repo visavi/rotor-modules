@@ -77,4 +77,24 @@ class AdminSocialsTest extends ModuleTestCase
     {
         $this->get('/admin/socials')->assertRedirect();
     }
+
+    public function testSettingsRequireBoss(): void
+    {
+        // Секреты OAuth-приложений — настройки сайта, они только для владельца
+        $this->actingAs($this->admin)
+            ->get('/admin/social-auth-settings')
+            ->assertForbidden();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/social-auth-settings', ['sets' => ['social_github_client_id' => 'stolen']])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('settings', ['name' => 'social_github_client_id', 'value' => 'stolen']);
+
+        $boss = User::factory()->boss()->create(['login' => 'boss_socials']);
+
+        $this->actingAs($boss)
+            ->get('/admin/social-auth-settings')
+            ->assertOk();
+    }
 }

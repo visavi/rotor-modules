@@ -78,7 +78,7 @@ class GuestbookApiController extends Controller
 
         $validated = $request->validate($rules + FileService::rules(Guestbook::$morphName));
 
-        $text = antimat($validated['text']);
+        $text = $validated['text'];
         $active = true;
         $guestName = null;
 
@@ -153,7 +153,7 @@ class GuestbookApiController extends Controller
         ]);
 
         $post->update([
-            'text'         => antimat($validated['text']),
+            'text'         => $validated['text'],
             'edit_user_id' => getUser('id'),
         ]);
 

@@ -94,9 +94,6 @@ class OfferController extends Controller
                 ->gte(getUser('point'), setting('addofferspoint'), __('offer::offers.condition_add', ['point' => plural(setting('addofferspoint'), setting('scorename'))]));
 
             if ($validator->isValid()) {
-                $title = antimat($title);
-                $text = antimat($text);
-
                 $offer = Offer::query()->create([
                     'type'    => $type,
                     'title'   => $title,
@@ -167,9 +164,6 @@ class OfferController extends Controller
                 ->in($type, Offer::TYPES, ['type' => __('offer::offers.type_invalid')]);
 
             if ($validator->isValid()) {
-                $title = antimat($title);
-                $text = antimat($text);
-
                 $offer->update([
                     'type'       => $type,
                     'title'      => $title,

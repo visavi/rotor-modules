@@ -44,7 +44,7 @@ class GiftsUser extends Model
         return [
             'user_id'      => 'int',
             'send_user_id' => 'int',
-            'text'         => HtmlCast::class,
+            'text'         => HtmlCast::class . ':nullable',
             'deleted_at'   => 'datetime',
         ];
     }

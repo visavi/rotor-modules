@@ -87,7 +87,7 @@ class Guestbook extends Model
         return [
             'user_id' => 'int',
             'text'    => HtmlCast::class,
-            'reply'   => HtmlCast::class,
+            'reply'   => HtmlCast::class . ':nullable',
         ];
     }
 

@@ -143,6 +143,21 @@ class NotifierTest extends ModuleTestCase
         $this->assertSame(Notifier::DEFAULT_INTERVAL, Notifier::interval());
     }
 
+    public function testAdminSavesSettingsWithoutSound(): void
+    {
+        $admin = User::factory()->create(['level' => User::BOSS]);
+
+        // «Без звука» — пустое значение: приходит null, а колонка value NOT NULL
+        $this->actingAs($admin)
+            ->post('/admin/notifier-settings', [
+                'sets' => ['notifier_sound' => ''],
+            ])
+            ->assertRedirect(route('notifier.settings'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('settings', ['name' => 'notifier_sound', 'value' => '']);
+    }
+
     public function testAdminSavesSettings(): void
     {
         $admin = User::factory()->create(['level' => User::BOSS]);

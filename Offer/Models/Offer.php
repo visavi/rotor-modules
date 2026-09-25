@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Offer\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\TextCast;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
@@ -131,10 +132,11 @@ class Offer extends Model
     protected function casts(): array
     {
         return [
+            'title'      => TextCast::class,
             'user_id'    => 'int',
             'closed'     => 'bool',
             'text'       => HtmlCast::class,
-            'reply'      => HtmlCast::class,
+            'reply'      => HtmlCast::class . ':nullable',
             'updated_at' => 'datetime',
         ];
     }

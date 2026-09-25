@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use App\Casts\TextCast;
 use App\Models\Poll;
 use App\Traits\PollableTrait;
 use Carbon\CarbonImmutable;
@@ -60,6 +61,7 @@ class Vote extends Model
     protected function casts(): array
     {
         return [
+            'title'      => TextCast::class,
             'created_at' => 'datetime',
         ];
     }

@@ -127,7 +127,7 @@ class ForumApiController extends Controller
             'files.*' => ['file', 'max:' . setting('filesize'), 'mimes:' . setting('file_extensions')],
         ]);
 
-        $msg = antimat($validated['text']);
+        $msg = $validated['text'];
 
         $uploadedFiles = $request->file('files', []);
 
@@ -193,7 +193,7 @@ class ForumApiController extends Controller
 
         $topic = Topic::query()->create([
             'forum_id'   => $forum->id,
-            'title'      => antimat($validated['title']),
+            'title'      => $validated['title'],
             'user_id'    => $user->id,
             'updated_at' => now(),
         ]);
@@ -201,7 +201,7 @@ class ForumApiController extends Controller
         $post = Post::query()->create([
             'topic_id' => $topic->id,
             'user_id'  => $user->id,
-            'text'     => antimat($validated['text']),
+            'text'     => $validated['text'],
             'ip'       => getIp(),
             'brow'     => getBrowser(),
         ]);

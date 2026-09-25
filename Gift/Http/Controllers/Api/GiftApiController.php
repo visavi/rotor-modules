@@ -103,7 +103,7 @@ class GiftApiController extends Controller
         // Заодно подчищаем просроченные, как и на сайте
         GiftsUser::query()->where('deleted_at', '<', now())->delete();
 
-        $text = antimat($validated['text'] ?? '');
+        $text = $validated['text'] ?? '';
 
         DB::transaction(static function () use ($gift, $user, $recipients, $text, $total) {
             $user->decrement('money', $total);

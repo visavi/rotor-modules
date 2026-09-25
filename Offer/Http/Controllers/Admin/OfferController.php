@@ -75,9 +75,6 @@ class OfferController extends Controller
                 ->in($type, Offer::TYPES, ['type' => __('offer::offers.type_invalid')]);
 
             if ($validator->isValid()) {
-                $title = antimat($title);
-                $text = antimat($text);
-
                 $offer->update([
                     'type'       => $type,
                     'title'      => $title,
@@ -119,8 +116,6 @@ class OfferController extends Controller
                 ->in($status, Offer::STATUSES, ['status' => __('offer::offers.status_invalid')]);
 
             if ($validator->isValid()) {
-                $reply = antimat($reply);
-
                 $offer->update([
                     'reply'         => $reply,
                     'reply_user_id' => getUser('id'),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Load\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\TextCast;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
@@ -87,6 +88,7 @@ class Down extends Model
     protected function casts(): array
     {
         return [
+            'title'   => TextCast::class,
             'active'  => 'bool',
             'links'   => 'array',
             'user_id' => 'int',

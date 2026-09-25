@@ -109,7 +109,7 @@ class PhotoController extends Controller
                 $photo = Photo::query()->create([
                     'user_id' => $user->id,
                     'title'   => $title,
-                    'text'    => antimat($text),
+                    'text'    => $text,
                     'closed'  => $closed,
                 ]);
 
@@ -168,8 +168,6 @@ class PhotoController extends Controller
                 ->length($text, setting('photo_text_min'), setting('photo_text_max'), ['text' => __('validator.text_long')]);
 
             if ($validator->isValid()) {
-                $text = antimat($text);
-
                 $photo->update([
                     'title'  => $title,
                     'text'   => $text,

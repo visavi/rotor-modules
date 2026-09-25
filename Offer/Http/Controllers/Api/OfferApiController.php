@@ -104,8 +104,8 @@ class OfferApiController extends Controller
 
         $offer = Offer::query()->create([
             'type'    => $validated['type'],
-            'title'   => antimat($validated['title']),
-            'text'    => antimat($validated['text']),
+            'title'   => $validated['title'],
+            'text'    => $validated['text'],
             'user_id' => $user->id,
             'rating'  => 1,
             'status'  => Offer::WAIT,
@@ -152,8 +152,8 @@ class OfferApiController extends Controller
 
         $offer->update([
             'type'       => $validated['type'],
-            'title'      => antimat($validated['title']),
-            'text'       => antimat($validated['text']),
+            'title'      => $validated['title'],
+            'text'       => $validated['text'],
             'updated_at' => now(),
         ]);
 

@@ -112,8 +112,8 @@ class ItemApiController extends Controller
 
         $item = Item::query()->create([
             'board_id'   => $board->id,
-            'title'      => antimat($validated['title']),
-            'text'       => antimat($validated['text']),
+            'title'      => $validated['title'],
+            'text'       => $validated['text'],
             'user_id'    => $user->id,
             'price'      => (int) ($validated['price'] ?? 0),
             'phone'      => $this->normalizePhone($validated['phone'] ?? null),
@@ -165,8 +165,8 @@ class ItemApiController extends Controller
 
         $item->update([
             'board_id' => $board->id,
-            'title'    => antimat($validated['title']),
-            'text'     => antimat($validated['text']),
+            'title'    => $validated['title'],
+            'text'     => $validated['text'],
             'price'    => (int) ($validated['price'] ?? 0),
             'phone'    => $this->normalizePhone($validated['phone'] ?? null),
         ]);

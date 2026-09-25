@@ -62,7 +62,7 @@ class WallApiController extends Controller
         $message = Wall::query()->create([
             'user_id'   => $user->id,
             'author_id' => getUser('id'),
-            'text'      => antimat($validated['text']),
+            'text'      => $validated['text'],
         ]);
 
         $flood->saveState();

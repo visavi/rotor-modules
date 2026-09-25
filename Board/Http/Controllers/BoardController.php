@@ -126,7 +126,7 @@ class BoardController extends Controller
                 $item = Item::query()->create([
                     'board_id'   => $board->id,
                     'title'      => $title,
-                    'text'       => antimat($text),
+                    'text'       => $text,
                     'user_id'    => $user->id,
                     'price'      => $price,
                     'phone'      => $phone,
@@ -209,7 +209,7 @@ class BoardController extends Controller
                 $item->update([
                     'board_id' => $board->id,
                     'title'    => $title,
-                    'text'     => antimat($text),
+                    'text'     => $text,
                     'price'    => $price,
                     'phone'    => $phone,
                 ]);

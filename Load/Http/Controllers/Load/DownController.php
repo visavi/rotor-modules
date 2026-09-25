@@ -122,7 +122,7 @@ class DownController extends Controller
                 $down = Down::query()->create([
                     'category_id' => $category->id,
                     'title'       => $title,
-                    'text'        => antimat($text),
+                    'text'        => $text,
                     'user_id'     => $user->id,
                     'active'      => isAdmin(User::ADMIN),
                     'links'       => $links ? array_values($links) : null,
@@ -226,7 +226,7 @@ class DownController extends Controller
                 $down->update([
                     'category_id' => $category->id,
                     'title'       => $title,
-                    'text'        => antimat($text),
+                    'text'        => $text,
                     'links'       => $links,
                 ]);
 

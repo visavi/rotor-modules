@@ -224,6 +224,8 @@ class CommentApiTest extends ModuleTestCase
             'relate_id'   => $offer->id,
             'text'        => $text,
             'user_id'     => $userId ?? User::factory()->create()->id,
+            'ip'          => '127.0.0.1',
+            'brow'        => 'Test',
             'created_at'  => now(),
         ]);
     }

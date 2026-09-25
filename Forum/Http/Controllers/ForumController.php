@@ -150,9 +150,6 @@ class ForumController extends Controller
             /* TODO: Сделать проверку поиска похожей темы */
 
             if ($validator->isValid()) {
-                $title = antimat($title);
-                $msg = antimat($msg);
-
                 $topic = Topic::query()->create([
                     'forum_id'   => $forum->id,
                     'title'      => $title,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Board\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\TextCast;
 use App\Models\File;
 use App\Models\User;
 use App\Traits\ConvertVideoTrait;
@@ -81,6 +82,7 @@ class Item extends Model
     protected function casts(): array
     {
         return [
+            'title'      => TextCast::class,
             'active'     => 'bool',
             'user_id'    => 'int',
             'text'       => HtmlCast::class,

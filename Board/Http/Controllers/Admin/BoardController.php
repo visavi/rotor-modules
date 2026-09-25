@@ -238,7 +238,7 @@ class BoardController extends AdminController
                 $item->update([
                     'board_id' => $board->id,
                     'title'    => $title,
-                    'text'     => antimat($text),
+                    'text'     => $text,
                     'price'    => $price,
                     'phone'    => $phone,
                 ]);

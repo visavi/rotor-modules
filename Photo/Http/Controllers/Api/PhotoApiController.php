@@ -112,7 +112,7 @@ class PhotoApiController extends Controller
         $photo = Photo::query()->create([
             'user_id' => $user->id,
             'title'   => $validated['title'],
-            'text'    => antimat((string) ($validated['text'] ?? '')),
+            'text'    => (string) ($validated['text'] ?? ''),
             'closed'  => (int) ($validated['closed'] ?? 0),
         ]);
 
@@ -145,7 +145,7 @@ class PhotoApiController extends Controller
 
         $photo->update([
             'title'  => $validated['title'],
-            'text'   => antimat((string) ($validated['text'] ?? '')),
+            'text'   => (string) ($validated['text'] ?? ''),
             'closed' => (int) ($validated['closed'] ?? 0),
         ]);
 

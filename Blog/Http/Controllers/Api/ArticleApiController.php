@@ -115,7 +115,7 @@ class ArticleApiController extends Controller
             'user_id'      => $user->id,
             'title'        => $validated['title'],
             'slug'         => $validated['title'],
-            'text'         => antimat($validated['text']),
+            'text'         => $validated['text'],
             'draft'        => $isDraft,
             'active'       => ! $isDraft && ! $publishedAt && ! $isModeration,
             'published_at' => $publishedAt,
@@ -163,7 +163,7 @@ class ArticleApiController extends Controller
         $article->update([
             'category_id'  => $category->id,
             'title'        => $validated['title'],
-            'text'         => antimat($validated['text']),
+            'text'         => $validated['text'],
             'draft'        => $isDraft,
             'active'       => $isPublish || (! $isDraft && ! $publishedAt && ! $isModeration && $article->active),
             'published_at' => $publishedAt,

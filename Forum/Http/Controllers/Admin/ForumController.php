@@ -457,8 +457,6 @@ class ForumController extends AdminController
             $validator->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
 
             if ($validator->isValid()) {
-                $msg = antimat($msg);
-
                 $post->update([
                     'text'         => $msg,
                     'edit_user_id' => getUser('id'),

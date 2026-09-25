@@ -85,7 +85,8 @@ class NotifierSettingController extends ModuleSettingController
 
         // Пишем только свои ключи: чужие имена из формы не должны попадать в настройки
         foreach (array_intersect_key($sets, array_flip(self::SETTINGS)) as $name => $value) {
-            Setting::query()->updateOrCreate(['name' => $name], ['value' => $value]);
+            // «Без звука» — пустое поле, оно приходит null, а колонка value NOT NULL
+            Setting::query()->updateOrCreate(['name' => $name], ['value' => (string) $value]);
         }
 
         clearCache('settings');

@@ -270,7 +270,7 @@ class LoadController extends AdminController
                 $down->update([
                     'category_id' => $category->id,
                     'title'       => $title,
-                    'text'        => antimat($text),
+                    'text'        => $text,
                     'links'       => $links,
                 ]);
 

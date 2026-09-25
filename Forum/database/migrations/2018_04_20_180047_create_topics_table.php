@@ -17,7 +17,7 @@ return new class extends Migration {
                 $table->boolean('locked')->default(false);
                 $table->string('moderators')->nullable();
                 $table->string('note')->nullable();
-                $table->integer('count_posts');
+                $table->integer('count_posts')->default(0);
                 $table->integer('visits')->default(0);
                 $table->integer('last_post_id')->nullable();
                 $table->integer('close_user_id')->nullable();

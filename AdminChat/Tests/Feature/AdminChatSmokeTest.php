@@ -93,6 +93,8 @@ class AdminChatSmokeTest extends ModuleTestCase
         return Chat::query()->create([
             'user_id'    => $this->admin->id,
             'text'       => 'Сообщение администрации',
+            'ip'         => '127.0.0.1',
+            'brow'       => 'Test',
             'created_at' => now(),
             ...$attributes,
         ]);

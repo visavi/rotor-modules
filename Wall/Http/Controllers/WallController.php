@@ -61,7 +61,7 @@ class WallController extends Controller
                 Wall::query()->create([
                     'user_id'   => $user->id,
                     'author_id' => getUser('id'),
-                    'text'      => antimat($msg),
+                    'text'      => $msg,
                 ]);
 
                 $flood->saveState();

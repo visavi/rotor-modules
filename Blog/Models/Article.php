@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Blog\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\TextCast;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
@@ -91,6 +92,7 @@ class Article extends Model
     protected function casts(): array
     {
         return [
+            'title'        => TextCast::class,
             'active'       => 'bool',
             'published_at' => 'datetime',
             'user_id'      => 'int',

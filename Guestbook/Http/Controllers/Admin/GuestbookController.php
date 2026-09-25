@@ -48,7 +48,7 @@ class GuestbookController extends AdminController
 
             if ($validator->isValid()) {
                 $post->update([
-                    'text'         => antimat($msg),
+                    'text'         => $msg,
                     'edit_user_id' => getUser('id'),
                 ]);
 

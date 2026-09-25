@@ -179,8 +179,6 @@ class ArticleController extends Controller
             }
 
             if ($validator->isValid()) {
-                $text = antimat($text);
-
                 $article = Article::query()->create([
                     'category_id'  => $category->id,
                     'user_id'      => $user->id,

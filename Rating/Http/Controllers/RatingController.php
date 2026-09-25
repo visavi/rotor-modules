@@ -72,8 +72,6 @@ class RatingController extends Controller
             }
 
             if ($validator->isValid()) {
-                $text = antimat($text);
-
                 Rating::query()->create([
                     'user_id'      => $this->user->id,
                     'recipient_id' => $user->id,

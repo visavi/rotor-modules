@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use App\Casts\TextCast;
 use App\Models\User;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
@@ -94,6 +95,7 @@ class Topic extends Model
     protected function casts(): array
     {
         return [
+            'title'      => TextCast::class,
             'user_id'    => 'int',
             'closed'     => 'bool',
             'locked'     => 'bool',

@@ -47,7 +47,7 @@ class GuestbookController extends Controller
      */
     public function add(Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
-        $msg = $request->input('msg');
+        $msg = (string) $request->input('msg');
         $user = $request->user();
 
         $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')])
@@ -55,14 +55,13 @@ class GuestbookController extends Controller
 
         if (! $user && setting('bookadds')) {
             $validator->true(captchaVerify(), ['protect' => __('validator.captcha')]);
-            $validator->true(! str_contains($msg ?? '', '//'), ['msg' => __('guestbook::guestbook.without_links')]);
+            $validator->true(! str_contains($msg, '//'), ['msg' => __('guestbook::guestbook.without_links')]);
             $validator->length($request->input('guest_name'), 3, 20, ['guest_name' => __('users.name_short_or_long')], false);
         } else {
             $validator->true($user, ['msg' => __('main.not_authorized')]);
         }
 
         if ($validator->isValid()) {
-            $msg = antimat($msg);
             $active = ! setting('guest_moderation');
             $guestName = $request->input('guest_name');
 
@@ -137,7 +136,7 @@ class GuestbookController extends Controller
 
             if ($validator->isValid()) {
                 $post->update([
-                    'text'         => antimat($msg),
+                    'text'         => $msg,
                     'edit_user_id' => $user->id,
                 ]);
 

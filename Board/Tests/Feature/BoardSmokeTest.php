@@ -37,7 +37,7 @@ class BoardSmokeTest extends ModuleTestCase
 
     public function testSettingsUpdate(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->boss()->create();
 
         $response = $this->actingAs($admin)->post(route('board.settings.update'), [
             'sets' => ['board_create_user_point' => '15'],
@@ -49,7 +49,7 @@ class BoardSmokeTest extends ModuleTestCase
 
     public function testSettingsUpdateEmpty(): void
     {
-        $admin = User::factory()->admin()->create();
+        $admin = User::factory()->boss()->create();
 
         $this->actingAs($admin)
             ->from(route('boards.index'))

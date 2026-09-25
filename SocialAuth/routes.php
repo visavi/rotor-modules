@@ -26,7 +26,8 @@ Route::middleware('web')
         Route::delete('/{provider}/unlink', 'unlink')->name('social.unlink')->where('provider', '[a-z]+');
     });
 
-Route::middleware(['web', 'check.admin', 'admin.logger'])
+// Секреты OAuth-приложений — настройки сайта, как и в ядре, только для владельца
+Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->controller(SocialAuthSettingController::class)
     ->prefix('admin')
     ->group(function () {

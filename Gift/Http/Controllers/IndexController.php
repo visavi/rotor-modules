@@ -71,8 +71,6 @@ class IndexController extends Controller
             if ($validator->isValid()) {
                 GiftsUser::query()->where('deleted_at', '<', now())->delete();
 
-                $msg = antimat($msg);
-
                 DB::transaction(static function () use ($gift, $users, $msg, $total) {
                     getUser()->decrement('money', $total);
 

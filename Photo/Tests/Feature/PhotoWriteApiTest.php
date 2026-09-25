@@ -124,6 +124,8 @@ class PhotoWriteApiTest extends ModuleTestCase
             'relate_id'   => $photo->id,
             'text'        => 'Красивое фото',
             'user_id'     => $this->user->id,
+            'ip'          => '127.0.0.1',
+            'brow'        => 'Test',
             'created_at'  => now(),
         ]);
         $photo->update(['count_comments' => 1]);
