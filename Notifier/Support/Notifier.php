@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Notifier\Support;
 
-use App\Models\Dialogue;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
 
@@ -112,22 +111,6 @@ class Notifier
     }
 
     /**
-     * Количество непрочитанных сообщений
-     *
-     * Свой подсчёт, а не User::getCountNewMessages(): метод появился в 14.7,
-     * а модуль ставится и на 14.6, где счётчик ещё лежал в колонке newprivat
-     * и умел отставать в ноль. Затравка страницы и ответ опроса обязаны брать
-     * одно число, иначе расхождение читается клиентом как новое письмо
-     */
-    public static function unreadCount(User $user): int
-    {
-        return Dialogue::query()
-            ->where('user_id', $user->id)
-            ->where('reading', 0)
-            ->count();
-    }
-
-    /**
      * Данные для клиентского скрипта
      *
      * @return array<string, mixed>
@@ -139,7 +122,7 @@ class Notifier
             // который прописан в APP_URL, и запрос ушёл бы на чужой origin
             'url'      => route('notifier.check', absolute: false),
             'userId'   => $user->id,
-            'count'    => self::unreadCount($user),
+            'count'    => $user->getCountNewMessages(),
             'interval' => self::interval() * 1000,
         ];
 

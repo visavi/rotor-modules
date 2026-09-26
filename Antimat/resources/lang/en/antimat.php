@@ -16,5 +16,5 @@ return [
     'settings_replace'         => 'Replacement',
     'settings_replace_hint'    => 'What to replace a listed word with, *** by default',
     'settings_whole_word'      => 'Whole words only',
-    'settings_whole_word_hint' => 'A listed word is not replaced inside other words. Word forms with endings then have to be listed separately',
+    'settings_whole_word_hint' => 'A word is replaced only when it stands alone, not inside another word',
 ];
