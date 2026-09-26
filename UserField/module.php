@@ -3,7 +3,7 @@
 return [
     'name'        => 'Пользовательские поля',
     'description' => 'Дополнительные поля профиля пользователей, настраиваемые администратором',
-    'version'     => '1.0.3',
+    'version'     => '1.1.0',
     'requires'    => '14.7.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

@@ -3,7 +3,7 @@
 return [
     'name'        => 'Денежные переводы',
     'description' => 'Переводы денег между пользователями с порогом по баллам и историей операций',
-    'version'     => '1.2.2',
+    'version'     => '1.3.0',
     'requires'    => '14.7.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
