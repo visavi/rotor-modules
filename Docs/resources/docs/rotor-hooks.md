@@ -40,7 +40,7 @@ Hook::add('sidebarMenu', function () {
 | Хук | Описание |
 |-----|----------|
 | `header` | После заголовка страницы |
-| `navbarStart` | Начало навбара |
+| `navbarStart` | Начало навбара, после переключателя темы |
 | `navbarEnd` | Конец навбара |
 | `navbarMenuStart` | Начало меню навбара |
 | `navbarMenuEnd` | Конец меню навбара |

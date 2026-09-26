@@ -22,7 +22,7 @@ Hook::add('navbarStart', static function () {
 
     return '<li>
         <a class="app-nav__item" href="' . route('admin.chats.index') . '" aria-label="' . __('admin_chat::admin_chat.chat') . '">
-            <i class="far fa-bell fa-lg"></i>
+            <i class="far fa-comment fa-lg"></i>
             <span class="badge bg-notify">!</span>
         </a>
     </li>';
