@@ -9,7 +9,7 @@ return [
     'name'        => 'Объявления',
     'description' => 'Доска объявлений по категориям с ценой, телефоном, фотографиями и сроком размещения',
     'version'     => '1.5.1',
-    'requires'    => '14.7.0',
+    'requires'    => '14.8.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

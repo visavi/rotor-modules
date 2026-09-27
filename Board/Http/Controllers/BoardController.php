@@ -159,7 +159,7 @@ class BoardController extends Controller
             ->where('relate_type', Item::$morphName)
             ->where('relate_id', 0)
             ->where('user_id', $user->id)
-            ->orderBy('created_at')
+            ->ordered()
             ->get();
 
         return view('board::boards/create', compact('boards', 'bid', 'files'));

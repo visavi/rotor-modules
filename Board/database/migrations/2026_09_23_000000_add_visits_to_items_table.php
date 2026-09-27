@@ -24,5 +24,7 @@ return new class extends Migration {
      * Колонку не удаляем: на свежей установке её создаёт миграция таблицы,
      * и откат этой миграции не должен её отнимать
      */
-    public function down(): void {}
+    public function down(): void
+    {
+    }
 };

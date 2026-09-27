@@ -7,7 +7,7 @@ return [
     'name'        => 'Галерея',
     'description' => 'Галерея фотографий пользователей с альбомами и комментариями',
     'version'     => '1.3.4',
-    'requires'    => '14.7.0',
+    'requires'    => '14.8.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

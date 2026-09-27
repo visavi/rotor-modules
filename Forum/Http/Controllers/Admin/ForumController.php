@@ -432,7 +432,7 @@ class ForumController extends AdminController
             ->where('relate_type', Post::$morphName)
             ->where('relate_id', 0)
             ->where('user_id', getUser('id'))
-            ->orderBy('created_at')
+            ->ordered()
             ->get();
 
         return view('forum::admin/forums/topic', compact('topic', 'posts', 'vote', 'files'));

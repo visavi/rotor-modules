@@ -104,7 +104,7 @@ class TopicController extends Controller
                 ->where('relate_type', Post::$morphName)
                 ->where('relate_id', 0)
                 ->where('user_id', $user->id)
-                ->orderBy('created_at')
+                ->ordered()
                 ->get();
         }
 

@@ -82,7 +82,7 @@ class NewsController extends AdminController
             ->where('relate_type', News::$morphName)
             ->where('relate_id', 0)
             ->where('user_id', getUser('id'))
-            ->orderBy('created_at');
+            ->ordered();
 
         if ($request->isMethod('post')) {
             $title = $request->input('title');
@@ -116,7 +116,7 @@ class NewsController extends AdminController
                 ->withErrors($validator->getErrors());
         }
 
-        $files = $files->orderBy('created_at')->get();
+        $files = $files->get();
 
         return view('news::admin/news/create', compact('files'));
     }

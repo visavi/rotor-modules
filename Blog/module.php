@@ -10,7 +10,7 @@ return [
     'name'        => 'Блоги',
     'description' => 'Статьи по категориям с тегами, комментариями, рейтингом, вложениями и отложенной публикацией',
     'version'     => '1.5.1',
-    'requires'    => '14.7.0',
+    'requires'    => '14.8.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

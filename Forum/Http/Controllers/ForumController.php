@@ -115,7 +115,7 @@ class ForumController extends Controller
             ->where('relate_type', Post::$morphName)
             ->where('relate_id', 0)
             ->where('user_id', $user->id)
-            ->orderBy('created_at');
+            ->ordered();
 
         if ($request->isMethod('post')) {
             $title = $request->input('title');
