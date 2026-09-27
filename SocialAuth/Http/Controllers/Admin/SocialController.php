@@ -16,7 +16,7 @@ class SocialController extends Controller
      */
     public function index(Request $request): View
     {
-        $provider = (string) $request->input('provider');
+        $provider = $request->string('provider')->value();
 
         if (! isset(Social::PROVIDERS[$provider])) {
             $provider = '';

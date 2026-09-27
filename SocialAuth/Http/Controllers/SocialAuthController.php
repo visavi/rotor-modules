@@ -9,6 +9,7 @@ use App\Models\BlackList;
 use App\Models\User;
 use App\Services\MailService;
 use App\Services\UserService;
+use App\Support\Validator;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -205,7 +206,7 @@ class SocialAuthController extends Controller
             return redirect('login');
         }
 
-        $email = strtolower($request->validated('email'));
+        $email = Str::lower($request->validated('email'));
 
         if (! setting('openreg')) {
             return redirect('login')->with('danger', __('users.registration_suspended'));
@@ -251,21 +252,21 @@ class SocialAuthController extends Controller
             return redirect('login')->with('danger', __('users.registration_suspended'));
         }
 
+        $email = $this->providerEmail($oauthUser['email'] ?? null);
+
         // Проверка занятости email
-        if (! empty($oauthUser['email'])) {
-            if (BlackList::isBlacklisted('email', $oauthUser['email'])) {
+        if ($email) {
+            if (BlackList::isBlacklisted('email', $email)) {
                 return redirect('login')->with('danger', __('users.email_is_blacklisted'));
             }
 
-            $domain = Str::substr(strrchr(strtolower($oauthUser['email']), '@'), 1);
-
-            if (BlackList::isBlacklisted('domain', $domain)) {
+            if (BlackList::isBlacklisted('domain', Str::afterLast($email, '@'))) {
                 return redirect('login')->with('danger', __('users.domain_is_blacklisted'));
             }
 
             // Адрес подтверждён провайдером, значит владелец ящика доказан —
             // пускаем в существующий аккаунт, а не плодим второй
-            $existing = User::query()->where('email', $oauthUser['email'])->first();
+            $existing = User::query()->where('email', $email)->first();
 
             if ($existing) {
                 return $this->attachAndLogin($existing, $provider, $providerId, $token, $request);
@@ -273,7 +274,7 @@ class SocialAuthController extends Controller
         }
 
         // Email не получен от провайдера — просим ввести вручную
-        if (empty($oauthUser['email'])) {
+        if (! $email) {
             $request->session()->put('social_pending', [
                 'provider'    => $provider,
                 'provider_id' => $providerId,
@@ -285,13 +286,29 @@ class SocialAuthController extends Controller
         }
 
         return $this->createUserWithSocial(
-            $oauthUser['email'],
+            $email,
             $oauthUser['name'] ?? '',
             $provider,
             $providerId,
             $token,
             $request
         );
+    }
+
+    /**
+     * Email провайдера проходит те же правила, что и введённый руками: адрес, который
+     * ядро не пропустит при регистрации (кириллица в имени или домене), считается
+     * неполученным — пользователь вводит свой на форме завершения регистрации
+     */
+    private function providerEmail(?string $email): ?string
+    {
+        if (blank($email)) {
+            return null;
+        }
+
+        $email = Str::lower($email);
+
+        return (new Validator())->email($email, 'email')->isValid() ? $email : null;
     }
 
     /**

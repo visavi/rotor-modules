@@ -25,8 +25,8 @@ class SocialAuthSettingController extends Controller
         $errors = [];
 
         foreach ($providers as $provider) {
-            $clientId = trim((string) $request->input('sets.social_' . $provider . '_client_id', ''));
-            $clientSecret = trim((string) $request->input('sets.social_' . $provider . '_client_secret', ''));
+            $clientId = $request->string('sets.social_' . $provider . '_client_id')->trim()->value();
+            $clientSecret = $request->string('sets.social_' . $provider . '_client_secret')->trim()->value();
             $enabled = $request->boolean('sets.social_' . $provider . '_enabled');
 
             if ($enabled && (empty($clientId) || empty($clientSecret))) {

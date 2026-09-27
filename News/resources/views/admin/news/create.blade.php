@@ -42,9 +42,9 @@
             </div>
 
             <div class="form-check">
-                <input type="hidden" value="0" name="top">
-                <input type="checkbox" class="form-check-input" value="1" name="top" id="top"{{ old('top') ? ' checked' : '' }}>
-                <label for="top" class="form-check-label">{{ __('news::news.pin_top') }}</label>
+                <input type="hidden" value="0" name="pinned">
+                <input type="checkbox" class="form-check-input" value="1" name="pinned" id="pinned"{{ old('pinned') ? ' checked' : '' }}>
+                <label for="pinned" class="form-check-label">{{ __('news::news.pin_top') }}</label>
             </div>
 
             <button class="btn btn-primary mt-3">{{ __('main.create') }}</button>

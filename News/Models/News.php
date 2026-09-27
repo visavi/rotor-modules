@@ -33,7 +33,7 @@ use Illuminate\Support\HtmlString;
  * @property int                  $count_comments
  * @property int                  $rating
  * @property bool                 $closed
- * @property int                  $top
+ * @property int                  $pinned
  * @property-read User                     $user
  * @property-read Collection<int, Comment> $comments
  * @property-read Collection<int, File>    $files

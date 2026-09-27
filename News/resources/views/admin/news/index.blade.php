@@ -33,7 +33,7 @@
                     </div>
 
                     <div class="text-end">
-                        @if ($data->top)
+                        @if ($data->pinned)
                             <span class="text-danger">{{ __('news::news.on_homepage') }}</span><br>
                         @endif
                         <a href="{{ route('admin.news.edit', ['id' => $data->id, 'page' => $news->currentPage()]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>

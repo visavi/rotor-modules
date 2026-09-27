@@ -15,10 +15,10 @@ class CompleteRequest extends FormRequest
         return [
             'email' => [
                 'required',
-                'email',
+                'email:rfc,filter',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    $email = strtolower($value);
-                    $domain = Str::substr(strrchr($email, '@'), 1);
+                    $email = Str::lower($value);
+                    $domain = Str::afterLast($email, '@');
 
                     if (BlackList::isBlacklisted('email', $email)) {
                         $fail(__('users.email_is_blacklisted'));

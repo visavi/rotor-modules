@@ -89,6 +89,28 @@ class FeedApiTest extends ModuleTestCase
         $response->assertJsonMissingPath('data.0.user.birthday');
     }
 
+    public function testPinnedNewsIsAboveNewerComment(): void
+    {
+        $this->overrideSetting('feed_news_show', 1);
+
+        [$news, $comment] = $this->createCommentInFeed();
+        $news->update(['pinned' => 1, 'created_at' => now()->subDay()]);
+
+        $response = $this->get('/api/feed');
+
+        $response->assertOk();
+        $response->assertJsonPath('data.0.type', News::$morphName);
+        $response->assertJsonPath('data.0.id', $news->id);
+        $response->assertJsonPath('data.1.id', $comment->id);
+
+        // Снятое закрепление возвращает новость на место по дате
+        $news->update(['pinned' => 0]);
+
+        $this->get('/api/feed')
+            ->assertJsonPath('data.0.id', $comment->id)
+            ->assertJsonPath('data.1.id', $news->id);
+    }
+
     private function attachFile(Comment $comment, string $name, string $extension, string $mimeType): void
     {
         File::query()->create([

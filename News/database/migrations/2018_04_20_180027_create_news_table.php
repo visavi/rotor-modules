@@ -15,7 +15,7 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->integer('count_comments')->default(0);
                 $table->boolean('closed')->default(false);
-                $table->boolean('top')->default(false);
+                $table->boolean('pinned')->default(false);
                 $table->integer('rating')->default(0);
                 $table->dateTime('created_at');
                 $table->dateTime('updated_at')->nullable();

@@ -242,6 +242,47 @@ class RegistrationTest extends ModuleTestCase
         $this->assertDatabaseMissing('socials', ['provider_id' => 'G-NOEMAIL']);
     }
 
+    /**
+     * Адрес, который ядро не пропустит при обычной регистрации, считается неполученным,
+     * даже если провайдер его подтвердил: пользователь вводит свой на форме
+     */
+    public function testNonAsciiProviderEmailRedirectsToCompleteForm(): void
+    {
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-UNICODE',
+                'email'          => 'vasya@почта.рф',
+                'verified_email' => true,
+                'name'           => 'Vasya',
+            ]),
+        ]);
+
+        $response = $this->hitCallback('google');
+
+        $response->assertRedirect(route('social.complete'));
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'vasya@почта.рф']);
+        $this->assertDatabaseMissing('socials', ['provider_id' => 'G-UNICODE']);
+    }
+
+    public function testProviderEmailIsLowercased(): void
+    {
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-UPPER',
+                'email'          => 'John.Upper@Example.com',
+                'verified_email' => true,
+                'name'           => 'John Upper',
+            ]),
+        ]);
+
+        $this->hitCallback('google')->assertRedirect('/');
+
+        $this->assertSame('john.upper@example.com', User::query()->where('login', 'john-upper')->value('email'));
+    }
+
     public function testCompleteCreatesUser(): void
     {
         $response = $this->withoutMiddleware(PreventRequestForgery::class)
@@ -329,6 +370,29 @@ class RegistrationTest extends ModuleTestCase
             'user_id'  => $victim->id,
             'provider' => 'google',
         ]);
+    }
+
+    /**
+     * Адрес проверяется так же, как при обычной регистрации: без кириллицы,
+     * иначе письмо подтверждения уйдёт только через сервер с SMTPUTF8
+     */
+    public function testCompleteRejectsNonAsciiEmail(): void
+    {
+        foreach (['Вася@example.com', 'vasya@почта.рф'] as $email) {
+            $response = $this->withoutMiddleware(PreventRequestForgery::class)
+                ->withSession(['social_pending' => [
+                    'provider'    => 'google',
+                    'provider_id' => 'G-UNICODE',
+                    'token'       => 'tok',
+                    'name'        => 'Vasya',
+                ]])
+                ->post(route('social.complete.post'), ['email' => $email]);
+
+            $response->assertSessionHasErrors('email');
+        }
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('socials', ['provider_id' => 'G-UNICODE']);
     }
 
     public function testBlacklistedEmailFromProviderBlocksRegistration(): void

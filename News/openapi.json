@@ -191,7 +191,7 @@
                         "type": "boolean",
                         "description": "Комментирование закрыто"
                     },
-                    "top": {
+                    "pinned": {
                         "type": "boolean",
                         "description": "Закреплена вверху списка"
                     },

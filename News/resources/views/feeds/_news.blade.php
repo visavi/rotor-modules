@@ -10,7 +10,7 @@
             <div class="section-title d-flex align-items-baseline">
                 <h3><a class="post-title" href="{{ route('news.view', ['id' => $post->id]) }}">{{ $post->title }}</a></h3>
 
-                @if ($post->top)
+                @if ($post->pinned)
                     <span class="ms-2" data-bs-toggle="tooltip" title="{{ __('main.pinned') }}"><i class="fa-solid fa-thumbtack fa-xs"></i></span>
                 @endif
             </div>

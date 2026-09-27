@@ -36,7 +36,7 @@ if (! function_exists('pinnedNews')) {
     {
         $news = Cache::remember('pinnedNews', 1800, static function () {
             return News::query()
-                ->where('top', 1)
+                ->where('pinned', 1)
                 ->orderByDesc('created_at')
                 ->get();
         });

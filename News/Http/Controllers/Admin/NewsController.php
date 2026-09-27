@@ -45,7 +45,7 @@ class NewsController extends AdminController
             $title = $request->input('title');
             $text = $request->input('text');
             $closed = empty($request->input('closed')) ? 0 : 1;
-            $top = empty($request->input('top')) ? 0 : 1;
+            $pinned = empty($request->input('pinned')) ? 0 : 1;
 
             $validator
                 ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])
@@ -56,7 +56,7 @@ class NewsController extends AdminController
                     'title'  => $title,
                     'text'   => $text,
                     'closed' => $closed,
-                    'top'    => $top,
+                    'pinned' => $pinned,
                 ]);
 
                 clearCache(['statNews', 'pinnedNews']);
@@ -88,7 +88,7 @@ class NewsController extends AdminController
             $title = $request->input('title');
             $text = $request->input('text');
             $closed = empty($request->input('closed')) ? 0 : 1;
-            $top = empty($request->input('top')) ? 0 : 1;
+            $pinned = empty($request->input('pinned')) ? 0 : 1;
 
             $validator
                 ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])
@@ -100,7 +100,7 @@ class NewsController extends AdminController
                     'title'   => $title,
                     'text'    => $text,
                     'closed'  => $closed,
-                    'top'     => $top,
+                    'pinned'  => $pinned,
                 ]);
 
                 $files->update(['relate_id' => $news->id]);

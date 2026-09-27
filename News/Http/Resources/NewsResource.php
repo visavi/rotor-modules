@@ -33,7 +33,7 @@ class NewsResource extends JsonResource
             ],
             // Закрытая новость не принимает новые комментарии
             'closed'         => (bool) $this->closed,
-            'top'            => (bool) $this->top,
+            'pinned'         => (bool) $this->pinned,
             'comments_count' => $this->count_comments,
             'user'           => AuthorResource::make($this->user),
             'media'          => FileResource::collection($this->resolveMedia($this->resource)),
