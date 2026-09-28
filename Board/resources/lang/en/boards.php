@@ -13,6 +13,11 @@ return [
     'text'                     => 'Text',
     'price'                    => 'Price',
     'phone'                    => 'Phone',
+    'show_phone'               => 'Show phone',
+    'messengers_hint'          => 'Mark the messengers where this number is available',
+    'messenger_has_number'     => 'The number is available in :name',
+    'city'                     => 'City',
+    'city_placeholder'         => 'Start typing a city',
     'expires'                  => 'Expires',
     'expires_in'               => 'Expires in',
     'contact_seller'           => 'Contact seller',
@@ -53,6 +58,7 @@ return [
     'settings_board_text_length'     => 'Ad text length',
     'settings_board_category_length' => 'Ad category length',
 
-    'feed_items_show' => 'Show boards in feed',
-    'boards'          => 'Bulletin board',
+    'feed_items_show'     => 'Show boards in feed',
+    'settings_messengers' => 'Messengers in ads',
+    'boards'              => 'Bulletin board',
 ];

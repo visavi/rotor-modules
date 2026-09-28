@@ -216,6 +216,7 @@ class BoardController extends AdminController
             $text = $request->input('text');
             $price = int($request->input('price'));
             $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
+            $city = $request->string('city')->value();
 
             $board = Board::query()->find($bid);
 
@@ -223,6 +224,7 @@ class BoardController extends AdminController
                 ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
                 ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
                 ->phone($phone, ['phone' => __('validator.phone')], false)
+                ->length($city, 2, 50, ['city' => __('validator.text')], false)
                 ->notEmpty($board, ['bid' => __('board::boards.category_not_exist')]);
 
             if ($board) {
@@ -236,11 +238,13 @@ class BoardController extends AdminController
                 }
 
                 $item->update([
-                    'board_id' => $board->id,
-                    'title'    => $title,
-                    'text'     => $text,
-                    'price'    => $price,
-                    'phone'    => $phone,
+                    'board_id'   => $board->id,
+                    'title'      => $title,
+                    'text'       => $text,
+                    'price'      => $price,
+                    'phone'      => $phone,
+                    'city'       => $city,
+                    'messengers' => $request->input('messengers'),
                 ]);
 
                 clearCache(['statBoards', 'recentBoards']);

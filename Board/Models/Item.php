@@ -17,11 +17,13 @@ use App\Traits\UploadTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
+use Modules\Board\Casts\CityCast;
 
 /**
  * Class Item
@@ -33,6 +35,8 @@ use Illuminate\Support\HtmlString;
  * @property int             $user_id
  * @property int             $price
  * @property string          $phone
+ * @property string          $city
+ * @property list<string>    $messengers
  * @property bool            $active
  * @property int             $visits
  * @property CarbonImmutable $created_at
@@ -50,6 +54,22 @@ class Item extends Model
     use SearchableTrait;
     use SortableTrait;
     use UploadTrait;
+
+    /**
+     * Мессенджеры, в которых автор может отметить свой номер
+     *
+     * url — чат по номеру, {phone} подставляется без плюса. У MAX ссылки
+     * по номеру нет, поэтому он только отмечается. Без icon название
+     * выводится плашкой: в Font Awesome есть не все значки
+     *
+     * @var array<string, array{label: string, icon: ?string, color: string, url: ?string}>
+     */
+    public const MESSENGERS = [
+        'whatsapp' => ['label' => 'WhatsApp', 'icon' => 'fa-brands fa-whatsapp', 'color' => '#25d366', 'url' => 'https://wa.me/{phone}'],
+        'telegram' => ['label' => 'Telegram', 'icon' => 'fa-brands fa-telegram', 'color' => '#29a9eb', 'url' => 'https://t.me/+{phone}'],
+        'viber'    => ['label' => 'Viber', 'icon' => 'fa-brands fa-viber', 'color' => '#7360f2', 'url' => 'viber://chat?number=%2B{phone}'],
+        'max'      => ['label' => 'MAX', 'icon' => null, 'color' => '#6f4bff', 'url' => null],
+    ];
 
     /**
      * Indicates if the model should be timestamped.
@@ -83,6 +103,7 @@ class Item extends Model
     {
         return [
             'title'      => TextCast::class,
+            'city'       => CityCast::class,
             'active'     => 'bool',
             'user_id'    => 'int',
             'text'       => HtmlCast::class,
@@ -90,6 +111,66 @@ class Item extends Model
             'updated_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Мессенджеры без номера бессмысленны: стёр телефон — снялись и отметки
+     */
+    protected static function booted(): void
+    {
+        static::saving(static function (self $item) {
+            if (blank($item->phone)) {
+                $item->messengers = [];
+            }
+        });
+    }
+
+    /**
+     * Отметки мессенджеров: в базе строка ключей через запятую
+     *
+     * Неизвестные ключи отбрасываются, порядок — как в MESSENGERS
+     */
+    protected function messengers(): Attribute
+    {
+        return Attribute::make(
+            get: static fn (?string $value): array => $value ? explode(',', $value) : [],
+            set: static fn (mixed $value): string => implode(',', array_intersect(
+                array_keys(self::MESSENGERS),
+                array_filter((array) $value, 'is_string'),
+            )),
+        );
+    }
+
+    /**
+     * Мессенджеры, включённые в настройках модуля
+     *
+     * Настройки ещё нет — мессенджер включён: новый пункт MESSENGERS
+     * работает без миграции настроек
+     *
+     * @return array<string, array{label: string, icon: ?string, color: string, url: ?string}>
+     */
+    public static function enabledMessengers(): array
+    {
+        return array_filter(
+            self::MESSENGERS,
+            static fn (string $key): bool => (bool) (setting('board_messenger_' . $key) ?? true),
+            ARRAY_FILTER_USE_KEY,
+        );
+    }
+
+    /**
+     * Отмеченные автором и включённые на сайте, со ссылкой на чат по номеру
+     *
+     * @return array<string, array{label: string, icon: ?string, color: string, url: ?string}>
+     */
+    public function getMessengers(): array
+    {
+        $phone = ltrim((string) $this->phone, '+');
+
+        return array_map(
+            static fn (array $messenger): array => ['url' => $messenger['url'] ? str_replace('{phone}', $phone, $messenger['url']) : null] + $messenger,
+            array_intersect_key(self::enabledMessengers(), array_flip($this->messengers)),
+        );
     }
 
     /**
@@ -151,6 +232,14 @@ class Item extends Model
         }
 
         return new HtmlString('<div class="text-center text-secondary py-3"><i class="fa fa-image fa-5x"></i></div>');
+    }
+
+    /**
+     * Цена с валютой сайта, разряды через неразрывный пробел: 12 500 руб
+     */
+    public function getPrice(): string
+    {
+        return number_format($this->price, 0, '', "\u{00A0}") . "\u{00A0}" . setting('currency');
     }
 
     /**

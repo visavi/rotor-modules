@@ -30,7 +30,7 @@
     <?php $inputTags = old('tags', $article->tags->pluck('name') ?? []); ?>
     <div class="mb-3{{ hasError('tags') }}">
         <label for="tags" class="form-label">{{ __('blog::blogs.tags') }}:</label>
-        <select class="form-select input-tag" id="tags" name="tags[]" multiple required>
+        <select class="form-select input-tag" id="tags" name="tags[]" multiple required data-server="{{ route('blogs.tags-search') }}" data-max="10">
             <option disabled value="">{{ __('blog::blogs.tags') }}...</option>
             @foreach ($inputTags as $tag)
                 <option value="{{ $tag }}" selected>{{ $tag }}</option>

@@ -13,6 +13,11 @@ return [
     'text'                     => 'Текст',
     'price'                    => 'Цена',
     'phone'                    => 'Телефон',
+    'show_phone'               => 'Показать телефон',
+    'messengers_hint'          => 'Отметьте мессенджеры, где есть этот номер',
+    'messenger_has_number'     => 'Номер есть в :name',
+    'city'                     => 'Город',
+    'city_placeholder'         => 'Начните вводить город',
     'expires'                  => 'Истекает',
     'expires_in'               => 'Истекает через',
     'contact_seller'           => 'Связаться с продавцом',
@@ -53,6 +58,7 @@ return [
     'settings_board_text_length'     => 'Длина текста объявления',
     'settings_board_category_length' => 'Длина категории объявления',
 
-    'feed_items_show' => 'Показывать объявления в ленте',
-    'boards'          => 'Объявления',
+    'feed_items_show'     => 'Показывать объявления в ленте',
+    'settings_messengers' => 'Мессенджеры в объявлениях',
+    'boards'              => 'Объявления',
 ];

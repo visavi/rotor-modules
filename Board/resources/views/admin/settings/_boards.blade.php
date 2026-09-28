@@ -75,6 +75,17 @@
         </div>
     </div>
 
+    <div class="mb-3">
+        <div class="form-label">{{ __('board::boards.settings_messengers') }}:</div>
+        @foreach (Modules\Board\Models\Item::MESSENGERS as $key => $messenger)
+            <div class="form-check form-switch">
+                <input type="hidden" value="0" name="sets[board_messenger_{{ $key }}]">
+                <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[board_messenger_{{ $key }}]" id="board_messenger_{{ $key }}"{{ ($settings['board_messenger_' . $key] ?? 1) ? ' checked' : '' }}>
+                <label class="form-check-label" for="board_messenger_{{ $key }}">@include('board::boards/_messenger_icon', ['withLabel' => true])</label>
+            </div>
+        @endforeach
+    </div>
+
     <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[feed_items_show]">
         <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_items_show]" id="feed_items_show"{{ ! empty($settings['feed_items_show']) ? ' checked' : '' }}>

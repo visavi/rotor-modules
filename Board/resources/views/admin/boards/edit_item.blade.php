@@ -76,6 +76,10 @@
                 <div class="invalid-feedback">{{ textError('phone') }}</div>
             </div>
 
+            @include('board::boards/_messengers', ['selected' => old('messengers', $item->messengers)])
+
+            @include('board::boards/_city', ['city' => old('city', $item->city)])
+
             @include('app/_upload_media', ['model' => $item])
 
             <button class="btn btn-primary">{{ __('main.change') }}</button>

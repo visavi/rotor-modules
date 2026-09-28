@@ -16,6 +16,8 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->integer('price')->default(0);
                 $table->string('phone', 15)->nullable();
+                $table->string('messengers', 100)->default('');
+                $table->string('city', 50)->default('');
                 $table->boolean('active')->default(true);
                 $table->integer('visits')->default(0);
                 $table->dateTime('created_at');
@@ -25,6 +27,7 @@ return new class extends Migration {
                 $table->index('board_id');
                 $table->index('expires_at');
                 $table->index('created_at');
+                $table->index('city');
             });
         }
     }

@@ -19,6 +19,14 @@
                         "$ref": "#/components/parameters/CategoryId"
                     },
                     {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Только объявления этого города",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "$ref": "#/components/parameters/Sort"
                     },
                     {
@@ -91,6 +99,19 @@
                                     },
                                     "phone": {
                                         "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "minLength": 2,
+                                        "maxLength": 50
+                                    },
+                                    "messengers": {
+                                        "type": "array",
+                                        "description": "Мессенджеры, где есть номер",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": ["whatsapp", "telegram", "viber", "max"]
+                                        }
                                     }
                                 }
                             }
@@ -256,6 +277,19 @@
                                     },
                                     "phone": {
                                         "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "minLength": 2,
+                                        "maxLength": 50
+                                    },
+                                    "messengers": {
+                                        "type": "array",
+                                        "description": "Мессенджеры, где есть номер",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": ["whatsapp", "telegram", "viber", "max"]
+                                        }
                                     }
                                 }
                             }
@@ -458,7 +492,19 @@
                         "type": [
                             "string",
                             "null"
-                        ]
+                        ],
+                        "description": "Только запросам с токеном, гостю null"
+                    },
+                    "city": {
+                        "type": "string",
+                        "description": "Пустая строка, если город не указан"
+                    },
+                    "messengers": {
+                        "type": "array",
+                        "description": "Мессенджеры с этим номером, включённые на сайте",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "active": {
                         "type": "boolean"

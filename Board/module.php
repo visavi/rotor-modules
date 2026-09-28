@@ -22,7 +22,7 @@ return [
                 'with'  => ['user', 'files', 'category.parent'],
                 'view'  => 'board::feeds/_items',
                 'scope' => fn ($query) => $query->where('active', true)->where('expires_at', '>', now()),
-                'api'   => fn (Item $post): array => ['price' => $post->price, 'phone' => $post->phone],
+                'api'   => fn (Item $post): array => ['price' => $post->price, 'phone' => getUser() ? $post->phone : null],
             ],
             'upload' => 'media',
             // Только живые объявления: скрытые и просроченные не считаем

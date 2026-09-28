@@ -13,6 +13,7 @@ Route::middleware('web')
     ->name('boards.')
     ->group(function () {
         Route::get('/{id?}', 'index')->name('index');
+        Route::get('/cities', 'cities')->middleware('throttle:60,1')->name('cities');
         Route::get('/active', 'active')->name('active');
     });
 
@@ -24,6 +25,8 @@ Route::middleware('web')
     ->group(function () {
         Route::get('/{id}', 'view')->name('view');
         Route::post('/{id}/close', 'close')->name('close');
+        // Лимит против перебора объявлений подряд
+        Route::post('/{id}/phone', 'phone')->middleware('throttle:20,1')->name('phone');
         Route::delete('/{id}/delete', 'delete')->name('delete');
         Route::match(['get', 'post'], '/create', 'create')->name('create');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');

@@ -11,8 +11,10 @@ use App\Models\Reader;
 use App\Support\CategoryTree;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Board\Models\Board;
 use Modules\Board\Models\Item;
@@ -42,6 +44,7 @@ class BoardController extends Controller
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
+        $city = $request->string('city')->trim()->value();
 
         [$sorting, $orderBy] = Item::getSorting($sort, $order);
 
@@ -49,15 +52,16 @@ class BoardController extends Controller
             ->when($board, static function (Builder $query) use ($board) {
                 return $query->where('board_id', $board->id);
             })
+            ->when($city !== '', static fn (Builder $query) => $query->where('city', $city))
             ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)
             ->with('category', 'user', 'files')
             ->paginate(setting('boards_per_page'))
-            ->appends(compact('sort', 'order'));
+            ->appends(array_filter(compact('sort', 'order', 'city')));
 
         $boards = $board ? $board->children : $categories->where('parent_id', 0)->values();
 
-        return view('board::boards/index', compact('items', 'board', 'boards', 'sorting'));
+        return view('board::boards/index', compact('items', 'board', 'boards', 'sorting', 'city'));
     }
 
     /**
@@ -80,6 +84,46 @@ class BoardController extends Controller
         Reader::countingStat($item);
 
         return view('board::boards/view', compact('item'));
+    }
+
+    /**
+     * Подсказки городов для формы: из всех объявлений, включая снятые и истёкшие
+     */
+    public function cities(Request $request): JsonResponse
+    {
+        $query = $request->string('query')->trim()->value();
+
+        if (Str::length($query) < 2) {
+            return response()->json([]);
+        }
+
+        $cities = Item::query()
+            ->select('city')
+            ->where('city', 'like', addcslashes($query, '%_\\') . '%')
+            ->groupBy('city')
+            ->orderByRaw('count(*) desc')
+            ->orderBy('city')
+            ->limit(10)
+            ->pluck('city');
+
+        return response()->json($cities->map(static fn (string $city) => ['value' => $city, 'label' => $city]));
+    }
+
+    /**
+     * Телефон объявления по клику
+     */
+    public function phone(int $id): JsonResponse
+    {
+        $item = Item::query()->find($id);
+
+        if (! $item?->phone) {
+            return response()->json(['success' => false, 'message' => __('board::boards.item_not_exist')]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'html'    => view('board::boards/_phone', ['item' => $item, 'revealed' => true])->render(),
+        ]);
     }
 
     /**
@@ -108,6 +152,7 @@ class BoardController extends Controller
             $text = $request->input('text');
             $price = int($request->input('price'));
             $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
+            $city = $request->string('city')->value();
 
             $board = Board::query()->find($bid);
 
@@ -115,6 +160,7 @@ class BoardController extends Controller
                 ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
                 ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
                 ->phone($phone, ['phone' => __('validator.phone')], false)
+                ->length($city, 2, 50, ['city' => __('validator.text')], false)
                 ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
                 ->notEmpty($board, ['category' => __('board::boards.category_not_exist')]);
 
@@ -130,6 +176,8 @@ class BoardController extends Controller
                     'user_id'    => $user->id,
                     'price'      => $price,
                     'phone'      => $phone,
+                    'city'       => $city,
+                    'messengers' => $request->input('messengers'),
                     'created_at' => now(),
                     'updated_at' => now(),
                     'expires_at' => now()->addDays((int) setting('boards_period')),
@@ -180,12 +228,22 @@ class BoardController extends Controller
             abort(404, __('board::boards.item_not_exist'));
         }
 
+        // Форма только для автора: админ правит чужое объявление в админке
+        if ($item->user_id !== $user->id) {
+            if (isAdmin()) {
+                return redirect()->route('admin.items.edit', ['id' => $item->id]);
+            }
+
+            abort(403, __('board::boards.item_not_author'));
+        }
+
         if ($request->isMethod('post')) {
             $bid = int($request->input('bid'));
             $title = $request->input('title');
             $text = $request->input('text');
             $price = int($request->input('price'));
             $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
+            $city = $request->string('city')->value();
 
             $board = Board::query()->find($bid);
 
@@ -193,8 +251,8 @@ class BoardController extends Controller
                 ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
                 ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
                 ->phone($phone, ['phone' => __('validator.phone')], false)
-                ->notEmpty($board, ['category' => __('board::boards.category_not_exist')])
-                ->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
+                ->length($city, 2, 50, ['city' => __('validator.text')], false)
+                ->notEmpty($board, ['category' => __('board::boards.category_not_exist')]);
 
             if ($board) {
                 $validator->empty($board->closed, ['category' => __('board::boards.category_closed')]);
@@ -207,11 +265,13 @@ class BoardController extends Controller
                 }
 
                 $item->update([
-                    'board_id' => $board->id,
-                    'title'    => $title,
-                    'text'     => $text,
-                    'price'    => $price,
-                    'phone'    => $phone,
+                    'board_id'   => $board->id,
+                    'title'      => $title,
+                    'text'       => $text,
+                    'price'      => $price,
+                    'phone'      => $phone,
+                    'city'       => $city,
+                    'messengers' => $request->input('messengers'),
                 ]);
 
                 clearCache(['statBoards', 'recentBoards']);

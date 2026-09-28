@@ -52,6 +52,10 @@
             <div class="invalid-feedback">{{ textError('phone') }}</div>
         </div>
 
+        @include('board::boards/_messengers', ['selected' => old('messengers', [])])
+
+        @include('board::boards/_city', ['city' => old('city')])
+
         @include('app/_upload_media', [
             'model' => Modules\Board\Models\Item::getModel(),
             'files' => $files,

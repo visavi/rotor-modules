@@ -75,4 +75,156 @@ class BoardSmokeTest extends ModuleTestCase
 
         $this->get($item->getViewUrl())->assertOk();
     }
+
+    public function testPhoneHiddenUntilClick(): void
+    {
+        $item = $this->createItem('+79121234567');
+
+        $this->get($item->getViewUrl())
+            ->assertOk()
+            ->assertDontSee('1234567')
+            ->assertSee(route('items.phone', ['id' => $item->id]));
+
+        $this->get(route('boards.index'))
+            ->assertOk()
+            ->assertDontSee('1234567');
+
+        $this->postJson(route('items.phone', ['id' => $item->id]))
+            ->assertOk()
+            ->assertJson(['success' => true])
+            ->assertJsonPath('html', fn (string $html) => str_contains($html, 'tel:+79121234567'));
+    }
+
+    public function testPhoneMissing(): void
+    {
+        $item = $this->createItem('');
+
+        $this->postJson(route('items.phone', ['id' => $item->id]))
+            ->assertOk()
+            ->assertJson(['success' => false]);
+    }
+
+    public function testCityFilter(): void
+    {
+        $this->createItem('', ['title' => 'Moscow item', 'city' => 'Москва']);
+        $this->createItem('', ['title' => 'Kazan item', 'city' => 'Казань']);
+
+        // Регистр в адресе не важен: сравнение в MySQL без учёта регистра
+        $this->get(route('boards.index', ['city' => 'москва']))
+            ->assertOk()
+            ->assertSee('Moscow item')
+            ->assertDontSee('Kazan item');
+    }
+
+    public function testCitySuggestions(): void
+    {
+        $this->createItem('', ['city' => 'Москва']);
+        $this->createItem('', ['city' => 'Москва']);
+        $this->createItem('', ['city' => 'Мозырь']);
+        // Истёкшие объявления тоже дают подсказки
+        $this->createItem('', ['city' => 'Мончегорск', 'active' => false, 'expires_at' => now()->subDay()]);
+        $this->createItem('', ['city' => 'Казань']);
+
+        $this->getJson(route('boards.cities', ['query' => 'М']))
+            ->assertOk()
+            ->assertExactJson([]);
+
+        // Частые города первыми
+        $this->getJson(route('boards.cities', ['query' => 'мо']))
+            ->assertOk()
+            ->assertExactJson([
+                ['value' => 'Москва', 'label' => 'Москва'],
+                ['value' => 'Мозырь', 'label' => 'Мозырь'],
+                ['value' => 'Мончегорск', 'label' => 'Мончегорск'],
+            ]);
+
+        // % в запросе ищется буквально, а не как шаблон
+        $this->getJson(route('boards.cities', ['query' => 'М%']))
+            ->assertOk()
+            ->assertExactJson([]);
+    }
+
+    public function testMessengersShownWithPhone(): void
+    {
+        $item = $this->createItem('+79121234567', ['messengers' => ['max', 'whatsapp', 'unknown']]);
+
+        // Неизвестный ключ отброшен, порядок — как в списке мессенджеров
+        self::assertSame(['whatsapp', 'max'], $item->fresh()->messengers);
+
+        $html = $this->postJson(route('items.phone', ['id' => $item->id]))->json('html');
+
+        self::assertStringContainsString('https://wa.me/79121234567', $html);
+        self::assertStringContainsString(__('board::boards.messenger_has_number', ['name' => 'MAX']), $html);
+        self::assertStringNotContainsString('t.me', $html);
+    }
+
+    public function testDisabledMessengerIsHidden(): void
+    {
+        $this->overrideSetting('board_messenger_whatsapp', 0);
+
+        $item = $this->createItem('+79121234567', ['messengers' => ['whatsapp', 'telegram']]);
+
+        $html = $this->postJson(route('items.phone', ['id' => $item->id]))->json('html');
+
+        self::assertStringNotContainsString('wa.me', $html);
+        self::assertStringContainsString('https://t.me/+79121234567', $html);
+        // Отметка не пропала: включат снова — вернётся
+        self::assertSame(['whatsapp', 'telegram'], $item->fresh()->messengers);
+    }
+
+    public function testMessengersClearedWithoutPhone(): void
+    {
+        $item = $this->createItem('+79121234567', ['messengers' => ['whatsapp']]);
+
+        $item->update(['phone' => '']);
+
+        self::assertSame([], $item->fresh()->messengers);
+    }
+
+    public function testExpiresShownToAuthorOnly(): void
+    {
+        $item = $this->createItem('');
+        $expires = __('board::boards.expires_in');
+
+        $this->get($item->getViewUrl())->assertOk()->assertDontSee($expires);
+
+        $this->actingAs(User::factory()->create())
+            ->get($item->getViewUrl())
+            ->assertDontSee($expires);
+
+        $this->actingAs($this->user)
+            ->get($item->getViewUrl())
+            ->assertSee($expires);
+    }
+
+    public function testEditIsForAuthorOnly(): void
+    {
+        $item = $this->createItem('');
+
+        $this->actingAs($this->user)->get(route('items.edit', ['id' => $item->id]))->assertOk();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('items.edit', ['id' => $item->id]))
+            ->assertForbidden();
+
+        $this->actingAs(User::factory()->boss()->create())
+            ->get(route('items.edit', ['id' => $item->id]))
+            ->assertRedirect(route('admin.items.edit', ['id' => $item->id]));
+    }
+
+    private function createItem(string $phone, array $attributes = []): Item
+    {
+        $board = Board::query()->create(['name' => 'Test board']);
+
+        return Item::query()->create($attributes + [
+            'board_id'   => $board->id,
+            'title'      => 'Test item',
+            'text'       => 'Test item text',
+            'phone'      => $phone,
+            'user_id'    => $this->user->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => now()->addDay(),
+        ]);
+    }
 }

@@ -55,56 +55,49 @@
         <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
     @endif
 
-    <div class="row mb-3">
-        <div class="col-md-12">
-            @if ($item->files->isNotEmpty())
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="float-end" data-bs-toggle="tooltip" title="{{ __('main.views') }}">
-                            <i class="far fa-eye"></i> {{ $item->visits }}
-                        </div>
+    <div class="mb-3">
+        @if ($item->files->isNotEmpty())
+            @include('app/_media_slider', ['model' => $item])
+        @endif
 
-                        @include('app/_media_slider', ['model' => $item])
-                    </div>
-                </div>
+        <div class="section-message">
+            {{ $item->getText() }}
+        </div>
+
+        @if ($item->price)
+            <div class="fs-5 fw-bold text-info mt-3">{{ $item->getPrice() }}</div>
+        @endif
+
+        @php($canContact = $item->user->id && getUser('id') !== $item->user->id)
+        @if ($item->phone || $canContact)
+            <div class="d-flex flex-wrap align-items-center gap-3 my-3">
+                @if ($canContact)
+                    <a class="btn btn-primary" href="{{ route('messages.talk', ['login' => $item->user->login]) }}">
+                        <i class="fa-solid fa-envelope me-1"></i> {{ __('board::boards.contact_seller') }}
+                    </a>
+                @endif
+
+                @if ($item->phone)
+                    <span class="fs-5">@include('board::boards/_phone', ['button' => true])</span>
+                @endif
+            </div>
+        @endif
+
+        <div class="text-muted small d-flex flex-wrap column-gap-3 row-gap-1 mb-3">
+            @if ($item->city)
+                <span><i class="fa-solid fa-location-dot"></i> <a href="{{ route('boards.index', ['city' => $item->city]) }}">{{ $item->city }}</a></span>
             @endif
 
-            <div class="row">
-                <div class="col-md-10">
-                    <div class="section-message">
-                        {{ $item->getText() }}
-                    </div>
-                    <div>
-                        @if ($item->phone)
-                            <div class="d-flex align-items-start mb-3">
-                                <a href="tel:{{ $item->phone }}" class="text-decoration-none fs-5"><i class="fa-solid fa-phone fs-5 me-2"></i> {{ $item->phone }}</a>
-                            </div>
-                        @endif
+            <span><i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }}</span>
+            <span><i class="fa-regular fa-calendar"></i> {{ dateFixed($item->updated_at) }}</span>
+            <span title="{{ __('main.views') }}"><i class="far fa-eye"></i> {{ $item->visits }}</span>
 
-                        @if ($item->user->id && getUser('id') !== $item->user->id)
-                            <div class="mb-3">
-                                <a class="btn btn-primary" href="{{ route('messages.talk', ['login' => $item->user->login]) }}">
-                                    <i class="fa-solid fa-envelope me-1"></i> {{ __('board::boards.contact_seller') }}
-                                </a>
-                            </div>
-                        @endif
-
-                        <i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }} / {{ dateFixed($item->updated_at) }}<br>
-
-                        @if ($item->expires_at->gt(now()))
-                            <i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}
-                        @endif
-
-                        @hook('share', ['url' => $item->getViewUrl(), 'title' => $item->title])
-                    </div>
-                </div>
-
-                <div class="col-md-2">
-                    @if ($item->price)
-                        <div class="text-md-end fs-4 fw-bold text-info text-nowrap">{{ $item->price }} {{ setting('currency') }}</div>
-                    @endif
-                </div>
-            </div>
+            {{-- Срок нужен только тому, кто может продлить --}}
+            @if ($item->expires_at->gt(now()) && (getUser('id') === $item->user_id || isAdmin()))
+                <span><i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}</span>
+            @endif
         </div>
+
+        @hook('share', ['url' => $item->getViewUrl(), 'title' => $item->title])
     </div>
 @stop

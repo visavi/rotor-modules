@@ -47,7 +47,7 @@
         <div class="row row-cols-2 row-cols-md-4 g-2 mb-3">
             @foreach ($boards as $child)
                 <div class="col">
-                    <a href="{{ route('boards.index', ['id' => $child->id]) }}">{{ $child->name }}</a>
+                    <a href="{{ route('boards.index', ['id' => $child->id, 'city' => $city ?: null]) }}">{{ $child->name }}</a>
                     <span class="badge bg-adaptive" data-bs-toggle="tooltip" title="{{ __('board::boards.boards') }}">{{ $child->total_items }}</span>
                 </div>
             @endforeach
@@ -57,11 +57,18 @@
     <div class="sort-links border-bottom pb-3 mb-3">
         {{ __('main.sort') }}:
         @foreach ($sorting as $key => $option)
-            <a href="{{ route('boards.index', ['id' => $board?->id, 'sort' => $key, 'order' => $option['inverse'] ?? 'desc']) }}" class="badge bg-{{ $option['badge'] ?? 'adaptive' }}">
+            <a href="{{ route('boards.index', ['id' => $board?->id, 'city' => $city ?: null, 'sort' => $key, 'order' => $option['inverse'] ?? 'desc']) }}" class="badge bg-{{ $option['badge'] ?? 'adaptive' }}">
                 {{ $option['label'] }}{{ $option['icon'] ?? '' }}
             </a>
         @endforeach
     </div>
+
+    @if ($city !== '')
+        <div class="border-bottom pb-3 mb-3">
+            <i class="fa-solid fa-location-dot"></i> {{ __('board::boards.city') }}: <strong>{{ $city }}</strong>
+            <a class="ms-2" href="{{ route('boards.index', ['id' => $board?->id]) }}" title="{{ __('main.clear') }}"><i class="fa-solid fa-xmark"></i></a>
+        </div>
+    @endif
 
     @if (getUser())
         <div class="border-bottom pb-3 mb-3">
@@ -89,6 +96,11 @@
                                     <div class="small my-2">
                                         <i class="fas fa-angle-right"></i>
                                         <a href="{{ route('boards.index', ['id' => $item->category->id]) }}">{{ $item->category->name }}</a>
+
+                                        @if ($item->city)
+                                            <i class="fa-solid fa-location-dot ms-2"></i>
+                                            <a href="{{ route('boards.index', ['id' => $board?->id, 'city' => $item->city]) }}">{{ $item->city }}</a>
+                                        @endif
                                     </div>
 
                                     <div class="section-content short-view">
@@ -99,9 +111,7 @@
 
                                     @if ($item->phone)
                                         <p class="card-text">
-                                            <a href="tel:{{ $item->phone }}" class="text-decoration-none">
-                                                <i class="fa-solid fa-phone fs-5 me-2"></i> {{ $item->phone }}
-                                            </a>
+                                            @include('board::boards/_phone')
                                         </p>
                                     @endif
 
@@ -115,7 +125,7 @@
 
                                 <div class="col-md-2">
                                     @if ($item->price)
-                                        <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $item->price }} {{ setting('currency') }}</div>
+                                        <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $item->getPrice() }}</div>
                                     @endif
                                 </div>
                             </div>

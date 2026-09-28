@@ -29,8 +29,12 @@ class ItemResource extends JsonResource
             'category' => BoardResource::make($this->whenLoaded('category')),
             'price'    => $this->price,
             // Валюта общая для сайта, отдельного поля у объявления нет
-            'currency'   => setting('currency'),
-            'phone'      => $this->phone,
+            'currency' => setting('currency'),
+            // Гостю номер не отдаём: без токена его собрал бы любой парсер
+            'phone' => getUser() ? $this->phone : null,
+            'city'  => $this->city,
+            // Ключи мессенджеров, включённых на сайте; ссылки клиент строит по номеру
+            'messengers' => array_keys($this->getMessengers()),
             'active'     => (bool) $this->active,
             'visits'     => $this->visits,
             'user'       => AuthorResource::make($this->user),

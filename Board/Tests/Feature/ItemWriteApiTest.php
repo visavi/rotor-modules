@@ -56,6 +56,30 @@ class ItemWriteApiTest extends ModuleTestCase
         $this->assertSame(1, $this->board->fresh()->count_items);
     }
 
+    public function testStoreNormalizesCity(): void
+    {
+        $payload = ['city' => '  нижний   Новгород '] + $this->payload();
+
+        $this->postJson('/api/items', $payload, $this->headers())
+            ->assertStatus(201)
+            ->assertJsonPath('item.city', 'Нижний Новгород');
+    }
+
+    public function testStoreMessengers(): void
+    {
+        $payload = ['messengers' => ['telegram', 'max']] + $this->payload();
+
+        $this->postJson('/api/items', $payload, $this->headers())
+            ->assertStatus(201)
+            ->assertJsonPath('item.messengers', ['telegram', 'max']);
+
+        $payload = ['messengers' => ['icq']] + $this->payload();
+
+        $this->postJson('/api/items', $payload, $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('messengers.0');
+    }
+
     public function testStoreAttachesPendingMedia(): void
     {
         $file = File::query()->create([

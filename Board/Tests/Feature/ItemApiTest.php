@@ -39,7 +39,8 @@ class ItemApiTest extends ModuleTestCase
         $response->assertJsonPath('data.url', $item->getViewUrl());
         $response->assertJsonPath('data.price', 500);
         $response->assertJsonPath('data.currency', 'руб.');
-        $response->assertJsonPath('data.phone', '79001234567');
+        // Номер гостю не отдаётся
+        $response->assertJsonPath('data.phone', null);
         $response->assertJsonPath('data.expired', false);
         $response->assertJsonPath('data.user.login', $this->user->login);
         $response->assertJsonPath('data.breadcrumbs.0.title', __('board::boards.boards'));
@@ -48,6 +49,21 @@ class ItemApiTest extends ModuleTestCase
         $response->assertJsonPath('data.category_id', $item->board_id);
         $response->assertJsonPath('data.category.name', 'Test board');
         $response->assertJsonPath('data.category.parent', null);
+    }
+
+    public function testPhoneOnlyWithToken(): void
+    {
+        $item = $this->createItem();
+        $reader = User::factory()->create(['apikey' => Str::random(32)]);
+
+        // Сначала гость: в тестах авторизация по токену переживает запрос
+        $this->getJson('/api/items')
+            ->assertOk()
+            ->assertJsonPath('data.0.phone', null);
+
+        $this->getJson('/api/items/' . $item->id, ['Authorization' => 'Bearer ' . $reader->apikey])
+            ->assertOk()
+            ->assertJsonPath('data.phone', '79001234567');
     }
 
     public function testViewSplitsMediaAndFiles(): void

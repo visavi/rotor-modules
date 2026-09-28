@@ -13,6 +13,11 @@ return [
     'text'                     => 'Текст',
     'price'                    => 'Ціна',
     'phone'                    => 'Телефон',
+    'show_phone'               => 'Показати телефон',
+    'messengers_hint'          => 'Позначте месенджери, де є цей номер',
+    'messenger_has_number'     => 'Номер є в :name',
+    'city'                     => 'Місто',
+    'city_placeholder'         => 'Почніть вводити місто',
     'expires'                  => 'Закінчується',
     'expires_in'               => 'Спливає через',
     'contact_seller'           => 'Зв’язатися з продавцем',
@@ -53,6 +58,7 @@ return [
     'settings_board_text_length'     => 'Довжина тексту оголошення',
     'settings_board_category_length' => 'Довжина категорії оголошення',
 
-    'feed_items_show' => 'Показувати оголошення у стрічці',
-    'boards'          => 'Оголошення',
+    'feed_items_show'     => 'Показувати оголошення у стрічці',
+    'settings_messengers' => 'Месенджери в оголошеннях',
+    'boards'              => 'Оголошення',
 ];

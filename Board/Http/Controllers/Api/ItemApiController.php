@@ -12,6 +12,7 @@ use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Validation\Rule;
 use Modules\Board\Http\Resources\BoardResource;
 use Modules\Board\Http\Resources\ItemResource;
 use Modules\Board\Models\Board;
@@ -41,12 +42,14 @@ class ItemApiController extends Controller
     public function index(Request $request): JsonResource
     {
         $categoryId = $request->integer('category_id');
+        $city = $request->string('city')->trim()->value();
 
         // Сортировка та же, что на сайте: date, title, price
         [, $orderBy] = Item::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         $items = Item::query()
             ->when($categoryId, static fn ($query) => $query->where('board_id', $categoryId))
+            ->when($city !== '', static fn ($query) => $query->where('city', $city))
             // Истёкшие объявления в списках не показываются
             ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)
@@ -106,6 +109,10 @@ class ItemApiController extends Controller
             ],
             'price' => ['nullable', 'integer', 'min:0'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'city'  => ['nullable', 'string', 'min:2', 'max:50'],
+            // Ключи Item::MESSENGERS
+            'messengers'   => ['nullable', 'array'],
+            'messengers.*' => ['string', Rule::in(array_keys(Item::MESSENGERS))],
         ] + FileService::rules(Item::$morphName));
 
         $board = $this->findOpenCategory((int) $validated['category_id']);
@@ -117,6 +124,8 @@ class ItemApiController extends Controller
             'user_id'    => $user->id,
             'price'      => (int) ($validated['price'] ?? 0),
             'phone'      => $this->normalizePhone($validated['phone'] ?? null),
+            'city'       => $validated['city'] ?? null,
+            'messengers' => $validated['messengers'] ?? [],
             'created_at' => now(),
             'updated_at' => now(),
             // Объявление живёт ограниченный срок и потом пропадает из списков
@@ -148,11 +157,14 @@ class ItemApiController extends Controller
         $item = $this->findOwnItem($id);
 
         $validated = $request->validate([
-            'category_id' => ['required', 'integer', 'min:1'],
-            'title'       => ['required', 'string', 'min:' . setting('board_title_min'), 'max:' . setting('board_title_max')],
-            'text'        => ['required', 'string', 'min:' . setting('board_text_min'), 'max:' . setting('board_text_max')],
-            'price'       => ['nullable', 'integer', 'min:0'],
-            'phone'       => ['nullable', 'string', 'max:20'],
+            'category_id'  => ['required', 'integer', 'min:1'],
+            'title'        => ['required', 'string', 'min:' . setting('board_title_min'), 'max:' . setting('board_title_max')],
+            'text'         => ['required', 'string', 'min:' . setting('board_text_min'), 'max:' . setting('board_text_max')],
+            'price'        => ['nullable', 'integer', 'min:0'],
+            'phone'        => ['nullable', 'string', 'max:20'],
+            'city'         => ['nullable', 'string', 'min:2', 'max:50'],
+            'messengers'   => ['nullable', 'array'],
+            'messengers.*' => ['string', Rule::in(array_keys(Item::MESSENGERS))],
         ]);
 
         $board = $this->findOpenCategory((int) $validated['category_id']);
@@ -164,11 +176,13 @@ class ItemApiController extends Controller
         }
 
         $item->update([
-            'board_id' => $board->id,
-            'title'    => $validated['title'],
-            'text'     => $validated['text'],
-            'price'    => (int) ($validated['price'] ?? 0),
-            'phone'    => $this->normalizePhone($validated['phone'] ?? null),
+            'board_id'   => $board->id,
+            'title'      => $validated['title'],
+            'text'       => $validated['text'],
+            'price'      => (int) ($validated['price'] ?? 0),
+            'phone'      => $this->normalizePhone($validated['phone'] ?? null),
+            'city'       => $validated['city'] ?? null,
+            'messengers' => $validated['messengers'] ?? [],
         ]);
 
         clearCache(['statBoards', 'recentBoards']);

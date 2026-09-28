@@ -35,7 +35,7 @@
 
             <div class="col-md-2">
                 @if ($post->price)
-                    <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $post->price }} {{ setting('currency') }}</div>
+                    <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $post->getPrice() }}</div>
                 @endif
             </div>
         </div>
@@ -44,9 +44,7 @@
     <div class="section-body">
         @if ($post->phone)
             <p class="card-text">
-                <a href="tel:{{ $post->phone }}" class="text-decoration-none">
-                    <i class="fa-solid fa-phone fs-5 me-2"></i> {{ $post->phone }}
-                </a>
+                @include('board::boards/_phone', ['item' => $post])
             </p>
         @endif
 
