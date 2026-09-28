@@ -47,7 +47,7 @@ class GuestbookController extends Controller
      */
     public function add(Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
-        $msg = (string) $request->input('msg');
+        $msg = $request->string('msg')->value();
         $user = $request->user();
 
         $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')])

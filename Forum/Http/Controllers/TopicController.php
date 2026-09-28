@@ -116,7 +116,7 @@ class TopicController extends Controller
      */
     public function create(int $id, Request $request, Validator $validator, Flood $flood): RedirectResponse
     {
-        $msg = (string) $request->input('msg');
+        $msg = $request->string('msg')->value();
 
         if (! $user = getUser()) {
             abort(403, __('main.not_authorized'));
