@@ -119,7 +119,7 @@ class GuestbookController extends Controller
             abort(403);
         }
 
-        $msg = $request->input('msg');
+        $msg = $request->string('msg')->value();
 
         $post = Guestbook::query()->where('user_id', $user->id)->find($id);
 

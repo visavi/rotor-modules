@@ -3,13 +3,9 @@
 @section('title', sprintf('%s (%s)', __('guestbook::guestbook.guestbook'), __('main.page_num', ['page' => $posts->currentPage()])))
 
 @section('header')
-    @if (getUser() || setting('bookadds'))
+    @if (isAdmin())
         <div class="float-end">
-            <a class="btn btn-success" href="#" onclick="return postJump()">{{ __('main.write') }}</a>
-
-            @if (isAdmin())
-                <a class="btn btn-adaptive" href="{{ route('admin.guestbook.index', ['page' => $posts->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
-            @endif
+            <a class="btn btn-adaptive" href="{{ route('admin.guestbook.index', ['page' => $posts->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
         </div>
     @endif
 
@@ -26,6 +22,8 @@
 @stop
 
 @section('content')
+    @include('guestbook::guestbook/_form')
+
     @if ($posts->isNotEmpty())
         @if ($unpublished && isAdmin())
             <div class="alert alert-info">
@@ -108,7 +106,4 @@
     @endif
 
     {{ $posts->links() }}
-
-    @include('guestbook::guestbook/_form')
-
 @stop

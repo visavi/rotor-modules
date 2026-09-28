@@ -42,7 +42,7 @@ class GuestbookController extends AdminController
         }
 
         if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
+            $msg = $request->string('msg')->value();
 
             $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')]);
 
@@ -76,7 +76,7 @@ class GuestbookController extends AdminController
         }
 
         if ($request->isMethod('post')) {
-            $reply = $request->input('reply');
+            $reply = $request->string('reply')->value();
 
             $validator->length($reply, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')]);
 
