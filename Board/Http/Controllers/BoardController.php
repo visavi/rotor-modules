@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Models\User;
 use App\Support\CategoryTree;
 use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
@@ -87,7 +88,9 @@ class BoardController extends Controller
     }
 
     /**
-     * Подсказки городов для формы: из всех объявлений, включая снятые и истёкшие
+     * Подсказки городов для формы: из всех объявлений, включая снятые и истёкшие,
+     * и из анкет пользователей. Город из анкеты — только если его вписали хотя бы
+     * двое: единичные варианты вроде «в деревне» в подсказки объявлений не попадают
      */
     public function cities(Request $request): JsonResponse
     {
@@ -97,16 +100,33 @@ class BoardController extends Controller
             return response()->json([]);
         }
 
-        $cities = Item::query()
-            ->select('city')
+        $itemCities = Item::query()
+            ->selectRaw('city, count(*) as total')
             ->where('city', 'like', addcslashes($query, '%_\\') . '%')
             ->groupBy('city')
-            ->orderByRaw('count(*) desc')
-            ->orderBy('city')
+            ->orderByDesc('total')
             ->limit(10)
-            ->pluck('city');
+            ->toBase()
+            ->pluck('total', 'city')
+            ->all();
 
-        return response()->json($cities->map(static fn (string $city) => ['value' => $city, 'label' => $city]));
+        // Один город из двух источников складывается; написание берём из объявлений
+        $counts = [];
+        foreach ([$itemCities, User::placeCounts('city', $query, 2)] as $source) {
+            foreach ($source as $city => $total) {
+                $key = mb_strtolower((string) $city);
+                $counts[$key] ??= ['city' => (string) $city, 'total' => 0];
+                $counts[$key]['total'] += (int) $total;
+            }
+        }
+
+        $cities = collect($counts)
+            ->sortBy([['total', 'desc'], ['city', 'asc']])
+            ->take(10)
+            ->map(static fn (array $row) => ['value' => $row['city'], 'label' => $row['city']])
+            ->values();
+
+        return response()->json($cities);
     }
 
     /**

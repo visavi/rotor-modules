@@ -125,15 +125,21 @@ class BoardSmokeTest extends ModuleTestCase
         $this->createItem('', ['city' => 'Мончегорск', 'active' => false, 'expires_at' => now()->subDay()]);
         $this->createItem('', ['city' => 'Казань']);
 
+        // Города из анкет: складываются с объявлениями, одиночный вариант отсекается
+        User::factory()->count(2)->create(['city' => 'москва']);
+        User::factory()->count(2)->create(['city' => 'Моршанск']);
+        User::factory()->create(['city' => 'Мокрое']);
+
         $this->getJson(route('boards.cities', ['query' => 'М']))
             ->assertOk()
             ->assertExactJson([]);
 
-        // Частые города первыми
+        // Частые города первыми, написание — из объявлений
         $this->getJson(route('boards.cities', ['query' => 'мо']))
             ->assertOk()
             ->assertExactJson([
                 ['value' => 'Москва', 'label' => 'Москва'],
+                ['value' => 'Моршанск', 'label' => 'Моршанск'],
                 ['value' => 'Мозырь', 'label' => 'Мозырь'],
                 ['value' => 'Мончегорск', 'label' => 'Мончегорск'],
             ]);
@@ -142,6 +148,19 @@ class BoardSmokeTest extends ModuleTestCase
         $this->getJson(route('boards.cities', ['query' => 'М%']))
             ->assertOk()
             ->assertExactJson([]);
+    }
+
+    public function testCreateFormTakesCityFromProfile(): void
+    {
+        $this->overrideSetting('boards_create', 1);
+        Board::query()->create(['name' => 'Test board']);
+
+        $this->user->update(['city' => 'Казань']);
+
+        $this->actingAs($this->user)
+            ->get(route('items.create'))
+            ->assertOk()
+            ->assertSee('<option value="Казань" selected>Казань</option>', false);
     }
 
     public function testMessengersShownWithPhone(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Board\Models;
 
 use App\Casts\HtmlCast;
+use App\Casts\PlaceCast;
 use App\Casts\TextCast;
 use App\Models\File;
 use App\Models\User;
@@ -23,7 +24,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
-use Modules\Board\Casts\CityCast;
 
 /**
  * Class Item
@@ -103,7 +103,7 @@ class Item extends Model
     {
         return [
             'title'      => TextCast::class,
-            'city'       => CityCast::class,
+            'city'       => PlaceCast::class,
             'active'     => 'bool',
             'user_id'    => 'int',
             'text'       => HtmlCast::class,
