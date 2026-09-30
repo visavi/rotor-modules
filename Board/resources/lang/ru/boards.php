@@ -20,6 +20,7 @@ return [
     'city_placeholder'         => 'Начните вводить город',
     'expires'                  => 'Истекает',
     'expires_in'               => 'Истекает через',
+    'renewed'                  => 'Продлено',
     'contact_seller'           => 'Связаться с продавцом',
     'edit_category'            => 'Редактирование категории',
     'parent_category'          => 'Родительская категория',

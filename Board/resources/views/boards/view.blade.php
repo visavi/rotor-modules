@@ -89,7 +89,12 @@
             @endif
 
             <span><i class="fa fa-user-circle"></i> {{ $item->user->getProfile() }}</span>
-            <span><i class="fa-regular fa-calendar"></i> {{ dateFixed($item->updated_at) }}</span>
+            <span><i class="fa-regular fa-calendar"></i> {{ dateFixed($item->created_at) }}</span>
+            {{-- Продление поднимает объявление в разделе, но не в ленте: обе даты объясняют разницу --}}
+            @if ($item->updated_at->gt($item->created_at))
+                <span><i class="fa-solid fa-rotate"></i> {{ __('board::boards.renewed') }} {{ dateFixed($item->updated_at) }}</span>
+            @endif
+
             <span title="{{ __('main.views') }}"><i class="far fa-eye"></i> {{ $item->visits }}</span>
 
             {{-- Срок нужен только тому, кто может продлить --}}

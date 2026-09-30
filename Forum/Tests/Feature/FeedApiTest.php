@@ -57,6 +57,18 @@ class FeedApiTest extends ModuleTestCase
         $this->assertStringContainsString('Последнее сообщение темы', $response->json('data.0.text'));
     }
 
+    public function testFeedReturnsLastPostTime(): void
+    {
+        [$topic, $post] = $this->createTopicInFeed();
+        $topic->update(['created_at' => now()->subDays(10)]);
+        $post->update(['created_at' => now()->subHour()]);
+
+        $response = $this->get('/api/feed');
+
+        $response->assertOk();
+        $response->assertJsonPath('data.0.created_at', $post->fresh()->created_at->format('c'));
+    }
+
     public function testFeedReturnsBreadcrumbs(): void
     {
         $parent = Forum::query()->create(['title' => 'Parent forum']);

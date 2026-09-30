@@ -20,6 +20,7 @@ return [
     'city_placeholder'         => 'Почніть вводити місто',
     'expires'                  => 'Закінчується',
     'expires_in'               => 'Спливає через',
+    'renewed'                  => 'Продовжено',
     'contact_seller'           => 'Зв’язатися з продавцем',
     'edit_category'            => 'Редагування категорії',
     'parent_category'          => 'Батьківська категорія',

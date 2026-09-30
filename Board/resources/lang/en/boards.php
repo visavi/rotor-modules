@@ -20,6 +20,7 @@ return [
     'city_placeholder'         => 'Start typing a city',
     'expires'                  => 'Expires',
     'expires_in'               => 'Expires in',
+    'renewed'                  => 'Renewed',
     'contact_seller'           => 'Contact seller',
     'edit_category'            => 'Editing a category',
     'parent_category'          => 'Parent category',

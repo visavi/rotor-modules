@@ -76,6 +76,21 @@ class BoardSmokeTest extends ModuleTestCase
         $this->get($item->getViewUrl())->assertOk();
     }
 
+    public function testRenewedItemShowsBothDates(): void
+    {
+        $item = $this->createItem('');
+        $renewed = __('board::boards.renewed');
+
+        $this->get($item->getViewUrl())->assertOk()->assertDontSee($renewed);
+
+        $item->update(['created_at' => now()->subMonth(), 'updated_at' => now()]);
+
+        $this->get($item->getViewUrl())
+            ->assertOk()
+            ->assertSee(dateFixed($item->created_at))
+            ->assertSee($renewed . ' ' . dateFixed($item->updated_at));
+    }
+
     public function testPhoneHiddenUntilClick(): void
     {
         $item = $this->createItem('+79121234567');

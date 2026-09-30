@@ -266,6 +266,33 @@ class RegistrationTest extends ModuleTestCase
         $this->assertDatabaseMissing('socials', ['provider_id' => 'G-UNICODE']);
     }
 
+    /**
+     * VK ID у аккаунтов без почты присылает в поле email номер телефона —
+     * такой «адрес» не сохраняется, пользователь вводит свой на форме
+     */
+    public function testVkPhoneInsteadOfEmailRedirectsToCompleteForm(): void
+    {
+        Http::fake([
+            'id.vk.ru/oauth2/auth*'      => Http::response(['access_token' => 'tok']),
+            'id.vk.ru/oauth2/user_info*' => Http::response([
+                'user' => [
+                    'user_id'    => 1102480006,
+                    'email'      => '380662908428',
+                    'first_name' => 'VK',
+                    'last_name'  => 'User',
+                ],
+            ]),
+        ]);
+
+        $response = $this->withSession(['oauth_state' => 'st', 'oauth_code_verifier' => 'ver'])
+            ->get('/auth/vk/callback?state=st&code=authcode&device_id=dev-1');
+
+        $response->assertRedirect(route('social.complete'));
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => '380662908428']);
+        $this->assertDatabaseMissing('socials', ['provider_id' => '1102480006']);
+    }
+
     public function testProviderEmailIsLowercased(): void
     {
         Http::fake([

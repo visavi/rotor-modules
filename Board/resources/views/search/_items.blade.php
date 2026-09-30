@@ -25,6 +25,6 @@
     <div class="section-body">
         <span class="avatar-micro">{{ $post->user->getAvatarImage() }}</span>
         {{ $post->user->getProfile() }}
-        <small class="section-date text-muted fst-italic">{{ dateFixed($post->updated_at) }}</small>
+        <small class="section-date text-muted fst-italic">{{ dateFixed($post->created_at) }}</small>
     </div>
 </div>
