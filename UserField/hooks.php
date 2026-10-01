@@ -8,26 +8,30 @@ use Illuminate\Http\Request;
 use Modules\UserField\Models\UserData;
 use Modules\UserField\Models\UserField;
 
-// Валидация полей при сохранении профиля (в админке обязательность не проверяется)
+// Валидация полей при сохранении профиля (в админке обязательность не проверяется).
+// Проверяются только пришедшие поля: форма сайта шлёт все, а клиент API о них не знает
 Registry::onProfileValidate(static function (User $user, Request $request, Validator $validator, bool $strict): void {
     $fields = UserField::query()->orderBy('sort')->get();
 
     foreach ($fields as $field) {
-        $validator->length(
-            $request->input('field' . $field->id),
-            $field->min,
-            $field->max,
-            ['field' . $field->id => __('validator.text')],
-            $strict && $field->required
-        );
+        if (! $request->has('field' . $field->id)) {
+            continue;
+        }
+
+        $field->validateValue($request->input('field' . $field->id), $validator, $strict && $field->required);
     }
 });
 
-// Сохранение значений полей после успешной валидации
+// Сохранение значений полей после успешной валидации. Не пришедшее поле не трогаем:
+// иначе сохранение профиля из API затирало бы все поля
 Registry::onProfileSave(static function (User $user, Request $request): void {
     $fields = UserField::query()->get();
 
     foreach ($fields as $field) {
+        if (! $request->has('field' . $field->id)) {
+            continue;
+        }
+
         UserData::query()->updateOrCreate([
             'user_id'  => $user->id,
             'field_id' => $field->id,

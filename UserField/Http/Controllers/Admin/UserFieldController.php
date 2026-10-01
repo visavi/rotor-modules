@@ -75,7 +75,10 @@ class UserFieldController extends AdminController
             abort(404, __('user_field::user_fields.not_found'));
         }
 
-        return view('user_field::admin/edit', compact('field', 'types'));
+        // Форма предупреждает, что при смене типа значения удалятся
+        $answersCount = $field->data()->whereNotNull('value')->count();
+
+        return view('user_field::admin/edit', compact('field', 'types', 'answersCount'));
     }
 
     public function update(int $id, StoreUserFieldRequest $request): RedirectResponse
@@ -84,6 +87,11 @@ class UserFieldController extends AdminController
 
         if (! $field) {
             abort(404, __('user_field::user_fields.not_found'));
+        }
+
+        // Старые значения новому типу не подходят: «Казань» у переключателя вывелась бы как «Да»
+        if ($field->type !== $request->validated('type')) {
+            $field->data()->delete();
         }
 
         $field->update($request->validated());
