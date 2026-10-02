@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Notifier']) }}">{{ __('admin.modules.module') }} {{ __('notifier::notifier.notifier') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'notifier']) }}">{{ __('admin.modules.module') }} {{ __('notifier::notifier.notifier') }}</a></li>
             <li class="breadcrumb-item active">{{ __('notifier::notifier.settings') }}</li>
         </ol>
     </nav>

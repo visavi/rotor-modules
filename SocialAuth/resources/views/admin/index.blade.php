@@ -10,7 +10,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'SocialAuth']) }}">{{ __('admin.modules.module') }} {{ __('social_auth::social_auth.module_name') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'social-auth']) }}">{{ __('admin.modules.module') }} {{ __('social_auth::social_auth.module_name') }}</a></li>
             <li class="breadcrumb-item active">{{ __('social_auth::social_auth.socials') }}</li>
         </ol>
     </nav>

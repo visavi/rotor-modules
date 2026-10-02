@@ -13,6 +13,19 @@
 @stop
 
 @section('content')
+    <div class="section-form mb-3 shadow">
+        {{-- Свёрнута в одно поле; после ошибки открыта --}}
+        <form action="/admin/chats" method="post"@unless ($errors->any() || old('msg')) data-compact @endunless>
+            @csrf
+            <div class="mb-3 compact-field{{ hasError('msg') }}">
+                <textarea class="form-control tiptap" id="msg" rows="5" name="msg" placeholder="{{ __('main.write_message') }}" required>{{ old('msg') }}</textarea>
+                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            </div>
+
+            <button class="btn btn-primary">{{ __('main.write') }}</button>
+        </form>
+    </div>
+
     @if ($posts->isNotEmpty())
         @foreach ($posts as $post)
             <div class="section mb-3 shadow">
@@ -62,19 +75,6 @@
     @endif
 
     {{ $posts->links() }}
-
-    <div class="section-form mb-3 shadow">
-        <form action="/admin/chats" method="post">
-            @csrf
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control tiptap" id="msg" rows="5" name="msg" placeholder="{{ __('main.message') }}" required>{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
-            </div>
-
-            <button class="btn btn-primary">{{ __('main.write') }}</button>
-        </form>
-    </div>
 
     @if ($posts->isNotEmpty() && isAdmin('boss'))
         <form action="/admin/chats/clear" method="post" onsubmit="return confirm('{{ __('admin_chat::admin_chat.confirm_clear') }}')">

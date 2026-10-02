@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('index.panel') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.modules.index') }}">{{ __('index.modules') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'Lottery']) }}">{{ __('admin.modules.module') }} {{ __('lottery::lottery.title') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.modules.module', ['module' => 'lottery']) }}">{{ __('admin.modules.module') }} {{ __('lottery::lottery.title') }}</a></li>
             <li class="breadcrumb-item active">{{ __('lottery::lottery.settings') }}</li>
         </ol>
     </nav>

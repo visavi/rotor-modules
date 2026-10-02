@@ -48,8 +48,7 @@
     @endif
 
     @include('app/_upload_file', [
-        'model'    => $down,
-        'showForm' => true,
+        'model' => $down,
     ])
 
     <button class="btn btn-primary">{{ $down->id ? __('main.edit') : __('main.upload') }}</button>

@@ -13,6 +13,23 @@
 @endsection
 
 @section('content')
+    @if (getUser())
+        <div class="section-form mb-3 shadow">
+            {{-- Свёрнута в одно поле; после ошибки открыта --}}
+            <form action="/walls/{{ $user->login }}/create" method="post"@unless ($errors->any() || old('msg')) data-compact @endunless>
+                @csrf
+                <div class="mb-3 compact-field{{ hasError('msg') }}">
+                    <textarea class="form-control tiptap" id="msg" rows="5" name="msg" placeholder="{{ __('main.write_message') }}" required>{{ old('msg') }}</textarea>
+                    <div class="invalid-feedback">{{ textError('msg') }}</div>
+                </div>
+
+                <button class="btn btn-primary">{{ __('main.write') }}</button>
+            </form>
+        </div>
+    @else
+        {{ showError(__('main.not_authorized')) }}
+    @endif
+
     @if ($messages->isNotEmpty())
         @foreach ($messages as $data)
             <div class="section mb-3 shadow">
@@ -59,22 +76,5 @@
         </div>
     @else
         {{ showError(__('wall::walls.empty_messages')) }}
-    @endif
-
-    @if (getUser())
-        <div class="section-form mb-3 shadow">
-            <form action="/walls/{{ $user->login }}/create" method="post">
-                @csrf
-                <div class="mb-3{{ hasError('msg') }}">
-                    <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                    <textarea class="form-control tiptap" id="msg" rows="5" name="msg" placeholder="{{ __('main.message') }}" required>{{ old('msg') }}</textarea>
-                    <div class="invalid-feedback">{{ textError('msg') }}</div>
-                </div>
-
-                <button class="btn btn-primary">{{ __('main.write') }}</button>
-            </form>
-        </div>
-    @else
-        {{ showError(__('main.not_authorized')) }}
     @endif
 @stop
