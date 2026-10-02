@@ -21,6 +21,11 @@ class LotteryDrawTest extends ModuleTestCase
 
         $this->overrideSetting('bonusmoney', 0);
 
+        // Узкий диапазон: тесты ставят билет на каждый номер
+        $this->overrideSetting('lottery_jackpot', 1000000);
+        $this->overrideSetting('lottery_min', 1);
+        $this->overrideSetting('lottery_max', 10);
+
         $this->service = $this->app->make(LotteryService::class);
 
         // ModuleTestCase поднимает вьюхи, хуки и маршруты, но не консольные команды модуля
@@ -36,7 +41,7 @@ class LotteryDrawTest extends ModuleTestCase
         $lottery = Lottery::query()->first();
 
         $this->assertSame(now()->format('Y-m-d'), $lottery->day);
-        $this->assertSame((int) Lottery::getConfig('jackpot'), $lottery->amount);
+        $this->assertSame((int) setting('lottery_jackpot'), $lottery->amount);
     }
 
     public function testTodayNumberIsHidden(): void
@@ -61,7 +66,7 @@ class LotteryDrawTest extends ModuleTestCase
         $yesterday = $this->yesterday(5000);
 
         // Билет на каждый номер диапазона: победитель найдётся при любом розыгрыше
-        [$min, $max] = Lottery::getConfig('numberRange');
+        [$min, $max] = [(int) setting('lottery_min'), (int) setting('lottery_max')];
         $yesterday->lotteryUsers()->create(['user_id' => $user->id, 'number' => $min]);
 
         for ($number = $min; $number <= $max; $number++) {
@@ -85,7 +90,7 @@ class LotteryDrawTest extends ModuleTestCase
     public function testBankIsSharedBetweenWinners(): void
     {
         $yesterday = $this->yesterday(1000);
-        [$min] = Lottery::getConfig('numberRange');
+        $min = (int) setting('lottery_min');
 
         $first = User::factory()->create(['money' => 0]);
         $second = User::factory()->create(['money' => 0]);
@@ -122,7 +127,7 @@ class LotteryDrawTest extends ModuleTestCase
     public function testFreshJackpotAfterWin(): void
     {
         $yesterday = $this->yesterday(3000);
-        [$min, $max] = Lottery::getConfig('numberRange');
+        [$min, $max] = [(int) setting('lottery_min'), (int) setting('lottery_max')];
 
         for ($number = $min; $number <= $max; $number++) {
             $user = User::factory()->create(['money' => 0]);
@@ -133,7 +138,7 @@ class LotteryDrawTest extends ModuleTestCase
 
         $today = Lottery::query()->where('day', now()->format('Y-m-d'))->first();
 
-        $this->assertSame((int) Lottery::getConfig('jackpot'), $today->amount, 'Банк не обнулился после выигрыша');
+        $this->assertSame((int) setting('lottery_jackpot'), $today->amount, 'Банк не обнулился после выигрыша');
     }
 
     public function testCommandDrawsTirage(): void

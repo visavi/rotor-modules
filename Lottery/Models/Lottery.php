@@ -43,14 +43,4 @@ class Lottery extends Model
     {
         return $this->hasMany(LotteryUser::class, 'lottery_id');
     }
-
-    /**
-     * Get config
-     */
-    public static function getConfig(?string $name = null): mixed
-    {
-        $config = include base_path('modules/Lottery/module.php');
-
-        return $name ? $config[$name] ?? null : $config;
-    }
 }

@@ -22,6 +22,11 @@ class GiftApiTest extends ModuleTestCase
     {
         parent::setUp();
 
+        // Настройки читаются до migrate:fresh и держатся в памяти — задаём явно
+        $this->overrideSetting('gift_per_page', 24);
+        $this->overrideSetting('gift_days', 365);
+        $this->overrideSetting('gift_max_users', 10);
+
         $this->user = User::factory()->create(['apikey' => Str::random(32), 'money' => 500]);
         $this->recipient = User::factory()->create();
 
@@ -99,7 +104,7 @@ class GiftApiTest extends ModuleTestCase
     public function testTooManyRecipientsAreRejected(): void
     {
         $logins = User::factory()
-            ->count((int) Gift::getConfig('max_users') + 1)
+            ->count((int) setting('gift_max_users') + 1)
             ->create()
             ->pluck('login')
             ->all();

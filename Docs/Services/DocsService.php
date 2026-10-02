@@ -40,11 +40,53 @@ class DocsService
 
         $html = Str::of($md)->markdown(['html_input' => 'strip'])->toString();
 
-        return preg_replace(
+        $html = preg_replace(
             '/(?:<p>)?' . preg_quote(self::ANCHOR_TOKEN, '/') . '([\w-]+)@@(?:<\/p>)?/',
             '<a id="$1"></a>',
             $html,
         );
+
+        return $this->linkHeadings($html);
+    }
+
+    /**
+     * Даёт заголовкам h2–h4 якорь и ссылку на него — чтобы скопировать адрес раздела
+     *
+     * Якорь из `<a name>` прямо перед заголовком (документация Laravel) переносится
+     * на сам заголовок, остальным id строится из текста
+     */
+    private function linkHeadings(string $html): string
+    {
+        $used = [];
+
+        return preg_replace_callback(
+            '/(?:<a id="([\w-]+)"><\/a>\s*)?<h([2-4])>(.*?)<\/h\2>/s',
+            function (array $m) use (&$used): string {
+                $id = $m[1] ?: $this->headingSlug($m[3]);
+
+                if (isset($used[$id])) {
+                    $id .= '-' . ++$used[$id];
+                } else {
+                    $used[$id] = 1;
+                }
+
+                return "<h{$m[2]} id=\"{$id}\">{$m[3]}"
+                    . " <a class=\"docs-anchor\" href=\"#{$id}\" aria-hidden=\"true\">#</a></h{$m[2]}>";
+            },
+            $html,
+        );
+    }
+
+    /**
+     * Строит id заголовка латиницей — ссылка копируется без %-кодов
+     *
+     * id с цифры не берёт querySelector, которым main.js прокручивает к якорю
+     */
+    private function headingSlug(string $heading): string
+    {
+        $slug = Str::slug(html_entity_decode(strip_tags($heading)), '-', 'ru');
+
+        return preg_match('/^[a-z]/', $slug) ? $slug : 'section-' . ($slug ?: 'untitled');
     }
 
     /**

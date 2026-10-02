@@ -24,4 +24,11 @@ return [
     'ticket_success_purchased' => 'Квиток успішно придбано!',
     'congratulations_winning'  => 'Вітаємо! Ви зірвали [url=/lottery]Джек-пот у лотереї[/url] та виграли :jackpot',
     'ticket_purchased'         => 'Квиток куплено, ваша ставка: :number',
+
+    'settings'             => 'Налаштування лотереї',
+    'setting_jackpot'      => 'Стартовий джек-пот',
+    'setting_ticket_price' => 'Ціна квитка',
+    'setting_min'          => 'Мінімальний номер',
+    'setting_max'          => 'Максимальний номер',
+    'range_invalid'        => 'Мінімальний номер має бути меншим за максимальний!',
 ];

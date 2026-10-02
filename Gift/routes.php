@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Gift\Http\Controllers\Api\GiftApiController;
+use Modules\Gift\Http\Controllers\GiftSettingController;
 use Modules\Gift\Http\Controllers\IndexController;
 use Modules\Gift\Http\Controllers\PanelController;
 
@@ -19,6 +20,13 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->group(function () {
         Route::match(['get', 'post'], '/gifts', [PanelController::class, 'index']);
         Route::delete('/gifts/{id}', [PanelController::class, 'delete']);
+
+        Route::controller(GiftSettingController::class)
+            ->name('gift.')
+            ->group(function () {
+                Route::get('/gift-settings', 'index')->name('settings');
+                Route::post('/gift-settings', 'update')->name('settings.update');
+            });
     });
 
 /* ---- API роуты ---- */

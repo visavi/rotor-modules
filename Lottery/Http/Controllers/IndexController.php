@@ -44,13 +44,15 @@ class IndexController extends Controller
                 ->get();
         }
 
-        $config = Lottery::getConfig();
+        $ticketPrice = (int) setting('lottery_ticket_price');
+        $min = (int) setting('lottery_min');
+        $max = (int) setting('lottery_max');
 
         $ticket = $today->lotteryUsers()
             ->where('user_id', getUser('id'))
             ->first();
 
-        return view('lottery::index', compact('today', 'yesterday', 'config', 'ticket'));
+        return view('lottery::index', compact('today', 'yesterday', 'ticket', 'ticketPrice', 'min', 'max'));
     }
 
     /**
@@ -65,8 +67,9 @@ class IndexController extends Controller
         $service->draw();
 
         $number = int($request->input('number'));
-        $ticketPrice = Lottery::getConfig('ticketPrice');
-        $numberRange = Lottery::getConfig('numberRange');
+        $ticketPrice = (int) setting('lottery_ticket_price');
+        $min = (int) setting('lottery_min');
+        $max = (int) setting('lottery_max');
 
         if (! $user = getUser()) {
             abort(403);
@@ -87,7 +90,7 @@ class IndexController extends Controller
         $validator
             ->false($ticketExist, ['number' => __('lottery::lottery.already_bought_ticket')])
             ->lte($ticketPrice, getUser('money'), ['number' => __('lottery::lottery.no_money')])
-            ->between($number, $numberRange[0], $numberRange[1], ['number' => __('lottery::lottery.must_enter_number')]);
+            ->between($number, $min, $max, ['number' => __('lottery::lottery.must_enter_number')]);
 
         if ($validator->isValid()) {
             $bought = DB::transaction(

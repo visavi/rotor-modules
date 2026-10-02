@@ -12,12 +12,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        $config = Lottery::getConfig();
-
+        // Настроек ещё нет — их создаёт миграция позже, банк стартовый по умолчанию.
+        // Номер пустой: он тянется в момент розыгрыша, как и у любого текущего тиража
         Lottery::query()->create([
             'day'    => date('Y-m-d'),
-            'amount' => $config['jackpot'],
-            'number' => mt_rand($config['numberRange'][0], $config['numberRange'][1]),
+            'amount' => 1000000,
+            'number' => null,
         ]);
     }
 

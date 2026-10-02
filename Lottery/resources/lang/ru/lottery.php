@@ -24,4 +24,11 @@ return [
     'ticket_success_purchased' => 'Билет успешно приобретен!',
     'congratulations_winning'  => 'Поздравляем! Вы сорвали [url=/lottery]Джек-пот в лотерее[/url] и выиграли :jackpot',
     'ticket_purchased'         => 'Билет куплен, ваша ставка: :number',
+
+    'settings'             => 'Настройки лотереи',
+    'setting_jackpot'      => 'Стартовый джек-пот',
+    'setting_ticket_price' => 'Цена билета',
+    'setting_min'          => 'Минимальный номер',
+    'setting_max'          => 'Максимальный номер',
+    'range_invalid'        => 'Минимальный номер должен быть меньше максимального!',
 ];

@@ -17,7 +17,8 @@ return new class extends Migration {
                 $table->increments('id');
                 $table->date('day');
                 $table->integer('amount');
-                $table->smallInteger('number');
+                // Номер тянется в момент розыгрыша, у текущего тиража его нет
+                $table->smallInteger('number')->nullable();
 
                 $table->index('day');
             });

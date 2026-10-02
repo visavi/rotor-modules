@@ -19,6 +19,11 @@ class LotterySmokeTest extends ModuleTestCase
         // Ежедневный бонус ядра начисляется прямо в запросе и сбивал бы счёт денег
         $this->overrideSetting('bonusmoney', 0);
 
+        $this->overrideSetting('lottery_jackpot', 1000000);
+        $this->overrideSetting('lottery_ticket_price', 50);
+        $this->overrideSetting('lottery_min', 1);
+        $this->overrideSetting('lottery_max', 100);
+
         $this->user = User::factory()->create(['money' => 1000]);
     }
 

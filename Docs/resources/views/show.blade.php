@@ -55,6 +55,12 @@
         .docs-content h2 { font-size: 1.3rem; font-weight: 600; margin-top: 2rem; margin-bottom: .75rem; border-bottom: 1px solid var(--bs-border-color); padding-bottom: .5rem; }
         .docs-content h2:first-of-type { margin-top: 0; }
         .docs-content h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.5rem; }
+        /* Отступ над целью якоря: шапка липкая, без него заголовок встаёт вплотную под неё
+           при открытии по ссылке и уходит под неё при переходе на открытой странице */
+        .docs-content :is(h2, h3, h4)[id] { scroll-margin-top: 5rem; }
+        .docs-anchor { opacity: 0; text-decoration: none; color: var(--bs-secondary-color); }
+        .docs-content :is(h2, h3, h4):hover .docs-anchor, .docs-anchor:focus { opacity: 1; }
+        @media (hover: none) { .docs-anchor { opacity: .5; } }
         .docs-content table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
         .docs-content table th, .docs-content table td { border: 1px solid var(--bs-border-color); padding: .5rem .75rem; font-size: .875rem; }
         .docs-content table th { background: var(--bs-tertiary-bg); font-weight: 600; }

@@ -23,7 +23,7 @@ class IndexController extends Controller
     public function index(Request $request): View
     {
         $user = $request->input('user');
-        $perPage = Gift::getConfig('per_page');
+        $perPage = (int) setting('gift_per_page');
 
         $gifts = Gift::query()
             ->orderBy('price')
@@ -53,7 +53,7 @@ class IndexController extends Controller
             abort(404, __('gift::gifts.gift_not_found'));
         }
 
-        $maxUsers = (int) Gift::getConfig('max_users');
+        $maxUsers = (int) setting('gift_max_users');
 
         if ($request->isMethod('post')) {
             $msg = $request->input('msg');
@@ -80,7 +80,7 @@ class IndexController extends Controller
                             'user_id'      => $user->id,
                             'send_user_id' => getUser('id'),
                             'text'         => $msg,
-                            'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
+                            'deleted_at'   => now()->addDays((int) setting('gift_days')),
                         ]);
                     }
                 });

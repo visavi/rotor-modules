@@ -50,7 +50,7 @@
                     @csrf
                     <div class="mb-3{{ hasError('number') }}">
                         <label for="number" class="form-label">{{ __('lottery::lottery.enter_number') }}:</label>
-                        <input type="text" class="form-control" id="number" name="number" maxlength="3" value="{{ old('number') }}" placeholder="{{ __('lottery::lottery.enter_number_inclusive', ['min' => $config['numberRange'][0], 'max' => $config['numberRange'][1]]) }}" required>
+                        <input type="number" class="form-control" id="number" name="number" min="{{ $min }}" max="{{ $max }}" value="{{ old('number') }}" placeholder="{{ __('lottery::lottery.enter_number_inclusive', ['min' => $min, 'max' => $max]) }}" required>
                         <div class="invalid-feedback">{{ textError('number') }}</div>
                     </div>
 
@@ -64,7 +64,7 @@
 
             <div class="mb-3">
                 {{ __('lottery::lottery.participate') }}: {{ $today->lotteryUsers()->count() }}<br>
-                {{ __('lottery::lottery.ticket_price') }}: {{ plural($config['ticketPrice'], setting('moneyname')) }}<br>
+                {{ __('lottery::lottery.ticket_price') }}: {{ plural($ticketPrice, setting('moneyname')) }}<br>
                 {{ __('lottery::lottery.in_stock') }}: {{ plural($user->money, setting('moneyname')) }}
             </div>
 

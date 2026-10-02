@@ -24,4 +24,11 @@ return [
     'ticket_success_purchased' => 'Ticket purchased successfully!',
     'congratulations_winning'  => 'Congratulations! You hit the [url=/lottery]lottery jackpot[/url] and won :jackpot',
     'ticket_purchased'         => 'Ticket purchased, your bet: :number',
+
+    'settings'             => 'Lottery settings',
+    'setting_jackpot'      => 'Starting jackpot',
+    'setting_ticket_price' => 'Ticket price',
+    'setting_min'          => 'Minimum number',
+    'setting_max'          => 'Maximum number',
+    'range_invalid'        => 'The minimum number must be less than the maximum!',
 ];

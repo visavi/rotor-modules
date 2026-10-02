@@ -37,6 +37,9 @@ Hook::add('messageActions', static fn ($user) => view('components.profile.action
     'url'   => '/gifts?user=' . $user->login,
 ])->render());
 
+// Ссылка в навигации настроек админки
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('gift.settings') . '">' . __('gift::gifts.settings') . '</a>');
+
 // Виджет подарков на главной админки
 Registry::widget('gifts', static fn (int $days): array => [
     'label' => __('gift::gifts.title'),

@@ -19,6 +19,9 @@ return new class extends Migration {
                 $table->integer('user_id');
                 $table->smallInteger('number');
                 $table->dateTime('created_at');
+
+                // Один билет в руки на тираж
+                $table->unique(['lottery_id', 'user_id']);
             });
         }
     }

@@ -27,7 +27,7 @@ class GiftApiController extends Controller
     {
         $gifts = Gift::query()
             ->orderBy('price')
-            ->paginate($this->apiPerPage($request, (int) Gift::getConfig('per_page')));
+            ->paginate($this->apiPerPage($request, (int) setting('gift_per_page')));
 
         return response()->json([
             'data' => GiftResource::collection($gifts->items()),
@@ -37,7 +37,7 @@ class GiftApiController extends Controller
                 'per_page'     => $gifts->perPage(),
                 'total'        => $gifts->total(),
                 // Через сколько дней подарок исчезнет из профиля
-                'days' => (int) Gift::getConfig('gift_days'),
+                'days' => (int) setting('gift_days'),
             ],
         ]);
     }
@@ -79,7 +79,7 @@ class GiftApiController extends Controller
             abort(404, __('gift::gifts.gift_not_found'));
         }
 
-        $maxUsers = (int) Gift::getConfig('max_users');
+        $maxUsers = (int) setting('gift_max_users');
 
         $validated = $request->validate([
             'users'   => ['required', 'array', 'max:' . $maxUsers],
@@ -114,7 +114,7 @@ class GiftApiController extends Controller
                     'user_id'      => $recipient->id,
                     'send_user_id' => $user->id,
                     'text'         => $text,
-                    'deleted_at'   => now()->addDays((int) Gift::getConfig('gift_days')),
+                    'deleted_at'   => now()->addDays((int) setting('gift_days')),
                 ]);
             }
         });

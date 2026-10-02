@@ -54,7 +54,7 @@ class LotteryService
             return false;
         }
 
-        $amount = (int) Lottery::getConfig('jackpot');
+        $amount = (int) setting('lottery_jackpot');
 
         if ($lottery) {
             $amount = $this->reward($lottery) ? $amount : $lottery->amount;
@@ -77,9 +77,7 @@ class LotteryService
      */
     private function reward(Lottery $lottery): bool
     {
-        [$min, $max] = Lottery::getConfig('numberRange');
-
-        $number = random_int((int) $min, (int) $max);
+        $number = random_int((int) setting('lottery_min'), (int) setting('lottery_max'));
 
         $lottery->update(['number' => $number]);
 

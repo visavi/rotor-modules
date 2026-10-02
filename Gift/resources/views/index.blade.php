@@ -18,7 +18,7 @@
                 @foreach ($gifts as $gift)
                     <div class="col">
                         <a href="/gifts/send/{{ $gift->id }}?user={{ $user }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                        {{ $gift->price }}  {{ setting('currency') }}
+                        {{ plural($gift->price, setting('moneyname')) }}
                     </div>
                 @endforeach
             </div>

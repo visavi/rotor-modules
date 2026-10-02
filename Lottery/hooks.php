@@ -25,3 +25,6 @@ Hook::add('gamesEnd', static function () {
         </div>
     </div>';
 });
+
+// Ссылка в навигации настроек админки
+Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('lottery.settings') . '">' . __('lottery::lottery.settings') . '</a>');

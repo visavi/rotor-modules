@@ -122,8 +122,24 @@ class DocsTest extends ModuleTestCase
     {
         $html = $this->docs->render("<a name=\"web-servers\"></a>\n## Web-серверы\n\n<script>alert(1)</script>");
 
-        $this->assertStringContainsString('<a id="web-servers"></a>', $html);
+        // Якорь Laravel переезжает на сам заголовок
+        $this->assertStringContainsString('<h2 id="web-servers">Web-серверы', $html);
+        $this->assertStringContainsString('href="#web-servers"', $html);
+        $this->assertStringNotContainsString('<a id="web-servers"></a>', $html);
         $this->assertStringNotContainsString('<script>', $html);
+    }
+
+    public function testHeadingsGetAnchors(): void
+    {
+        $html = $this->docs->render("# Версионирование\n\n## Что считается публичным API\n\n### 14.x\n\n## Что считается публичным API");
+
+        $this->assertStringContainsString('<h2 id="chto-schitaetsya-publichnym-api">', $html);
+        $this->assertStringContainsString('href="#chto-schitaetsya-publichnym-api"', $html);
+        // Повтор заголовка не дублирует id, id с цифры не начинается
+        $this->assertStringContainsString('<h2 id="chto-schitaetsya-publichnym-api-2">', $html);
+        $this->assertStringContainsString('<h3 id="section-14x">', $html);
+        // h1 скрыт на странице — без якоря
+        $this->assertStringContainsString('<h1>Версионирование</h1>', $html);
     }
 
     public function testUnknownPageIsNotFound(): void

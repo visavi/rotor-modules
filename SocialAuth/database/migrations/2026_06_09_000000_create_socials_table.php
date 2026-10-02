@@ -17,10 +17,12 @@ return new class extends Migration {
                 $table->string('provider_id', 100);
                 $table->text('token')->nullable();
                 $table->dateTime('created_at')->nullable();
+                $table->dateTime('last_login_at')->nullable();
 
                 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->unique(['provider', 'provider_id']);
                 $table->index('user_id');
+                $table->index('last_login_at');
             });
         }
     }

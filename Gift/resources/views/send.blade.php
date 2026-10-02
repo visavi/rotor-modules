@@ -37,7 +37,7 @@
 
             <div class="mb-3">
                 <a href="/gifts/send/{{ $gift->id }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>
-                {{ __('gift::gifts.price') }}: <span class="badge bg-primary"><span id="total-price">{{ $gift->price }}</span> {{ setting('currency') }}</span>
+                {{ __('gift::gifts.price') }}: <span class="badge bg-primary" id="total-price">{{ plural($gift->price, setting('moneyname')) }}</span>
             </div>
 
             <button class="btn btn-primary">{{ __('main.send') }}</button>
@@ -46,14 +46,25 @@
 @stop
 
 @push('scripts')
+    @php $moneyForms = array_map('trim', explode(',', setting('moneyname'))); @endphp
     <script type="module">
         const price = {{ $gift->price }};
+        const forms = @json($moneyForms);
         const users = document.getElementById('users');
         const total = document.getElementById('total-price');
 
+        // Склонение как у plural() в ядре: сумма меняется на клиенте, слово за ней тоже
+        const plural = num => {
+            const n = Math.abs(num) % 100;
+            const index = n % 10 === 1 && n !== 11 ? 0
+                : (n % 10 > 1 && n % 10 < 5 && (n < 12 || n > 14) ? 1 : 2);
+
+            return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202F') + ' ' + (forms[index] ?? forms[0]);
+        };
+
         // Теги шлют change на исходном select, пересчитываем сумму за всех получателей
         // Пока получатели не выбраны, показываем цену одного подарка, а не 0
-        const recount = () => total.textContent = String(price * (users.selectedOptions.length || 1));
+        const recount = () => total.textContent = plural(price * (users.selectedOptions.length || 1));
 
         recount();
         users.addEventListener('change', recount);
