@@ -3,6 +3,7 @@
 namespace Modules\News\Tests\Feature;
 
 use App\Models\User;
+use App\Services\FileService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\News\Models\News;
 use Tests\ModuleTestCase;
@@ -20,6 +21,15 @@ class NewsSmokeTest extends ModuleTestCase
         Relation::morphMap([News::$morphName => News::class]);
 
         $this->user = User::factory()->create();
+    }
+
+    public function testNewsAcceptsDocuments(): void
+    {
+        $this->overrideSetting('file_extensions', 'pdf,jpg');
+        $this->overrideSetting('media_extensions', 'jpg,mp4');
+
+        // Новости принимают файлы, а не только медиа
+        $this->assertSame(['pdf', 'jpg'], FileService::extensions(News::$morphName));
     }
 
     public function testIndex(): void

@@ -4,6 +4,7 @@ namespace Modules\Guestbook\Tests\Feature;
 
 use App\Models\File;
 use App\Models\User;
+use App\Services\FileService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Guestbook\Models\Guestbook;
 use Tests\ModuleTestCase;
@@ -25,6 +26,20 @@ class GuestbookFormTest extends ModuleTestCase
         $this->overrideSetting('captcha_type', 'graphical');
 
         $this->user = User::factory()->create();
+    }
+
+    public function testFormAcceptsDocuments(): void
+    {
+        $this->overrideSetting('file_extensions', 'pdf,jpg');
+        $this->overrideSetting('media_extensions', 'jpg,mp4');
+
+        // Гостевая принимает файлы, а не только медиа: pdf в окне выбора и на сервере
+        $this->actingAs($this->user)
+            ->get(route('guestbook.index'))
+            ->assertOk()
+            ->assertSee('accept=".pdf,.jpg"', false);
+
+        $this->assertSame(['pdf', 'jpg'], FileService::extensions(Guestbook::$morphName));
     }
 
     public function testFormIsCompactForUser(): void

@@ -17,7 +17,7 @@ return [
             'label'  => 'news::news.news',
             'search' => ['view' => 'news::search/_news'],
             'feed'   => ['with' => ['user', 'files'], 'view' => 'news::feeds/_news'],
-            'upload' => 'media',
+            'upload' => 'file',
             'rating' => true,
             'stat'   => true,
         ],

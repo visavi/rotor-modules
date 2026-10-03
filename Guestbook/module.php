@@ -15,7 +15,7 @@ return [
         Guestbook::class => [
             'label'  => 'guestbook::guestbook.guestbook',
             'search' => ['view' => 'guestbook::search/_guestbooks'],
-            'upload' => 'media',
+            'upload' => 'file',
             'spam'   => true,
             'stat'   => true,
         ],
