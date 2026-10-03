@@ -39,6 +39,8 @@ class GuestbookFormTest extends ModuleTestCase
             ->assertOk()
             ->assertSee('accept=".pdf,.jpg"', false);
 
+        // Без регистрации тип тоже получил бы file_extensions — проверяем её саму
+        $this->assertContains(Guestbook::$morphName, FileService::fileTypes());
         $this->assertSame(['pdf', 'jpg'], FileService::extensions(Guestbook::$morphName));
     }
 

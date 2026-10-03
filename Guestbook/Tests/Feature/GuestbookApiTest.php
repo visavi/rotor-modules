@@ -33,7 +33,7 @@ class GuestbookApiTest extends ModuleTestCase
         $this->overrideSetting('captcha_type', 'graphical');
         $this->overrideSetting('floodstime', 0);
         $this->overrideSetting('filesize', 10485760);
-        $this->overrideSetting('media_extensions', 'jpg,png');
+        $this->overrideSetting('file_extensions', 'jpg,png,pdf');
         $this->overrideSetting('maxfiles', 5);
 
         $this->user = User::factory()->create(['apikey' => Str::random(32)]);
@@ -76,6 +76,30 @@ class GuestbookApiTest extends ModuleTestCase
         ], $this->headers())
             ->assertStatus(201)
             ->assertJsonCount(1, 'post.media');
+    }
+
+    public function testStoreAcceptsDocumentInRequest(): void
+    {
+        $this->post('/api/guestbook', [
+            'text'  => 'Сообщение с документом',
+            'files' => [UploadedFile::fake()->create('doc.pdf', 10, 'application/pdf')],
+        ], $this->headers())
+            ->assertStatus(201)
+            ->assertJsonCount(1, 'post.files');
+    }
+
+    public function testGuestCannotAttachFiles(): void
+    {
+        // Файл гостя открыт по ссылке ещё до модерации — загрузка только пользователям
+        $this->post('/api/guestbook', [
+            'text'  => 'Сообщение от гостя',
+            'files' => [UploadedFile::fake()->create('doc.pdf', 10, 'application/pdf')],
+        ] + $this->captcha(), ['Accept' => 'application/json'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('files');
+
+        $this->assertDatabaseCount('files', 0);
+        $this->assertDatabaseCount('guestbook', 0);
     }
 
     public function testStoreAttachesPendingFiles(): void

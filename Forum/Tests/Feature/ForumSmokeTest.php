@@ -4,6 +4,7 @@ namespace Modules\Forum\Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
@@ -101,5 +102,34 @@ class ForumSmokeTest extends ModuleTestCase
 
         $this->postJson('/api/forums/' . $forum->id, ['title' => 'New topic', 'text' => 'Text'])
             ->assertStatus(400);
+    }
+
+    public function testApiRejectsOversizedFile(): void
+    {
+        // filesize хранится в байтах, а правило max у Laravel считает килобайты:
+        // переданная напрямую настройка пропускала файлы в 1024 раза больше
+        $this->overrideSetting('filesize', 100 * 1024);
+        $this->overrideSetting('file_extensions', 'pdf');
+        $this->overrideSetting('forum_text_min', 1);
+        $this->overrideSetting('forum_text_max', 1000);
+
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 0,
+            'created_at'  => now(),
+        ]);
+
+        $this->user->update(['apikey' => Str::random(32)]);
+
+        $this->post('/api/topics/' . $topic->id, [
+            'text'  => 'Сообщение с файлом',
+            'files' => [UploadedFile::fake()->create('big.pdf', 200, 'application/pdf')],
+        ], ['Authorization' => 'Bearer ' . $this->user->apikey, 'Accept' => 'application/json'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('files.0');
     }
 }

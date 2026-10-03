@@ -6,6 +6,7 @@ namespace Modules\Forum\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Services\FileService;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -123,9 +124,7 @@ class ForumApiController extends Controller
                     }
                 },
             ],
-            'files'   => ['nullable', 'array', 'max:' . setting('maxfiles')],
-            'files.*' => ['file', 'max:' . setting('filesize'), 'mimes:' . setting('file_extensions')],
-        ]);
+        ] + FileService::rules(Post::$morphName));
 
         $msg = $validated['text'];
 
@@ -187,9 +186,7 @@ class ForumApiController extends Controller
             'question'  => ['nullable', 'string', 'min:' . setting('vote_title_min'), 'max:' . setting('vote_title_max')],
             'answers'   => ['required_with:question', 'array', 'min:2', 'max:10'],
             'answers.*' => ['string', 'min:' . setting('vote_answer_min'), 'max:' . setting('vote_answer_max')],
-            'files'     => ['nullable', 'array', 'max:' . setting('maxfiles')],
-            'files.*'   => ['file', 'max:' . setting('filesize'), 'mimes:' . setting('file_extensions')],
-        ]);
+        ] + FileService::rules(Post::$morphName));
 
         $topic = Topic::query()->create([
             'forum_id'   => $forum->id,

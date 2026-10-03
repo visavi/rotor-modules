@@ -76,7 +76,11 @@ class GuestbookApiController extends Controller
             $rules['guest_name'] = ['nullable', 'string', 'min:3', 'max:20'];
         }
 
-        $validated = $request->validate($rules + FileService::rules(Guestbook::$morphName));
+        // Вложения — только от пользователей, как на сайте: файл гостя открыт
+        // по ссылке ещё до модерации и обходит запрет ссылок в тексте
+        $rules += $user ? FileService::rules(Guestbook::$morphName) : ['files' => ['prohibited']];
+
+        $validated = $request->validate($rules);
 
         $text = $validated['text'];
         $active = true;
@@ -101,10 +105,9 @@ class GuestbookApiController extends Controller
             'active'     => $active,
         ]);
 
-        // Медиа можно приложить к запросу или загрузить заранее — с relate_id = 0
-        $files->attachUploaded($post, $request->file('files', []));
-
+        // Файлы можно приложить к запросу или загрузить заранее — с relate_id = 0
         if ($user) {
+            $files->attachUploaded($post, $request->file('files', []));
             $files->attachPending($post);
         }
 

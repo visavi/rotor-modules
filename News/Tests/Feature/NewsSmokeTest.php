@@ -28,7 +28,9 @@ class NewsSmokeTest extends ModuleTestCase
         $this->overrideSetting('file_extensions', 'pdf,jpg');
         $this->overrideSetting('media_extensions', 'jpg,mp4');
 
-        // Новости принимают файлы, а не только медиа
+        // Новости принимают файлы, а не только медиа. Без регистрации тип
+        // тоже получил бы file_extensions — проверяем её саму
+        $this->assertContains(News::$morphName, FileService::fileTypes());
         $this->assertSame(['pdf', 'jpg'], FileService::extensions(News::$morphName));
     }
 
