@@ -99,9 +99,7 @@ class PhotoController extends Controller
                 ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])]);
 
             $existFiles = File::query()
-                ->where('relate_type', Photo::$morphName)
-                ->where('relate_id', 0)
-                ->where('user_id', $user->id)
+                ->pending(Photo::$morphName, $user->id)
                 ->exists();
             $validator->true($existFiles, ['files' => __('validator.image_upload_failed')]);
 
@@ -114,9 +112,7 @@ class PhotoController extends Controller
                 ]);
 
                 File::query()
-                    ->where('relate_type', Photo::$morphName)
-                    ->where('relate_id', 0)
-                    ->where('user_id', $user->id)
+                    ->pending(Photo::$morphName, $user->id)
                     ->update(['relate_id' => $photo->id]);
 
                 clearCache(['statPhotos', 'recentPhotos']);
@@ -132,9 +128,7 @@ class PhotoController extends Controller
         }
 
         $files = File::query()
-            ->where('relate_type', Photo::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Photo::$morphName, $user->id)
             ->ordered()
             ->get();
 

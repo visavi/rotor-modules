@@ -206,9 +206,7 @@ class BoardController extends Controller
                 $item->category->increment('count_items');
 
                 File::query()
-                    ->where('relate_type', Item::$morphName)
-                    ->where('relate_id', 0)
-                    ->where('user_id', $user->id)
+                    ->pending(Item::$morphName, $user->id)
                     ->update(['relate_id' => $item->id]);
 
                 clearCache(['statBoards', 'recentBoards']);
@@ -224,9 +222,7 @@ class BoardController extends Controller
         }
 
         $files = File::query()
-            ->where('relate_type', Item::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Item::$morphName, $user->id)
             ->ordered()
             ->get();
 

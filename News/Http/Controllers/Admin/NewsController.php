@@ -79,9 +79,7 @@ class NewsController extends AdminController
     public function create(Request $request, Validator $validator): View|RedirectResponse
     {
         $files = File::query()
-            ->where('relate_type', News::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', getUser('id'))
+            ->pending(News::$morphName, getUser('id'))
             ->ordered();
 
         if ($request->isMethod('post')) {

@@ -429,9 +429,7 @@ class ForumController extends AdminController
         }
 
         $files = File::query()
-            ->where('relate_type', Post::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', getUser('id'))
+            ->pending(Post::$morphName, getUser('id'))
             ->ordered()
             ->get();
 

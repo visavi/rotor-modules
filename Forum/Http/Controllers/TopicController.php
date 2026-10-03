@@ -101,9 +101,7 @@ class TopicController extends Controller
 
         if ($user) {
             $files = File::query()
-                ->where('relate_type', Post::$morphName)
-                ->where('relate_id', 0)
-                ->where('user_id', $user->id)
+                ->pending(Post::$morphName, $user->id)
                 ->ordered()
                 ->get();
         }
@@ -147,9 +145,7 @@ class TopicController extends Controller
         }
 
         $countFiles = File::query()
-            ->where('relate_type', Post::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Post::$morphName, $user->id)
             ->orderBy('created_at')
             ->count();
 
@@ -181,9 +177,7 @@ class TopicController extends Controller
         }
 
         File::query()
-            ->where('relate_type', Post::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Post::$morphName, $user->id)
             ->update(['relate_id' => $post->id]);
 
         $flood->saveState();

@@ -82,9 +82,7 @@ class DownController extends Controller
         }
 
         $files = File::query()
-            ->where('relate_type', Down::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Down::$morphName, $user->id)
             ->ordered();
 
         if ($request->isMethod('post')) {

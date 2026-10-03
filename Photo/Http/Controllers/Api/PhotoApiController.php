@@ -100,9 +100,7 @@ class PhotoApiController extends Controller
         // Снимок обязателен: он и есть содержимое записи. Считаем и приложенные
         // к запросу, и загруженные заранее через POST /api/files
         $pending = File::query()
-            ->where('relate_type', Photo::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Photo::$morphName, $user->id)
             ->exists();
 
         if (! $uploaded && ! $pending) {

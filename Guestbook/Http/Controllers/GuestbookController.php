@@ -32,9 +32,7 @@ class GuestbookController extends Controller
         $files = collect();
         if ($user = getUser()) {
             $files = File::query()
-                ->where('relate_type', Guestbook::$morphName)
-                ->where('relate_id', 0)
-                ->where('user_id', $user->id)
+                ->pending(Guestbook::$morphName, $user->id)
                 ->ordered()
                 ->get();
         }
@@ -86,9 +84,7 @@ class GuestbookController extends Controller
 
             if ($user) {
                 File::query()
-                    ->where('relate_type', Guestbook::$morphName)
-                    ->where('relate_id', 0)
-                    ->where('user_id', $user->id)
+                    ->pending(Guestbook::$morphName, $user->id)
                     ->update(['relate_id' => $guestbook->id]);
             } else {
                 Cookie::queue('guest_name', $guestName, 525600);

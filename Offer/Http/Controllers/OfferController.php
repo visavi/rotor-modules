@@ -105,9 +105,7 @@ class OfferController extends Controller
 
                 // Файлы загружаются до создания записи, привязываем их к ней
                 File::query()
-                    ->where('relate_type', Offer::$morphName)
-                    ->where('relate_id', 0)
-                    ->where('user_id', $user->id)
+                    ->pending(Offer::$morphName, $user->id)
                     ->update(['relate_id' => $offer->id]);
 
                 $flood->saveState();
@@ -122,9 +120,7 @@ class OfferController extends Controller
         }
 
         $files = File::query()
-            ->where('relate_type', Offer::$morphName)
-            ->where('relate_id', 0)
-            ->where('user_id', $user->id)
+            ->pending(Offer::$morphName, $user->id)
             ->ordered()
             ->get();
 
