@@ -80,6 +80,47 @@ class ForumSmokeTest extends ModuleTestCase
             ->assertJsonPath('topic.forum.parent', null);
     }
 
+    public function testTopicEditShowsPostFiles(): void
+    {
+        // Редактор первого сообщения грузит файлы прямо в него — без списка
+        // их не было видно и нечем было удалить
+        $this->overrideSetting('editforumpoint', 0);
+
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 1,
+            'created_at'  => now(),
+        ]);
+
+        $post = Post::query()->create([
+            'topic_id' => $topic->id,
+            'user_id'  => $this->user->id,
+            'text'     => 'Первое сообщение',
+            'ip'       => '127.0.0.1',
+            'brow'     => 'test',
+        ]);
+
+        $file = File::query()->create([
+            'relate_id'   => $post->id,
+            'relate_type' => Post::$morphName,
+            'path'        => '/uploads/forums/doc.pdf',
+            'name'        => 'doc.pdf',
+            'size'        => 1024,
+            'extension'   => 'pdf',
+            'mime_type'   => 'application/pdf',
+            'user_id'     => $this->user->id,
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('topics.edit', ['id' => $topic->id]))
+            ->assertOk()
+            ->assertSee('data-key="' . $file->id . '"', false);
+    }
+
     public function testApiReadingIsOpenForGuests(): void
     {
         $forum = Forum::query()->create(['title' => 'Test forum']);

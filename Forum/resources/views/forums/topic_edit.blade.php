@@ -38,6 +38,8 @@
                     <div class="invalid-feedback">{{ textError('msg') }}</div>
                     <span class="js-textarea-counter"></span>
                 </div>
+
+                @include('app/_upload_file', ['model' => $post])
             @endif
 
             @if ($vote)
