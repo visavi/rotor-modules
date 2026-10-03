@@ -148,8 +148,7 @@ class DownApiController extends Controller
         ]);
 
         // Дистрибутив можно приложить к запросу или загрузить заранее — с relate_id = 0
-        $files->attachUploaded($down, $uploaded);
-        $files->attachPending($down);
+        $files->attach($down, $uploaded);
 
         if ($down->active) {
             $down->category->increment('count_downs');

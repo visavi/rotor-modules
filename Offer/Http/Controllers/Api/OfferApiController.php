@@ -112,8 +112,7 @@ class OfferApiController extends Controller
         ]);
 
         // Медиа можно приложить к запросу или загрузить заранее — с relate_id = 0
-        $files->attachUploaded($offer, $request->file('files', []));
-        $files->attachPending($offer);
+        $files->attach($offer, $request->file('files', []));
 
         $flood->saveState();
 

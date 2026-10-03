@@ -169,4 +169,59 @@ class ForumSmokeTest extends ModuleTestCase
 
         $this->assertSame($id, $file->fresh()->relate_id);
     }
+
+    public function testApiPostKeepsPendingFilesFirst(): void
+    {
+        // Загруженные заранее идут первыми, файлы из запроса — после них:
+        // в обратном порядке sort групп совпадал и вложения перемешивались
+        $this->overrideSetting('forum_text_min', 1);
+        $this->overrideSetting('forum_text_max', 1000);
+        $this->overrideSetting('file_extensions', 'pdf,txt');
+        $this->overrideSetting('filesize', 1024 * 1024);
+        $this->overrideSetting('maxfiles', 5);
+
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 0,
+            'created_at'  => now(),
+        ]);
+
+        foreach (['first.pdf', 'second.pdf'] as $i => $name) {
+            File::query()->create([
+                'relate_id'   => 0,
+                'relate_type' => Post::$morphName,
+                'path'        => '/uploads/forums/' . $name,
+                'name'        => $name,
+                'size'        => 1024,
+                'extension'   => 'pdf',
+                'mime_type'   => 'application/pdf',
+                'user_id'     => $this->user->id,
+                'sort'        => $i + 1,
+            ]);
+        }
+
+        $this->user->update(['apikey' => Str::random(32)]);
+
+        $id = $this->post('/api/topics/' . $topic->id, [
+            'text'  => 'Сообщение',
+            'files' => [UploadedFile::fake()->createWithContent('third.txt', 'text')],
+        ], ['Authorization' => 'Bearer ' . $this->user->apikey, 'Accept' => 'application/json'])
+            ->assertStatus(201)
+            ->json('post.id');
+
+        $files = Post::query()->find($id)->files()->ordered()->get();
+
+        try {
+            $this->assertSame(['first.pdf', 'second.pdf', 'third.txt'], $files->pluck('name')->all());
+        } finally {
+            // Файл из запроса реально лёг в public/uploads
+            if ($uploaded = $files->firstWhere('name', 'third.txt')) {
+                @unlink(public_path($uploaded->path));
+            }
+        }
+    }
 }

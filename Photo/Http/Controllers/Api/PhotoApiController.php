@@ -114,8 +114,7 @@ class PhotoApiController extends Controller
             'closed'  => (int) ($validated['closed'] ?? 0),
         ]);
 
-        $files->attachUploaded($photo, $uploaded);
-        $files->attachPending($photo);
+        $files->attach($photo, $uploaded);
 
         clearCache(['statPhotos', 'recentPhotos']);
         $flood->saveState();

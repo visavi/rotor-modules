@@ -135,8 +135,7 @@ class ItemApiController extends Controller
         $item->category->increment('count_items');
 
         // Медиа можно приложить к запросу или загрузить заранее — с relate_id = 0
-        $files->attachUploaded($item, $request->file('files', []));
-        $files->attachPending($item);
+        $files->attach($item, $request->file('files', []));
 
         clearCache(['statBoards', 'recentBoards']);
         $flood->saveState();

@@ -102,7 +102,7 @@ class ArticleApiController extends Controller
         }
 
         $user = getUser();
-        $validated = $this->validateArticle($request, $flood);
+        $validated = $this->validateArticle($request, $flood, FileService::rules(Article::$morphName));
         $category = $this->findOpenCategory((int) $validated['category_id']);
 
         $isDraft = (bool) ($validated['draft'] ?? false);
@@ -124,8 +124,7 @@ class ArticleApiController extends Controller
         $this->syncTags($article, $validated['tags']);
 
         // Файлы можно приложить к запросу или загрузить заранее — с relate_id = 0
-        $files->attachUploaded($article, $request->file('files', []));
-        $files->attachPending($article);
+        $files->attach($article, $request->file('files', []));
         $flood->saveState();
 
         $article->load('user', 'category', 'tags', 'files');
@@ -182,8 +181,11 @@ class ArticleApiController extends Controller
 
     /**
      * Общие правила статьи
+     *
+     * Файлы — только при создании: правка идёт PATCH, а его multipart PHP не разбирает.
+     * Вложения существующей статьи — через POST /api/files с её id
      */
-    private function validateArticle(Request $request, ?Flood $flood = null): array
+    private function validateArticle(Request $request, ?Flood $flood = null, array $fileRules = []): array
     {
         return $request->validate([
             'category_id' => ['required', 'integer', 'min:1'],
@@ -203,7 +205,7 @@ class ArticleApiController extends Controller
             'tags.*'       => ['string', 'min:' . setting('blog_tag_min'), 'max:' . setting('blog_tag_max')],
             'draft'        => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date', 'after:now'],
-        ] + FileService::rules(Article::$morphName));
+        ] + $fileRules);
     }
 
     /**

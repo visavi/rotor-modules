@@ -107,8 +107,7 @@ class GuestbookApiController extends Controller
 
         // Файлы можно приложить к запросу или загрузить заранее — с relate_id = 0
         if ($user) {
-            $files->attachUploaded($post, $request->file('files', []));
-            $files->attachPending($post);
+            $files->attach($post, $request->file('files', []));
         }
 
         clearCache('statGuestbook');

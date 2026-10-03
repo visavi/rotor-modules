@@ -137,8 +137,7 @@ class ForumApiController extends Controller
         ]);
 
         // Через FileService, а не uploadFile: он конвертирует видео и забирает файлы, загруженные заранее
-        $files->attachUploaded($post, $request->file('files', []));
-        $files->attachPending($post);
+        $files->attach($post, $request->file('files', []));
 
         $flood->saveState();
         sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
@@ -201,8 +200,7 @@ class ForumApiController extends Controller
             'brow'     => getBrowser(),
         ]);
 
-        $files->attachUploaded($post, $request->file('files', []));
-        $files->attachPending($post);
+        $files->attach($post, $request->file('files', []));
 
         $flood->saveState();
 
