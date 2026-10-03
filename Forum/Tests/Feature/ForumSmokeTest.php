@@ -2,6 +2,7 @@
 
 namespace Modules\Forum\Tests\Feature;
 
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
@@ -131,5 +132,41 @@ class ForumSmokeTest extends ModuleTestCase
         ], ['Authorization' => 'Bearer ' . $this->user->apikey, 'Accept' => 'application/json'])
             ->assertStatus(422)
             ->assertJsonValidationErrors('files.0');
+    }
+
+    public function testApiPostAttachesPendingFiles(): void
+    {
+        // Файл, загруженный заранее через POST /api/files, ждёт записи с relate_id = 0
+        $this->overrideSetting('forum_text_min', 1);
+        $this->overrideSetting('forum_text_max', 1000);
+
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 0,
+            'created_at'  => now(),
+        ]);
+
+        $file = File::query()->create([
+            'relate_id'   => 0,
+            'relate_type' => Post::$morphName,
+            'path'        => '/uploads/forums/doc.pdf',
+            'name'        => 'doc.pdf',
+            'size'        => 1024,
+            'extension'   => 'pdf',
+            'mime_type'   => 'application/pdf',
+            'user_id'     => $this->user->id,
+        ]);
+
+        $this->user->update(['apikey' => Str::random(32)]);
+
+        $id = $this->postJson('/api/topics/' . $topic->id, ['text' => 'Сообщение'], ['Authorization' => 'Bearer ' . $this->user->apikey])
+            ->assertStatus(201)
+            ->json('post.id');
+
+        $this->assertSame($id, $file->fresh()->relate_id);
     }
 }

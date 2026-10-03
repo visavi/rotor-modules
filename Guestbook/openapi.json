@@ -91,7 +91,7 @@
                                             "type": "string",
                                             "format": "binary"
                                         },
-                                        "description": "Фото и видео (необязательно)"
+                                        "description": "Вложения из upload.extensions в /api/config (необязательно). Только для пользователей: гостю файлы запрещены — 422"
                                     }
                                 }
                             }

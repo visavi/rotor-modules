@@ -89,7 +89,7 @@ class ForumApiController extends Controller
     /**
      * Создание сообщения
      */
-    public function createPost(int $id, Request $request, Flood $flood): JsonResponse
+    public function createPost(int $id, Request $request, Flood $flood, FileService $files): JsonResponse
     {
         $user = getUser();
 
@@ -128,8 +128,6 @@ class ForumApiController extends Controller
 
         $msg = $validated['text'];
 
-        $uploadedFiles = $request->file('files', []);
-
         $post = Post::query()->create([
             'topic_id' => $topic->id,
             'user_id'  => $user->id,
@@ -138,9 +136,9 @@ class ForumApiController extends Controller
             'brow'     => getBrowser(),
         ]);
 
-        foreach ($uploadedFiles as $file) {
-            $post->uploadFile($file);
-        }
+        // Через FileService, а не uploadFile: он конвертирует видео и забирает файлы, загруженные заранее
+        $files->attachUploaded($post, $request->file('files', []));
+        $files->attachPending($post);
 
         $flood->saveState();
         sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
@@ -156,7 +154,7 @@ class ForumApiController extends Controller
     /**
      * Создание темы
      */
-    public function createTopic(int $id, Request $request, Flood $flood): JsonResponse
+    public function createTopic(int $id, Request $request, Flood $flood, FileService $files): JsonResponse
     {
         $user = getUser();
 
@@ -203,9 +201,8 @@ class ForumApiController extends Controller
             'brow'     => getBrowser(),
         ]);
 
-        foreach ($request->file('files', []) as $file) {
-            $post->uploadFile($file);
-        }
+        $files->attachUploaded($post, $request->file('files', []));
+        $files->attachPending($post);
 
         $flood->saveState();
 
