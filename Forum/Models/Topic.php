@@ -161,13 +161,25 @@ class Topic extends Model
     }
 
     /**
-     * Ссылка на страницу темы, при наличии — сразу на последнее сообщение
+     * Ссылка на страницу темы, при наличии — сразу на последнее сообщение.
+     * Последняя страница известна по счётчику, поэтому без pid: тот
+     * считает страницу и делает лишний редирект (боты платят двумя запросами)
      */
     public function getViewUrl(bool $absolute = true): string
     {
-        $params = array_filter(['id' => $this->id, 'pid' => $this->last_post_id]);
+        $url = route('topics.topic', array_filter(['id' => $this->id, 'page' => self::pageOf($this->count_posts)]), $absolute);
 
-        return route('topics.topic', $params, $absolute);
+        return $this->last_post_id ? $url . '#post_' . $this->last_post_id : $url;
+    }
+
+    /**
+     * Страница темы, на которой стоит сообщение с этим порядковым номером (null для первой)
+     */
+    public static function pageOf(int $position): ?int
+    {
+        $page = (int) ceil($position / max(1, (int) setting('forumpost')));
+
+        return $page > 1 ? $page : null;
     }
 
     /**
@@ -257,15 +269,13 @@ class Topic extends Model
         $pages = [];
         $link = $url . '/' . $this->id;
 
-        $pg_cnt = ceil($this->count_posts / setting('forumpost'));
+        $pg_cnt = self::pageOf($this->count_posts) ?? 1;
 
         for ($i = 1; $i <= 5; $i++) {
             if ($i <= $pg_cnt) {
                 $pages[] = [
-                    'page'  => $i,
-                    'title' => $i . ' страница',
-                    'name'  => $i,
-                    'url'   => $i > 1 ? $link . '?page=' . $i : $link,
+                    'name' => $i,
+                    'url'  => $i > 1 ? $link . '?page=' . $i : $link,
                 ];
             }
         }
@@ -279,10 +289,8 @@ class Topic extends Model
             }
 
             $pages[] = [
-                'page'  => $pg_cnt,
-                'title' => $pg_cnt . ' страница',
-                'name'  => $pg_cnt,
-                'url'   => $link . '?page=' . $pg_cnt,
+                'name' => $pg_cnt,
+                'url'  => $link . '?page=' . $pg_cnt,
             ];
         }
 

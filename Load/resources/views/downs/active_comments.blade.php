@@ -23,7 +23,7 @@
                 <div class="d-flex align-items-center mb-2">
                     <div class="flex-grow-1">
                         <i class="fa fa-comment"></i>
-                        <a href="{{ route('downs.view', ['id' => $data->relate_id, 'cid' => $data->id]) }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_comments }}</span>
+                        <a href="{{ $data->getViewUrl() }}" class="section-title">{{ $data->title }}</a> <span class="badge bg-adaptive">{{ $data->count_comments }}</span>
                     </div>
 
                     <div class="ms-2 flex-shrink-0 d-flex align-items-center">

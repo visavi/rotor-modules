@@ -57,6 +57,48 @@ class ForumSmokeTest extends ModuleTestCase
         $this->get(route('topics.topic', ['id' => $topic->id]))->assertOk();
     }
 
+    public function testPidRedirectsToPostPage(): void
+    {
+        $this->overrideSetting('forumpost', 2);
+
+        [$topic, $posts] = $this->createTopicWithPosts(3);
+
+        $this->get(route('topics.topic', ['id' => $topic->id, 'pid' => $posts[2]->id]))
+            ->assertRedirect(route('topics.topic', ['id' => $topic->id, 'page' => 2]) . '#post_' . $posts[2]->id);
+
+        $this->get(route('topics.topic', ['id' => $topic->id, 'pid' => $posts[1]->id]))
+            ->assertRedirect(route('topics.topic', ['id' => $topic->id]) . '#post_' . $posts[1]->id);
+    }
+
+    public function testViewUrlPointsToLastPageWithoutPid(): void
+    {
+        // Ссылка на последнее сообщение строится по счётчику — без редиректа через pid
+        $this->overrideSetting('forumpost', 2);
+
+        [$topic, $posts] = $this->createTopicWithPosts(3);
+
+        $this->assertSame(
+            route('topics.topic', ['id' => $topic->id, 'page' => 2]) . '#post_' . $posts[2]->id,
+            $topic->fresh()->getViewUrl(),
+        );
+    }
+
+    public function testTopicPageCanonicalKeepsPage(): void
+    {
+        // Без номера страницы страницы 2+ выглядят для поисковика дублями первой
+        $this->overrideSetting('forumpost', 2);
+
+        [$topic] = $this->createTopicWithPosts(3);
+
+        $this->get(route('topics.topic', ['id' => $topic->id, 'page' => 2, 'foo' => 'bar']))
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="' . route('topics.topic', ['id' => $topic->id]) . '?page=2">', false);
+
+        $this->get(route('topics.topic', ['id' => $topic->id, 'page' => 1]))
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="' . route('topics.topic', ['id' => $topic->id]) . '">', false);
+    }
+
     public function testApiTopicContainsForum(): void
     {
         $forum = Forum::query()->create(['title' => 'Test forum']);
@@ -264,5 +306,38 @@ class ForumSmokeTest extends ModuleTestCase
                 @unlink(public_path($uploaded->path));
             }
         }
+    }
+
+    /**
+     * @return array{Topic, list<Post>}
+     */
+    private function createTopicWithPosts(int $count): array
+    {
+        $forum = Forum::query()->create(['title' => 'Test forum']);
+
+        $topic = Topic::query()->create([
+            'forum_id'    => $forum->id,
+            'title'       => 'Test topic',
+            'user_id'     => $this->user->id,
+            'count_posts' => 0,
+            'created_at'  => now(),
+        ]);
+
+        $posts = [];
+
+        foreach (range(1, $count) as $i) {
+            $posts[] = Post::query()->create([
+                'topic_id'   => $topic->id,
+                'user_id'    => $this->user->id,
+                'text'       => 'Сообщение ' . $i,
+                'ip'         => '127.0.0.1',
+                'brow'       => 'test',
+                'created_at' => now()->addSeconds($i),
+            ]);
+        }
+
+        $topic->update(['count_posts' => $count, 'last_post_id' => end($posts)->id]);
+
+        return [$topic, $posts];
     }
 }

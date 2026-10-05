@@ -1,7 +1,7 @@
 <form method="post">
     @csrf
     <div class="mb-3{{ hasError('cid') }}">
-        <label for="inputCategory" class="form-label">{{ __('blog::blogs.blog') }}</label>
+        <label for="inputCategory" class="form-label">{{ __('blog::blogs.blog') }}:</label>
 
         <?php $inputCategory = (int) old('cid', $article->category_id ?? $cid); ?>
         <select class="form-select" id="inputCategory" name="cid">

@@ -31,6 +31,20 @@ class TopicController extends Controller
      */
     public function index(int $id, Request $request): View|RedirectResponse
     {
+        // Переход к сообщению: страница считается до загрузки темы — по pid
+        // ходят и боты, и тяжёлый запрос с закладками ради редиректа не нужен.
+        // Несуществующую тему отдаст 404 страница, куда ведёт редирект
+        $pid = int($request->input('pid'));
+        if ($pid) {
+            $position = Post::query()
+                ->where('topic_id', $id)
+                ->where('id', '<=', $pid)
+                ->count();
+
+            return redirect()->route('topics.topic', ['id' => $id, 'page' => Topic::pageOf($position)])
+                ->withFragment('post_' . $pid);
+        }
+
         $user = getUser();
 
         $topic = Topic::query()
@@ -47,18 +61,6 @@ class TopicController extends Controller
 
         if (! $topic) {
             abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        // Переход к сообщению
-        $pid = int($request->input('pid'));
-        if ($pid) {
-            $countPosts = $topic->posts()->where('id', '<=', $pid)->count();
-
-            $page = ceil($countPosts / setting('forumpost'));
-            $page = $page > 1 ? $page : null;
-
-            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page])
-                ->withFragment('post_' . $pid);
         }
 
         $posts = Post::query()
@@ -139,7 +141,7 @@ class TopicController extends Controller
         $validator->notEqual($msg, $post->text ?? '', ['msg' => __('forum::forums.post_repeat')]);
 
         if (! $validator->isValid()) {
-            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $this->lastPage($topic)])
+            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => Topic::pageOf($topic->count_posts)])
                 ->withInput()
                 ->withErrors($validator->getErrors());
         }
@@ -186,19 +188,9 @@ class TopicController extends Controller
         // count_posts увеличил обсервер на своём инстансе — освежаем для расчёта страницы
         $topic->refresh();
 
-        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $this->lastPage($topic)])
+        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => Topic::pageOf($topic->count_posts)])
             ->withFragment('post_' . $post->id)
             ->with('success', __('main.message_added_success'));
-    }
-
-    /**
-     * Возвращает номер последней страницы темы (null для первой)
-     */
-    private function lastPage(Topic $topic): ?int
-    {
-        $page = (int) ceil($topic->count_posts / setting('forumpost'));
-
-        return $page > 1 ? $page : null;
     }
 
     /**

@@ -51,7 +51,7 @@ class FeedApiTest extends ModuleTestCase
         $response->assertJsonPath('data.0.type', Topic::$morphName);
         $response->assertJsonPath('data.0.id', $topic->id);
         $response->assertJsonPath('data.0.title', 'Test topic');
-        $response->assertJsonPath('data.0.url', route('topics.topic', ['id' => $topic->id, 'pid' => $post->id]));
+        $response->assertJsonPath('data.0.url', route('topics.topic', ['id' => $topic->id]) . '#post_' . $post->id);
         $response->assertJsonPath('data.0.comments_count', 1);
         $response->assertJsonPath('data.0.user.login', $this->user->login);
         $this->assertStringContainsString('Последнее сообщение темы', $response->json('data.0.text'));

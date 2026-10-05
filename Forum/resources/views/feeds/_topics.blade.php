@@ -17,7 +17,7 @@
     <div class="section-header d-flex align-items-start">
         <div class="flex-grow-1">
             <div class="section-title d-flex align-items-baseline">
-                <h3><a class="post-title" href="{{ route('topics.topic', ['id' => $post->id, 'pid' => $post->lastPost->id]) }}">{{ $post->title }}</a></h3>
+                <h3><a class="post-title" href="{{ $post->getViewUrl() }}">{{ $post->title }}</a></h3>
 
                 @if ($post->vote->exists)
                     <span class="ms-2" data-bs-toggle="tooltip" title="{{ __('forum::forums.has_vote') }}"><i class="fa-solid fa-square-poll-vertical fa-xs"></i></span>

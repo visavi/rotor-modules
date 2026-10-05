@@ -2,6 +2,7 @@
 
 namespace Modules\News\Tests\Feature;
 
+use App\Models\Comment;
 use App\Models\User;
 use App\Services\FileService;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -49,5 +50,30 @@ class NewsSmokeTest extends ModuleTestCase
         ]);
 
         $this->get($news->getViewUrl())->assertOk();
+    }
+
+    public function testAllCommentsLinkToComment(): void
+    {
+        // Ссылка ведёт к самому комментарию, а не на начало страницы через ?cid=
+        $news = News::query()->create([
+            'title'      => 'Test news',
+            'text'       => 'Test news text',
+            'user_id'    => $this->user->id,
+            'created_at' => now(),
+        ]);
+
+        $comment = Comment::query()->create([
+            'relate_type' => News::$morphName,
+            'relate_id'   => $news->id,
+            'text'        => 'Test comment',
+            'user_id'     => $this->user->id,
+            'ip'          => '127.0.0.1',
+            'brow'        => 'test',
+            'created_at'  => now(),
+        ]);
+
+        $this->get(route('news.all-comments'))
+            ->assertOk()
+            ->assertSee('href="' . route('news.view', ['id' => $news->id]) . '#comment_' . $comment->id . '"', false);
     }
 }
