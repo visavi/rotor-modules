@@ -33,12 +33,15 @@ class SafeTest extends ModuleTestCase
 
     public function testFirstTryChargesOncePerGame(): void
     {
+        $charged = ['id' => $this->user->id, 'money' => 5000 - SafeController::PRICE];
+
+        // Баланс — из базы: phpstan запоминает $user->fresh()->money между запросами
         $this->guess([0, 0, 0, 0, 0]);
-        $this->assertSame(5000 - SafeController::PRICE, $this->user->fresh()->money);
+        $this->assertDatabaseHas('users', $charged);
 
         // Вторая попытка той же партии бесплатна
         $this->guess([1, 1, 1, 1, 1]);
-        $this->assertSame(5000 - SafeController::PRICE, $this->user->fresh()->money);
+        $this->assertDatabaseHas('users', $charged);
     }
 
     public function testGameIsRejectedWithoutMoney(): void
