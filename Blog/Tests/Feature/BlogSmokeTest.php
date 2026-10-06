@@ -164,4 +164,20 @@ class BlogSmokeTest extends ModuleTestCase
 
         $this->assertFalse(Cache::has('tagCloud'));
     }
+
+    public function testUserPagesAreClosedForGuests(): void
+    {
+        // Страницы пользователя только авторизованным — гостю 403
+        $routes = ['articles.user-articles', 'articles.user-comments', 'blogs.authors'];
+
+        foreach ($routes as $route) {
+            $this->get(route($route, ['user' => $this->user->login]))->assertForbidden();
+        }
+
+        $this->actingAs($this->user);
+
+        foreach ($routes as $route) {
+            $this->get(route($route, ['user' => $this->user->login]))->assertOk();
+        }
+    }
 }

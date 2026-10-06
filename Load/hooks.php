@@ -49,11 +49,13 @@ Hook::add('userProfileLinks', static function ($user) {
     ]);
 
     return view('components.profile.link', [
-        'icon'  => 'fas fa-download',
-        'label' => __('load::loads.loads'),
-        'url'   => route('downs.active-files', ['user' => $user->login]),
-        'count' => $downs,
-        'extra' => [
+        // Страницы пользователя закрыты для гостей — гостю карточка без ссылок
+        'guests' => false,
+        'icon'   => 'fas fa-download',
+        'label'  => __('load::loads.loads'),
+        'url'    => route('downs.active-files', ['user' => $user->login]),
+        'count'  => $downs,
+        'extra'  => [
             'label' => __('main.comments'),
             'url'   => route('downs.active-comments', ['user' => $user->login]),
             'count' => $comments,

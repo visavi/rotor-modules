@@ -56,12 +56,12 @@ class ZipViewTest extends ModuleTestCase
         parent::tearDown();
     }
 
-    public function testGuestIsRedirectedFromArchive(): void
+    public function testArchiveIsClosedForGuests(): void
     {
         auth()->logout();
 
-        $this->get($this->zipUrl())->assertRedirect(route('login'));
-        $this->get($this->zipUrl(0))->assertRedirect(route('login'));
+        $this->get($this->zipUrl())->assertForbidden();
+        $this->get($this->zipUrl(0))->assertForbidden();
     }
 
     public function testGuestDoesNotSeeArchiveLink(): void

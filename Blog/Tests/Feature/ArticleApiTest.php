@@ -192,6 +192,10 @@ class ArticleApiTest extends ModuleTestCase
         $tag = Tag::query()->create(['name' => 'laravel']);
         $other->tags()->attach($tag->id, ['sort' => 0]);
 
+        // Списки пользователя — только с токеном, как страницы сайта
+        $this->getJson('/api/articles?user=' . $this->user->login)->assertForbidden();
+        $this->actingAs($this->user);
+
         $this->getJson('/api/articles?user=' . $this->user->login)
             ->assertOk()
             ->assertJsonCount(1, 'data')

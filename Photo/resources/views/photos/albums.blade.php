@@ -22,7 +22,7 @@
             <div class="section mb-3 shadow">
                 <div class="section-title">
                     <i class="fa fa-image"></i>
-                    <a class="" href="{{ route('photos.user-albums', ['user' => $data->user->login]) }}">{{ $data->user->getName() }}</a>
+                    <a href="{{ route('photos.user-albums', ['user' => $data->user->login]) }}">{{ $data->user->getName() }}</a>
                 </div>
 
                 {{ $data->cnt }} {{ __('photo::photos.photos') }} / {{ $data->count_comments }} {{ __('main.comments') }}

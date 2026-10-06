@@ -78,11 +78,13 @@ Hook::add('userProfileLinks', static function ($user) {
     ]);
 
     return view('components.profile.link', [
-        'icon'  => 'far fa-comment-alt',
-        'label' => __('forum::forums.forums'),
-        'url'   => route('forums.active-topics', ['user' => $user->login]),
-        'count' => $topics,
-        'extra' => [
+        // Страницы пользователя закрыты для гостей — гостю карточка без ссылок
+        'guests' => false,
+        'icon'   => 'far fa-comment-alt',
+        'label'  => __('forum::forums.forums'),
+        'url'    => route('forums.active-topics', ['user' => $user->login]),
+        'count'  => $topics,
+        'extra'  => [
             'label' => __('main.messages'),
             'url'   => route('forums.active-posts', ['user' => $user->login]),
             'count' => $posts,

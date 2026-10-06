@@ -93,6 +93,10 @@ class ForumApiListTest extends ModuleTestCase
         $own = $this->createTopic($this->user);
         $this->createTopic(User::factory()->create());
 
+        // Списки пользователя — только с токеном, как страницы сайта
+        $this->getJson('/api/topics?user=' . $this->user->login)->assertForbidden();
+        $this->actingAs($this->user);
+
         $this->getJson('/api/topics?user=' . $this->user->login)
             ->assertOk()
             ->assertJsonCount(1, 'data')
@@ -115,6 +119,10 @@ class ForumApiListTest extends ModuleTestCase
             ->assertJsonPath('data.0.topic.id', $topic->id)
             ->assertJsonPath('data.0.topic.title', 'Test topic')
             ->assertJsonPath('data.1.id', $own->id);
+
+        // Списки пользователя — только с токеном, как страницы сайта
+        $this->getJson('/api/posts?user=' . $this->user->login)->assertForbidden();
+        $this->actingAs($this->user);
 
         $this->getJson('/api/posts?user=' . $this->user->login)
             ->assertOk()

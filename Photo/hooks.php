@@ -36,11 +36,13 @@ Hook::add('userProfileLinks', static function ($user) {
     ]);
 
     return view('components.profile.link', [
-        'icon'  => 'far fa-image',
-        'label' => __('photo::photos.photos'),
-        'url'   => route('photos.user-albums', ['user' => $user->login]),
-        'count' => $photos,
-        'extra' => [
+        // Страницы пользователя закрыты для гостей — гостю карточка без ссылок
+        'guests' => false,
+        'icon'   => 'far fa-image',
+        'label'  => __('photo::photos.photos'),
+        'url'    => route('photos.user-albums', ['user' => $user->login]),
+        'count'  => $photos,
+        'extra'  => [
             'label' => __('main.comments'),
             'url'   => route('photos.user-comments', ['user' => $user->login]),
             'count' => $comments,

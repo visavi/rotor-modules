@@ -39,8 +39,9 @@ Route::middleware('web')->group(function () {
             Route::get('/', [NewController::class, 'files'])->name('new-files');
             Route::get('/comments', [NewController::class, 'comments'])->name('new-comments');
 
-            Route::get('/active/files', [ActiveController::class, 'files'])->name('active-files');
-            Route::get('/active/comments', [ActiveController::class, 'comments'])->name('active-comments');
+            // Страницы пользователя — только авторизованным
+            Route::get('/active/files', [ActiveController::class, 'files'])->middleware('check.user')->name('active-files');
+            Route::get('/active/comments', [ActiveController::class, 'comments'])->middleware('check.user')->name('active-comments');
 
             Route::get('/{id}', [DownController::class, 'view'])->name('view');
             Route::post('/{id}/comments', [DownController::class, 'storeComment'])->name('add-comment');
@@ -48,8 +49,9 @@ Route::middleware('web')->group(function () {
             Route::get('/{id}/download/{fid}', [DownController::class, 'download'])->name('download');
             Route::get('/{id}/link/{lid}', [DownController::class, 'downloadLink'])->whereNumber('lid')->name('download-link');
 
-            Route::get('/{id}/zip/{fid}', [DownController::class, 'zip'])->name('zip');
-            Route::get('/{id}/zip/{fid}/{zid}', [DownController::class, 'zipView'])->whereNumber('zid')->name('zip-view');
+            // Просмотр архивов — только авторизованным
+            Route::get('/{id}/zip/{fid}', [DownController::class, 'zip'])->middleware('check.user')->name('zip');
+            Route::get('/{id}/zip/{fid}/{zid}', [DownController::class, 'zipView'])->middleware('check.user')->whereNumber('zid')->name('zip-view');
 
             Route::match(['get', 'post'], '/create', [DownController::class, 'create'])->name('create');
             Route::match(['get', 'post'], '/{id}/edit', [DownController::class, 'edit'])->name('edit');

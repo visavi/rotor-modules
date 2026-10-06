@@ -154,6 +154,10 @@ class PhotoApiTest extends ModuleTestCase
         $own = $this->createPhoto();
         $this->createPhoto()->update(['user_id' => User::factory()->create()->id]);
 
+        // Списки пользователя — только с токеном, как страницы сайта
+        $this->getJson('/api/photos?user=' . $this->user->login)->assertForbidden();
+        $this->actingAs($this->user);
+
         $this->getJson('/api/photos?user=' . $this->user->login)
             ->assertOk()
             ->assertJsonCount(1, 'data')

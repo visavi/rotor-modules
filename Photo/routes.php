@@ -24,10 +24,11 @@ Route::middleware('web')
         Route::get('/{id}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
         Route::delete('/{id}/delete', 'delete')->name('delete');
-        Route::get('/albums', 'albums')->name('albums');
+        Route::get('/albums', 'albums')->middleware('check.user')->name('albums');
         Route::get('/comments', 'allComments')->name('new-comments');
-        Route::get('/active/albums', 'album')->name('user-albums');
-        Route::get('/active/comments', 'userComments')->name('user-comments');
+        // Страницы пользователя — только авторизованным
+        Route::get('/active/albums', 'album')->middleware('check.user')->name('user-albums');
+        Route::get('/active/comments', 'userComments')->middleware('check.user')->name('user-comments');
         Route::match(['get', 'post'], '/create', 'create')->name('create');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
     });

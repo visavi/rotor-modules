@@ -297,6 +297,7 @@ Hook::add('userProfileLinks', static function ($user) {
         'label' => 'Мои записи',
         'url'   => '/my-module/' . $user->login,
         'count' => $count,
+        // 'guests' => false — страница закрыта для гостей (check.user): гостю карточка без ссылки
     ])->render();
 });
 

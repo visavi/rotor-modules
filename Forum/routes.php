@@ -34,8 +34,9 @@ Route::middleware('web')->group(function () {
             Route::get('/rss', [ForumController::class, 'rss'])->name('rss');
             Route::match(['get', 'post'], '/create', [ForumController::class, 'create'])->name('create');
 
-            Route::get('/active/posts', [ActiveController::class, 'posts'])->name('active-posts');
-            Route::get('/active/topics', [ActiveController::class, 'topics'])->name('active-topics');
+            // Страницы пользователя — только авторизованным
+            Route::get('/active/posts', [ActiveController::class, 'posts'])->middleware('check.user')->name('active-posts');
+            Route::get('/active/topics', [ActiveController::class, 'topics'])->middleware('check.user')->name('active-topics');
             Route::delete('/active/{id}/delete', [ActiveController::class, 'destroy'])->name('active-delete');
 
             Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');

@@ -39,11 +39,13 @@ Hook::add('userProfileLinks', static function ($user) {
     ]);
 
     return view('components.profile.link', [
-        'icon'  => 'far fa-sticky-note',
-        'label' => __('blog::blogs.blogs'),
-        'url'   => route('articles.user-articles', ['user' => $user->login]),
-        'count' => $articles,
-        'extra' => [
+        // Страницы пользователя закрыты для гостей — гостю карточка без ссылок
+        'guests' => false,
+        'icon'   => 'far fa-sticky-note',
+        'label'  => __('blog::blogs.blogs'),
+        'url'    => route('articles.user-articles', ['user' => $user->login]),
+        'count'  => $articles,
+        'extra'  => [
             'label' => __('main.comments'),
             'url'   => route('articles.user-comments', ['user' => $user->login]),
             'count' => $comments,

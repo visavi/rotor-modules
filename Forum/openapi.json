@@ -206,7 +206,7 @@
                         "name": "user",
                         "in": "query",
                         "required": false,
-                        "description": "Логин автора тем",
+                        "description": "Логин автора тем. Только с токеном: гостю 403.",
                         "schema": {
                             "type": "string"
                         }
@@ -263,6 +263,9 @@
                     },
                     "404": {
                         "description": "Пользователь не найден"
+                    },
+                    "403": {
+                        "description": "Фильтр user без токена"
                     }
                 }
             }
@@ -422,7 +425,7 @@
                         "name": "user",
                         "in": "query",
                         "required": false,
-                        "description": "Логин автора сообщений",
+                        "description": "Логин автора сообщений. Только с токеном: гостю 403.",
                         "schema": {
                             "type": "string"
                         }
@@ -488,6 +491,9 @@
                     },
                     "404": {
                         "description": "Пользователь не найден"
+                    },
+                    "403": {
+                        "description": "Фильтр user без токена"
                     }
                 }
             }

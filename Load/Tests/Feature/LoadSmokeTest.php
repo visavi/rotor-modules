@@ -80,4 +80,20 @@ class LoadSmokeTest extends ModuleTestCase
             ->assertOk()
             ->assertSee('href="' . route('downs.view', ['id' => $down->id]) . '#comment_' . $comment->id . '"', false);
     }
+
+    public function testUserPagesAreClosedForGuests(): void
+    {
+        // Страницы пользователя только авторизованным — гостю 403
+        $routes = ['downs.active-files', 'downs.active-comments'];
+
+        foreach ($routes as $route) {
+            $this->get(route($route, ['user' => $this->user->login]))->assertForbidden();
+        }
+
+        $this->actingAs($this->user);
+
+        foreach ($routes as $route) {
+            $this->get(route($route, ['user' => $this->user->login]))->assertOk();
+        }
+    }
 }

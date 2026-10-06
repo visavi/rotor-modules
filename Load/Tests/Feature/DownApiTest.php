@@ -247,6 +247,10 @@ class DownApiTest extends ModuleTestCase
         $own = $this->createDown();
         $this->createDown()->update(['user_id' => User::factory()->create()->id]);
 
+        // Списки пользователя — только с токеном, как страницы сайта
+        $this->getJson('/api/downs?user=' . $this->user->login)->assertForbidden();
+        $this->actingAs($this->user);
+
         $this->getJson('/api/downs?user=' . $this->user->login)
             ->assertOk()
             ->assertJsonCount(1, 'data')

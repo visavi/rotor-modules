@@ -12,7 +12,10 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('photos.index') }}">{{ __('photo::photos.photos') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('photos.user-albums', ['user' => $photo->user->login]) }}">{{ __('photo::photos.album') }} {{ $photo->user->getName() }}</a></li>
+            {{-- Альбом пользователя закрыт для гостей --}}
+            @if (getUser())
+                <li class="breadcrumb-item"><a href="{{ route('photos.user-albums', ['user' => $photo->user->login]) }}">{{ __('photo::photos.album') }} {{ $photo->user->getName() }}</a></li>
+            @endif
             <li class="breadcrumb-item active">{{ $photo->title }}</li>
         </ol>
     </nav>

@@ -31,7 +31,7 @@ Route::middleware('web')
         Route::get('/tags', 'tags')->name('tags');
         Route::get('/tags-search', 'searchTags')->name('tags-search');
         Route::get('/tags/{tag}', 'getTag')->where('tag', '.+')->name('tag');
-        Route::get('/authors', 'authors')->name('authors');
+        Route::get('/authors', 'authors')->middleware('check.user')->name('authors');
         Route::get('/rss', 'rss')->name('rss');
         Route::match(['get', 'post'], '/create', 'create')->name('create');
         Route::get('/main', 'main')->name('main');
@@ -48,8 +48,9 @@ Route::middleware('web')
         Route::get('/comments', 'newComments')->name('new-comments');
         Route::get('/{slug}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
-        Route::get('/active/articles', 'userArticles')->name('user-articles');
-        Route::get('/active/comments', 'userComments')->name('user-comments');
+        // Страницы пользователя — только авторизованным
+        Route::get('/active/articles', 'userArticles')->middleware('check.user')->name('user-articles');
+        Route::get('/active/comments', 'userComments')->middleware('check.user')->name('user-comments');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
     });
 

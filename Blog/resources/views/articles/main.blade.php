@@ -55,6 +55,8 @@
         {{ showError(__('blog::blogs.empty_articles')) }}
     @endif
 
-    <a href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a> /
-    <a href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
+    <a href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>
+    @if (getUser())
+        / <a href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
+    @endif
 @stop

@@ -33,7 +33,9 @@
     @endif
 
     {{ __('main.all') }}:
-    <a href="{{ route('photos.albums') }}" class="badge bg-adaptive">{{ __('photo::photos.albums') }}</a>
+    @if (getUser())
+        <a href="{{ route('photos.albums') }}" class="badge bg-adaptive">{{ __('photo::photos.albums') }}</a>
+    @endif
     <a href="{{ route('photos.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
     <hr>
 
