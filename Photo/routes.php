@@ -25,7 +25,7 @@ Route::middleware('web')
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
         Route::delete('/{id}/delete', 'delete')->name('delete');
         Route::get('/albums', 'albums')->name('albums');
-        Route::get('/comments', 'allComments')->name('all-comments');
+        Route::get('/comments', 'allComments')->name('new-comments');
         Route::get('/active/albums', 'album')->name('user-albums');
         Route::get('/active/comments', 'userComments')->name('user-comments');
         Route::match(['get', 'post'], '/create', 'create')->name('create');

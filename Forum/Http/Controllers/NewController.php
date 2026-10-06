@@ -28,10 +28,8 @@ class NewController extends Controller
             ->with('forum', 'user', 'lastPost.user')
             // Иконке в списке нужен только факт наличия опроса, сам он не грузится
             ->withExists('vote')
-            ->limit(1000)
-            ->get();
-
-        $topics = paginate($topics, setting('forumtem'))
+            ->capped()
+            ->paginate(setting('forumtem'))
             ->appends(compact('sort', 'order'));
 
         return view('forum::forums/new_topics', compact('topics', 'sorting'));
@@ -55,10 +53,9 @@ class NewController extends Controller
             })
             ->orderBy(...$orderBy)
             ->with('topic', 'user', 'poll')
-            ->limit(1000)
-            ->get();
-
-        $posts = paginate($posts, setting('forumpost'), compact('period', 'sort', 'order'));
+            ->capped()
+            ->paginate(setting('forumpost'))
+            ->appends(compact('period', 'sort', 'order'));
 
         return view('forum::forums/new_posts', compact('posts', 'period', 'sort', 'order', 'sorting'));
     }

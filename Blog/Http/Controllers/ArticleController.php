@@ -462,6 +462,7 @@ class ArticleController extends Controller
             ->leftJoin('articles', 'comments.relate_id', 'articles.id')
             ->orderByDesc('comments.created_at')
             ->with('user', 'relate', 'poll')
+            ->capped()
             ->paginate(setting('comments_per_page'));
 
         return view('blog::articles/new_comments', compact('comments'));

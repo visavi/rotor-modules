@@ -18,6 +18,7 @@ Route::redirect('/articles/{id}/rss', '/articles/{id}', 301);
 Route::redirect('/articles/print/{id}', '/articles/{id}', 301);
 Route::redirect('/articles/{id}/print', '/articles/{id}', 301);
 Route::redirect('/articles/end/{id}', '/articles/{id}', 301);
+Route::redirect('/articles/new/comments', '/articles/comments', 301);
 
 /* Категория блогов */
 Route::middleware('web')
@@ -43,9 +44,10 @@ Route::middleware('web')
     ->name('articles.')
     ->group(function () {
         Route::get('/', 'newArticles')->name('index');
+        // До /{slug}: адрес статьи начинается с id, слово comments статьёй не бывает
+        Route::get('/comments', 'newComments')->name('new-comments');
         Route::get('/{slug}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
-        Route::get('/new/comments', 'newComments')->name('new-comments');
         Route::get('/active/articles', 'userArticles')->name('user-articles');
         Route::get('/active/comments', 'userComments')->name('user-comments');
         Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');

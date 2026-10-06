@@ -36,8 +36,13 @@ class TopicResource extends JsonResource
             'last_post_user_login' => $this->lastPost->user->login,
             'last_post_user_name'  => $this->lastPost->user->getName(),
             'close_user_id'        => $this->close_user_id,
-            'updated_at'           => dateFixed($this->updated_at, 'c', true),
-            'created_at'           => dateFixed($this->created_at, 'c', true),
+            // Только в закладках: сообщений при последнем просмотре и сколько добавилось
+            'bookmark' => $this->whenHas('bookmark_posts', fn ($count) => [
+                'count_posts' => (int) $count,
+                'new_posts'   => max(0, $this->count_posts - (int) $count),
+            ]),
+            'updated_at' => dateFixed($this->updated_at, 'c', true),
+            'created_at' => dateFixed($this->created_at, 'c', true),
         ];
     }
 }

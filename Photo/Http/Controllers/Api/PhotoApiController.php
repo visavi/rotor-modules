@@ -10,7 +10,6 @@ use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
 use Closure;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -30,12 +29,7 @@ class PhotoApiController extends Controller
         [, $orderBy] = Photo::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         $photos = Photo::query()
-            ->select('photos.*', 'polls.vote')
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('photos.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Photo::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
+            ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'files')
             ->paginate($this->apiPerPage($request));
@@ -49,13 +43,8 @@ class PhotoApiController extends Controller
     public function view(int $id, Request $request): JsonResource
     {
         $photo = Photo::query()
-            ->select('photos.*', 'polls.vote')
+            ->withUserVote()
             ->where('photos.id', $id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('photos.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Photo::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->with('user', 'files')
             ->first();
 

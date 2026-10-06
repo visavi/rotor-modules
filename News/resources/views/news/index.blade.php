@@ -22,7 +22,7 @@
 @stop
 
 @section('content')
-    <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('news.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-comment"></i> <a class="me-3" href="{{ route('news.all-comments') }}">{{ __('main.last_comments') }}</a>
+    <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('news.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-comment"></i> <a class="me-3" href="{{ route('news.new-comments') }}">{{ __('main.last_comments') }}</a>
     <hr>
 
     @if ($news->isNotEmpty())

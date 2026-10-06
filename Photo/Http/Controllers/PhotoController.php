@@ -10,7 +10,6 @@ use App\Models\File;
 use App\Models\Flood;
 use App\Support\Validator;
 use App\Traits\HandlesComments;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,12 +35,7 @@ class PhotoController extends Controller
         [$sorting, $orderBy] = Photo::getSorting($sort, $order);
 
         $photos = Photo::query()
-            ->select('photos.*', 'polls.vote')
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('photos.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Photo::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
+            ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'files')
             ->paginate(setting('fotolist'))
@@ -56,13 +50,8 @@ class PhotoController extends Controller
     public function view(int $id): View
     {
         $photo = Photo::query()
-            ->select('photos.*', 'polls.vote')
+            ->withUserVote()
             ->where('photos.id', $id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('photos.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Photo::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->with('user')
             ->first();
 
@@ -264,6 +253,7 @@ class PhotoController extends Controller
             ->leftJoin('photos', 'comments.relate_id', 'photos.id')
             ->orderByDesc('comments.created_at')
             ->with('user', 'relate')
+            ->capped()
             ->paginate(setting('comments_per_page'));
 
         return view('photo::photos/all_comments', compact('comments'));

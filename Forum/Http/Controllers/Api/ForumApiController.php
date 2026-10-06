@@ -7,7 +7,9 @@ namespace Modules\Forum\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Services\FileService;
+use App\Traits\HandlesApiPagination;
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,6 +24,13 @@ use Modules\Forum\Models\VoteAnswer;
 
 class ForumApiController extends Controller
 {
+    use HandlesApiPagination;
+
+    /**
+     * Связи для списков тем: TopicResource отдаёт автора, последнее сообщение и раздел
+     */
+    private const array LIST_RELATIONS = ['user', 'lastPost.user', 'forum.parent', 'forum.lastTopic.lastPost.user'];
+
     /**
      * Список категорий форума
      */
@@ -55,11 +64,64 @@ class ForumApiController extends Controller
             ->where('forum_id', $id)
             ->with('user', 'lastPost.user')
             ->orderByDesc('locked')
-            ->orderBy('updated_at', $this->getOrder($request))
-            ->paginate($this->getPerPage($request));
+            ->orderBy('updated_at', $this->apiOrder($request, 'desc'))
+            ->paginate($this->apiPerPage($request));
 
         return TopicResource::collection($topics)
             ->additional(['forum' => ForumResource::make($forum)]);
+    }
+
+    /**
+     * Новые темы — по последнему сообщению. С ?user= — темы пользователя
+     */
+    public function newTopics(Request $request): JsonResource
+    {
+        $user = $this->apiUser($request);
+
+        // Общая лента — первые 1000, как на сайте; темы автора листаются целиком
+        $topics = Topic::query()
+            ->when($user, static fn (Builder $query) => $query->where('user_id', $user->id))
+            ->with(self::LIST_RELATIONS)
+            ->orderBy('updated_at', $this->apiOrder($request, 'desc'))
+            ->when(! $user, static fn (Builder $query) => $query->capped())
+            ->paginate($this->apiPerPage($request));
+
+        return TopicResource::collection($topics);
+    }
+
+    /**
+     * Новые сообщения всех тем. С ?user= — сообщения пользователя
+     */
+    public function newPosts(Request $request): JsonResource
+    {
+        $user = $this->apiUser($request);
+
+        // Общая лента — первые 1000, как на сайте; сообщения автора листаются целиком
+        $posts = Post::query()
+            ->withUserVote()
+            ->when($user, static fn (Builder $query) => $query->where('posts.user_id', $user->id))
+            ->with('user', 'files', 'topic')
+            ->orderBy('posts.created_at', $this->apiOrder($request, 'desc'))
+            ->when(! $user, static fn (Builder $query) => $query->capped())
+            ->paginate($this->apiPerPage($request));
+
+        return PostResource::collection($posts);
+    }
+
+    /**
+     * Закладки: темы с числом сообщений на момент последнего просмотра
+     */
+    public function bookmarks(Request $request): JsonResource
+    {
+        $topics = Topic::query()
+            ->select('topics.*', 'bookmarks.count_posts as bookmark_posts')
+            ->join('bookmarks', 'topics.id', 'bookmarks.topic_id')
+            ->where('bookmarks.user_id', getUser('id'))
+            ->with(self::LIST_RELATIONS)
+            ->orderBy('topics.updated_at', $this->apiOrder($request, 'desc'))
+            ->paginate($this->apiPerPage($request));
+
+        return TopicResource::collection($topics);
     }
 
     /**
@@ -77,10 +139,11 @@ class ForumApiController extends Controller
         }
 
         $posts = Post::query()
-            ->where('topic_id', $id)
+            ->withUserVote()
+            ->where('posts.topic_id', $id)
             ->with('user', 'files')
-            ->orderBy('created_at', $this->getOrder($request, 'asc'))
-            ->paginate($this->getPerPage($request));
+            ->orderBy('posts.created_at', $this->apiOrder($request, 'asc'))
+            ->paginate($this->apiPerPage($request));
 
         return PostResource::collection($posts)
             ->additional(['topic' => TopicResource::make($topic)]);
@@ -221,25 +284,5 @@ class ForumApiController extends Controller
             'message' => __('forum::forums.topic_success_created'),
             'topic'   => TopicResource::make($topic),
         ], 201);
-    }
-
-    /**
-     * Возвращает порядок сортировки
-     */
-    private function getOrder(Request $request, string $default = 'desc'): string
-    {
-        $order = $request->input('order', $default);
-
-        return in_array($order, ['asc', 'desc']) ? $order : $default;
-    }
-
-    /**
-     * Возвращает количество элементов на страницу
-     */
-    private function getPerPage(Request $request): int
-    {
-        $perPage = $request->integer('per_page', 10);
-
-        return max(1, min($perPage, 100));
     }
 }

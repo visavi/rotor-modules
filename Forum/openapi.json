@@ -187,6 +187,71 @@
                 }
             }
         },
+        "/topics": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Новые темы",
+                "description": "Темы всех разделов по последнему сообщению (updated_at). С параметром user — темы пользователя, в том числе свои («Мои темы»).",
+                "operationId": "getNewTopics",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "description": "Логин автора тем",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Topic"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    }
+                }
+            }
+        },
         "/topics/{id}": {
             "get": {
                 "tags": [
@@ -319,6 +384,124 @@
                     },
                     "422": {
                         "description": "Ошибка валидации (тема закрыта, флуд, повтор текста)"
+                    }
+                }
+            }
+        },
+        "/posts": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Новые сообщения",
+                "description": "Сообщения всех тем по дате. С параметром user — сообщения пользователя.",
+                "operationId": "getNewPosts",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "description": "Логин автора сообщений",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Post"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден"
+                    }
+                }
+            }
+        },
+        "/bookmarks": {
+            "get": {
+                "tags": [
+                    "Форум"
+                ],
+                "summary": "Закладки",
+                "description": "Темы в закладках текущего пользователя по последнему сообщению. Поле bookmark — сколько сообщений было при последнем просмотре и сколько добавилось. Требует токен.",
+                "operationId": "getBookmarks",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/PerPage"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Page"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Order"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Topic"
+                                            }
+                                        },
+                                        "links": {
+                                            "$ref": "#/components/schemas/PaginationLinks"
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Токен не передан"
+                    },
+                    "401": {
+                        "description": "Неверный токен"
                     }
                 }
             }
@@ -544,6 +727,20 @@
                     "created_at": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "bookmark": {
+                        "type": "object",
+                        "description": "Только в GET /bookmarks",
+                        "properties": {
+                            "count_posts": {
+                                "type": "integer",
+                                "description": "Сообщений в теме при последнем просмотре"
+                            },
+                            "new_posts": {
+                                "type": "integer",
+                                "description": "Новых сообщений с последнего просмотра"
+                            }
+                        }
                     }
                 }
             },
@@ -552,6 +749,21 @@
                 "properties": {
                     "id": {
                         "type": "integer"
+                    },
+                    "topic": {
+                        "type": "object",
+                        "description": "Только в GET /posts",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "forum_id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "user": {
                         "description": "Автор сообщения",
@@ -576,6 +788,32 @@
                     },
                     "rating": {
                         "type": "integer"
+                    },
+                    "vote": {
+                        "type": "object",
+                        "description": "Цель голосования для POST /rating, value — голос текущего пользователя (гостю null)",
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "enum": [
+                                    "+",
+                                    "-",
+                                    null
+                                ]
+                            },
+                            "own": {
+                                "type": "boolean"
+                            }
+                        }
                     },
                     "updated_at": {
                         "type": "string",

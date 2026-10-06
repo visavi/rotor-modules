@@ -9,7 +9,6 @@ use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
 use Closure;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -32,13 +31,8 @@ class OfferApiController extends Controller
         [, $orderBy] = Offer::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         $offers = Offer::query()
-            ->select('offers.*', 'polls.vote')
+            ->withUserVote()
             ->where('type', $type)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('offers.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Offer::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->orderBy(...$orderBy)
             ->with('user', 'replyUser', 'files')
             ->paginate($this->apiPerPage($request))
@@ -53,13 +47,8 @@ class OfferApiController extends Controller
     public function view(int $id, Request $request): JsonResource
     {
         $offer = Offer::query()
-            ->select('offers.*', 'polls.vote')
+            ->withUserVote()
             ->where('offers.id', $id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('offers.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Offer::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->with('user', 'replyUser', 'files')
             ->first();
 

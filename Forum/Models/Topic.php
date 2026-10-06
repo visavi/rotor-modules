@@ -6,6 +6,7 @@ namespace Modules\Forum\Models;
 
 use App\Casts\TextCast;
 use App\Models\User;
+use App\Traits\CappableTrait;
 use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use Carbon\CarbonImmutable;
@@ -48,6 +49,7 @@ class Topic extends Model
 {
     use SearchableTrait;
     use SortableTrait;
+    use CappableTrait;
 
     /**
      * The name of the "updated at" column.

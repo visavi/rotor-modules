@@ -7,7 +7,6 @@ namespace Modules\News\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Traits\HandlesComments;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\News\Models\News;
@@ -27,13 +26,8 @@ class NewsController extends Controller
     public function index(): View
     {
         $news = News::query()
-            ->select('news.*', 'polls.vote')
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('news.id', 'polls.relate_id')
-                    ->where('polls.relate_type', News::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
-            ->orderByDesc('created_at')
+            ->withUserVote()
+            ->orderByDesc('news.created_at')
             ->with('user', 'files')
             ->paginate(setting('postnews'));
 
@@ -46,12 +40,7 @@ class NewsController extends Controller
     public function view(int $id): View
     {
         $news = News::query()
-            ->select('news.*', 'polls.vote')
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('news.id', 'polls.relate_id')
-                    ->where('polls.relate_type', News::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
+            ->withUserVote()
             ->find($id);
 
         if (! $news) {
@@ -92,8 +81,9 @@ class NewsController extends Controller
             ->select('comments.*', 'title', 'count_comments')
             ->where('relate_type', News::$morphName)
             ->leftJoin('news', 'comments.relate_id', 'news.id')
-            ->orderByDesc('created_at')
+            ->orderByDesc('comments.created_at')
             ->with('user')
+            ->capped()
             ->paginate(setting('comments_per_page'));
 
         return view('news::news/allcomments', compact('comments'));

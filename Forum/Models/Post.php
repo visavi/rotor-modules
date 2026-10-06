@@ -8,6 +8,7 @@ use App\Casts\HtmlCast;
 use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
+use App\Traits\CappableTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FileableTrait;
 use App\Traits\PollableTrait;
@@ -49,6 +50,7 @@ class Post extends Model
     use SearchableTrait;
     use SortableTrait;
     use UploadTrait;
+    use CappableTrait;
 
     /**
      * The attributes that aren't mass assignable.

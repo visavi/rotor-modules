@@ -10,6 +10,7 @@ use Modules\News\Http\Controllers\NewsController;
 Route::redirect('/news/comments/{id}', '/news/{id}', 301);
 Route::redirect('/news/comment/{id}/{cid}', '/news/{id}?cid={cid}', 301);
 Route::redirect('/news/end/{id}', '/news/{id}', 301);
+Route::redirect('/news/allcomments', '/news/comments', 301);
 
 /* Новости */
 Route::middleware('web')
@@ -19,7 +20,7 @@ Route::middleware('web')
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/rss', 'rss')->name('rss');
-        Route::get('/allcomments', 'allComments')->name('all-comments');
+        Route::get('/comments', 'allComments')->name('new-comments');
         Route::get('/{id}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
     });

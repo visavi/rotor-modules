@@ -34,7 +34,7 @@
 
     {{ __('main.all') }}:
     <a href="{{ route('photos.albums') }}" class="badge bg-adaptive">{{ __('photo::photos.albums') }}</a>
-    <a href="{{ route('photos.all-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
+    <a href="{{ route('photos.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
     <hr>
 
     @if ($photos->isNotEmpty())

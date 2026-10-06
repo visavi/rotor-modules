@@ -9,7 +9,6 @@ use App\Models\File;
 use App\Models\Flood;
 use App\Support\Validator;
 use App\Traits\HandlesComments;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -53,13 +52,8 @@ class OfferController extends Controller
     public function view(int $id): View
     {
         $offer = Offer::query()
-            ->select('offers.*', 'polls.vote')
+            ->withUserVote()
             ->where('offers.id', $id)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('offers.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Offer::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->first();
 
         if (! $offer) {

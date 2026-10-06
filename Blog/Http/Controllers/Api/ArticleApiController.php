@@ -9,7 +9,6 @@ use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
 use Closure;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -51,12 +50,7 @@ class ArticleApiController extends Controller
         $articles = Article::query()
             ->active()
             ->when($categoryId, static fn ($query) => $query->where('category_id', $categoryId))
-            ->select('articles.*', 'polls.vote')
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('articles.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Article::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
+            ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'category.parent', 'tags', 'files')
             ->paginate($this->apiPerPage($request));
@@ -73,13 +67,8 @@ class ArticleApiController extends Controller
         $articleId = int(Str::before($id, '-'));
 
         $article = Article::query()
-            ->select('articles.*', 'polls.vote')
+            ->withUserVote()
             ->where('articles.id', $articleId)
-            ->leftJoin('polls', static function (JoinClause $join) {
-                $join->on('articles.id', 'polls.relate_id')
-                    ->where('polls.relate_type', Article::$morphName)
-                    ->where('polls.user_id', getUser('id'));
-            })
             ->with('user', 'category.parent', 'tags', 'files')
             ->first();
 

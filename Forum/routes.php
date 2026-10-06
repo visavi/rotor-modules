@@ -118,6 +118,8 @@ Route::middleware(['api', 'check.token.optional'])
     ->group(function () {
         Route::get('/forums', [ForumApiController::class, 'categoryForums']);
         Route::get('/forums/{id}', [ForumApiController::class, 'forums']);
+        Route::get('/topics', [ForumApiController::class, 'newTopics']);
+        Route::get('/posts', [ForumApiController::class, 'newPosts']);
         Route::get('/topics/{id}', [ForumApiController::class, 'topics']);
     });
 
@@ -125,6 +127,7 @@ Route::middleware(['api', 'check.token.optional'])
 Route::middleware(['api', 'check.token'])
     ->prefix('api')
     ->group(function () {
+        Route::get('/bookmarks', [ForumApiController::class, 'bookmarks']);
         Route::post('/forums/{id}', [ForumApiController::class, 'createTopic']);
         Route::post('/topics/{id}', [ForumApiController::class, 'createPost']);
     });
