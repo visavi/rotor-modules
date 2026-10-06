@@ -5,8 +5,10 @@ namespace Modules\Blog\Tests\Feature;
 use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Cache;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Blog;
+use Modules\Blog\Models\Tag;
 use Tests\ModuleTestCase;
 
 class BlogSmokeTest extends ModuleTestCase
@@ -92,5 +94,74 @@ class BlogSmokeTest extends ModuleTestCase
             ->assertOk()
             ->assertJsonPath('data.0.relate.title', 'Public article')
             ->assertJsonPath('data.1.relate', null);
+    }
+
+    public function testTagCloudOrderIsStableBetweenViews(): void
+    {
+        // Облако перемешано, но не скачет при обновлении страницы
+        $blog = Blog::query()->create(['name' => 'Test category']);
+        $article = Article::query()->create([
+            'category_id' => $blog->id,
+            'user_id'     => $this->user->id,
+            'title'       => 'Test article',
+            'slug'        => 'test-article',
+            'text'        => 'Text',
+            'active'      => true,
+            'created_at'  => now(),
+        ]);
+
+        foreach (range(1, 10) as $i) {
+            $article->tags()->attach(Tag::query()->create(['name' => 'tag' . $i])->id, ['sort' => $i]);
+        }
+
+        $order = fn () => preg_match_all('~/blogs/tags/(tag\d+)~', $this->get(route('blogs.tags'))->assertOk()->getContent(), $m) ? $m[1] : [];
+
+        $first = $order();
+
+        $this->assertCount(10, $first);
+        $this->assertSame($first, $order());
+    }
+
+    public function testTagPageHidesDrafts(): void
+    {
+        $blog = Blog::query()->create(['name' => 'Test category']);
+        $tag = Tag::query()->create(['name' => 'rotor']);
+
+        foreach (['Public article' => true, 'Draft article' => false] as $title => $active) {
+            Article::query()->create([
+                'category_id' => $blog->id,
+                'user_id'     => $this->user->id,
+                'title'       => $title,
+                'slug'        => 'article',
+                'text'        => 'Text',
+                'active'      => $active,
+                'created_at'  => now(),
+            ])->tags()->attach($tag->id, ['sort' => 0]);
+        }
+
+        $this->get(route('blogs.tag', ['tag' => 'rotor']))
+            ->assertOk()
+            ->assertSee('Public article')
+            ->assertDontSee('Draft article');
+    }
+
+    public function testPublishingClearsTagCloud(): void
+    {
+        // Облако считает только опубликованные — публикация должна его пересобрать
+        Cache::put('tagCloud', ['stale' => 1], 3600);
+
+        $article = Article::query()->create([
+            'category_id' => Blog::query()->create(['name' => 'Test category'])->id,
+            'user_id'     => $this->user->id,
+            'title'       => 'Draft',
+            'slug'        => 'draft',
+            'text'        => 'Text',
+            'active'      => false,
+            'created_at'  => now(),
+        ]);
+
+        $article->update(['active' => true]);
+
+        $this->assertFalse(Cache::has('tagCloud'));
     }
 }

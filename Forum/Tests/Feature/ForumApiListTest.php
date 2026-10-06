@@ -136,6 +136,36 @@ class ForumApiListTest extends ModuleTestCase
         $this->get(route('posts.index'))->assertOk()->assertSee('pid=' . $post->id, false);
     }
 
+    public function testNewTopicsSortAsOnSite(): void
+    {
+        $quiet = $this->createTopic($this->user, now());
+        $busy = $this->createTopic($this->user, now()->subDay());
+        $busy->update(['count_posts' => 10]);
+
+        $this->getJson('/api/topics?sort=posts')
+            ->assertOk()
+            ->assertJsonPath('data.0.id', $busy->id)
+            ->assertJsonPath('data.1.id', $quiet->id);
+    }
+
+    public function testNewPostsSortByRatingWithinPeriod(): void
+    {
+        // Лучшие за неделю: старое сообщение с высоким рейтингом в период не попадает
+        $topic = $this->createTopic($this->user);
+        $old = $this->createPost($topic, $this->user);
+        $best = $this->createPost($topic, $this->user);
+        $plain = $this->createPost($topic, $this->user);
+
+        Post::query()->whereKey($old->id)->update(['rating' => 100, 'created_at' => now()->subDays(30)]);
+        Post::query()->whereKey($best->id)->update(['rating' => 5]);
+
+        $this->getJson('/api/posts?sort=rating&period=7')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.id', $best->id)
+            ->assertJsonPath('data.1.id', $plain->id);
+    }
+
     public function testBookmarksShowNewPosts(): void
     {
         $topic = $this->createTopic(User::factory()->create());

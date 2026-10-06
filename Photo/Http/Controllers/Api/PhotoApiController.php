@@ -25,10 +25,12 @@ class PhotoApiController extends Controller
      */
     public function index(Request $request): JsonResource
     {
-        // Сортировка та же, что на сайте: date, rating, comments
+        // Сортировка та же, что на сайте: date, rating, comments, name
         [, $orderBy] = Photo::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
+        $user = $this->apiUser($request);
 
         $photos = Photo::query()
+            ->when($user, static fn ($query) => $query->where('photos.user_id', $user->id))
             ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'files')

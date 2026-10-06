@@ -98,6 +98,7 @@ Route::middleware(['api', 'check.token.optional'])
         Route::get('/articles', [ArticleApiController::class, 'index']);
         Route::get('/articles/{id}', [ArticleApiController::class, 'view']);
         Route::get('/blogs', [ArticleApiController::class, 'categories']);
+        Route::get('/tags', [ArticleApiController::class, 'tags']);
     });
 
 // Создание и правка — только с токеном

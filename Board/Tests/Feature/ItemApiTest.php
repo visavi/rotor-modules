@@ -161,4 +161,15 @@ class ItemApiTest extends ModuleTestCase
             'user_id'     => $this->user->id,
         ]);
     }
+
+    public function testListFiltersByUser(): void
+    {
+        $own = $this->createItem();
+        $this->createItem()->update(['user_id' => User::factory()->create()->id]);
+
+        $this->getJson('/api/items?user=' . $this->user->login)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $own->id);
+    }
 }

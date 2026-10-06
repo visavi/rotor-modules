@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\User;
 use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Blog;
@@ -180,5 +181,69 @@ class ArticleApiTest extends ModuleTestCase
             'ip'          => '127.0.0.1',
             'brow'        => 'test',
         ]);
+    }
+
+    public function testListFiltersByUserAndTag(): void
+    {
+        $own = $this->createArticle();
+        $other = $this->createArticle();
+        $other->update(['user_id' => User::factory()->create()->id]);
+
+        $tag = Tag::query()->create(['name' => 'laravel']);
+        $other->tags()->attach($tag->id, ['sort' => 0]);
+
+        $this->getJson('/api/articles?user=' . $this->user->login)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $own->id);
+
+        $this->getJson('/api/articles?tag=laravel')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $other->id);
+    }
+
+    public function testTagsCloudAndSuggest(): void
+    {
+        $first = $this->createArticle();
+        $second = $this->createArticle();
+
+        $php = Tag::query()->create(['name' => 'php']);
+        $phpstan = Tag::query()->create(['name' => 'phpstan']);
+        $first->tags()->attach([$php->id => ['sort' => 0], $phpstan->id => ['sort' => 1]]);
+        $second->tags()->attach($php->id, ['sort' => 0]);
+
+        // Облако — по частоте, а не вперемешку, как на сайте
+        $this->getJson('/api/tags')
+            ->assertOk()
+            ->assertJsonPath('data.0', ['name' => 'php', 'count' => 2])
+            ->assertJsonPath('data.1', ['name' => 'phpstan', 'count' => 1]);
+
+        $this->getJson('/api/tags?query=phps')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'phpstan');
+
+        // Подсказки — от двух букв, как на сайте
+        $this->getJson('/api/tags?query=p')->assertOk()->assertJsonCount(0, 'data');
+
+        // Числовой тег приходит строкой, а не роняет ответ
+        $year = Tag::query()->create(['name' => '2026']);
+        $second->tags()->attach($year->id, ['sort' => 1]);
+
+        $this->getJson('/api/tags?query=20')->assertOk()->assertJsonPath('data.0.name', '2026');
+
+        // Тег одних черновиков не предлагается: по нему список статей пуст
+        $draft = $this->createArticle();
+        $draft->update(['active' => false]);
+        $draftTag = Tag::query()->create(['name' => 'draftonly']);
+        $draft->tags()->attach([$draftTag->id => ['sort' => 0], $php->id => ['sort' => 1]]);
+        Cache::forget('tagCloud');
+
+        $this->getJson('/api/tags?query=draft')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/api/tags')
+            ->assertOk()
+            ->assertJsonMissing(['name' => 'draftonly'])
+            ->assertJsonPath('data.0', ['name' => 'php', 'count' => 2]);
     }
 }

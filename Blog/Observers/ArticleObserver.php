@@ -34,6 +34,9 @@ class ArticleObserver
         }
 
         if ($article->wasChanged('active')) {
+            // Облако тегов считает только опубликованные статьи
+            clearCache('tagCloud');
+
             $user = $article->user;
             // Настройки может не быть — модуль ставят раньше, чем задают его настройки
             $pointAmount = (int) setting('blog_point');

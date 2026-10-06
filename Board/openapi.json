@@ -16,6 +16,15 @@
                 ],
                 "parameters": [
                     {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "description": "Логин автора — объявления пользователя; неизвестный логин — 404",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "$ref": "#/components/parameters/CategoryId"
                     },
                     {
@@ -27,7 +36,19 @@
                         }
                     },
                     {
-                        "$ref": "#/components/parameters/Sort"
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, price — цена, name — название (date — по обновлению). Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "price",
+                                "name"
+                            ],
+                            "default": "date"
+                        }
                     },
                     {
                         "$ref": "#/components/parameters/PerPage"
@@ -110,7 +131,12 @@
                                         "description": "Мессенджеры, где есть номер",
                                         "items": {
                                             "type": "string",
-                                            "enum": ["whatsapp", "telegram", "viber", "max"]
+                                            "enum": [
+                                                "whatsapp",
+                                                "telegram",
+                                                "viber",
+                                                "max"
+                                            ]
                                         }
                                     }
                                 }
@@ -288,7 +314,12 @@
                                         "description": "Мессенджеры, где есть номер",
                                         "items": {
                                             "type": "string",
-                                            "enum": ["whatsapp", "telegram", "viber", "max"]
+                                            "enum": [
+                                                "whatsapp",
+                                                "telegram",
+                                                "viber",
+                                                "max"
+                                            ]
                                         }
                                     }
                                 }

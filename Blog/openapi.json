@@ -16,10 +16,42 @@
                 ],
                 "parameters": [
                     {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "description": "Логин автора — статьи пользователя; неизвестный логин — 404",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "required": false,
+                        "description": "Статьи с этим тегом",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "$ref": "#/components/parameters/CategoryId"
                     },
                     {
-                        "$ref": "#/components/parameters/Sort"
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, name — название, visits — просмотры, rating — рейтинг, comments — комментарии. Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "name",
+                                "visits",
+                                "rating",
+                                "comments"
+                            ],
+                            "default": "date"
+                        }
                     },
                     {
                         "$ref": "#/components/parameters/PerPage"
@@ -344,6 +376,62 @@
                     },
                     "429": {
                         "description": "Превышен общий лимит запросов"
+                    }
+                }
+            }
+        },
+        "/tags": {
+            "get": {
+                "tags": [
+                    "Блоги"
+                ],
+                "summary": "Теги статей",
+                "description": "Без параметров — облако: 100 самых частых тегов по убыванию числа статей (кэш на час). С query — подсказки: до 10 тегов, начинающихся с этого текста, от двух символов. Имя тега передаётся в GET /articles?tag=.",
+                "operationId": "getTags",
+                "security": [
+                    {
+                        "BearerToken": []
+                    },
+                    []
+                ],
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": false,
+                        "description": "Начало имени тега, минимум 2 символа",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "count": {
+                                                        "type": "integer",
+                                                        "description": "Число статей с тегом"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

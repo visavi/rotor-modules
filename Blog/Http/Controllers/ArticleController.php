@@ -17,13 +17,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Blog;
 use Modules\Blog\Models\Tag;
+use Random\Engine\Mt19937;
+use Random\Randomizer;
 
 class ArticleController extends Controller
 {
@@ -350,21 +351,12 @@ class ArticleController extends Controller
      */
     public function tags(): View
     {
-        $tags = Cache::remember('tagCloud', 3600, static function () {
-            $allTags = Tag::query()
-                ->withCount('articles')
-                ->orderBy('articles_count', 'desc')
-                ->limit(100)
-                ->get()
-                ->pluck('articles_count', 'name')
-                ->toArray();
+        $tags = Tag::cloud();
 
-            uksort($allTags, static function () {
-                return mt_rand(-1, 1);
-            });
-
-            return $allTags;
-        });
+        // В кэше порядок по частоте; облако перемешивается раз в час и одинаково у всех —
+        // не скачет при обновлении страницы. Свой генератор не сбивает общий mt_rand
+        $names = (new Randomizer(new Mt19937((int) date('YmdH'))))->shuffleArray(array_keys($tags));
+        $tags = array_replace(array_flip($names), $tags);
 
         $max = $tags ? max($tags) : 0;
         $min = $tags ? min($tags) : 0;
@@ -395,6 +387,7 @@ class ArticleController extends Controller
         $articles = $tagModel->articles()
             ->select('articles.*', 'blogs.name')
             ->join('blogs', 'articles.category_id', 'blogs.id')
+            ->where('articles.active', true)
             ->orderByDesc('created_at')
             ->with('user', 'poll')
             ->paginate(setting('blogpost'));
@@ -413,13 +406,7 @@ class ArticleController extends Controller
             return response()->json();
         }
 
-        $tags = Tag::query()
-            ->where('name', 'like', $query . '%')
-            ->withCount('articles')
-            ->orderByDesc('articles_count')
-            ->orderBy('name')
-            ->limit(10)
-            ->get();
+        $tags = Tag::suggest($query);
 
         $formattedTags = $tags->map(function ($tag) {
             return [

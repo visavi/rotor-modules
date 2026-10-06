@@ -43,13 +43,15 @@ class ItemApiController extends Controller
     {
         $categoryId = $request->integer('category_id');
         $city = $request->string('city')->trim()->value();
+        $user = $this->apiUser($request);
 
-        // Сортировка та же, что на сайте: date, title, price
+        // Сортировка та же, что на сайте: date, price, name
         [, $orderBy] = Item::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         $items = Item::query()
             ->when($categoryId, static fn ($query) => $query->where('board_id', $categoryId))
             ->when($city !== '', static fn ($query) => $query->where('city', $city))
+            ->when($user, static fn ($query) => $query->where('user_id', $user->id))
             // Истёкшие объявления в списках не показываются
             ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)

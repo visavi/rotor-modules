@@ -148,4 +148,15 @@ class PhotoApiTest extends ModuleTestCase
             'brow'        => 'test',
         ]);
     }
+
+    public function testListFiltersByUser(): void
+    {
+        $own = $this->createPhoto();
+        $this->createPhoto()->update(['user_id' => User::factory()->create()->id]);
+
+        $this->getJson('/api/photos?user=' . $this->user->login)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $own->id);
+    }
 }

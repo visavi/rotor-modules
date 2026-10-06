@@ -44,6 +44,7 @@ class DownApiController extends Controller
     public function index(Request $request): JsonResource
     {
         $categoryId = $request->integer('category_id');
+        $user = $this->apiUser($request);
 
         // Сортировка та же, что на сайте: date, name, loads, rating, comments
         [, $orderBy] = Down::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
@@ -51,6 +52,7 @@ class DownApiController extends Controller
         $downs = Down::query()
             ->active()
             ->when($categoryId, static fn ($query) => $query->where('category_id', $categoryId))
+            ->when($user, static fn ($query) => $query->where('downs.user_id', $user->id))
             ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'category.parent', 'files')

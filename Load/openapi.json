@@ -16,10 +16,33 @@
                 ],
                 "parameters": [
                     {
+                        "name": "user",
+                        "in": "query",
+                        "required": false,
+                        "description": "Логин автора — файлы пользователя; неизвестный логин — 404",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "$ref": "#/components/parameters/CategoryId"
                     },
                     {
-                        "$ref": "#/components/parameters/Sort"
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, loads — скачивания, name — название, rating — рейтинг, comments — комментарии. Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "loads",
+                                "name",
+                                "rating",
+                                "comments"
+                            ],
+                            "default": "date"
+                        }
                     },
                     {
                         "$ref": "#/components/parameters/PerPage"

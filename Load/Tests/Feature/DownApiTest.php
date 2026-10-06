@@ -241,4 +241,15 @@ class DownApiTest extends ModuleTestCase
             'brow'        => 'test',
         ]);
     }
+
+    public function testListFiltersByUser(): void
+    {
+        $own = $this->createDown();
+        $this->createDown()->update(['user_id' => User::factory()->create()->id]);
+
+        $this->getJson('/api/downs?user=' . $this->user->login)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $own->id);
+    }
 }

@@ -212,6 +212,21 @@
                         }
                     },
                     {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, visits — просмотры, posts — сообщения (date — по последнему сообщению). Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "visits",
+                                "posts"
+                            ],
+                            "default": "date"
+                        }
+                    },
+                    {
                         "$ref": "#/components/parameters/PerPage"
                     },
                     {
@@ -410,6 +425,30 @@
                         "description": "Логин автора сообщений",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, rating — рейтинг. Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "rating"
+                            ],
+                            "default": "date"
+                        }
+                    },
+                    {
+                        "name": "period",
+                        "in": "query",
+                        "required": false,
+                        "description": "Только за последние N дней (на сайте: 1, 7, 30, 365); без параметра — за всё время. Полезно с sort=rating — лучшие за период",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     {

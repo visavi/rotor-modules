@@ -72,17 +72,19 @@ class ForumApiController extends Controller
     }
 
     /**
-     * Новые темы — по последнему сообщению. С ?user= — темы пользователя
+     * Новые темы — по последнему сообщению. С ?user= — темы пользователя.
+     * Сортировка та же, что на сайте: date, visits, posts
      */
     public function newTopics(Request $request): JsonResource
     {
         $user = $this->apiUser($request);
+        [, $orderBy] = Topic::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         // Общая лента — первые 1000, как на сайте; темы автора листаются целиком
         $topics = Topic::query()
             ->when($user, static fn (Builder $query) => $query->where('user_id', $user->id))
             ->with(self::LIST_RELATIONS)
-            ->orderBy('updated_at', $this->apiOrder($request, 'desc'))
+            ->orderBy(...$orderBy)
             ->when(! $user, static fn (Builder $query) => $query->capped())
             ->paginate($this->apiPerPage($request));
 
@@ -90,18 +92,22 @@ class ForumApiController extends Controller
     }
 
     /**
-     * Новые сообщения всех тем. С ?user= — сообщения пользователя
+     * Новые сообщения всех тем. С ?user= — сообщения пользователя.
+     * Как на сайте: сортировка date или rating, period — за сколько последних дней
      */
     public function newPosts(Request $request): JsonResource
     {
         $user = $this->apiUser($request);
+        $period = $request->integer('period');
+        [, $orderBy] = Post::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
 
         // Общая лента — первые 1000, как на сайте; сообщения автора листаются целиком
         $posts = Post::query()
             ->withUserVote()
             ->when($user, static fn (Builder $query) => $query->where('posts.user_id', $user->id))
+            ->when($period > 0, static fn (Builder $query) => $query->where('posts.created_at', '>', now()->subDays($period)))
             ->with('user', 'files', 'topic')
-            ->orderBy('posts.created_at', $this->apiOrder($request, 'desc'))
+            ->orderBy(...$orderBy)
             ->when(! $user, static fn (Builder $query) => $query->capped())
             ->paginate($this->apiPerPage($request));
 

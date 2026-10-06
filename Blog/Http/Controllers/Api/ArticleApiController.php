@@ -38,11 +38,30 @@ class ArticleApiController extends Controller
     }
 
     /**
+     * Теги: облако из 100 самых частых, с ?query= — подсказки по началу слова
+     */
+    public function tags(Request $request): JsonResponse
+    {
+        $query = $request->string('query')->trim()->value();
+
+        $tags = $query === ''
+            ? Tag::cloud()
+            : (Str::length($query) < 2 ? [] : Tag::suggest($query)->pluck('articles_count', 'name')->all());
+
+        return response()->json([
+            // Ключ — имя тега: числовое имя PHP превращает в int-ключ, отдаём строкой
+            'data' => collect($tags)->map(static fn (int $count, int|string $name) => ['name' => (string) $name, 'count' => $count])->values(),
+        ]);
+    }
+
+    /**
      * Список статей, при указании category_id — статьи категории
      */
     public function index(Request $request): JsonResource
     {
         $categoryId = $request->integer('category_id');
+        $tag = $request->string('tag')->trim()->value();
+        $user = $this->apiUser($request);
 
         // Сортировка та же, что на сайте: date, name, visits, rating, comments
         [, $orderBy] = Article::getSorting($request->input('sort', 'date'), $this->apiOrder($request, 'desc'));
@@ -50,6 +69,8 @@ class ArticleApiController extends Controller
         $articles = Article::query()
             ->active()
             ->when($categoryId, static fn ($query) => $query->where('category_id', $categoryId))
+            ->when($user, static fn ($query) => $query->where('articles.user_id', $user->id))
+            ->when($tag !== '', static fn ($query) => $query->whereHas('tags', static fn ($query) => $query->where('name', $tag)))
             ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'category.parent', 'tags', 'files')

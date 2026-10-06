@@ -28,7 +28,21 @@
                         }
                     },
                     {
-                        "$ref": "#/components/parameters/Sort"
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "description": "Поле сортировки: date — дата, comments — комментарии, rating — рейтинг, name — название, status — статус. Неизвестное значение — date",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "date",
+                                "comments",
+                                "rating",
+                                "name",
+                                "status"
+                            ],
+                            "default": "date"
+                        }
                     },
                     {
                         "$ref": "#/components/parameters/PerPage"
