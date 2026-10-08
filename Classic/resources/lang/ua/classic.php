@@ -5,6 +5,7 @@ return [
     'guests_online'   => 'На сайті :count гостей',
     'calendar'        => 'Календар',
     'communication'   => 'Спілкування',
+    'homepage'        => 'Класична головна',
     'recent_activity' => 'Остання активність',
     'recent_articles' => 'Останні статті',
     'recent_files'    => 'Останні файли',
