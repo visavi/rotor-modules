@@ -1,3 +1,7 @@
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/modules/classics/css/calendar.css') }}">
+@endpush
+
 <div class="calendar">
 <div class="calendar-nav">
     <a href="{{ request()->fullUrlWithQuery(['calendar' => $prev]) }}">‹</a>

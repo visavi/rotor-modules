@@ -22,6 +22,7 @@ class HomepageTest extends ModuleTestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('<a href="' . route('classic.recent') . '">', false)
+            ->assertSee('calendar.css', false)
             ->assertDontSee('feed-container', false);
     }
 
@@ -33,6 +34,7 @@ class HomepageTest extends ModuleTestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('feed-container', false)
-            ->assertDontSee(route('classic.recent'), false);
+            ->assertDontSee(route('classic.recent'), false)
+            ->assertDontSee('calendar.css', false);
     }
 }
