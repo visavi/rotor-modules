@@ -68,15 +68,22 @@
                             </div>
                         @endif
 
-                        <b>{{ $file->name }}</b> ({{ formatSize($file->size) }})<br>
-                        {{-- Гостям просмотр архива закрыт, ссылку не показываем --}}
-                        @if ($file->extension === 'zip' && getUser())
-                            <a href="{{ route('downs.zip', ['id' => $down->id, 'fid' => $file->id]) }}">{{ __('load::loads.view_archive') }}</a><br>
-                        @endif
+                        <div class="mb-2">
+                            {{ icons($file->extension) }}
+                            <b>{{ $file->name }}</b>
+                            <span class="text-muted small">{{ formatSize($file->size) }}</span>
+                        </div>
 
-                        @if ($allowDownload)
-                            <a class="btn btn-success" href="{{ route('downs.download', ['id' => $down->id, 'fid' => $file->id ]) }}"><i class="fa fa-download"></i> {{ __('main.download') }}</a><br>
-                        @endif
+                        <div class="d-flex flex-wrap gap-2">
+                            @if ($allowDownload)
+                                <a class="btn btn-success" href="{{ route('downs.download', ['id' => $down->id, 'fid' => $file->id ]) }}"><i class="fa fa-download"></i> {{ __('main.download') }}</a>
+                            @endif
+
+                            {{-- Гостям просмотр архива закрыт, кнопку не показываем --}}
+                            @if ($file->extension === 'zip' && getUser())
+                                <a class="btn btn-outline-primary" href="{{ route('downs.zip', ['id' => $down->id, 'fid' => $file->id]) }}"><i class="fa fa-folder-open"></i> {{ __('load::loads.view_archive') }}</a>
+                            @endif
+                        </div>
                     @else
                         <i class="fa fa-download"></i> {{ __('main.file_not_found') }}
                     @endif
@@ -86,7 +93,10 @@
             @if ($down->links && $allowDownload)
                 @foreach ($down->links as $linkId => $link)
                     <div class="media-file mb-3">
-                        <b>{{ basename($link) }}</b><br>
+                        <div class="mb-2">
+                            <i class="fa fa-link"></i>
+                            <b>{{ basename($link) }}</b>
+                        </div>
                         <a class="btn btn-success" href="{{ route('downs.download-link', ['id' => $down->id, 'lid' => $linkId]) }}"><i class="fa fa-download"></i> {{ __('main.download') }}</a>
                     </div>
                 @endforeach

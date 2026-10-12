@@ -3,6 +3,7 @@
 namespace Modules\PageEditor\Tests\Feature;
 
 use App\Models\User;
+use Closure;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Tests\ModuleTestCase;
@@ -171,7 +172,7 @@ class PageEditorTest extends ModuleTestCase
     {
         $this->actingAs($this->boss)->post(route('admin.files.create', ['root' => 'views']), [
             'filename' => 'page_editor_fixture.blade.php',
-        ])->assertRedirect();
+        ])->assertRedirect()->assertSessionHas('success', $this->flashed(__('page_editor::files.file_success_created')));
 
         $path = resource_path('views/page_editor_fixture.blade.php');
         $this->assertFileExists($path);
@@ -179,7 +180,7 @@ class PageEditorTest extends ModuleTestCase
         $this->actingAs($this->boss)->post(route('admin.files.edit', [
             'root' => 'views',
             'file' => 'page_editor_fixture.blade.php',
-        ]), ['msg' => 'hello'])->assertRedirect();
+        ]), ['msg' => 'hello'])->assertRedirect()->assertSessionHas('success', $this->flashed(__('page_editor::files.file_success_saved')));
 
         // Файл сохраняется с завершающим переводом строки
         $this->assertSame("hello\n", file_get_contents($path));
@@ -493,5 +494,13 @@ class PageEditorTest extends ModuleTestCase
         ]), ['msg' => "first\r\nsecond\r\n"])->assertRedirect();
 
         $this->assertSame("first\nsecond\n", file_get_contents($file));
+    }
+
+    /**
+     * Проверка флеша: рядом с сообщением бывают и чужие (бонус за вход)
+     */
+    private function flashed(string $message): Closure
+    {
+        return static fn (mixed $value): bool => in_array($message, (array) $value, true);
     }
 }

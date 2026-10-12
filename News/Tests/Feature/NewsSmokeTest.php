@@ -77,6 +77,41 @@ class NewsSmokeTest extends ModuleTestCase
             ->assertSee('href="' . route('news.view', ['id' => $news->id]) . '#comment_' . $comment->id . '"', false);
     }
 
+    public function testEditDialogOnlyWithEditableComment(): void
+    {
+        $news = News::query()->create([
+            'title'      => 'Test news',
+            'text'       => 'Test news text',
+            'user_id'    => $this->user->id,
+            'created_at' => now(),
+        ]);
+
+        $comment = fn (User $user) => Comment::query()->create([
+            'relate_type' => News::$morphName,
+            'relate_id'   => $news->id,
+            'text'        => 'Test comment',
+            'user_id'     => $user->id,
+            'ip'          => '127.0.0.1',
+            'brow'        => 'test',
+            'created_at'  => now(),
+        ]);
+
+        $comment(User::factory()->create());
+        $this->actingAs($this->user);
+
+        // Чужой комментарий не правится: окна на странице нет
+        $this->get($news->getViewUrl())
+            ->assertOk()
+            ->assertDontSee('id="editCommentDialog"', false);
+
+        $comment($this->user);
+        $comment($this->user);
+
+        // Свои правятся, а окно одно на страницу
+        $html = $this->get($news->getViewUrl())->assertOk()->getContent();
+        $this->assertSame(1, substr_count($html, 'id="editCommentDialog"'));
+    }
+
     public function testOldCommentsUrlRedirects(): void
     {
         $this->assertSame(url('/news/comments'), route('news.new-comments'));

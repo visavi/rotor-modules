@@ -129,6 +129,6 @@ class TranslationController extends Controller
         $label = $namespace === null ? $group : $namespace . '::' . $group;
 
         return redirect()->route('admin.files.translations', ['group' => $label])
-            ->with('flash.success', __('page_editor::files.translations_saved'));
+            ->with('success', __('page_editor::files.translations_saved'));
     }
 }

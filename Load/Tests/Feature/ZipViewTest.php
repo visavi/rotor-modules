@@ -87,6 +87,17 @@ class ZipViewTest extends ModuleTestCase
             ->assertSee('readme.txt');
     }
 
+    public function testFoldersOpenWithoutScripts(): void
+    {
+        // Папка — <details>: содержимое внутри, раскрывает браузер
+        $html = $this->get($this->zipUrl())->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '~<details class="zip-dir[^"]*">\s*<summary[^>]*>.*?<b>docs</b>.*?</summary>\s*<div class="ms-3">.*?guide\.txt.*?</details>~s',
+            $html,
+        );
+    }
+
     public function testMapIsCachedAfterFirstView(): void
     {
         // Пока карты нет, о содержимом архива ничего не известно
@@ -166,6 +177,7 @@ class ZipViewTest extends ModuleTestCase
         $archive->open($path, ZipArchive::CREATE);
         $archive->addFromString('readme.txt', 'Привет из архива');
         $archive->addFromString('logo.gif', base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'));
+        $archive->addFromString('docs/guide.txt', 'Файл в папке');
         $archive->close();
 
         return File::query()->create([

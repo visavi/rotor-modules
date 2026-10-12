@@ -1,0 +1,18 @@
+{{--
+    Свой блок главной. Это Blade-шаблон: HTML плюс вставки {{ }} и @директивы.
+    Блок рисуется целиком здесь: рамка, заголовок и содержимое.
+
+    $block — сам блок: $block->title — заголовок (может быть пустым)
+
+    Свои стили — @push('styles') ... @endpush, скрипты — @push('scripts') ... @endpush
+--}}
+
+<div class="section shadow mb-3">
+    @if ($block->title !== '')
+        <div class="section-title">{{ $block->title }}</div>
+    @endif
+
+    <div class="section-message">
+        <p>Здесь будет свой блок. Сегодня {{ date('d.m.Y') }}.</p>
+    </div>
+</div>

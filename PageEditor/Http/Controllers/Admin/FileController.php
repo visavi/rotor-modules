@@ -179,11 +179,11 @@ class FileController extends Controller
                 } catch (RuntimeException) {
                     return redirect()->route('admin.files.edit', $params)
                         ->withInput()
-                        ->with('flash.danger', __('page_editor::files.file_write_failed'));
+                        ->with('danger', __('page_editor::files.file_write_failed'));
                 }
 
                 return redirect()->route('admin.files.edit', $params)
-                    ->with('flash.success', $status);
+                    ->with('success', $status);
             }
 
             return redirect()->route('admin.files.edit', $params)
@@ -194,7 +194,7 @@ class FileController extends Controller
         // Крупный .json или .svg целиком в память не читаем — вернём в листинг
         if (filesize($full) > (int) config('page_editor.max_edit_size', 1048576)) {
             return redirect()->route('admin.files.index', ['root' => $this->root, 'path' => $this->path])
-                ->with('flash.danger', __('page_editor::files.file_too_large'));
+                ->with('danger', __('page_editor::files.file_too_large'));
         }
 
         $contest = file_get_contents($full);
@@ -277,7 +277,7 @@ class FileController extends Controller
                     } catch (RuntimeException) {
                         return redirect()->route('admin.files.create', ['root' => $this->root, 'path' => $this->path])
                             ->withInput()
-                            ->with('flash.danger', __('page_editor::files.file_write_failed'));
+                            ->with('danger', __('page_editor::files.file_write_failed'));
                     }
 
                     chmod($directory . '/' . $filename, 0644);
@@ -286,7 +286,7 @@ class FileController extends Controller
                         'root' => $this->root,
                         'path' => $this->path,
                         'file' => $filename,
-                    ])->with('flash.success', __('page_editor::files.file_success_created'));
+                    ])->with('success', __('page_editor::files.file_success_created'));
                 }
 
                 $old = umask(0);
@@ -294,8 +294,8 @@ class FileController extends Controller
                 umask($old);
 
                 $flash = $created
-                    ? ['flash.success', __('page_editor::files.directory_success_created')]
-                    : ['flash.danger', __('page_editor::files.directory_not_writable', ['dir' => $dirname])];
+                    ? ['success', __('page_editor::files.directory_success_created')]
+                    : ['danger', __('page_editor::files.directory_not_writable', ['dir' => $dirname])];
 
                 return redirect()->route('admin.files.index', [
                     'root' => $this->root,
@@ -353,7 +353,7 @@ class FileController extends Controller
         chmod($directory . '/' . $name, 0644);
 
         return redirect()->route('admin.files.index', $params)
-            ->with('flash.success', __('page_editor::files.file_success_uploaded'));
+            ->with('success', __('page_editor::files.file_success_uploaded'));
     }
 
     /**
@@ -392,7 +392,7 @@ class FileController extends Controller
                 FileWriter::delete($directory . '/' . $filename);
             } catch (RuntimeException) {
                 return redirect()->route('admin.files.index', $params)
-                    ->with('flash.danger', __('page_editor::files.file_delete_failed'));
+                    ->with('danger', __('page_editor::files.file_delete_failed'));
             }
 
             $status = __('page_editor::files.file_success_deleted');
@@ -402,7 +402,7 @@ class FileController extends Controller
         }
 
         return redirect()->route('admin.files.index', $params)
-            ->with('flash.success', $status);
+            ->with('success', $status);
     }
 
     /**
@@ -442,7 +442,7 @@ class FileController extends Controller
         rename($directory . '/' . $name, $directory . '/' . $newName);
 
         return redirect()->route('admin.files.index', $params)
-            ->with('flash.success', __('page_editor::files.file_success_renamed'));
+            ->with('success', __('page_editor::files.file_success_renamed'));
     }
 
     /**

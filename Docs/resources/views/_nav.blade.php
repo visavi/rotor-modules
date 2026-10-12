@@ -23,30 +23,20 @@
     <div class="docs-nav-group-title mb-1">
         <span>Laravel</span> <span class="badge bg-danger">{{ \Modules\Docs\Services\DocsService::LARAVEL_VERSION }}</span>
     </div>
-    <div id="docs-laravel-accordion">
+    {{-- Открыта одна группа: name объединяет <details> в группу --}}
     @foreach ($menu['laravel']['nav'] as $group)
         @php
-            $groupId = 'lg-' . $loop->index;
             $hasActive = ($section ?? null) === 'laravel'
                 && collect($group['items'])->contains('page', $menu['laravel']['page'] ?? null);
         @endphp
-        <div class="docs-nav-group">
-            <button class="docs-nav-section-toggle{{ $hasActive ? '' : ' collapsed' }}"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#{{ $groupId }}"
-                    aria-expanded="{{ $hasActive ? 'true' : 'false' }}">
-                {{ $group['title'] }}
-            </button>
-            <div class="collapse{{ $hasActive ? ' show' : '' }}" id="{{ $groupId }}">
-                @foreach ($group['items'] as $item)
-                    @php $isActive = ($section ?? null) === 'laravel' && ($menu['laravel']['page'] ?? null) === $item['page']; @endphp
-                    <a class="docs-nav-item{{ $isActive ? ' active' : '' }}" href="{{ $item['href'] }}">{{ $item['title'] }}</a>
-                @endforeach
-            </div>
-        </div>
+        <details class="docs-nav-group" name="docs-laravel" @if ($hasActive) open @endif>
+            <summary class="docs-nav-section-toggle">{{ $group['title'] }}</summary>
+            @foreach ($group['items'] as $item)
+                @php $isActive = ($section ?? null) === 'laravel' && ($menu['laravel']['page'] ?? null) === $item['page']; @endphp
+                <a class="docs-nav-item{{ $isActive ? ' active' : '' }}" href="{{ $item['href'] }}">{{ $item['title'] }}</a>
+            @endforeach
+        </details>
     @endforeach
-    </div>
 @else
     <small class="text-muted">Laravel docs не загружены.<br><code>php artisan docs:sync</code></small>
 @endif

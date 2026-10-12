@@ -45,7 +45,7 @@ class EditorController extends Controller
         if (! is_writable(dirname($this->cssPath))) {
             return redirect()
                 ->route('admin.editor.index')
-                ->with('flash.danger', __('style_editor::editor.not_writable'));
+                ->with('danger', __('style_editor::editor.not_writable'));
         }
 
         file_put_contents($this->cssPath, $css);
@@ -53,6 +53,6 @@ class EditorController extends Controller
 
         return redirect()
             ->route('admin.editor.index')
-            ->with('flash.success', __('style_editor::editor.saved'));
+            ->with('success', __('style_editor::editor.saved'));
     }
 }

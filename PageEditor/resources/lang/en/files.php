@@ -13,6 +13,7 @@ return [
     'create_directory'           => 'Create directory',
     'file_name'                  => 'File name',
     'create_file'                => 'Create file',
+    'file_name_hint'             => 'With the extension: page.blade.php, style.css, script.js',
     'create_hint'                => 'Latin letters, digits, hyphen, underscore and dot are allowed. Specify the file name with its extension',
     'file_editing'               => 'Editing a file',
     'edit_hint'                  => 'The Tab key inserts an indent',

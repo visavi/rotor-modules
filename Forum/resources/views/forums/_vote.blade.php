@@ -15,20 +15,21 @@
                 @foreach ($vote->answers as $answer)
                     <label><input name="poll" type="radio" value="{{ $answer->id }}"> {{ $answer->answer }}</label><br>
                 @endforeach
-                <div class="d-flex align-items-center gap-3 mt-3">
-                    <button class="btn btn-sm btn-primary">{{ __('forum::forums.vote') }}</button>
-                    <a href="#vote-results-{{ $vote->id }}" data-bs-toggle="collapse">{{ __('forum::forums.results') }}</a>
-                </div>
+                <button class="btn btn-sm btn-primary mt-3">{{ __('forum::forums.vote') }}</button>
             </form>
         @endunless
 
-        {{-- До голоса результаты свернуты, раскрываются ссылкой из формы --}}
-        <div @class(['collapse mb-3' => ! $voted]) id="vote-results-{{ $vote->id }}">
+        {{-- До голоса результаты свернуты в <details>, после — открыты всегда --}}
+        <{{ $voted ? 'div' : 'details' }} class="mb-3">
+            @unless ($voted)
+                <summary class="link-primary">{{ __('forum::forums.results') }}</summary>
+            @endunless
+
             @foreach ($vote->results() as $result)
                 <b>{{ $result['answer'] }}</b> ({{ __('forum::forums.votes') }}: {{ $result['result'] }})<br>
                 {{ progressBar($result['width'], $result['percent'] . '%') }}
             @endforeach
-        </div>
+        </{{ $voted ? 'div' : 'details' }}>
 
         {{ __('forum::forums.total_votes') }}: {{ $vote->count }}
     </div>
