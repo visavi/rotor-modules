@@ -58,18 +58,6 @@ jobs:
             TAG="$MODULE-$VERSION"
             ASSET="$MODULE.zip"
 
-            if ! gh release view "$TAG" &>/dev/null; then
-              echo "[$MODULE] Creating release $TAG"
-              zip -r "/tmp/$ASSET" "$MODULE" -x "*.git*"
-              gh release create "$TAG" \
-                "/tmp/$ASSET#$ASSET" \
-                --title "$MODULE $VERSION" \
-                --notes "Module: **$MODULE**, Version: **$VERSION**"
-              CHANGED=1
-            else
-              echo "[$MODULE] Release $TAG already exists"
-            fi
-
             CL_FILE="$MODULE/changelog.md"
             [ -f "$CL_FILE" ] || CL_FILE="$MODULE/CHANGELOG.md"
             CHANGELOG=""
@@ -79,6 +67,23 @@ jobs:
                 found && (started || NF) { started=1; a[++n]=$0 }
                 END { while (n>0 && a[n] ~ /^[[:space:]]*$/) n--; for(i=1;i<=n;i++) print a[i] }
               ' "$CL_FILE")
+            fi
+
+            if ! gh release view "$TAG" &>/dev/null; then
+              echo "[$MODULE] Creating release $TAG"
+              zip -r "/tmp/$ASSET" "$MODULE" -x "*.git*"
+
+              # Текст релиза — раздел этой версии из changelog модуля,
+              # модуль и версия уже в заголовке
+              NOTES="${CHANGELOG:-Module: **$MODULE**, Version: **$VERSION**}"
+
+              gh release create "$TAG" \
+                "/tmp/$ASSET#$ASSET" \
+                --title "$MODULE $VERSION" \
+                --notes "$NOTES"
+              CHANGED=1
+            else
+              echo "[$MODULE] Release $TAG already exists"
             fi
 
             # Скриншоты отдаются raw-ссылками на ветку по умолчанию: архив модуля
