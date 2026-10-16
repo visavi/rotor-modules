@@ -18,7 +18,7 @@ $lottery = \Modules\Lottery\Models\Lottery::query()
 ?&gt;
 {{ plural($lottery-&gt;amount, setting('moneyname')) }}</code></pre>
 INFO,
-    'version'  => '1.0.4',
+    'version'  => '1.1.0',
     'requires' => '14.8.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',

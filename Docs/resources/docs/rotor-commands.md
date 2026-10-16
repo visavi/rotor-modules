@@ -39,14 +39,6 @@ php artisan delete:readers  # удаляет устаревшие записи �
 php artisan delete:dialogues # удаляет старые диалоги
 ```
 
-## Уведомления и рассылки
-
-```bash
-php artisan add:subscribers  # добавляет подписчиков на рассылку
-php artisan add:birthdays    # отправляет поздравления с днём рождения
-php artisan message:send     # отправляет отложенные сообщения из очереди
-```
-
 ## Вспомогательные
 
 ```bash
@@ -69,10 +61,14 @@ php artisan lang:compare ru en   # сравнивает два языковых 
 | `delete:dialogues` | ежедневно |
 | `delete:polls` | еженедельно |
 | `delete:readers` | еженедельно |
-| `add:subscribers` | каждый час |
-| `add:birthdays` | ежедневно в 07:00 |
-| `message:send` | каждую минуту |
 
 ## Команды модулей
 
-Каждый модуль может добавлять собственные команды. Файлы из `modules/{Module}/Console/` регистрируются автоматически.
+Каждый модуль может добавлять собственные команды. Файлы из `modules/{Module}/Console/` регистрируются автоматически, а расписание модуль задаёт ключом `schedule` в `module.php`.
+
+Например, «Почтовая рассылка» (MailNotify):
+
+```bash
+php artisan add:subscribers  # напоминание о непрочитанных сообщениях, каждый час
+php artisan add:birthdays    # поздравления с днём рождения, ежедневно в 07:00
+```

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'delivery'                => 'Private newsletter',
+    'delivery'                => 'Private mailing',
     'online'                  => 'Online',
     'active'                  => 'Active',
     'admins'                  => 'Administration',
