@@ -19,7 +19,6 @@ use Modules\Payment\Requests\PayRequest;
 use Modules\Payment\Services\OrderService;
 use Modules\Payment\Services\PaymentService;
 use Modules\Payment\Services\YooKassaService;
-use RuntimeException;
 
 class AdvertController extends Controller
 {
@@ -27,7 +26,6 @@ class AdvertController extends Controller
      * Конструктор
      */
     public function __construct(
-        private readonly YooKassaService $yooKassaService,
         private readonly PaymentService $paymentService,
         private readonly OrderService $orderService,
     ) {
@@ -56,7 +54,7 @@ class AdvertController extends Controller
         $advert = [
             'type'        => Order::TYPE_ADVERT,
             'place'       => $validated['place'],
-            'site'        => $validated['site'],
+            'url'         => $validated['url'],
             'names'       => $validated['names'],
             'color'       => $validated['color'],
             'bold'        => $validated['bold'],
@@ -83,30 +81,16 @@ class AdvertController extends Controller
 
         try {
             $data = Crypt::decrypt($validated['data']);
+
+            if (($data['type'] ?? null) === Order::TYPE_CARD
+                && $error = $this->paymentService->validateCardOrder($data)
+            ) {
+                return redirect('/payments/card')->withErrors($error);
+            }
+
             $order = $this->orderService->createOrder($data);
-            $payment = $this->yooKassaService->createPayment($order);
 
-            if (! $payment || ! $payment['id']) {
-                throw new RuntimeException(__('payment::payments.payment_create_failed'));
-            }
-
-            if ($payment['status'] === YooKassaService::CANCELED) {
-                throw new RuntimeException(__('payment::payments.payment_creation_cancelled'));
-            }
-
-            // Проверяем ссылку для редиректа
-            $confirmationUrl = $payment['confirmation']['confirmation_url'] ?? null;
-            if (! $confirmationUrl) {
-                throw new RuntimeException(__('payment::payments.payment_link_failed'));
-            }
-
-            $order->update([
-                'status'      => $payment['status'],
-                'payment_id'  => $payment['id'],
-                'payment_url' => $confirmationUrl,
-            ]);
-
-            return redirect()->away($confirmationUrl);
+            return redirect()->away($this->paymentService->startPayment($order));
         } catch (Exception $e) {
             Log::error($e->getMessage());
 
@@ -142,6 +126,7 @@ class AdvertController extends Controller
         // Неоплаченные заказы, у которых страница оплаты ещё жива
         $pendingOrders = Order::query()
             ->where('user_id', auth()->id())
+            ->whereIn('type', [Order::TYPE_ADVERT, Order::TYPE_CARD])
             ->where('status', YooKassaService::PENDING)
             ->whereNotNull('payment_url')
             ->where('created_at', '>', now()->subSeconds((int) config('payment.confirmation_ttl')))
@@ -156,7 +141,7 @@ class AdvertController extends Controller
      */
     public function edit(int $id): View
     {
-        $advert = PaidAdvert::query()->ownActive()->find($id);
+        $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find($id);
 
         if (! $advert) {
             abort(404, __('payment::payments.paid_adverts.not_found'));
@@ -178,7 +163,7 @@ class AdvertController extends Controller
         $validated = $request->validated();
 
         $advert->update([
-            'site'  => $validated['site'],
+            'url'   => $validated['url'],
             'names' => array_values($validated['names']),
             'color' => $advert->color ? $validated['color'] : null,
         ]);

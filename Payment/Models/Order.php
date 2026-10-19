@@ -32,6 +32,10 @@ class Order extends Model
 {
     public const string TYPE_ADVERT = 'advert';
 
+    public const string TYPE_BALANCE = 'balance';
+
+    public const string TYPE_CARD = 'card';
+
     /**
      * The attributes that aren't mass assignable.
      */
@@ -64,6 +68,14 @@ class Order extends Model
         return $this->status === YooKassaService::PENDING
             && $this->payment_url
             && $this->created_at->addSeconds((int) config('payment.confirmation_ttl'))->isFuture();
+    }
+
+    /**
+     * Название вида заказа
+     */
+    public function typeName(): string
+    {
+        return __('payment::payments.types.' . $this->type);
     }
 
     /**

@@ -62,6 +62,48 @@
             <div class="invalid-feedback">{{ textError('sets[payment_price_name]') }}</div>
         </div>
 
+        <h5 class="mt-4">{{ __('payment::payments.balance.title') }}</h5>
+
+        <div class="form-check form-switch mb-3">
+            <input type="hidden" value="0" name="sets[payment_balance_enabled]">
+            <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[payment_balance_enabled]" id="payment_balance_enabled"{{ old('sets.payment_balance_enabled', $settings['payment_balance_enabled'] ?? 0) ? ' checked' : '' }}>
+            <label class="form-check-label" for="payment_balance_enabled">{{ __('payment::payments.balance.enabled') }}</label>
+        </div>
+
+        <div class="mb-3{{ hasError('sets[payment_balance_rate]') }}">
+            <label for="payment_balance_rate" class="form-label">{{ __('payment::payments.balance.setting_rate', ['currency' => setting('currency')]) }}:</label>
+
+            <input type="number" class="form-control" name="sets[payment_balance_rate]" id="payment_balance_rate" min="1" value="{{ old('sets.payment_balance_rate', $settings['payment_balance_rate'] ?? 100) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_balance_rate]') }}</div>
+        </div>
+
+        <div class="mb-3{{ hasError('sets[payment_balance_min]') }}">
+            <label for="payment_balance_min" class="form-label">{{ __('payment::payments.balance.setting_min', ['currency' => setting('currency')]) }}:</label>
+
+            <input type="number" class="form-control" name="sets[payment_balance_min]" id="payment_balance_min" min="1" value="{{ old('sets.payment_balance_min', $settings['payment_balance_min'] ?? 10) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_balance_min]') }}</div>
+        </div>
+
+        <h5 class="mt-4">{{ __('payment::payments.cards.title') }}</h5>
+
+        @foreach (\Modules\Payment\Models\PaidAdvert::CARD_PLACES as $place)
+            <div class="mb-3{{ hasError('sets[payment_price_' . $place . ']') }}">
+                <label for="payment_price_{{ $place }}" class="form-label">{{ __('payment::payments.cards.' . $place) }}, {{ setting('currency') }} {{ __('payment::payments.paid_adverts.per_day') }}:</label>
+
+                <input type="number" class="form-control" name="sets[payment_price_{{ $place }}]" id="payment_price_{{ $place }}" min="0" value="{{ old('sets.payment_price_' . $place, $settings['payment_price_' . $place] ?? 0) }}" required>
+                <div class="invalid-feedback">{{ textError('sets[payment_price_' . $place . ']') }}</div>
+                <div class="form-text">{{ __('payment::payments.cards.price_hint') }}</div>
+            </div>
+        @endforeach
+
+        <div class="mb-3{{ hasError('sets[payment_card_limit]') }}">
+            <label for="payment_card_limit" class="form-label">{{ __('payment::payments.cards.setting_limit') }}:</label>
+
+            <input type="number" class="form-control" name="sets[payment_card_limit]" id="payment_card_limit" min="1" value="{{ old('sets.payment_card_limit', $settings['payment_card_limit'] ?? 3) }}" required>
+            <div class="invalid-feedback">{{ textError('sets[payment_card_limit]') }}</div>
+        </div>
+
+
         <button class="btn btn-primary">{{ __('main.save' )}}</button>
     </form>
 @stop

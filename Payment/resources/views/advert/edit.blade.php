@@ -27,9 +27,9 @@
             </div>
 
             <div class="mb-3">
-                <label for="site" class="form-label">{{ __('payment::payments.paid_adverts.link') }}:</label>
-                <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="100" placeholder="https://" required>
-                <div class="invalid-feedback">{{ textError('site') }}</div>
+                <label for="url" class="form-label">{{ __('payment::payments.paid_adverts.link') }}:</label>
+                <input class="form-control{{ hasError('url') }}" id="url" name="url" type="text" value="{{ old('url', $advert->url) }}" maxlength="100" placeholder="https://" required>
+                <div class="invalid-feedback">{{ textError('url') }}</div>
             </div>
 
             <div class="mb-3">

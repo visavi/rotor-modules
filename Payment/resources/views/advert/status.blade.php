@@ -1,12 +1,16 @@
 @extends('layout')
 
-@section('title', 'Покупка рекламы')
+@section('title', __('payment::payments.order_status'))
 
 @section('breadcrumb')
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/payments/advert">{{ __('payment::payments.paid_adverts.create_advert') }}</a></li>
+            @if ($order->type === \Modules\Payment\Models\Order::TYPE_BALANCE)
+                <li class="breadcrumb-item"><a href="/payments/balance">{{ __('payment::payments.balance.title') }}</a></li>
+            @else
+                <li class="breadcrumb-item"><a href="/payments/advert">{{ __('payment::payments.paid_adverts.create_advert') }}</a></li>
+            @endif
             <li class="breadcrumb-item active">{{ __('payment::payments.order_status') }}</li>
         </ol>
     </nav>

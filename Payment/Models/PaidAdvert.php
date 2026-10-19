@@ -12,14 +12,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 /**
  * Class PaidAdvert
  *
  * @property int             $id
  * @property string          $place
- * @property string          $site
+ * @property string          $url
  * @property array           $names
+ * @property string|null     $text
+ * @property string|null     $image
  * @property string          $color
  * @property bool            $bold
  * @property int|null        $user_id
@@ -47,6 +50,35 @@ class PaidAdvert extends Model
         self::BOTTOM_ALL,
         self::BOTTOM,
     ];
+
+    /**
+     * Места рекламных карточек: продаются отдельно от ссылок, в PLACES не входят
+     */
+    public const string CARD_SIDEBAR = 'card_sidebar';
+    public const string CARD_FEED_START = 'card_feed_start';
+    public const string CARD_FEED_MIDDLE = 'card_feed_middle';
+    public const string CARD_FEED_END = 'card_feed_end';
+
+    public const array CARD_PLACES = [
+        self::CARD_SIDEBAR,
+        self::CARD_FEED_START,
+        self::CARD_FEED_MIDDLE,
+        self::CARD_FEED_END,
+    ];
+
+    /**
+     * Места в ленте по точкам, где ядро вызывает хук feedAdvert: в начале, в середине и в конце первой порции
+     */
+    public const array CARD_FEED_POINTS = [
+        'start'  => self::CARD_FEED_START,
+        'middle' => self::CARD_FEED_MIDDLE,
+        'end'    => self::CARD_FEED_END,
+    ];
+
+    /**
+     * Директория загрузки картинок карточек
+     */
+    public string $uploadPath = '/uploads/paid-adverts';
 
     /**
      * Get the attributes that should be cast.
@@ -80,6 +112,22 @@ class PaidAdvert extends Model
     }
 
     /**
+     * Карточка (а не ссылка)
+     */
+    public function isCard(): bool
+    {
+        return in_array($this->place, self::CARD_PLACES, true);
+    }
+
+    /**
+     * Реклама, срок которой не истёк
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('deleted_at', '>', now());
+    }
+
+    /**
      * Активная реклама текущего пользователя
      */
     public function scopeOwnActive(Builder $query): Builder
@@ -107,7 +155,90 @@ class PaidAdvert extends Model
      */
     public function getPlaceName(): string
     {
+        if ($this->isCard()) {
+            return __('payment::payments.cards.' . $this->place);
+        }
+
         return $this->getPlaces()[$this->place] ?? 'Unknown';
+    }
+
+    /**
+     * Данные карточки для вывода
+     *
+     * @return array{title: string, text: ?string, url: string, image: ?string, expires: int}
+     */
+    public function cardData(): array
+    {
+        return [
+            'title'   => $this->names[0] ?? '',
+            'text'    => $this->text,
+            'url'     => $this->url,
+            'image'   => $this->image,
+            'expires' => $this->deleted_at->getTimestamp(),
+        ];
+    }
+
+    /**
+     * Текст карточки для вывода: экранирован, переносы строк сохранены
+     *
+     * Пустые строки выкидываются, строк не больше трёх (остальное склеивается
+     * в третью): иначе в 200 символов влезают десятки переносов и карточка
+     * вытягивается в столб
+     */
+    public static function cardTextHtml(?string $text, ?int $limit = null): string
+    {
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/u', (string) $text))));
+
+        if (count($lines) > 3) {
+            $lines = [$lines[0], $lines[1], implode(' ', array_slice($lines, 2))];
+        }
+
+        $text = implode("\n", $lines);
+
+        if ($limit) {
+            $text = Str::limit($text, $limit);
+        }
+
+        return nl2br(e($text));
+    }
+
+    /**
+     * Кеширует активные карточки по местам
+     *
+     * @return array<string, array<int, array{title: string, text: ?string, url: string, image: ?string, expires: int}>>
+     */
+    public static function activeCards(): array
+    {
+        return Cache::remember('paidCards', 3600, static function () {
+            $cards = [];
+
+            $data = self::query()
+                ->active()
+                ->whereIn('place', self::CARD_PLACES)
+                ->get();
+
+            foreach ($data as $card) {
+                $cards[$card->place][] = $card->cardData();
+            }
+
+            return $cards;
+        });
+    }
+
+    /**
+     * Случайная активная карточка места: карточки показываются по очереди
+     *
+     * Срок проверяется и здесь: кэш живёт час, а истёкшая карточка
+     * не должна делить место с купленной на освободившееся
+     *
+     * @return array{title: string, text: ?string, url: string, image: ?string, expires: int}|null
+     */
+    public static function randomCard(string $place): ?array
+    {
+        $now = now()->getTimestamp();
+        $cards = array_filter(self::activeCards()[$place] ?? [], static fn (array $card) => $card['expires'] > $now);
+
+        return $cards ? Arr::random($cards) : null;
     }
 
     /**
@@ -116,7 +247,11 @@ class PaidAdvert extends Model
     public static function statAdverts(): array
     {
         return Cache::remember('paidAdverts', 3600, static function () {
-            $data = self::query()->where('deleted_at', '>', now())->orderBy('created_at')->get();
+            $data = self::query()
+                ->where('deleted_at', '>', now())
+                ->whereNotIn('place', self::CARD_PLACES)
+                ->orderBy('created_at')
+                ->get();
 
             $links = [];
             if ($data->isNotEmpty()) {
@@ -129,7 +264,7 @@ class PaidAdvert extends Model
                             $name = '<span style="color:' . $val->color . '">' . $name . '</span>';
                         }
 
-                        $link = '<a href="' . $val->site . '" target="_blank">' . $name . '</a>';
+                        $link = '<a href="' . $val->url . '" target="_blank">' . $name . '</a>';
 
                         if ($val->bold) {
                             $link = '<b>' . $link . '</b>';

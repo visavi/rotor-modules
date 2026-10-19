@@ -15,7 +15,7 @@ class CalculateRequest extends FormRequest
     {
         return [
             'place'   => ['required', 'in:' . implode(',', PaidAdvert::PLACES)],
-            'site'    => ['required', 'url', 'max:100'],
+            'url'     => ['required', 'url', 'max:100'],
             'names'   => ['required', 'array', 'min:1'],
             'names.*' => ['string', 'min:5', 'max:35', 'distinct'],
             'color'   => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
@@ -33,7 +33,7 @@ class CalculateRequest extends FormRequest
     {
         return [
             'place'   => __('payment::payments.paid_adverts.place'),
-            'site'    => __('adverts.link'),
+            'url'     => __('adverts.link'),
             'names.*' => __('payment::payments.paid_adverts.name'),
             'color'   => __('payment::payments.paid_adverts.color'),
             'bold'    => __('payment::payments.paid_adverts.bold'),

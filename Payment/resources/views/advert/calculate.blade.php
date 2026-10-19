@@ -33,9 +33,9 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-solid fa-link text-muted me-2"></i>
-                        {{ $advert['site'] }}
+                        {{ $advert['url'] }}
                     </div>
-                    <a href="{{ $advert['site'] }}" target="_blank" class="text-decoration-none">
+                    <a href="{{ $advert['url'] }}" target="_blank" class="text-decoration-none">
                         <i class="fa-solid fa-external-link-alt"></i>
                     </a>
                 </div>

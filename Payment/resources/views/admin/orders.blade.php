@@ -41,7 +41,7 @@
                 <div>{{ __('payment::payments.order_amount') }}: <strong>{{ $order->amount }} {{ $order->currency }}</strong></div>
 
                 <div>{{ $order->email }}</div>
-                <div>{{ $order->type }}</div>
+                <div>{{ $order->typeName() }}</div>
             </div>
 
             <div class="section-body">

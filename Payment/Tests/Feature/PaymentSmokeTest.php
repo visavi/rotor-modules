@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Tests\Feature;
 
+use App\Models\Message;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
@@ -39,6 +40,10 @@ class PaymentSmokeTest extends ModuleTestCase
             'payment_price_color' => 3,
             'payment_price_bold'  => 3,
             'payment_price_name'  => 1,
+
+            'payment_balance_enabled' => 1,
+            'payment_balance_rate'    => 10,
+            'payment_balance_min'     => 10,
         ];
 
         foreach ($settings as $name => $value) {
@@ -57,7 +62,7 @@ class PaymentSmokeTest extends ModuleTestCase
     {
         $response = $this->post('/payments/calculate', [
             'place'   => PaidAdvert::TOP,
-            'site'    => 'https://example.com',
+            'url'     => 'https://example.com',
             'names'   => ['Test advert name'],
             'color'   => '#ff0000',
             'bold'    => 1,
@@ -75,7 +80,7 @@ class PaymentSmokeTest extends ModuleTestCase
     {
         $this->post('/payments/calculate', [
             'place' => 'unknown',
-            'site'  => 'not-a-url',
+            'url'   => 'not-a-url',
         ])->assertRedirect();
     }
 
@@ -203,7 +208,7 @@ class PaymentSmokeTest extends ModuleTestCase
         return [
             'type'        => Order::TYPE_ADVERT,
             'place'       => PaidAdvert::TOP,
-            'site'        => 'https://example.com',
+            'url'         => 'https://example.com',
             'names'       => ['Test advert name'],
             'color'       => '#ff0000',
             'bold'        => 1,
@@ -252,14 +257,14 @@ class PaymentSmokeTest extends ModuleTestCase
         $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true]);
 
         $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
-            'site'  => 'https://new-site.com',
+            'url'   => 'https://new-site.com',
             'names' => ['New advert name'],
             'color' => '#00ff00',
             'bold'  => 0,
         ])->assertRedirect('/payments/my');
 
         $advert->refresh();
-        $this->assertSame('https://new-site.com', $advert->site);
+        $this->assertSame('https://new-site.com', $advert->url);
         $this->assertSame(['New advert name'], $advert->names);
         $this->assertSame('#00ff00', $advert->color);
         $this->assertTrue($advert->bold);
@@ -271,7 +276,7 @@ class PaymentSmokeTest extends ModuleTestCase
         $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true]);
 
         $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
-            'site'  => 'https://example.com',
+            'url'   => 'https://example.com',
             'names' => ['Test advert name'],
             'color' => '',
         ])->assertSessionHasErrors('color');
@@ -287,7 +292,7 @@ class PaymentSmokeTest extends ModuleTestCase
         $advert = $this->createAdvert($user);
 
         $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
-            'site'  => 'https://example.com',
+            'url'   => 'https://example.com',
             'names' => ['Test advert name'],
             'color' => '#00ff00',
             'bold'  => 1,
@@ -304,7 +309,7 @@ class PaymentSmokeTest extends ModuleTestCase
         $advert = $this->createAdvert($user);
 
         $this->actingAs($user)->post('/payments/my/edit/' . $advert->id, [
-            'site'  => 'https://example.com',
+            'url'   => 'https://example.com',
             'names' => ['First advert name', 'Second advert name'],
         ])->assertSessionHasErrors('names');
     }
@@ -316,7 +321,7 @@ class PaymentSmokeTest extends ModuleTestCase
     {
         return PaidAdvert::query()->create(array_merge([
             'place'      => PaidAdvert::TOP,
-            'site'       => 'https://example.com',
+            'url'        => 'https://example.com',
             'names'      => ['Test advert name'],
             'color'      => null,
             'bold'       => false,
@@ -324,6 +329,85 @@ class PaymentSmokeTest extends ModuleTestCase
             'created_at' => now()->timestamp,
             'deleted_at' => now()->addDay()->timestamp,
         ], $attributes));
+    }
+
+    public function testAdminCreateAdvert(): void
+    {
+        $boss = User::factory()->boss()->create();
+
+        $this->actingAs($boss)->post('/admin/paid-adverts/create', [
+            'place'   => PaidAdvert::TOP_ALL,
+            'url'     => 'https://admin-site.com',
+            'names'   => ['Admin advert', '', 'Admin advert', 'Second name'],
+            'color'   => '#00ff00',
+            'bold'    => 1,
+            'term'    => now()->addDays(7)->format('Y-m-d H:i'),
+            'comment' => 'Без оплаты',
+        ])->assertRedirect('admin/paid-adverts?place=' . PaidAdvert::TOP_ALL);
+
+        $advert = PaidAdvert::query()->where('url', 'https://admin-site.com')->firstOrFail();
+        $this->assertSame($boss->id, $advert->user_id);
+        $this->assertSame(['Admin advert', 'Second name'], $advert->names);
+        $this->assertSame('#00ff00', $advert->color);
+        $this->assertTrue($advert->bold);
+        $this->assertTrue($advert->deleted_at->gt(now()));
+    }
+
+    public function testAdminCreateAdvertReadableErrors(): void
+    {
+        $this->actingAs(User::factory()->boss()->create())
+            ->post('/admin/paid-adverts/create', [
+                'place' => PaidAdvert::TOP_ALL,
+                'url'   => 'https://admin-site.com',
+                'names' => ['', 'abc'],
+                'term'  => now()->subDay()->format('Y-m-d H:i'),
+            ])
+            ->assertRedirect('/admin/paid-adverts/create?place=' . PaidAdvert::TOP_ALL)
+            ->assertSessionHasErrors([
+                'term'  => __('payment::payments.paid_adverts.term_invalid'),
+                'names' => __('validation.min.string', ['attribute' => __('payment::payments.paid_adverts.name'), 'min' => 5]),
+            ]);
+
+        $this->post('/admin/paid-adverts/create', ['place' => PaidAdvert::TOP_ALL, 'names' => ['']])
+            ->assertSessionHasErrors(['names' => __('payment::payments.paid_adverts.names_count')]);
+
+        $this->assertDatabaseMissing('paid_adverts', ['url' => 'https://admin-site.com']);
+    }
+
+    public function testAdminUpdateAdvert(): void
+    {
+        $advert = $this->createAdvert(User::factory()->create(), ['bold' => true]);
+
+        $this->actingAs(User::factory()->boss()->create())
+            ->post('/admin/paid-adverts/edit/' . $advert->id, [
+                'place' => PaidAdvert::BOTTOM_ALL,
+                'url'   => 'https://moved-site.com',
+                'names' => ['Moved advert'],
+                'term'  => now()->addDays(3)->format('Y-m-d H:i'),
+            ])
+            ->assertRedirect('admin/paid-adverts?place=' . PaidAdvert::BOTTOM_ALL);
+
+        $advert->refresh();
+        $this->assertSame(PaidAdvert::BOTTOM_ALL, $advert->place);
+        $this->assertSame('https://moved-site.com', $advert->url);
+        $this->assertFalse($advert->bold);
+    }
+
+    public function testAdminEditAdvertIgnoresCards(): void
+    {
+        $card = $this->createAdvert(User::factory()->create(), ['place' => PaidAdvert::CARD_SIDEBAR]);
+
+        $this->actingAs(User::factory()->boss()->create());
+
+        $this->get('/admin/paid-adverts/edit/' . $card->id)->assertNotFound();
+        $this->post('/admin/paid-adverts/edit/' . $card->id, [
+            'place' => PaidAdvert::TOP_ALL,
+            'url'   => 'https://example.org',
+            'names' => ['Card to link'],
+            'term'  => now()->addDay()->format('Y-m-d H:i'),
+        ])->assertNotFound();
+
+        $this->assertSame(PaidAdvert::CARD_SIDEBAR, $card->fresh()->place);
     }
 
     public function testStatusShowsContinuePaymentForFreshOrder(): void
@@ -359,6 +443,155 @@ class PaymentSmokeTest extends ModuleTestCase
             ->get('/payments/my')
             ->assertOk()
             ->assertSee('https://yoomoney.ru/checkout/test-pay');
+    }
+
+    public function testBalanceGuestForbidden(): void
+    {
+        $this->get('/payments/balance')->assertForbidden();
+    }
+
+    public function testBalanceDisabled(): void
+    {
+        Setting::query()->where('name', 'payment_balance_enabled')->update(['value' => 0]);
+        clearCache('settings');
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/payments/balance')->assertNotFound();
+        $this->actingAs($user)->post('/payments/balance', ['amount' => 100])->assertNotFound();
+    }
+
+    public function testBalanceIndex(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/payments/balance')
+            ->assertOk()
+            ->assertSee('value="100"', false);
+    }
+
+    public function testBalancePay(): void
+    {
+        Http::fake([
+            'api.yookassa.ru/v3/payments' => Http::response([
+                'id'           => 'pay-456',
+                'status'       => YooKassaService::PENDING,
+                'confirmation' => ['confirmation_url' => 'https://yookassa.test/confirm'],
+            ]),
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/payments/balance', ['amount' => 150, 'email' => 'test@example.com'])
+            ->assertRedirect('https://yookassa.test/confirm');
+
+        $order = Order::query()->where('payment_id', 'pay-456')->first();
+
+        $this->assertNotNull($order);
+        $this->assertSame(Order::TYPE_BALANCE, $order->type);
+        $this->assertSame($user->id, $order->user_id);
+        // 150 рублей по курсу 10
+        $this->assertSame(150, $order->amount);
+        $this->assertSame(1500, $order->data['coins']);
+    }
+
+    public function testBalancePayFailedMarksOrderError(): void
+    {
+        // Неверные ключи магазина: ЮКасса отвечает 401
+        Http::fake([
+            'api.yookassa.ru/v3/payments' => Http::response([
+                'type'        => 'error',
+                'description' => 'Authentication by given credentials failed',
+            ], 401),
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/payments/balance', ['amount' => 100, 'email' => 'test@example.com'])
+            ->assertRedirect('/payments/balance')
+            ->assertSessionHasErrors();
+
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $user->id,
+            'type'    => Order::TYPE_BALANCE,
+            'status'  => YooKassaService::ERROR,
+        ]);
+    }
+
+    public function testBalancePayInvalidAmount(): void
+    {
+        $user = User::factory()->create();
+
+        // Дробные рубли
+        $this->actingAs($user)
+            ->post('/payments/balance', ['amount' => 100.5, 'email' => 'test@example.com'])
+            ->assertSessionHasErrors('amount');
+
+        // Меньше минимума
+        $this->actingAs($user)
+            ->post('/payments/balance', ['amount' => 5, 'email' => 'test@example.com'])
+            ->assertSessionHasErrors('amount');
+
+        // Больше предела одного платежа
+        $this->actingAs($user)
+            ->post('/payments/balance', ['amount' => 100001, 'email' => 'test@example.com'])
+            ->assertSessionHasErrors('amount');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function testWebhookBalanceCreditsOnce(): void
+    {
+        $user = User::factory()->create(['money' => 100, 'language' => 'ru']);
+
+        $this->createOrder([
+            'user_id' => $user->id,
+            'type'    => Order::TYPE_BALANCE,
+            'amount'  => 1000,
+            'data'    => [
+                'type'   => Order::TYPE_BALANCE,
+                'coins'  => 10000,
+                'email'  => 'test@example.com',
+                'prices' => ['total' => 1000],
+            ],
+        ]);
+
+        Http::fake([
+            'api.yookassa.ru/v3/payments/pay-123' => Http::response([
+                'id'     => 'pay-123',
+                'status' => YooKassaService::SUCCEEDED,
+            ]),
+        ]);
+
+        $webhook = [
+            'event'  => 'payment.succeeded',
+            'object' => ['id' => 'pay-123'],
+        ];
+
+        // Повторное уведомление ЮКассы не начисляет второй раз.
+        // Язык запроса чужой: уведомление всё равно на языке получателя
+        $headers = ['Accept-Language' => 'en-US,en;q=0.9'];
+        $this->post('/payments/webhook', $webhook, $headers)->assertStatus(200);
+        $this->post('/payments/webhook', $webhook, $headers)->assertStatus(200);
+
+        $this->assertSame(10100, $user->fresh()->money);
+        $this->assertDatabaseCount('paid_adverts', 0);
+
+        $text = Message::query()->where('user_id', $user->id)->where('author_id', 0)->value('text');
+        $this->assertStringContainsString('Баланс пополнен', (string) $text);
+    }
+
+    public function testProfileShowsBalanceLink(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/users/' . $user->login)
+            ->assertOk()
+            ->assertSee('/payments/balance');
     }
 
     /**

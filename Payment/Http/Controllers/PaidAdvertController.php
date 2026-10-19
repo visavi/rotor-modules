@@ -5,14 +5,25 @@ declare(strict_types=1);
 namespace Modules\Payment\Http\Controllers;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Payment\Models\PaidAdvert;
+use Modules\Payment\Requests\AdminAdvertRequest;
+use Modules\Payment\Requests\AdminCardRequest;
+use Modules\Payment\Services\CardImageService;
 
 class PaidAdvertController extends AdminController
 {
+    /**
+     * Конструктор
+     */
+    public function __construct(
+        private readonly CardImageService $cardImageService,
+    ) {
+        //
+    }
+
     /**
      * List adverts
      */
@@ -20,7 +31,9 @@ class PaidAdvertController extends AdminController
     {
         $place = check($request->input('place', 'top_all'));
 
-        if (! in_array($place, PaidAdvert::PLACES, true)) {
+        $places = [...PaidAdvert::PLACES, ...PaidAdvert::CARD_PLACES];
+
+        if (! in_array($place, $places, true)) {
             $place = 'top_all';
         }
 
@@ -31,7 +44,6 @@ class PaidAdvertController extends AdminController
             ->all();
 
         $totals = [];
-        $places = PaidAdvert::PLACES;
         foreach ($places as $placeName) {
             $totals[$placeName] = $advertTotal[$placeName] ?? 0;
         }
@@ -46,71 +58,42 @@ class PaidAdvertController extends AdminController
     }
 
     /**
-     * Create advert
+     * Форма добавления рекламной ссылки
      */
-    public function create(Request $request, Validator $validator): View|RedirectResponse
+    public function create(Request $request): View
     {
         $places = PaidAdvert::PLACES;
         $advert = new PaidAdvert();
         $place = $request->input('place');
 
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $names = (array) $request->input('names');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-            $term = (string) $request->input('term');
-            $comment = $request->input('comment');
-
-            $term = strtotime($term);
-            $names = array_unique(array_diff($names, ['']));
-
-            $validator
-                ->in($place, $places, ['place' => __('payment::payments.paid_adverts.place_invalid')])
-                ->url($site, ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, now()->timestamp, ['term' => __('payment::payments.paid_adverts.term_invalid')])
-                ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
-                ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
-
-            foreach ($names as $name) {
-                $validator->length($name, 5, 35, ['names' => __('validator.text')]);
-            }
-
-            if ($validator->isValid()) {
-                PaidAdvert::query()->create([
-                    'user_id'    => getUser('id'),
-                    'place'      => $place,
-                    'site'       => $site,
-                    'names'      => array_values($names),
-                    'color'      => $color,
-                    'bold'       => $bold,
-                    'comment'    => $comment,
-                    'deleted_at' => $term,
-                ]);
-
-                clearCache('paidAdverts');
-
-                return redirect('admin/paid-adverts?place=' . $place)
-                    ->with('success', __('main.record_added_success'));
-            }
-
-            return redirect('admin/paid-adverts/create?place=' . $place)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         return view('payment::admin/paid-adverts/create', compact('advert', 'places', 'place'));
     }
 
     /**
-     * Change advert
+     * Добавление рекламной ссылки
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function store(AdminAdvertRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        PaidAdvert::query()->create([
+            'user_id' => getUser('id'),
+            ...$this->advertData($request),
+        ]);
+
+        clearCache('paidAdverts');
+
+        return redirect('admin/paid-adverts?place=' . $validated['place'])
+            ->with('success', __('main.record_added_success'));
+    }
+
+    /**
+     * Форма редактирования рекламной ссылки
+     */
+    public function edit(int $id, Request $request): View
     {
         $places = PaidAdvert::PLACES;
-        $advert = PaidAdvert::query()->find($id);
+        $advert = PaidAdvert::query()->whereIn('place', $places)->find($id);
 
         if (! $advert) {
             abort(404, __('payment::payments.paid_adverts.not_found'));
@@ -118,53 +101,41 @@ class PaidAdvertController extends AdminController
 
         $place = $request->input('place');
 
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $names = (array) $request->input('names');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-            $term = (string) $request->input('term');
-            $comment = $request->input('comment');
+        return view('payment::admin/paid-adverts/edit', compact('advert', 'places', 'place'));
+    }
 
-            $term = strtotime($term);
-            $names = array_unique(array_diff($names, ['']));
+    /**
+     * Сохранение рекламной ссылки
+     */
+    public function update(AdminAdvertRequest $request): RedirectResponse
+    {
+        $advert = $request->advert();
+        $advert->update($this->advertData($request));
 
-            $validator
-                ->in($place, $places, ['place' => __('payment::payments.paid_adverts.place_invalid')])
-                ->url($site, ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gt($term, now()->timestamp, ['term' => __('payment::payments.paid_adverts.term_invalid')])
-                ->length($comment, 0, 255, ['comment' => __('validator.text_long')])
-                ->gte(count($names), 1, ['names' => __('payment::payments.paid_adverts.names_count')]);
+        clearCache('paidAdverts');
 
-            foreach ($names as $name) {
-                $validator->length($name, 5, 35, ['names' => __('validator.text')]);
-            }
+        return redirect('admin/paid-adverts?place=' . $advert->place)
+            ->with('success', __('main.record_saved_success'));
+    }
 
-            if ($validator->isValid()) {
-                $advert->update([
-                    'place'      => $place,
-                    'site'       => $site,
-                    'names'      => array_values($names),
-                    'color'      => $color,
-                    'bold'       => $bold,
-                    'comment'    => $comment,
-                    'deleted_at' => $term,
-                ]);
+    /**
+     * Снятие рекламы с показа: срок истекает сейчас, запись остаётся в списке.
+     * Вернуть — новой датой в правке
+     */
+    public function stop(int $id): RedirectResponse
+    {
+        $advert = PaidAdvert::query()->active()->find($id);
 
-                clearCache('paidAdverts');
-
-                return redirect('admin/paid-adverts?place=' . $place)
-                    ->with('success', __('main.record_saved_success'));
-            }
-
-            return redirect('admin/paid-adverts/edit/' . $advert->id . '?place=' . $place)
-                ->withInput()
-                ->withErrors($validator->getErrors());
+        if (! $advert) {
+            abort(404, __('payment::payments.paid_adverts.not_found'));
         }
 
-        return view('payment::admin/paid-adverts/edit', compact('advert', 'places', 'place'));
+        $advert->update(['deleted_at' => now()]);
+
+        clearCache(['paidAdverts', 'paidCards']);
+
+        return redirect('admin/paid-adverts?place=' . $advert->place)
+            ->with('success', __('payment::payments.paid_adverts.stopped'));
     }
 
     /**
@@ -179,10 +150,113 @@ class PaidAdvertController extends AdminController
         }
 
         $advert->delete();
+        $this->cardImageService->delete($advert->image);
 
-        clearCache('paidAdverts');
+        clearCache(['paidAdverts', 'paidCards']);
 
         return redirect('admin/paid-adverts?place=' . $advert->place)
             ->with('success', __('main.record_deleted_success'));
+    }
+
+    /**
+     * Форма добавления рекламной карточки без оплаты
+     */
+    public function createCard(Request $request): View
+    {
+        $card = new PaidAdvert(['place' => $request->input('place')]);
+
+        return view('payment::admin/paid-adverts/edit-card', compact('card'));
+    }
+
+    /**
+     * Добавление рекламной карточки без оплаты
+     *
+     * Лимит места не проверяется: админ ставит карточку сверх очереди сознательно
+     */
+    public function storeCard(AdminCardRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+
+        PaidAdvert::query()->create([
+            'user_id'    => getUser('id'),
+            'place'      => $validated['place'],
+            'url'        => $validated['url'],
+            'names'      => [$validated['title']],
+            'text'       => $validated['text'] ?? null,
+            'image'      => $request->hasFile('image') ? $this->cardImageService->store($request->file('image')) : null,
+            'deleted_at' => $validated['term'],
+        ]);
+
+        clearCache('paidCards');
+
+        return redirect('admin/paid-adverts?place=' . $validated['place'])
+            ->with('success', __('main.record_added_success'));
+    }
+
+    /**
+     * Форма редактирования рекламной карточки
+     */
+    public function editCard(int $id): View
+    {
+        $card = PaidAdvert::query()->whereIn('place', PaidAdvert::CARD_PLACES)->find($id);
+
+        if (! $card) {
+            abort(404, __('payment::payments.paid_adverts.not_found'));
+        }
+
+        return view('payment::admin/paid-adverts/edit-card', compact('card'));
+    }
+
+    /**
+     * Сохранение рекламной карточки
+     *
+     * Плохую картинку снимают, не трогая карточку: покупатель получил
+     * оплаченное место, возвращать деньги не за что
+     */
+    public function updateCard(AdminCardRequest $request): RedirectResponse
+    {
+        $card = $request->card();
+        $validated = $request->validated();
+
+        $oldImage = $image = $card->image;
+
+        if ($request->hasFile('image')) {
+            $image = $this->cardImageService->store($request->file('image'));
+        } elseif ($request->boolean('remove_image')) {
+            $image = null;
+        }
+
+        $card->update([
+            'names'      => [$validated['title']],
+            'text'       => $validated['text'] ?? null,
+            'url'        => $validated['url'],
+            'image'      => $image,
+            'deleted_at' => $validated['term'],
+        ]);
+
+        $this->cardImageService->delete($oldImage);
+
+        clearCache('paidCards');
+
+        return redirect('admin/paid-adverts?place=' . $card->place)
+            ->with('success', __('main.record_saved_success'));
+    }
+
+    /**
+     * Поля рекламной ссылки из проверенного запроса
+     */
+    private function advertData(AdminAdvertRequest $request): array
+    {
+        $validated = $request->validated();
+
+        return [
+            'place'      => $validated['place'],
+            'url'        => $validated['url'],
+            'names'      => $validated['names'],
+            'color'      => $validated['color'] ?? null,
+            'bold'       => $request->boolean('bold'),
+            'comment'    => $validated['comment'] ?? null,
+            'deleted_at' => $validated['term'],
+        ];
     }
 }

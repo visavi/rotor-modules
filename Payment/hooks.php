@@ -6,6 +6,7 @@ use App\Support\Hook;
 use App\Support\Registry;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
+use Modules\Payment\Services\PaymentService;
 use Modules\Payment\Services\YooKassaService;
 
 // Ссылка в навигации настроек админки
@@ -27,13 +28,15 @@ Hook::add('adminBlockBoss', static function () {
     </div>';
 });
 
-// Платная реклама в шаблоне (верх/низ всех страниц), свободный верх продаёт себя сам
+// Платная реклама в шаблоне (верх/низ всех страниц), свободный верх продаёт себя сам.
+// Приоритет ставит рекламу за рубли выше ссылок за монеты (модуль Advert): при равном
+// порядок зависел бы от того, какой модуль установлен раньше
 Hook::add('advertTop', static function () {
     $ad = PaidAdvert::renderAdvert(PaidAdvert::TOP_ALL)
         ?? '<i class="fas fa-ad"></i> <a class="small text-muted" href="/payments/advert" rel="nofollow">' . __('payment::payments.paid_adverts.your_advert_here') . '</a>';
 
     return '<div class="text-center">' . $ad . '</div>';
-});
+}, 10);
 Hook::add('advertBottom', static fn () => ($ad = PaidAdvert::renderAdvert(PaidAdvert::BOTTOM_ALL)) ? '<div class="text-center my-1">' . $ad . '</div>' : '');
 
 // Платная реклама на главной странице
@@ -43,10 +46,36 @@ Hook::add('advertIndexBottom', static fn () => ($ad = PaidAdvert::renderAdvert(P
 // Платная реклама на форуме
 Hook::add('advertForum', static fn () => ($ad = PaidAdvert::renderAdvert(PaidAdvert::FORUM)) ? '<div class="my-1">' . $ad . '</div>' : '');
 
-// Баннер внизу сайдбара, ниже всех остальных хуков
-Hook::add('sidebarFooterEnd', static fn () => '<li class="mt-3 text-center">
-        <a class="btn btn-sm btn-adaptive w-100" href="/payments/advert" rel="nofollow"><i class="fas fa-ad"></i> ' . __('payment::payments.paid_adverts.site_advert') . '</a>
-    </li>', -100);
+// Рекламная карточка внизу сайдбара, ниже всех остальных хуков. Пустое место продаёт себя само,
+// а если карточки в сайдбаре не продаются — прежняя кнопка покупки рекламы
+Hook::add('sidebarFooterEnd', static function () {
+    if ($card = PaidAdvert::randomCard(PaidAdvert::CARD_SIDEBAR)) {
+        return '<li class="mt-3">' . view('payment::card/_card', ['card' => $card, 'layout' => 'sidebar'])->render() . '</li>';
+    }
+
+    [$url, $label] = app(PaymentService::class)->getCardPrice(PaidAdvert::CARD_SIDEBAR) > 0
+        ? ['/payments/card', __('payment::payments.cards.your_card_here')]
+        : ['/payments/advert', __('payment::payments.paid_adverts.site_advert')];
+
+    return '<li class="mt-3 text-center">
+        <a class="btn btn-sm btn-adaptive w-100" href="' . $url . '" rel="nofollow"><i class="fas fa-ad"></i> ' . $label . '</a>
+    </li>';
+}, -100);
+
+// Рекламные карточки в ленте главной: у каждой точки ленты своё место
+Hook::add('feedAdvert', static fn (?string $point = null) => ($place = PaidAdvert::CARD_FEED_POINTS[$point] ?? null)
+    && ($card = PaidAdvert::randomCard($place))
+        ? view('payment::card/_card', ['card' => $card, 'layout' => 'feed'])->render()
+        : '');
+
+// Пополнение баланса в своей анкете
+Hook::add('userPersonalEnd', static fn () => app(PaymentService::class)->isBalanceEnabled()
+    ? view('components.profile.action', [
+        'icon'  => 'fas fa-coins',
+        'label' => __('payment::payments.balance.title'),
+        'url'   => '/payments/balance',
+    ])->render()
+    : '');
 
 // Виджет платежей на главной админки: считается сумма, а не число заказов
 Registry::widget('orders', static fn (int $days): array => [

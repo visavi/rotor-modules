@@ -13,10 +13,10 @@
         <div class="invalid-feedback">{{ textError('place') }}</div>
     </div>
 
-    <div class="mb-3{{ hasError('site') }}">
-        <label for="site" class="form-label">{{ __('payment::payments.paid_adverts.link') }}:</label>
-        <input name="site" class="form-control" id="site" maxlength="100" placeholder="{{ __('payment::payments.paid_adverts.link') }}" value="{{ old('site', $advert->site) }}" required>
-        <div class="invalid-feedback">{{ textError('site') }}</div>
+    <div class="mb-3{{ hasError('url') }}">
+        <label for="url" class="form-label">{{ __('payment::payments.paid_adverts.link') }}:</label>
+        <input name="url" class="form-control" id="url" maxlength="100" placeholder="{{ __('payment::payments.paid_adverts.link') }}" value="{{ old('url', $advert->url) }}" required>
+        <div class="invalid-feedback">{{ textError('url') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('names') }}">
@@ -70,6 +70,7 @@
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>
+    @include('payment::admin/paid-adverts/_stop_button')
 </form>
 
 @push('scripts')

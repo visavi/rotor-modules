@@ -15,7 +15,7 @@ class MyAdvertRequest extends FormRequest
     public function advert(): PaidAdvert
     {
         if (! $this->advert) {
-            $advert = PaidAdvert::query()->ownActive()->find((int) $this->route('id'));
+            $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find((int) $this->route('id'));
 
             if (! $advert) {
                 abort(404, __('payment::payments.paid_adverts.not_found'));
@@ -38,7 +38,7 @@ class MyAdvertRequest extends FormRequest
         $advert = $this->advert();
 
         $rules = [
-            'site'    => ['required', 'url', 'max:100'],
+            'url'     => ['required', 'url', 'max:100'],
             'names'   => ['required', 'array', 'size:' . count($advert->names)],
             'names.*' => ['required', 'string', 'min:5', 'max:35', 'distinct'],
         ];
@@ -56,7 +56,7 @@ class MyAdvertRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'site'    => __('payment::payments.paid_adverts.link'),
+            'url'     => __('payment::payments.paid_adverts.link'),
             'names.*' => __('payment::payments.paid_adverts.name'),
             'color'   => __('payment::payments.paid_adverts.color'),
         ];

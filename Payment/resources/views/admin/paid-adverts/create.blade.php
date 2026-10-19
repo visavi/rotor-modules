@@ -14,6 +14,8 @@
 @stop
 
 @section('content')
+    @include('payment::admin/paid-adverts/_create_tabs')
+
     <div class="section-form mb-3 shadow">
         @include('payment::admin/paid-adverts/_form')
     </div>
