@@ -17,10 +17,10 @@
         <form method="post" action="{{ route('wall.settings.update') }}">
             @csrf
 
-            <div class="mb-3{{ hasError('sets[wallpost]') }}">
+            <div class="mb-3{{ hasError('sets.wallpost') }}">
                 <label for="wallpost" class="form-label">{{ __('wall::walls.walls_per_page') }}:</label>
                 <input type="number" class="form-control" id="wallpost" name="sets[wallpost]" maxlength="2" value="{{ old('sets.wallpost', $settings['wallpost'] ?? 10) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[wallpost]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.wallpost') }}</div>
             </div>
 
             <button class="btn btn-primary">{{ __('main.save') }}</button>

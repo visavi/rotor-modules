@@ -185,7 +185,7 @@ class MailNotifyTest extends ModuleTestCase
     {
         $this->actingAs(User::factory()->create(['level' => User::BOSS]))
             ->post('/admin/mail-notify-settings', ['sets' => ['sendprivatmailday' => 0, 'sendmailpacket' => 5000]])
-            ->assertSessionHasErrors(['sets[sendprivatmailday]', 'sets[sendmailpacket]']);
+            ->assertSessionHasErrors(['sets.sendprivatmailday', 'sets.sendmailpacket']);
     }
 
     /**

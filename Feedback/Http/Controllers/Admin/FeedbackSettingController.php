@@ -6,10 +6,8 @@ namespace Modules\Feedback\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\ModuleSettingController;
 use App\Models\Setting;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Modules\Feedback\Support\Feedback;
+use Modules\Feedback\Http\Requests\FeedbackSettingRequest;
 
 class FeedbackSettingController extends ModuleSettingController
 {
@@ -20,23 +18,10 @@ class FeedbackSettingController extends ModuleSettingController
     /**
      * Сохранение настроек
      */
-    public function update(Request $request): RedirectResponse
+    public function store(FeedbackSettingRequest $request): RedirectResponse
     {
-        $validator = new Validator();
         $delivery = $request->string('sets.feedback_delivery')->value();
         $email = $request->string('sets.feedback_email')->trim()->value();
-
-        $validator->in($delivery, Feedback::DELIVERIES, ['sets[feedback_delivery]' => __('feedback::feedback.delivery_invalid')]);
-
-        if ($email !== '') {
-            $validator->email($email, ['sets[feedback_email]' => __('validator.email')]);
-        }
-
-        if ($validator->fails()) {
-            return redirect()->route($this->route)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         // Пишем только свои ключи: чужие имена из формы не должны попадать в настройки
         foreach (['feedback_delivery' => $delivery, 'feedback_email' => $email] as $name => $value) {

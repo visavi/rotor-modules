@@ -20,10 +20,10 @@
 @section('settings')
     <form method="post" action="{{ route('antimat.settings.update') }}">
         @csrf
-        <div class="mb-3{{ hasError('sets[antimat_replace]') }}">
+        <div class="mb-3{{ hasError('sets.antimat_replace') }}">
             <label for="antimat_replace" class="form-label">{{ __('antimat::antimat.settings_replace') }}:</label>
             <input type="text" class="form-control" id="antimat_replace" name="sets[antimat_replace]" maxlength="20" value="{{ old('sets.antimat_replace', $settings['antimat_replace'] ?? '***') }}" required>
-            <div class="invalid-feedback">{{ textError('sets[antimat_replace]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.antimat_replace') }}</div>
             <div class="form-text">{{ __('antimat::antimat.settings_replace_hint') }}</div>
         </div>
 

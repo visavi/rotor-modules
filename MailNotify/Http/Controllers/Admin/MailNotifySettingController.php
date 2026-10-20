@@ -6,9 +6,8 @@ namespace Modules\MailNotify\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\ModuleSettingController;
 use App\Models\Setting;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Modules\MailNotify\Http\Requests\MailNotifySettingRequest;
 
 class MailNotifySettingController extends ModuleSettingController
 {
@@ -19,21 +18,10 @@ class MailNotifySettingController extends ModuleSettingController
     /**
      * Сохранение настроек
      */
-    public function update(Request $request): RedirectResponse
+    public function store(MailNotifySettingRequest $request): RedirectResponse
     {
-        $validator = new Validator();
         $days = $request->integer('sets.sendprivatmailday');
         $packet = $request->integer('sets.sendmailpacket');
-
-        $validator
-            ->between($days, 1, 99, ['sets[sendprivatmailday]' => __('mail_notify::mail_notify.days_invalid')])
-            ->between($packet, 1, 999, ['sets[sendmailpacket]' => __('mail_notify::mail_notify.packet_invalid')]);
-
-        if ($validator->fails()) {
-            return redirect()->route($this->route)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         // Пишем только свои ключи: чужие имена из формы не должны попадать в настройки
         foreach (['sendprivatmailday' => $days, 'sendmailpacket' => $packet] as $name => $value) {

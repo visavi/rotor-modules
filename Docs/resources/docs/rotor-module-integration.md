@@ -283,13 +283,18 @@ Registry::onAdminLog(function (Request $request): void {
 ### onProfileValidate — проверка своих полей профиля
 
 Поля добавляются через `Hook::add('profileFields', ...)`. `$strict` равен `false`, когда профиль
-сохраняет администратор — обязательность полей тогда не проверяется:
+сохраняет администратор — обязательность полей тогда не проверяется.
+
+`$validator` — `Illuminate\Validation\Validator` формы профиля: колбэк зовётся в её `after()`,
+на сайте, в API и в админке. Ошибка добавляется к полю, форма подсветит его и вернёт ввод:
 
 ```php
-use App\Support\Validator;
+use Illuminate\Validation\Validator;
 
 Registry::onProfileValidate(function (User $user, Request $request, Validator $validator, bool $strict): void {
-    $validator->length($request->input('city'), 0, 50, ['city' => 'Слишком длинное название']);
+    if (mb_strlen((string) $request->input('city')) > 50) {
+        $validator->errors()->add('city', 'Слишком длинное название');
+    }
 });
 ```
 

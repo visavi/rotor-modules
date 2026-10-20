@@ -215,7 +215,7 @@ class FeedbackTest extends ModuleTestCase
     {
         $this->actingAs(User::factory()->create(['level' => User::BOSS]))
             ->post('/admin/feedback-settings', ['sets' => ['feedback_delivery' => 'pigeon', 'feedback_email' => 'не-адрес']])
-            ->assertSessionHasErrors(['sets[feedback_delivery]', 'sets[feedback_email]']);
+            ->assertSessionHasErrors(['sets.feedback_delivery', 'sets.feedback_email']);
 
         $this->assertNotSame('pigeon', Setting::query()->where('name', 'feedback_delivery')->value('value'));
         $this->assertFalse(Feedback::byEmail());

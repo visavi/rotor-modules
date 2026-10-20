@@ -26,5 +26,5 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->name('notifier.')
     ->group(function () {
         Route::get('/notifier-settings', 'index')->name('settings');
-        Route::post('/notifier-settings', 'update')->name('settings.update');
+        Route::post('/notifier-settings', 'store')->name('settings.update');
     });

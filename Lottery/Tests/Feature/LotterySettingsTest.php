@@ -57,7 +57,7 @@ class LotterySettingsTest extends ModuleTestCase
     {
         // Минимум больше максимума уронил бы random_int в розыгрыше
         $this->save(['lottery_min' => 100, 'lottery_max' => 10])
-            ->assertSessionHasErrors('sets[lottery_max]');
+            ->assertSessionHasErrors('sets.lottery_max');
 
         $this->assertSame(100, setting('lottery_max'));
     }
@@ -66,6 +66,6 @@ class LotterySettingsTest extends ModuleTestCase
     {
         // Номер хранится в smallInteger
         $this->save(['lottery_max' => 40000])
-            ->assertSessionHasErrors('sets[lottery_max]');
+            ->assertSessionHasErrors('sets.lottery_max');
     }
 }

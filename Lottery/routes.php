@@ -19,5 +19,5 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->name('lottery.')
     ->group(function () {
         Route::get('/lottery-settings', 'index')->name('settings');
-        Route::post('/lottery-settings', 'update')->name('settings.update');
+        Route::post('/lottery-settings', 'store')->name('settings.update');
     });

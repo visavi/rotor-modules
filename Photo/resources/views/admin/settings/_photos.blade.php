@@ -21,16 +21,16 @@
 @section('settings')
 <form method="post" action="{{ route('photo.settings.update') }}">
     @csrf
-    <div class="mb-3{{ hasError('sets[fotolist]') }}">
+    <div class="mb-3{{ hasError('sets.fotolist') }}">
         <label for="fotolist" class="form-label">{{ __('photo::photos.settings_photos_per_page') }}:</label>
         <input type="number" class="form-control" id="fotolist" name="sets[fotolist]" maxlength="2" value="{{ old('sets.fotolist', $settings['fotolist']) }}" required>
-        <div class="invalid-feedback">{{ textError('sets[fotolist]') }}</div>
+        <div class="invalid-feedback">{{ textError('sets.fotolist') }}</div>
     </div>
 
-    <div class="mb-3{{ hasError('sets[photogroup]') }}">
+    <div class="mb-3{{ hasError('sets.photogroup') }}">
         <label for="photogroup" class="form-label">{{ __('photo::photos.settings_photos_groups') }}:</label>
         <input type="number" class="form-control" id="photogroup" name="sets[photogroup]" maxlength="2" value="{{ old('sets.photogroup', $settings['photogroup']) }}" required>
-        <div class="invalid-feedback">{{ textError('sets[photogroup]') }}</div>
+        <div class="invalid-feedback">{{ textError('sets.photogroup') }}</div>
     </div>
 
     <div class="form-check form-switch mb-3">
@@ -42,24 +42,24 @@
     <div class="mb-3">
         <label for="photo_title_min" class="form-label">{{ __('photo::photos.settings_photo_title_length') }}:</label>
         <div class="d-flex gap-2">
-            <input type="number" class="form-control{{ hasError('sets[photo_title_min]') }}" id="photo_title_min" name="sets[photo_title_min]" value="{{ old('sets.photo_title_min', $settings['photo_title_min']) }}" placeholder="{{ __('main.min') }}" required>
-            <input type="number" class="form-control{{ hasError('sets[photo_title_max]') }}" name="sets[photo_title_max]" value="{{ old('sets.photo_title_max', $settings['photo_title_max']) }}" placeholder="{{ __('main.max') }}" required>
+            <input type="number" class="form-control{{ hasError('sets.photo_title_min') }}" id="photo_title_min" name="sets[photo_title_min]" value="{{ old('sets.photo_title_min', $settings['photo_title_min']) }}" placeholder="{{ __('main.min') }}" required>
+            <input type="number" class="form-control{{ hasError('sets.photo_title_max') }}" name="sets[photo_title_max]" value="{{ old('sets.photo_title_max', $settings['photo_title_max']) }}" placeholder="{{ __('main.max') }}" required>
         </div>
         <div class="invalid-feedback d-block">
-            <div>{{ textError('sets[photo_title_min]') }}</div>
-            <div>{{ textError('sets[photo_title_max]') }}</div>
+            <div>{{ textError('sets.photo_title_min') }}</div>
+            <div>{{ textError('sets.photo_title_max') }}</div>
         </div>
     </div>
 
     <div class="mb-3">
         <label for="photo_text_min" class="form-label">{{ __('photo::photos.settings_photo_text_length') }}:</label>
         <div class="d-flex gap-2">
-            <input type="number" class="form-control{{ hasError('sets[photo_text_min]') }}" id="photo_text_min" name="sets[photo_text_min]" value="{{ old('sets.photo_text_min', $settings['photo_text_min']) }}" placeholder="{{ __('main.min') }}" required>
-            <input type="number" class="form-control{{ hasError('sets[photo_text_max]') }}" name="sets[photo_text_max]" value="{{ old('sets.photo_text_max', $settings['photo_text_max']) }}" placeholder="{{ __('main.max') }}" required>
+            <input type="number" class="form-control{{ hasError('sets.photo_text_min') }}" id="photo_text_min" name="sets[photo_text_min]" value="{{ old('sets.photo_text_min', $settings['photo_text_min']) }}" placeholder="{{ __('main.min') }}" required>
+            <input type="number" class="form-control{{ hasError('sets.photo_text_max') }}" name="sets[photo_text_max]" value="{{ old('sets.photo_text_max', $settings['photo_text_max']) }}" placeholder="{{ __('main.max') }}" required>
         </div>
         <div class="invalid-feedback d-block">
-            <div>{{ textError('sets[photo_text_min]') }}</div>
-            <div>{{ textError('sets[photo_text_max]') }}</div>
+            <div>{{ textError('sets.photo_text_min') }}</div>
+            <div>{{ textError('sets.photo_text_max') }}</div>
         </div>
     </div>
 
@@ -69,10 +69,10 @@
         <label class="form-check-label" for="feed_photos_show">{{ __('photo::photos.feed_photos_show') }}</label>
     </div>
 
-    <div class="mb-3{{ hasError('sets[feed_photos_rating]') }}">
+    <div class="mb-3{{ hasError('sets.feed_photos_rating') }}">
         <label for="feed_photos_rating" class="form-label">{{ __('photo::photos.feed_photos_rating') }}:</label>
         <input type="number" class="form-control" id="feed_photos_rating" name="sets[feed_photos_rating]" maxlength="2" value="{{ old('sets.feed_photos_rating', $settings['feed_photos_rating']) }}" required>
-        <div class="invalid-feedback">{{ textError('sets[feed_photos_rating]') }}</div>
+        <div class="invalid-feedback">{{ textError('sets.feed_photos_rating') }}</div>
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>

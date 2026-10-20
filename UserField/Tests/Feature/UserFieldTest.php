@@ -86,6 +86,25 @@ class UserFieldTest extends ModuleTestCase
         $this->assertSame(null, UserData::query()->value('value'));
     }
 
+    public function testAdminEditChecksFieldButNotRequirement(): void
+    {
+        // Администратору обязательность не мешает, но неверное значение отклоняется
+        $this->field->update(['required' => true]);
+        $boss = User::factory()->boss()->create();
+        $url = '/admin/users/edit?user=' . $this->user->login;
+        $base = ['level' => User::USER, 'email' => $this->user->email];
+
+        $this->actingAs($boss)
+            ->post($url, $base + ['field' . $this->field->id => 'Ок'])
+            ->assertSessionHasErrors('field' . $this->field->id);
+
+        $this->assertDatabaseCount('user_data', 0);
+
+        $this->actingAs($boss)
+            ->post($url, $base + ['field' . $this->field->id => ''])
+            ->assertSessionHasNoErrors();
+    }
+
     public function testTextareaValueIsSanitized(): void
     {
         $field = UserField::query()->create([

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Modules\UserField\Models;
 
 use App\Casts\TextCast;
+use App\Rules\EmailRule;
 use App\Support\HtmlSanitizer;
-use App\Support\Validator;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class UserField
@@ -162,54 +163,52 @@ class UserField extends Model
 
     /**
      * Проверяет значение по типу поля
+     *
+     * @return string|null текст ошибки или null, если значение подходит
      */
-    public function validateValue(mixed $value, Validator $validator, bool $required): void
+    public function validateValue(mixed $value, bool $required): ?string
     {
-        $key = 'field' . $this->id;
-
         if (blank($value)) {
-            if ($required) {
-                $validator->addError([$key => __('user_field::user_fields.required_value')]);
-            }
-
-            return;
+            return $required ? __('user_field::user_fields.required_value') : null;
         }
 
+        if (! is_scalar($value)) {
+            return __('validator.text');
+        }
+
+        $value = (string) $value;
+
+        // Длина без тегов: у многострочного поля значение — HTML из редактора
         if ($this->isText()) {
-            $validator->length($value, $this->min, $this->max, [$key => __('validator.text')]);
+            $length = mb_strlen(strip_tags($value));
+
+            if ($length < $this->min || $length > $this->max) {
+                return __('validator.text');
+            }
         }
 
-        switch ($this->type) {
-            case self::URL:
-                $validator->url($value, [$key => __('validator.url')]);
-                break;
-            case self::EMAIL:
-                $validator->email($value, [$key => __('validator.email')]);
-                break;
-            case self::TEL:
-                $validator->regex($value, '#^\+?[\d\s()\-]{5,20}$#', [$key => __('validator.phone')]);
-                break;
-            case self::NUMBER:
-                if (is_numeric($value)) {
-                    $validator->between((float) $value, $this->min, $this->max, [$key => __('user_field::user_fields.invalid_number')]);
-                } else {
-                    $validator->addError([$key => __('user_field::user_fields.invalid_number')]);
-                }
-                break;
-            case self::DATE:
-                if (! $this->isDate((string) $value)) {
-                    $validator->addError([$key => __('user_field::user_fields.invalid_date')]);
-                }
-                break;
-            case self::SELECT:
-            case self::RADIO:
-                $validator->in($value, $this->optionList(), [$key => __('user_field::user_fields.invalid_option')]);
-                break;
-            case self::CHECKBOX:
-                // Включённый переключатель приходит единицей, выключенный не приходит вовсе
-                $validator->in($value, ['1'], [$key => __('user_field::user_fields.invalid_option')]);
-                break;
-        }
+        return match ($this->type) {
+            self::URL    => $this->passes($value, 'url:http,https') ? null : __('validator.url'),
+            self::EMAIL  => $this->passes($value, new EmailRule()) ? null : __('validator.email'),
+            self::TEL    => preg_match('#^\+?[\d\s()\-]{5,20}$#', $value) ? null : __('validator.phone'),
+            self::NUMBER => is_numeric($value) && $value >= $this->min && $value <= $this->max
+                ? null
+                : __('user_field::user_fields.invalid_number'),
+            self::DATE => $this->isDate($value) ? null : __('user_field::user_fields.invalid_date'),
+            self::SELECT,
+            self::RADIO => in_array($value, $this->optionList(), true) ? null : __('user_field::user_fields.invalid_option'),
+            // Включённый переключатель приходит единицей, выключенный не приходит вовсе
+            self::CHECKBOX => $value === '1' ? null : __('user_field::user_fields.invalid_option'),
+            default        => null,
+        };
+    }
+
+    /**
+     * Значение проходит правило Laravel
+     */
+    private function passes(string $value, mixed $rule): bool
+    {
+        return Validator::make(['value' => $value], ['value' => [$rule]])->passes();
     }
 
     /**

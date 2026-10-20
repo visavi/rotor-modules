@@ -108,9 +108,13 @@ Hook::add('sidebarMenu', function () {
 | `registerFields` | Поля модуля в форме регистрации |
 | `profileFields` | Поля модуля в форме профиля (передаётся `$user`) |
 
-Поля этих форм ядро не сохраняет — модуль подписывается на колбэки `Registry`:
+Поля этих форм ядро не сохраняет — модуль подписывается на колбэки `Registry`.
+`$validator` — `Illuminate\Validation\Validator` формы, колбэк зовётся в её `after()`;
+ошибку добавляет `$validator->errors()->add('поле', 'текст')`:
 
 ```php
+use Illuminate\Validation\Validator;
+
 Registry::onSettingsValidate(fn (User $user, Request $request, Validator $validator) => ...);
 Registry::onSettingsSave(fn (User $user, Request $request) => ...);
 

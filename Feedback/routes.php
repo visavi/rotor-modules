@@ -19,5 +19,5 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
     ->name('feedback.')
     ->group(function () {
         Route::get('/feedback-settings', 'index')->name('settings');
-        Route::post('/feedback-settings', 'update')->name('settings.update');
+        Route::post('/feedback-settings', 'store')->name('settings.update');
     });

@@ -63,6 +63,28 @@ class BlogSmokeTest extends ModuleTestCase
         $this->get('/articles/new/comments')->assertRedirect('/articles/comments');
     }
 
+    public function testCommentToInactiveArticleIsRejected(): void
+    {
+        // Форма к неопубликованной статье не выводится, но запрос можно отправить напрямую
+        $blog = Blog::query()->create(['name' => 'Test category']);
+
+        $article = Article::query()->create([
+            'category_id' => $blog->id,
+            'user_id'     => $this->user->id,
+            'title'       => 'Draft article',
+            'slug'        => 'draft-article',
+            'text'        => 'Text',
+            'active'      => false,
+            'created_at'  => now(),
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('articles.add-comment', ['id' => $article->id]), ['msg' => 'Комментарий к черновику'])
+            ->assertSee(__('main.record_not_active'));
+
+        $this->assertDatabaseMissing('comments', ['relate_id' => $article->id]);
+    }
+
     public function testApiCommentFeedHidesInactiveArticle(): void
     {
         // Заголовок неопубликованной статьи в ленту не попадает

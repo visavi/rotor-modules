@@ -3,8 +3,8 @@
 use App\Models\User;
 use App\Support\Hook;
 use App\Support\Registry;
-use App\Support\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Validator;
 use Modules\UserField\Models\UserData;
 use Modules\UserField\Models\UserField;
 
@@ -18,7 +18,11 @@ Registry::onProfileValidate(static function (User $user, Request $request, Valid
             continue;
         }
 
-        $field->validateValue($request->input('field' . $field->id), $validator, $strict && $field->required);
+        $error = $field->validateValue($request->input('field' . $field->id), $strict && $field->required);
+
+        if ($error) {
+            $validator->errors()->add('field' . $field->id, $error);
+        }
     }
 });
 

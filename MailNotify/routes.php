@@ -15,5 +15,5 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->name('mail-notify.')
     ->group(function () {
         Route::get('/mail-notify-settings', 'index')->name('settings');
-        Route::post('/mail-notify-settings', 'update')->name('settings.update');
+        Route::post('/mail-notify-settings', 'store')->name('settings.update');
     });

@@ -37,7 +37,7 @@
 
         <fieldset id="notifier_options">
 
-        <div class="mb-3{{ hasError('sets[notifier_interval]') }}">
+        <div class="mb-3{{ hasError('sets.notifier_interval') }}">
             <label for="notifier_interval" class="form-label">{{ __('notifier::notifier.interval') }}, {{ __('notifier::notifier.seconds') }}:</label>
             <input type="number" class="form-control" id="notifier_interval" name="sets[notifier_interval]" list="notifier_intervals" min="{{ \Modules\Notifier\Support\Notifier::MIN_INTERVAL }}" max="{{ \Modules\Notifier\Support\Notifier::MAX_INTERVAL }}" step="1" value="{{ $interval }}" required>
             <datalist id="notifier_intervals">
@@ -46,13 +46,13 @@
                 @endforeach
             </datalist>
             <div class="form-text">{{ __('notifier::notifier.interval_help') }}</div>
-            <div class="invalid-feedback">{{ textError('sets[notifier_interval]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.notifier_interval') }}</div>
         </div>
 
         <h2 class="h5 mt-4">{{ __('notifier::notifier.notify_group') }}</h2>
         <p class="form-text mt-0 mb-3">{{ __('notifier::notifier.notify_help') }}</p>
 
-        <div class="mb-3{{ hasError('sets[notifier_sound]') }}">
+        <div class="mb-3{{ hasError('sets.notifier_sound') }}">
             <label for="notifier_sound" class="form-label">{{ __('notifier::notifier.sound') }}:</label>
             <div class="input-group">
                 <select class="form-select" id="notifier_sound" name="sets[notifier_sound]">
@@ -68,13 +68,13 @@
                 </button>
             </div>
             <div class="form-text">{{ __('notifier::notifier.sound_help') }}</div>
-            <div class="invalid-feedback">{{ textError('sets[notifier_sound]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.notifier_sound') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('sets[notifier_volume]') }}">
+        <div class="mb-3{{ hasError('sets.notifier_volume') }}">
             <label for="notifier_volume" class="form-label">{{ __('notifier::notifier.volume') }}: <span id="notifier_volume_value">{{ $volume }}</span>%</label>
             <input type="range" class="form-range" id="notifier_volume" name="sets[notifier_volume]" min="0" max="100" step="5" value="{{ $volume }}">
-            <div class="invalid-feedback d-block">{{ textError('sets[notifier_volume]') }}</div>
+            <div class="invalid-feedback d-block">{{ textError('sets.notifier_volume') }}</div>
         </div>
 
         <div class="form-check form-switch mb-3">

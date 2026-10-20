@@ -133,6 +133,20 @@ class CommentApiTest extends ModuleTestCase
         ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('text');
     }
 
+    public function testStoreCountsTextWithoutTags(): void
+    {
+        $offer = $this->createOffer();
+
+        // Как на сайте: разметка в длину не входит, 4 символа текста — меньше минимума
+        $this->postJson('/api/comments', [
+            'type' => Offer::$morphName,
+            'id'   => $offer->id,
+            'text' => '<p><strong>мало</strong></p>',
+        ], $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['text' => __('validator.length_min', ['length' => 5])]);
+    }
+
     public function testStoreOnMissingRecord(): void
     {
         $this->postJson('/api/comments', [

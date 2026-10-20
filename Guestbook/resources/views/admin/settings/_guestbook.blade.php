@@ -31,33 +31,33 @@
             <label class="form-check-label" for="guest_moderation">{{ __('guestbook::guestbook.guestbook_moderation') }}</label>
         </div>
 
-        <div class="mb-3{{ hasError('sets[bookpost]') }}">
+        <div class="mb-3{{ hasError('sets.bookpost') }}">
             <label for="bookpost" class="form-label">{{ __('guestbook::guestbook.guestbook_per_page') }}:</label>
             <input type="number" class="form-control" id="bookpost" name="sets[bookpost]" maxlength="2" value="{{ old('sets.bookpost', $settings['bookpost']) }}" required>
-            <div class="invalid-feedback">{{ textError('sets[bookpost]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.bookpost') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('sets[guestbook_point]') }}">
+        <div class="mb-3{{ hasError('sets.guestbook_point') }}">
             <label for="guestbook_point" class="form-label">{{ __('guestbook::guestbook.guestbook_point') }}:</label>
             <input type="number" class="form-control" id="guestbook_point" name="sets[guestbook_point]" maxlength="2" value="{{ old('sets.guestbook_point', $settings['guestbook_point']) }}" required>
-            <div class="invalid-feedback">{{ textError('sets[guestbook_point]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.guestbook_point') }}</div>
         </div>
 
-        <div class="mb-3{{ hasError('sets[guestbook_money]') }}">
+        <div class="mb-3{{ hasError('sets.guestbook_money') }}">
             <label for="guestbook_money" class="form-label">{{ __('guestbook::guestbook.guestbook_money') }}:</label>
             <input type="number" class="form-control" id="guestbook_money" name="sets[guestbook_money]" maxlength="2" value="{{ old('sets.guestbook_money', $settings['guestbook_money']) }}" required>
-            <div class="invalid-feedback">{{ textError('sets[guestbook_money]') }}</div>
+            <div class="invalid-feedback">{{ textError('sets.guestbook_money') }}</div>
         </div>
 
         <div class="mb-3">
             <label for="guestbook_text_min" class="form-label">{{ __('guestbook::guestbook.guestbook_text_length') }}:</label>
             <div class="d-flex gap-2">
-                <input type="number" class="form-control{{ hasError('sets[guestbook_text_min]') }}" id="guestbook_text_min" name="sets[guestbook_text_min]" value="{{ old('sets.guestbook_text_min', $settings['guestbook_text_min']) }}" placeholder="{{ __('main.min') }}" required>
-                <input type="number" class="form-control{{ hasError('sets[guestbook_text_max]') }}" name="sets[guestbook_text_max]" value="{{ old('sets.guestbook_text_max', $settings['guestbook_text_max']) }}" placeholder="{{ __('main.max') }}" required>
+                <input type="number" class="form-control{{ hasError('sets.guestbook_text_min') }}" id="guestbook_text_min" name="sets[guestbook_text_min]" value="{{ old('sets.guestbook_text_min', $settings['guestbook_text_min']) }}" placeholder="{{ __('main.min') }}" required>
+                <input type="number" class="form-control{{ hasError('sets.guestbook_text_max') }}" name="sets[guestbook_text_max]" value="{{ old('sets.guestbook_text_max', $settings['guestbook_text_max']) }}" placeholder="{{ __('main.max') }}" required>
             </div>
             <div class="invalid-feedback d-block">
-                <div>{{ textError('sets[guestbook_text_min]') }}</div>
-                <div>{{ textError('sets[guestbook_text_max]') }}</div>
+                <div>{{ textError('sets.guestbook_text_min') }}</div>
+                <div>{{ textError('sets.guestbook_text_max') }}</div>
             </div>
         </div>
 

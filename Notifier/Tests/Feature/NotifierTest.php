@@ -216,9 +216,9 @@ class NotifierTest extends ModuleTestCase
             ])
             ->assertRedirect(route('notifier.settings'))
             ->assertSessionHasErrors([
-                'sets[notifier_interval]',
-                'sets[notifier_volume]',
-                'sets[notifier_sound]',
+                'sets.notifier_interval',
+                'sets.notifier_volume',
+                'sets.notifier_sound',
             ]);
 
         Setting::flush();

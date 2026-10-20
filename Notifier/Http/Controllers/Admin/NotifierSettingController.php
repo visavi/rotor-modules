@@ -6,10 +6,9 @@ namespace Modules\Notifier\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\ModuleSettingController;
 use App\Models\Setting;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Notifier\Http\Requests\NotifierSettingRequest;
 use Modules\Notifier\Support\Notifier;
 
 class NotifierSettingController extends ModuleSettingController
@@ -45,43 +44,9 @@ class NotifierSettingController extends ModuleSettingController
     /**
      * Сохранение настроек
      */
-    public function update(Request $request): RedirectResponse
+    public function store(NotifierSettingRequest $request): RedirectResponse
     {
-        $validator = new Validator();
         $sets = (array) $request->input('sets', []);
-
-        // При выключенной проверке остальные поля заблокированы в форме
-        // и браузер их не отправляет — проверяем только пришедшее,
-        // непришедшее сохраняет прежнее значение
-        if (array_key_exists('notifier_interval', $sets)) {
-            $validator->between(
-                (int) $sets['notifier_interval'],
-                Notifier::MIN_INTERVAL,
-                Notifier::MAX_INTERVAL,
-                ['sets[notifier_interval]' => __('notifier::notifier.interval_invalid', [
-                    'min' => Notifier::MIN_INTERVAL,
-                    'max' => Notifier::MAX_INTERVAL,
-                ])],
-            );
-        }
-
-        if (array_key_exists('notifier_volume', $sets)) {
-            $validator->between((int) $sets['notifier_volume'], 0, 100, [
-                'sets[notifier_volume]' => __('notifier::notifier.volume_invalid'),
-            ]);
-        }
-
-        if (! empty($sets['notifier_sound'])) {
-            $validator->in((string) $sets['notifier_sound'], array_keys(Notifier::sounds()), [
-                'sets[notifier_sound]' => __('notifier::notifier.sound_invalid'),
-            ]);
-        }
-
-        if ($validator->fails()) {
-            return redirect()->route($this->route)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         // Пишем только свои ключи: чужие имена из формы не должны попадать в настройки
         foreach (array_intersect_key($sets, array_flip(self::SETTINGS)) as $name => $value) {

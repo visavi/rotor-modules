@@ -290,7 +290,7 @@ class AntimatTest extends ModuleTestCase
             ->post('/admin/antimat-settings', ['sets' => ['antimat_replace' => str_repeat('*', 256)]]);
 
         $response->assertRedirect('/admin/antimat-settings');
-        $response->assertSessionHasErrors('sets[antimat_replace]');
+        $response->assertSessionHasErrors('sets.antimat_replace');
 
         $this->assertDatabaseMissing('settings', ['name' => 'antimat_replace', 'value' => str_repeat('*', 256)]);
     }

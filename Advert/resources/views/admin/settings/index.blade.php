@@ -25,50 +25,50 @@
                 <label class="form-check-label" for="rekuseractive">{{ __('advert::adverts.adverts_active') }}</label>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekusershow]') }}">
+            <div class="mb-3{{ hasError('sets.rekusershow') }}">
                 <label for="rekusershow" class="form-label">{{ __('advert::adverts.adverts_count_links') }}:</label>
                 <input type="number" class="form-control" id="rekusershow" name="sets[rekusershow]" min="1" value="{{ old('sets.rekusershow', $settings['rekusershow'] ?? 1) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekusershow]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekusershow') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekuserprice]') }}">
+            <div class="mb-3{{ hasError('sets.rekuserprice') }}">
                 <label for="rekuserprice" class="form-label">{{ __('advert::adverts.adverts_price') }}:</label>
                 <input type="number" class="form-control" id="rekuserprice" name="sets[rekuserprice]" maxlength="8" value="{{ old('sets.rekuserprice', $settings['rekuserprice'] ?? 1000) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekuserprice]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekuserprice') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekuserpoint]') }}">
+            <div class="mb-3{{ hasError('sets.rekuserpoint') }}">
                 <label for="rekuserpoint" class="form-label">{{ __('advert::adverts.adverts_points') }}:</label>
                 <input type="number" class="form-control" id="rekuserpoint" name="sets[rekuserpoint]" maxlength="3" value="{{ old('sets.rekuserpoint', $settings['rekuserpoint'] ?? 50) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekuserpoint]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekuserpoint') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekuseroptprice]') }}">
+            <div class="mb-3{{ hasError('sets.rekuseroptprice') }}">
                 <label for="rekuseroptprice" class="form-label">{{ __('advert::adverts.adverts_option') }}:</label>
                 <input type="number" class="form-control" id="rekuseroptprice" name="sets[rekuseroptprice]" maxlength="8" value="{{ old('sets.rekuseroptprice', $settings['rekuseroptprice'] ?? 100) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekuseroptprice]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekuseroptprice') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekusertime]') }}">
+            <div class="mb-3{{ hasError('sets.rekusertime') }}">
                 <label for="rekusertime" class="form-label">{{ __('advert::adverts.adverts_term') }}:</label>
                 <input type="number" class="form-control" id="rekusertime" name="sets[rekusertime]" maxlength="3" value="{{ old('sets.rekusertime', $settings['rekusertime'] ?? 24) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekusertime]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekusertime') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('sets[rekuserpost]') }}">
+            <div class="mb-3{{ hasError('sets.rekuserpost') }}">
                 <label for="rekuserpost" class="form-label">{{ __('advert::adverts.adverts_per_page') }}:</label>
                 <input type="number" class="form-control" id="rekuserpost" name="sets[rekuserpost]" maxlength="2" value="{{ old('sets.rekuserpost', $settings['rekuserpost'] ?? 10) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekuserpost]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekuserpost') }}</div>
             </div>
 
             <hr>
 
             <h5 class="mb-3">{{ __('advert::adverts.settings_admin') }}</h5>
 
-            <div class="mb-3{{ hasError('sets[rekadmintime]') }}">
+            <div class="mb-3{{ hasError('sets.rekadmintime') }}">
                 <label for="rekadmintime" class="form-label">{{ __('advert::adverts.adverts_admin_term') }}:</label>
                 <input type="number" class="form-control" id="rekadmintime" name="sets[rekadmintime]" maxlength="3" value="{{ old('sets.rekadmintime', $settings['rekadmintime'] ?? 7) }}" required>
-                <div class="invalid-feedback">{{ textError('sets[rekadmintime]') }}</div>
+                <div class="invalid-feedback">{{ textError('sets.rekadmintime') }}</div>
             </div>
 
             <button class="btn btn-primary">{{ __('main.save') }}</button>

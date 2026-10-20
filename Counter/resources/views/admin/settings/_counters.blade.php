@@ -31,7 +31,7 @@
     ];
     $inputCounter = (int) old('sets.incount', $settings['incount']);
     ?>
-    <div class="mb-3{{ hasError('sets[incount]') }}">
+    <div class="mb-3{{ hasError('sets.incount') }}">
         <label for="incount" class="form-label">{{ __('counter::counters.counters_enable') }}:</label>
         <select class="form-select" id="incount" name="sets[incount]">
 
@@ -40,7 +40,7 @@
             @endforeach
 
         </select>
-        <div class="invalid-feedback">{{ textError('sets[incount]') }}</div>
+        <div class="invalid-feedback">{{ textError('sets.incount') }}</div>
     </div>
 
     <button class="btn btn-primary">{{ __('main.save') }}</button>
