@@ -21,4 +21,5 @@ return [
     'invalid_backup_name'      => 'Invalid backup name!',
     'backup_not_exist'         => 'File to delete does not exist!',
     'backup_success_deleted'   => 'Backup successfully deleted!',
+    'confirm_delete'           => 'Delete the backup? It cannot be restored!',
 ];

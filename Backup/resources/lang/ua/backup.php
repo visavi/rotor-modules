@@ -21,4 +21,5 @@ return [
     'invalid_backup_name'      => 'Неприпустима назва бекапу!',
     'backup_not_exist'         => 'Файлу видалення не існує!',
     'backup_success_deleted'   => 'Бекап успішно видалено!',
+    'confirm_delete'           => 'Видалити бекап? Відновити його буде неможливо!',
 ];

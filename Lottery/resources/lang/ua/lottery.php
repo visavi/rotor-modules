@@ -16,6 +16,7 @@ return [
     'in_stock'               => 'У наявності',
     'participants'           => 'Учасники',
     'no_participants'        => 'Учасників ще немає!',
+    'participant_bet'        => 'Ставка: :number',
 
     'lottery_not_activated'    => 'Лотерею ще не активовано!',
     'already_bought_ticket'    => 'Ви вже купили квиток! Не можна купувати двічі!',

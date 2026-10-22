@@ -45,7 +45,7 @@
                     @if (isAdmin('boss'))
                         <div class="float-end">
                             <a href="{{ route('admin.forums.edit', ['id' => $child->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_forum') }}')">
+                            <form action="{{ route('admin.forums.delete', ['id' => $child->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_delete_forum') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
@@ -86,7 +86,7 @@
                     <div class="text-end">
                         <a href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                         <a href="{{ route('admin.topics.move', ['id' => $topic->id]) }}" title="{{ __('main.move') }}"><i class="fa fa-arrows-alt text-muted"></i></a>
-                        <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_topic') }}')" title="{{ __('main.delete') }}">
+                        <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}" title="{{ __('main.delete') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link p-0"><i class="fa fa-times text-muted"></i></button>

@@ -77,7 +77,7 @@
     {{ $posts->links() }}
 
     @if ($posts->isNotEmpty() && isAdmin('boss'))
-        <form action="/admin/chats/clear" method="post" onsubmit="return confirm('{{ __('admin_chat::admin_chat.confirm_clear') }}')">
+        <form action="/admin/chats/clear" method="post" onsubmit="return confirmAction(this)" data-confirm="{{ __('admin_chat::admin_chat.confirm_clear') }}">
             @csrf
             <button type="submit" class="btn btn-danger"><i class="fa fa-trash-alt"></i> {{ __('admin_chat::admin_chat.clear') }}</button>
         </form><br>

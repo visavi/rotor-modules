@@ -141,6 +141,24 @@ class PhotoFormTest extends ModuleTestCase
             ->assertSessionHas('success');
     }
 
+    public function testAdminListDeletesPhotoByForm(): void
+    {
+        $photo = $this->createPhoto();
+        $admin = User::factory()->create(['level' => User::ADMIN]);
+
+        // Ссылка отправляла GET, а маршрут удаления принимает только DELETE
+        $this->actingAs($admin)
+            ->get('/admin/photos')
+            ->assertOk()
+            ->assertSee('action="' . route('admin.photos.delete', ['id' => $photo->id, 'page' => 1]) . '" method="post"', false);
+
+        $this->actingAs($admin)
+            ->delete('/admin/photos/' . $photo->id . '/delete?page=2')
+            ->assertRedirect(route('admin.photos.index', ['page' => 2]));
+
+        $this->assertNull($photo->fresh());
+    }
+
     private function pendingFile(): File
     {
         return File::factory()->create([

@@ -37,7 +37,7 @@
 
                 <a class="dropdown-item" href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}">{{ __('main.change') }}</a>
                 <a class="dropdown-item" href="{{ route('admin.topics.move', ['id' => $topic->id]) }}">{{ __('main.move') }}</a>
-                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_delete_topic') }}')">
+                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>
@@ -73,7 +73,7 @@
         @if (! $topic->closed && getUser('id') === $topic->user_id && getUser('point') >= setting('editforumpoint'))
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-lock"></i>
-                <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('forum::forums.confirm_close_topic') }}')">
+                <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
                     @csrf
                     <button class="btn btn-link p-0 align-baseline">{{ __('main.close') }}</button>
                 </form>

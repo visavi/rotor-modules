@@ -20,6 +20,25 @@
 
 > Историческое исключение: переход хранения дат с timestamp на datetime вошёл в 14.1.0 — до принятия этих правил. Для него действует мост (`SITETIME`, `dateFixed()` с int/string), который будет удалён в 15.0.
 
+## Что удаляется в 15.0
+
+Мосты 14.x. Модуль или тема, которые на них опираются, на 15.0 перестанут работать — переводить заранее:
+
+| Устарело | Чем заменить |
+|---|---|
+| `App\Classes\*` | `App\Support\*` — те же классы под новым namespace |
+| `SITETIME`, `dateFixed()` с int или строкой | колонки `DATETIME`, `now()` и `dateFixed()` с датой Carbon |
+| `antimat()` | ничего: касты `HtmlCast` и `TextCast` применяют фильтры при выводе |
+| `setFlash()`, `setInput()`, `getInput()` | `redirect()->with()`, `->withInput()`, `old()` |
+| `sendMail()` | `app(MailService::class)->send()` |
+| `getAvailableLanguages()` | `App\Support\Locale::available()` |
+| `$user->newprivat` | `$user->getCountNewMessages()` |
+| `App\Support\Validator` | FormRequest, в методе — `Validator::make()` из Laravel |
+| адрес `/mails`, `route('mails.index')` | `route('feedback.index')` из модуля Feedback |
+| адрес `/admin/modules/module?module=Name` | `/admin/modules/{name}` в kebab-case |
+
+Устаревшие классы и функции помечает phpstan с `phpstan-deprecation-rules`. `SITETIME`, `$user->newprivat` и старые адреса он не видит — их искать поиском по модулю.
+
 ## Что считается публичным API
 
 На это модули могут опираться — внутри мажора оно стабильно:

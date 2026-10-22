@@ -27,7 +27,7 @@
                 <i class="fa fa-archive"></i> <b>{{ basename($file) }}</b> ({{ formatFileSize($file) }})
 
                 <div class="float-end">
-                    <form action="/admin/backups/delete" method="post" class="d-inline">
+                    <form action="/admin/backups/delete" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('backup::backup.confirm_delete') }}">
                         @csrf
                         @method('DELETE')
                         <input type="hidden" name="file" value="{{ basename($file) }}">

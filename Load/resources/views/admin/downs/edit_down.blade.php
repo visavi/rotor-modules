@@ -36,20 +36,20 @@
     @if (isAdmin('boss'))
         @if ($down->active)
             <i class="fa fa-pencil-alt"></i>
-            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('load::loads.confirm_unpublish_down') }}')">
+            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('load::loads.confirm_unpublish_down') }}">
                 @csrf
                 <button class="btn btn-link p-0 me-3">{{ __('main.unpublish') }}</button>
             </form>
         @else
             <i class="fa fa-pencil-alt"></i>
-            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('load::loads.confirm_publish_down') }}')">
+            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('load::loads.confirm_publish_down') }}">
                 @csrf
                 <button class="btn btn-link p-0 me-3">{{ __('main.publish') }}</button>
             </form>
         @endif
 
         <i class="fas fa-times"></i>
-        <form action="{{ route('admin.downs.delete', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('load::loads.confirm_delete_down') }}')">
+        <form action="{{ route('admin.downs.delete', ['id' => $down->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('load::loads.confirm_delete_down') }}">
             @csrf
             @method('DELETE')
             <button class="btn btn-link p-0 me-3">{{ __('main.delete') }}</button>

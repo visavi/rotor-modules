@@ -68,6 +68,69 @@ class BackupTest extends ModuleTestCase
         }
     }
 
+    public function testIndexListsNewestFirst(): void
+    {
+        // По имени апрель шёл бы раньше января: сортировка — по времени файла
+        $january = storage_path('backups/backup_10-Jan-2026_10-00-00_test.sql');
+        $april = storage_path('backups/backup_10-Apr-2026_10-00-00_test.sql');
+
+        try {
+            file_put_contents($april, '-- april');
+            file_put_contents($january, '-- january');
+            touch($april, strtotime('2026-04-10'));
+            touch($january, strtotime('2026-01-10'));
+
+            $this->actingAs($this->boss)
+                ->get('/admin/backups')
+                ->assertOk()
+                ->assertSeeInOrder([basename($april), basename($january)])
+                ->assertSee('data-confirm="' . __('backup::backup.confirm_delete') . '"', false);
+        } finally {
+            array_map(unlink(...), array_filter([$january, $april], is_file(...)));
+        }
+    }
+
+    public function testGzipDumpIsReadable(): void
+    {
+        if (! function_exists('gzopen')) {
+            $this->markTestSkipped('zlib не установлен');
+        }
+
+        $before = $this->backups();
+
+        try {
+            $this->actingAs($this->boss)
+                ->post('/admin/backups/create', ['sheets' => ['users'], 'method' => 'gzip', 'level' => 5])
+                ->assertSessionHas('success');
+
+            $created = array_values(array_diff($this->backups(), $before));
+            $this->assertCount(1, $created);
+            $this->assertStringEndsWith('.sql.gz', $created[0]);
+            $this->assertStringContainsString("'boss_test'", (string) gzdecode((string) file_get_contents($created[0])));
+        } finally {
+            array_map(unlink(...), array_diff($this->backups(), $before));
+        }
+    }
+
+    public function testDeleteRemovesBackup(): void
+    {
+        $file = storage_path('backups/backup_01-Jan-2026_00-00-00.sql');
+        file_put_contents($file, '-- dump');
+
+        try {
+            $this->actingAs($this->boss)
+                ->delete('/admin/backups/delete', ['file' => basename($file)])
+                ->assertRedirect('admin/backups')
+                ->assertSessionHas('success');
+
+            $this->assertFileDoesNotExist($file);
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
     public function testCreateErrorsAreShownUnderTheirField(): void
     {
         $this->actingAs($this->boss)

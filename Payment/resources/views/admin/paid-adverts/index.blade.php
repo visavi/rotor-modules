@@ -42,7 +42,7 @@
 
                     <a class="ms-2" href="/admin/paid-adverts/edit-card/{{ $data->id }}"><i class="fas fa-pencil-alt text-muted"></i></a>
                     @include('payment::admin/paid-adverts/_stop_icon')
-                    <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('payment::payments.paid_adverts.confirm_delete_advert') }}')">
+                    <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('payment::payments.paid_adverts.confirm_delete_advert') }}">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-link p-0"><i class="fa fa-times text-muted"></i></button>
@@ -65,7 +65,7 @@
                     <div class="float-end">
                         <a href="/admin/paid-adverts/edit/{{ $data->id }}"><i class="fas fa-pencil-alt text-muted"></i></a>
                         @include('payment::admin/paid-adverts/_stop_icon')
-                        <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('payment::payments.paid_adverts.confirm_delete_advert') }}')">
+                        <form action="/admin/paid-adverts/delete/{{ $data->id }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('payment::payments.paid_adverts.confirm_delete_advert') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link p-0"><i class="fa fa-times text-muted"></i></button>

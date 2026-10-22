@@ -32,8 +32,10 @@ class BackupController extends AdminController
      */
     public function index(): View
     {
-        $files = glob(storage_path('backups/*.{zip,gz,bz2,sql}'), GLOB_BRACE);
-        arsort($files);
+        $files = glob(storage_path('backups/*.{zip,gz,bz2,sql}'), GLOB_BRACE) ?: [];
+
+        // По времени создания: в имени дата d-M-Y, по строке апрель шёл бы раньше января
+        usort($files, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
 
         return view('backup::admin/backups/index', compact('files'));
     }

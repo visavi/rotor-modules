@@ -16,6 +16,7 @@ return [
     'in_stock'               => 'In stock',
     'participants'           => 'Participants',
     'no_participants'        => 'No participants yet!',
+    'participant_bet'        => 'Bet: :number',
 
     'lottery_not_activated'    => 'The lottery is not activated yet!',
     'already_bought_ticket'    => 'You have already bought a ticket! You cannot buy twice!',

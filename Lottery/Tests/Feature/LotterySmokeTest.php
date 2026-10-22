@@ -50,6 +50,19 @@ class LotterySmokeTest extends ModuleTestCase
         $this->assertSame(950, $this->user->fresh()->money);
     }
 
+    public function testParticipantBetIsShown(): void
+    {
+        $this->lottery();
+
+        $this->actingAs($this->user)->post('/lottery/buy', ['number' => 42]);
+
+        $this->actingAs($this->user)
+            ->get('/lottery')
+            ->assertOk()
+            ->assertSee('id="lottery-users"', false)
+            ->assertSee(__('lottery::lottery.participant_bet', ['number' => 42]));
+    }
+
     public function testSecondTicketIsRejected(): void
     {
         $this->lottery();

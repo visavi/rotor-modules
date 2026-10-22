@@ -26,9 +26,8 @@ class PhpInfoController extends Controller
             $iniInfo = ini_get_all();
         }
 
-        if ($gdInfo = gd_info()) {
-            $gdInfo = parseVersion($gdInfo['GD Version']);
-        }
+        // Без расширения GD функции нет: страница падала бы, а не показывала остальное
+        $gdInfo = function_exists('gd_info') ? parseVersion(gd_info()['GD Version']) : null;
 
         $dbVersion = DB::select('SELECT VERSION() as version')[0]->version ?? 'N/A';
 

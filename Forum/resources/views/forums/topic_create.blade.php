@@ -45,8 +45,6 @@
 
             @php
                 $checkVote = (bool) old('vote');
-                $checked = $checkVote ? ' checked' : '';
-                $display = $checkVote ? '' : ' style="display: none"';
             @endphp
 
             @include('app/_upload_file', [
@@ -57,10 +55,11 @@
             <label class="form-check mb-3">
                 {{-- Снятый флажок браузер не отправляет, без нуля запрос не узнает, что его сняли --}}
                 <input type="hidden" name="vote" value="0">
-                <input type="checkbox" class="form-check-input" name="vote" onchange="showVoteForm();"{!! $checked !!}> {{ __('forum::forums.create_vote') }}
+                {{-- autocomplete="off": браузер не восстановит флажок после перезагрузки, иначе он разойдётся с формой голосования --}}
+                <input type="checkbox" class="form-check-input" name="vote" value="1" autocomplete="off" data-bs-toggle="collapse" data-bs-target="#vote-form" aria-controls="vote-form" aria-expanded="{{ $checkVote ? 'true' : 'false' }}" @checked($checkVote)> {{ __('forum::forums.create_vote') }}
             </label>
 
-            <div class="js-vote-form"{!! $display !!}>
+            <div class="collapse{{ $checkVote ? ' show' : '' }}" id="vote-form">
                 <div class="mb-3{{ hasError('question') }}">
 
                     <label for="inputQuestion" class="form-label">{{ __('forum::forums.question') }}:</label>
@@ -81,13 +80,3 @@
     <a href="/search">{{ __('main.search') }}</a><br>
     {{ __('forum::forums.create_rule3') }}<br><br>
 @stop
-
-@push('scripts')
-    <script type="module">
-        window.showVoteForm = function() {
-            const el = document.querySelector('.js-vote-form');
-            if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
-            return false;
-        };
-    </script>
-@endpush

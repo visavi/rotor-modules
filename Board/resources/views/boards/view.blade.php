@@ -21,7 +21,7 @@
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <a class="dropdown-item" href="{{ route('admin.items.edit', ['id' => $item->id]) }}">{{ __('main.edit') }}</a>
-                        <form action="{{ route('admin.items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('board::boards.confirm_delete_item') }}')">
+                        <form action="{{ route('admin.items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('board::boards.confirm_delete_item') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>

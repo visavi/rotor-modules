@@ -41,6 +41,25 @@ https://github.com/visavi/rotor-modules/releases/download/registry/registry.json
 
 ---
 
+## Создание модуля
+
+Новый модуль создаётся генератором ядра:
+
+```bash
+php artisan make:module Kanban --model=Task --admin --api
+```
+
+Флаги необязательные:
+
+- `--model=Task` — модель, миграция таблицы и фабрика для тестов
+- `--admin` — страница настроек в админке и миграция с настройками
+- `--api` — api-контроллер, ресурс и `openapi.json` (требует `--model`)
+- `--helpers`, `--config`, `--middleware` — файлы `helpers.php`, `config.php`, `middleware.php`
+
+Готовый модуль включается в разделе `/admin/modules`. Примеры полноценных модулей — `Guestbook`, `News`, `Forum`.
+
+---
+
 ## Структура модуля
 
 ```
@@ -507,7 +526,7 @@ MyModule/module.php, database/migrations/
 MyModule/module.php, hooks.php
 ```
 
-См. модуль `Template` — минимальный шаблон для старта.
+Заготовку любого из них создаёт `php artisan make:module` — см. [Создание модуля](#создание-модуля).
 
 ---
 

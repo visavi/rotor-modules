@@ -26,7 +26,7 @@
             @endif
 
             <i class="fas fa-times"></i>
-            <form action="/admin/admin-adverts/delete" method="post" class="d-inline" onsubmit="return confirm('{{ __('main.delete') }}')">
+            <form action="/admin/admin-adverts/delete" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('main.delete') }}">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-link p-0 me-3">{{ __('main.delete') }}</button>

@@ -68,31 +68,22 @@
                 {{ __('lottery::lottery.in_stock') }}: {{ plural($user->money, setting('moneyname')) }}
             </div>
 
-            <i class="fa fa-question-circle"></i> <a href="#" onclick="return showLotteryUsers()">{{ __('lottery::lottery.participants') }}</a><br>
+            <i class="fa fa-question-circle"></i> <a href="#lottery-users" data-bs-toggle="collapse" aria-controls="lottery-users" aria-expanded="false">{{ __('lottery::lottery.participants') }}</a><br>
         </div>
     @endif
 
-    <div class="section mb-3 shadow js-lottery-users" style="display: none">
-        <h5>{{ __('lottery::lottery.participants') }}:</h5>
-        @if ($today->lotteryUsers->isNotEmpty())
-            @foreach ($today->lotteryUsers as $lotteryUser)
-                {{ $lotteryUser->user->getProfile() }} Ставка: {!! $lotteryUser->number !!}<br>
-            @endforeach
-        @else
-            <div class="alert alert-info">
-                {{ __('lottery::lottery.no_participants') }}
-            </div>
-        @endif
+    <div class="collapse" id="lottery-users">
+        <div class="section mb-3 shadow">
+            <h5>{{ __('lottery::lottery.participants') }}:</h5>
+            @if ($today->lotteryUsers->isNotEmpty())
+                @foreach ($today->lotteryUsers as $lotteryUser)
+                    {{ $lotteryUser->user->getProfile() }} {{ __('lottery::lottery.participant_bet', ['number' => $lotteryUser->number]) }}<br>
+                @endforeach
+            @else
+                <div class="alert alert-info">
+                    {{ __('lottery::lottery.no_participants') }}
+                </div>
+            @endif
+        </div>
     </div>
 @stop
-
-@push('scripts')
-    <script type="module">
-        window.showLotteryUsers = function() {
-            const el = document.querySelector('.js-lottery-users');
-            if (!el) return false;
-            el.style.display = getComputedStyle(el).display === 'none' ? '' : 'none';
-            return false;
-        };
-    </script>
-@endpush

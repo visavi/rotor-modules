@@ -39,8 +39,14 @@ class EditorController extends Controller
      */
     public function save(Request $request): RedirectResponse
     {
-        $css = $request->input('css', '');
-        $js = $request->input('js', '');
+        $data = $request->validate([
+            'css' => ['nullable', 'string'],
+            'js'  => ['nullable', 'string'],
+        ]);
+
+        // Пустое поле приходит null: файл очищается
+        $css = $data['css'] ?? '';
+        $js = $data['js'] ?? '';
 
         if (! is_writable(dirname($this->cssPath))) {
             return redirect()

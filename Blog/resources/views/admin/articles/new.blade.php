@@ -29,7 +29,7 @@
                         <a href="{{ route('admin.articles.edit', ['id' => $article->id]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt"></i></a>
 
                         @if (isAdmin('boss'))
-                            <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_delete_article') }}')">
+                            <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_delete_article') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0" title="{{ __('main.delete') }}"><i class="fa fa-times"></i></button>

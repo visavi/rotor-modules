@@ -46,14 +46,17 @@
         <div class="form-check mb-3">
             {{-- Снятый флажок браузер не отправляет, без нуля запрос не узнает, что его сняли --}}
             <input type="hidden" name="delay" value="0">
-            <input type="checkbox" class="form-check-input" value="1" name="delay" id="delay" onchange="showDelayForm(this);" @checked($isDelayed)>
+            {{-- autocomplete="off": браузер не восстановит флажок после перезагрузки, иначе он разойдётся с блоком даты --}}
+            <input type="checkbox" class="form-check-input" value="1" name="delay" id="delay" autocomplete="off" data-bs-toggle="collapse" data-bs-target="#delay-published" aria-controls="delay-published" aria-expanded="{{ $isDelayed ? 'true' : 'false' }}" @checked($isDelayed)>
             <label for="delay" class="form-check-label">{{ __('blog::blogs.delay_publication') }}</label>
         </div>
 
-        <div class="col-sm-6 col-md-4 mb-3 js-published" @style(['display: none' => !$isDelayed])>
-            <label for="published_at" class="form-label">{{ __('blog::blogs.date_publication') }}</label>
-            <input class="form-control{{ hasError('published_at') }}" type="datetime-local" name="published_at" id="published_at" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}">
-            <div class="invalid-feedback">{{ textError('published_at') }}</div>
+        <div class="collapse{{ $isDelayed ? ' show' : '' }}" id="delay-published">
+            <div class="col-sm-6 col-md-4 mb-3">
+                <label for="published_at" class="form-label">{{ __('blog::blogs.date_publication') }}</label>
+                <input class="form-control{{ hasError('published_at') }}" type="datetime-local" name="published_at" id="published_at" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}">
+                <div class="invalid-feedback">{{ textError('published_at') }}</div>
+            </div>
         </div>
     @endif
 
@@ -75,13 +78,3 @@
         </button>
     @endif
 </form>
-
-@push('scripts')
-    <script type="module">
-        window.showDelayForm = function(el) {
-            const published = document.querySelector('.js-published');
-            if (published) published.style.display = el.checked ? '' : 'none';
-            return false;
-        };
-    </script>
-@endpush

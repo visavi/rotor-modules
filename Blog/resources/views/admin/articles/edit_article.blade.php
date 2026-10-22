@@ -40,20 +40,20 @@
 
     @if ($article->active)
         <i class="fa fa-pencil-alt"></i>
-        <form action="{{ route('admin.articles.publish', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_unpublish_article') }}')">
+        <form action="{{ route('admin.articles.publish', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_unpublish_article') }}">
             @csrf
             <button class="btn btn-link p-0 me-3">{{ __('main.unpublish') }}</button>
         </form>
     @else
         <i class="fa fa-pencil-alt"></i>
-        <form action="{{ route('admin.articles.publish', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_publish_article') }}')">
+        <form action="{{ route('admin.articles.publish', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_publish_article') }}">
             @csrf
             <button class="btn btn-link p-0 me-3">{{ __('main.publish') }}</button>
         </form>
     @endif
 
     <i class="fas fa-times"></i>
-    <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirm('{{ __('blog::blogs.confirm_delete_article') }}')">
+    <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_delete_article') }}">
         @csrf
         @method('DELETE')
         <button class="btn btn-link p-0 me-3">{{ __('main.delete') }}</button>
