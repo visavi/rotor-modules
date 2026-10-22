@@ -13,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Modules\Payment\Console\CleanCardImages;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
@@ -725,6 +726,194 @@ class PaidCardTest extends ModuleTestCase
         $this->assertFileExists(public_path($used));
         $this->assertFileDoesNotExist(public_path($orphan));
         $this->assertFileExists(public_path($fresh));
+    }
+
+    public function testCardRenewFormOnOwnFullPlace(): void
+    {
+        $user = User::factory()->create();
+        $card = $this->createCard($user, ['image' => '/uploads/paid-adverts/renew.webp']);
+        $this->createCard();
+
+        // Место занято целиком, но продлеваемая карточка его не занимает
+        $this->actingAs($user)
+            ->get('/payments/my/card/renew/' . $card->id)
+            ->assertOk()
+            ->assertSee('name="renew_id" value="' . $card->id . '"', false)
+            ->assertSee('/uploads/paid-adverts/renew.webp')
+            ->assertSee('Заголовок карточки')
+            ->assertDontSee(Str::before(__('payment::payments.cards.place_full'), ':date'));
+    }
+
+    public function testMyAdvertsShowsExpiredCardWithImage(): void
+    {
+        $user = User::factory()->create();
+        $card = $this->createCard($user, ['image' => '/uploads/paid-adverts/expired.webp', 'deleted_at' => now()->subDay()]);
+
+        $this->actingAs($user)
+            ->get('/payments/my')
+            ->assertOk()
+            ->assertSee('/uploads/paid-adverts/expired.webp')
+            ->assertSee($card->renewUrl());
+    }
+
+    public function testCardRenewForeignNotFound(): void
+    {
+        $user = User::factory()->create();
+        $foreign = $this->createCard(User::factory()->create());
+
+        $this->actingAs($user)->get('/payments/my/card/renew/' . $foreign->id)->assertNotFound();
+
+        $this->actingAs($user)
+            ->post('/payments/card/calculate', [
+                'place'    => PaidAdvert::CARD_SIDEBAR,
+                'title'    => 'Хостинг для сайтов',
+                'url'      => 'https://example.com',
+                'term'     => 5,
+                'email'    => 'test@example.com',
+                'renew_id' => $foreign->id,
+            ])
+            ->assertNotFound();
+    }
+
+    public function testCardCalculateRenewOnOwnFullPlace(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $card = $this->createCard($user, ['image' => '/uploads/paid-adverts/renew.webp']);
+        $this->createCard();
+
+        $this->actingAs($user)
+            ->post('/payments/card/calculate', [
+                'place'    => PaidAdvert::CARD_SIDEBAR,
+                'title'    => 'Хостинг для сайтов',
+                'url'      => 'https://example.com',
+                'term'     => 5,
+                'email'    => 'test@example.com',
+                'renew_id' => $card->id,
+            ])
+            ->assertOk()
+            ->assertSee('100')
+            ->assertSee('/uploads/paid-adverts/renew.webp')
+            ->assertSee(dateFixed(now()->addDays(15)));
+    }
+
+    public function testCardPayRenewOnOwnFullPlace(): void
+    {
+        $user = User::factory()->create();
+        $card = $this->createCard($user);
+        $this->createCard();
+
+        $data = $this->cardData([
+            'place'    => PaidAdvert::CARD_SIDEBAR,
+            'prices'   => ['total' => 100, 'place' => 100],
+            'renew_id' => $card->id,
+        ]);
+
+        $this->actingAs($user);
+        $service = app(PaymentService::class);
+
+        $this->assertNull($service->validateCardOrder($data));
+        $this->assertNotNull($service->validateCardOrder([...$data, 'renew_id' => null]));
+    }
+
+    public function testFulfillRenewCardKeepsImageAndExtendsFromEnd(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $image = $this->makeImageFile('keep');
+        $card = $this->createCard($user, ['place' => PaidAdvert::CARD_FEED_MIDDLE, 'image' => $image]);
+
+        $this->fulfillCardRenew($user, $card);
+
+        $card->refresh();
+        $this->assertDatabaseCount('paid_adverts', 1);
+        $this->assertSame(['Хостинг для сайтов'], $card->names);
+        $this->assertSame($image, $card->image);
+        $this->assertFileExists(public_path($image));
+        $this->assertSame(now()->addDays(15)->getTimestamp(), $card->deleted_at->getTimestamp());
+    }
+
+    public function testFulfillRenewCardReplacesImageAndNotifiesBoss(): void
+    {
+        $boss = User::factory()->boss()->create(['language' => 'ru']);
+        $user = User::factory()->create();
+        $old = $this->makeImageFile('old');
+        $new = $this->makeImageFile('new');
+        $card = $this->createCard($user, ['image' => $old]);
+
+        $this->fulfillCardRenew($user, $card, ['image' => $new]);
+
+        $this->assertSame($new, $card->fresh()->image);
+        $this->assertFileDoesNotExist(public_path($old));
+
+        $message = Message::query()->where('user_id', $boss->id)->sole();
+        $this->assertStringContainsString('/admin/paid-adverts/edit-card/' . $card->id, $message->text);
+    }
+
+    public function testFulfillRenewCardRemovesImage(): void
+    {
+        $user = User::factory()->create();
+        $old = $this->makeImageFile('old');
+        $card = $this->createCard($user, ['image' => $old]);
+
+        $this->fulfillCardRenew($user, $card, ['remove_image' => true]);
+
+        $this->assertNull($card->fresh()->image);
+        $this->assertFileDoesNotExist(public_path($old));
+    }
+
+    public function testFulfillRenewCardOnPricierPlaceRecalculatesRemainder(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $card = $this->createCard($user, ['deleted_at' => now()->addDays(10)]);
+
+        // Сайдбар 20 в сутки, середина ленты 30: 10 оставшихся дней становятся 10 × 20 / 30
+        $this->fulfillCardRenew($user, $card);
+
+        $card->refresh();
+        $this->assertSame(PaidAdvert::CARD_FEED_MIDDLE, $card->place);
+        $this->assertSame(
+            now()->addDays(5)->addSeconds(intdiv(10 * 86400 * 20, 30))->getTimestamp(),
+            $card->deleted_at->getTimestamp(),
+        );
+    }
+
+    public function testFulfillRenewCardOnFreePlaceKeepsRemainder(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        // Место без цены (добавлена админом бесплатно): пересчитать остаток не через что
+        $card = $this->createCard($user, ['place' => PaidAdvert::CARD_FEED_END, 'deleted_at' => now()->addDays(10)]);
+
+        $this->fulfillCardRenew($user, $card);
+
+        $this->assertSame(now()->addDays(15)->getTimestamp(), $card->fresh()->deleted_at->getTimestamp());
+    }
+
+    /**
+     * Выполняет оплаченный заказ продления карточки
+     */
+    private function fulfillCardRenew(User $user, PaidAdvert $card, array $data = []): void
+    {
+        $order = Order::factory()->create([
+            'user_id'     => $user->id,
+            'type'        => Order::TYPE_CARD,
+            'amount'      => 150,
+            'currency'    => 'RUB',
+            'token'       => 'test-token-renew-123456',
+            'payment_id'  => 'pay-renew',
+            'status'      => YooKassaService::PENDING,
+            'email'       => 'test@example.com',
+            'description' => 'Рекламная карточка',
+            'data'        => $this->cardData([...$data, 'renew_id' => $card->id]),
+        ]);
+
+        app(PaymentService::class)->fulfill($order);
     }
 
     public function testSettingsPageShowsCardFields(): void

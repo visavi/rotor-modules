@@ -16,13 +16,13 @@
     <h2 class="h5">{{ __('payment::payments.cards.preview') }}</h2>
 
     <div class="row g-3 mb-3">
-        <div class="col-md-8">
-            @include('payment::card/_card', ['layout' => 'feed'])
-        </div>
         <div class="col-md-4">
             <div class="section shadow">
-                @include('payment::card/_card', ['layout' => 'sidebar'])
+                @include('payment::card/_card', ['card' => $preview, 'layout' => 'sidebar'])
             </div>
+        </div>
+        <div class="col-md-8">
+            @include('payment::card/_card', ['card' => $preview, 'layout' => 'feed'])
         </div>
     </div>
 
@@ -31,6 +31,12 @@
             <span>{{ __('payment::payments.cards.place') }}: {{ __('payment::payments.cards.' . $card['place']) }}</span>
             <span>{{ plural($card['term'], __('main.plural_days')) }}</span>
         </div>
+        @if ($renewUntil)
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <span>{{ __('payment::payments.paid_adverts.renew_until') }}</span>
+                <span>{{ dateFixed($renewUntil) }}</span>
+            </div>
+        @endif
         <div class="py-2 border-bottom">{{ $card['email'] }}</div>
         <div class="d-flex justify-content-between align-items-start pt-2">
             <div class="h5 mb-0">{{ __('payment::payments.total_paid') }}:</div>

@@ -35,10 +35,12 @@ Route::middleware(['web', 'check.user'])
         Route::post('/card/calculate', [CardController::class, 'calculate']);
         Route::get('/my/card/{id}', [CardController::class, 'edit']);
         Route::post('/my/card/{id}', [CardController::class, 'update']);
+        Route::get('/my/card/renew/{id}', [CardController::class, 'renew']);
 
         Route::get('/my', [AdvertController::class, 'my']);
         Route::get('/my/edit/{id}', [AdvertController::class, 'edit']);
         Route::post('/my/edit/{id}', [AdvertController::class, 'update']);
+        Route::get('/my/renew/{id}', [AdvertController::class, 'renew']);
 
         Route::get('/balance', [BalanceController::class, 'index']);
         Route::post('/balance', [BalanceController::class, 'pay']);

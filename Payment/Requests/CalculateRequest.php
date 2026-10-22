@@ -8,21 +8,54 @@ use Modules\Payment\Models\PaidAdvert;
 
 class CalculateRequest extends FormRequest
 {
+    private ?PaidAdvert $renewed = null;
+
+    /**
+     * Продлеваемая реклама текущего пользователя, null — новая покупка
+     *
+     * Истёкшую тоже можно продлить. Чужая или карточка — 404,
+     * гость своей рекламы не имеет
+     */
+    public function renewed(): ?PaidAdvert
+    {
+        if (! $this->filled('renew_id')) {
+            return null;
+        }
+
+        if (! $this->renewed) {
+            $advert = PaidAdvert::query()
+                ->own()
+                ->whereNotIn('place', PaidAdvert::CARD_PLACES)
+                ->find((int) $this->input('renew_id'));
+
+            if (! $advert) {
+                abort(404, __('payment::payments.paid_adverts.not_found'));
+            }
+
+            $this->renewed = $advert;
+        }
+
+        return $this->renewed;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      */
     public function rules(): array
     {
+        $this->renewed();
+
         return [
-            'place'   => ['required', 'in:' . implode(',', PaidAdvert::PLACES)],
-            'url'     => ['required', 'url', 'max:100'],
-            'names'   => ['required', 'array', 'min:1'],
-            'names.*' => ['string', 'min:5', 'max:35', 'distinct'],
-            'color'   => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
-            'bold'    => ['sometimes', 'boolean'],
-            'term'    => ['required', 'integer', 'min:1', 'max:365'],
-            'comment' => ['nullable', 'string', 'max:255'],
-            'email'   => ['required', new EmailRule(), 'max:100'],
+            'place'    => ['required', 'in:' . implode(',', PaidAdvert::PLACES)],
+            'url'      => ['required', 'url', 'max:100'],
+            'names'    => ['required', 'array', 'min:1'],
+            'names.*'  => ['string', 'min:5', 'max:35', 'distinct'],
+            'color'    => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],
+            'bold'     => ['sometimes', 'boolean'],
+            'term'     => ['required', 'integer', 'min:1', 'max:365'],
+            'comment'  => ['nullable', 'string', 'max:255'],
+            'email'    => ['required', new EmailRule(), 'max:100'],
+            'renew_id' => ['nullable', 'integer'],
         ];
     }
 

@@ -7,6 +7,7 @@ namespace Modules\Payment\Services;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
 use RuntimeException;
@@ -19,6 +20,7 @@ class PaymentService
      */
     public function __construct(
         private readonly YooKassaService $yooKassaService,
+        private readonly CardImageService $cardImageService,
     ) {
         //
     }
@@ -75,22 +77,54 @@ class PaymentService
     }
 
     /**
-     * Создаёт оплаченную рекламную карточку
+     * Создаёт оплаченную рекламную карточку или продлевает существующую
      *
      * Карточка встаёт на сайт сразу, без проверки: админы узнают о ней
-     * из уведомления и снимают нарушителя сами
+     * из уведомления и снимают нарушителя сами. При продлении уведомление
+     * приходит, только если сменили картинку — как при правке
+     *
+     * В данных продления картинка — только новая: старую берём из записи
+     * в момент оплаты, путь из расчёта мог устареть после правки
      */
     public function createCard(Order $order): PaidAdvert
     {
+        $data = $order->data;
+
+        $attributes = [
+            'place'   => $data['place'],
+            'url'     => $data['url'],
+            'names'   => [$data['title']],
+            'text'    => $data['text'],
+            'comment' => $data['description'] . ' #' . $order->id,
+        ];
+
+        $card = $this->findRenewed($order);
+
+        if ($card) {
+            $oldImage = $card->image;
+
+            $card->update([
+                ...$attributes,
+                'image'      => $data['image'] ?? (empty($data['remove_image']) ? $oldImage : null),
+                'deleted_at' => $this->renewEnd($card, $data),
+            ]);
+
+            $this->cardImageService->delete($oldImage);
+
+            clearCache('paidCards');
+
+            if ($data['image']) {
+                $this->notifyBosses($card, 'cards.notify_image');
+            }
+
+            return $card;
+        }
+
         $card = PaidAdvert::query()->create([
+            ...$attributes,
             'user_id'    => $order->user_id,
-            'place'      => $order->data['place'],
-            'url'        => $order->data['url'],
-            'names'      => [$order->data['title']],
-            'text'       => $order->data['text'],
-            'image'      => $order->data['image'],
-            'comment'    => $order->data['description'] . ' #' . $order->id,
-            'deleted_at' => now()->addDays((int) $order->data['term']),
+            'image'      => $data['image'],
+            'deleted_at' => now()->addDays((int) $data['term']),
         ]);
 
         clearCache('paidCards');
@@ -98,6 +132,92 @@ class PaymentService
         $this->notifyBosses($card, 'cards.notify_new');
 
         return $card;
+    }
+
+    /**
+     * Продлеваемая заказом реклама покупателя
+     *
+     * Запись могли удалить, пока шла оплата: тогда заказ создаёт новую, деньги уже списаны.
+     * Без покупателя продлевать нечего — where с null стал бы whereNull
+     */
+    private function findRenewed(Order $order): ?PaidAdvert
+    {
+        $id = (int) ($order->data['renew_id'] ?? 0);
+
+        if (! $id || ! $order->user_id) {
+            return null;
+        }
+
+        $query = PaidAdvert::query()->where('user_id', $order->user_id);
+
+        if ($order->type === Order::TYPE_CARD) {
+            $query->whereIn('place', PaidAdvert::CARD_PLACES);
+        } else {
+            $query->whereNotIn('place', PaidAdvert::CARD_PLACES);
+        }
+
+        return $query->find($id);
+    }
+
+    /**
+     * Конец срока после продления
+     *
+     * Остаток срока активной рекламы не пропадает, а пересчитывается по цене
+     * новых опций: 9 дней по 35 с добавленным цветом за 3 станут 9 × 35 / 38 ≈ 8,3 дня.
+     * Иначе за день с жирным шрифтом жирным стал бы весь остаток. С прежними опциями
+     * цена та же — продление просто от конца срока. Цены текущие для обеих сторон:
+     * тарифы могли смениться после покупки
+     */
+    public function renewEnd(PaidAdvert $advert, array $data): CarbonImmutable
+    {
+        $end = CarbonImmutable::now()->addDays((int) $data['term']);
+
+        if (! $advert->isActive()) {
+            return $end;
+        }
+
+        $left = $advert->deleted_at->getTimestamp() - now()->getTimestamp();
+        $oldPrice = $this->dailyPrice($this->pricingData($advert));
+        $newPrice = $this->dailyPrice($data);
+
+        // Бесплатное место (цена 0) пересчитать не через что — остаток как есть
+        if ($oldPrice > 0 && $newPrice > 0) {
+            $left = intdiv($left * $oldPrice, $newPrice);
+        }
+
+        return $end->addSeconds($left);
+    }
+
+    /**
+     * Цена суток рекламы с опциями из данных заказа
+     */
+    private function dailyPrice(array $data): int
+    {
+        $data['term'] = 1;
+
+        $prices = ($data['type'] ?? null) === Order::TYPE_CARD
+            ? $this->calculateCard($data)
+            : $this->calculateAdvert($data);
+
+        return (int) $prices['total'];
+    }
+
+    /**
+     * Платные опции рекламы в виде данных заказа — для расчёта цены
+     */
+    private function pricingData(PaidAdvert $advert): array
+    {
+        if ($advert->isCard()) {
+            return ['type' => Order::TYPE_CARD, 'place' => $advert->place];
+        }
+
+        return [
+            'type'  => Order::TYPE_ADVERT,
+            'place' => $advert->place,
+            'names' => $advert->names,
+            'color' => $advert->color,
+            'bold'  => $advert->bold,
+        ];
     }
 
     /**
@@ -191,20 +311,38 @@ class PaymentService
     }
 
     /**
-     * Create paid advert
+     * Создаёт оплаченную рекламную ссылку или продлевает существующую
+     *
+     * Комментарий покупателя (до 255 символов) вместе с описанием заказа
+     * не влезает в колонку на 191: строгий MySQL уронил бы уже оплаченный заказ
      */
     public function createAdvert(Order $order): PaidAdvert
     {
-        $advert = PaidAdvert::query()->create([
-            'user_id'    => $order->user_id,
-            'place'      => $order->data['place'],
-            'url'        => $order->data['url'],
-            'names'      => $order->data['names'],
-            'color'      => $order->data['color'],
-            'bold'       => $order->data['bold'],
-            'comment'    => $order->data['description'] . ' #' . $order->id . ' ' . $order->data['comment'],
-            'deleted_at' => now()->addDays((int) $order->data['term']),
-        ]);
+        $data = $order->data;
+
+        $attributes = [
+            'place'   => $data['place'],
+            'url'     => $data['url'],
+            'names'   => $data['names'],
+            'color'   => $data['color'],
+            'bold'    => $data['bold'],
+            'comment' => Str::limit($data['description'] . ' #' . $order->id . ' ' . $data['comment'], 191, ''),
+        ];
+
+        $advert = $this->findRenewed($order);
+
+        if ($advert) {
+            $advert->update([
+                ...$attributes,
+                'deleted_at' => $this->renewEnd($advert, $data),
+            ]);
+        } else {
+            $advert = PaidAdvert::query()->create([
+                ...$attributes,
+                'user_id'    => $order->user_id,
+                'deleted_at' => now()->addDays((int) $data['term']),
+            ]);
+        }
 
         clearCache('paidAdverts');
 
@@ -277,11 +415,12 @@ class PaymentService
     /**
      * Места карточек, которые продаются, с ценой и занятостью
      *
-     * freeAt — когда освободится ближайшее, если место занято целиком
+     * freeAt — когда освободится ближайшее, если место занято целиком.
+     * Продлеваемая карточка ($exceptId) своё место не занимает
      *
      * @return array<string, array{name: string, price: int, taken: int, limit: int, freeAt: ?CarbonImmutable}>
      */
-    public function getCardPlaces(): array
+    public function getCardPlaces(?int $exceptId = null): array
     {
         $limit = $this->getCardLimit();
         $places = [];
@@ -296,6 +435,7 @@ class PaymentService
             $active = PaidAdvert::query()
                 ->active()
                 ->where('place', $place)
+                ->when($exceptId, static fn ($query) => $query->whereKeyNot($exceptId))
                 ->orderBy('deleted_at')
                 ->pluck('deleted_at');
 
@@ -343,7 +483,7 @@ class PaymentService
             return __('payment::payments.cards.payload_expired');
         }
 
-        if (! $this->isCardPlaceAvailable((string) $data['place'])) {
+        if (! $this->isCardPlaceAvailable((string) $data['place'], $data['renew_id'] ?? null)) {
             return __('payment::payments.cards.place_unavailable');
         }
 
@@ -357,9 +497,9 @@ class PaymentService
     /**
      * Можно ли купить карточку на месте: продаётся и есть свободное
      */
-    public function isCardPlaceAvailable(string $place): bool
+    public function isCardPlaceAvailable(string $place, ?int $exceptId = null): bool
     {
-        $info = $this->getCardPlaces()[$place] ?? null;
+        $info = $this->getCardPlaces($exceptId)[$place] ?? null;
 
         return $info && $info['taken'] < $info['limit'];
     }

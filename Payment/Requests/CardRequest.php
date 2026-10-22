@@ -5,18 +5,50 @@ namespace Modules\Payment\Requests;
 use App\Rules\EmailRule;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\Payment\Models\PaidAdvert;
 use Modules\Payment\Services\PaymentService;
 
 class CardRequest extends FormRequest
 {
     use CardFieldsTrait;
 
+    private ?PaidAdvert $renewed = null;
+
+    /**
+     * Продлеваемая карточка текущего пользователя, null — новая покупка
+     *
+     * Истёкшую тоже можно продлить, чужая — 404
+     */
+    public function renewed(): ?PaidAdvert
+    {
+        if (! $this->filled('renew_id')) {
+            return null;
+        }
+
+        if (! $this->renewed) {
+            $card = PaidAdvert::query()
+                ->own()
+                ->whereIn('place', PaidAdvert::CARD_PLACES)
+                ->find((int) $this->input('renew_id'));
+
+            if (! $card) {
+                abort(404, __('payment::payments.paid_adverts.not_found'));
+            }
+
+            $this->renewed = $card;
+        }
+
+        return $this->renewed;
+    }
+
     /**
      * Get the validation rules that apply to the request.
+     *
+     * Продлеваемая карточка своё место не занимает
      */
     public function rules(): array
     {
-        $places = app(PaymentService::class)->getCardPlaces();
+        $places = app(PaymentService::class)->getCardPlaces($this->renewed()?->id);
 
         return [
             'place' => [
@@ -33,6 +65,9 @@ class CardRequest extends FormRequest
             ...$this->cardRules(),
             'term'  => ['required', 'integer', 'min:1', 'max:365'],
             'email' => ['required', new EmailRule(), 'max:100'],
+
+            'renew_id'     => ['nullable', 'integer'],
+            'remove_image' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -53,6 +88,8 @@ class CardRequest extends FormRequest
      */
     public function getRedirectUrl(): string
     {
-        return '/payments/card';
+        $card = $this->renewed();
+
+        return $card ? '/payments/my/card/renew/' . $card->id : '/payments/card';
     }
 }

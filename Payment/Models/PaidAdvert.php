@@ -24,6 +24,7 @@ use Illuminate\Support\Str;
  * @property array           $names
  * @property string|null     $text
  * @property string|null     $image
+ * @property string|null     $comment
  * @property string          $color
  * @property bool            $bold
  * @property int|null        $user_id
@@ -132,13 +133,40 @@ class PaidAdvert extends Model
     }
 
     /**
+     * Реклама текущего пользователя
+     *
+     * whereNotNull обязателен: у гостя auth()->id() — null, и where превратился бы
+     * в whereNull, отдав рекламу, купленную гостями
+     */
+    public function scopeOwn(Builder $query): Builder
+    {
+        return $query
+            ->whereNotNull('user_id')
+            ->where('user_id', auth()->id());
+    }
+
+    /**
      * Активная реклама текущего пользователя
      */
     public function scopeOwnActive(Builder $query): Builder
     {
-        return $query
-            ->where('user_id', auth()->id())
-            ->where('deleted_at', '>', now());
+        return $this->scopeActive($this->scopeOwn($query));
+    }
+
+    /**
+     * Срок рекламы не истёк
+     */
+    public function isActive(): bool
+    {
+        return $this->deleted_at->isFuture();
+    }
+
+    /**
+     * Адрес продления рекламы владельцем
+     */
+    public function renewUrl(): string
+    {
+        return ($this->isCard() ? '/payments/my/card/renew/' : '/payments/my/renew/') . $this->id;
     }
 
     /**

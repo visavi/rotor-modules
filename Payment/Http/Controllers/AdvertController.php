@@ -50,6 +50,7 @@ class AdvertController extends Controller
     public function calculate(CalculateRequest $request): View
     {
         $validated = $request->validated();
+        $renewed = $request->renewed();
 
         $advert = [
             'type'        => Order::TYPE_ADVERT,
@@ -62,6 +63,7 @@ class AdvertController extends Controller
             'comment'     => $validated['comment'],
             'email'       => $validated['email'],
             'description' => __('payment::payments.payment_order'),
+            'renew_id'    => $renewed?->id,
         ];
 
         $prices = $this->paymentService->calculateAdvert($advert);
@@ -69,7 +71,9 @@ class AdvertController extends Controller
 
         $data = Crypt::encrypt($advert);
 
-        return view('payment::advert/calculate', compact('advert', 'data'));
+        $renewUntil = $renewed ? $this->paymentService->renewEnd($renewed, $advert) : null;
+
+        return view('payment::advert/calculate', compact('advert', 'data', 'renewUntil'));
     }
 
     /**
@@ -85,7 +89,9 @@ class AdvertController extends Controller
             if (($data['type'] ?? null) === Order::TYPE_CARD
                 && $error = $this->paymentService->validateCardOrder($data)
             ) {
-                return redirect('/payments/card')->withErrors($error);
+                $url = empty($data['renew_id']) ? '/payments/card' : '/payments/my/card/renew/' . $data['renew_id'];
+
+                return redirect($url)->withErrors($error);
             }
 
             $order = $this->orderService->createOrder($data);
@@ -115,12 +121,23 @@ class AdvertController extends Controller
 
     /**
      * Моя реклама
+     *
+     * Истёкшая — за последние дни из config.php модуля, её можно продлить.
+     * Конфиг кэшируется вместе со списком модулей: пока кэш не сброшен,
+     * нового ключа в нём нет, и без значения по умолчанию список был бы пуст
      */
     public function my(): View
     {
         $adverts = PaidAdvert::query()
             ->ownActive()
             ->orderByDesc('created_at')
+            ->get();
+
+        $expired = PaidAdvert::query()
+            ->own()
+            ->where('deleted_at', '<=', now())
+            ->where('deleted_at', '>', now()->subDays((int) config('payment.renew_expired_days', 90)))
+            ->orderByDesc('deleted_at')
             ->get();
 
         // Неоплаченные заказы, у которых страница оплаты ещё жива
@@ -133,7 +150,27 @@ class AdvertController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('payment::advert/my', compact('adverts', 'pendingOrders'));
+        return view('payment::advert/my', compact('adverts', 'expired', 'pendingOrders'));
+    }
+
+    /**
+     * Продление своей рекламы: форма покупки с данными рекламы, всё можно поменять
+     */
+    public function renew(int $id): View
+    {
+        $advert = PaidAdvert::query()->own()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find($id);
+
+        if (! $advert) {
+            abort(404, __('payment::payments.paid_adverts.not_found'));
+        }
+
+        // В комментарии записи — служебное описание заказа, покупателю его не подставляем
+        $advert->comment = null;
+
+        $places = $advert->getPlaces();
+        $prices = $this->paymentService->getPrices();
+
+        return view('payment::advert/renew', compact('advert', 'places', 'prices'));
     }
 
     /**

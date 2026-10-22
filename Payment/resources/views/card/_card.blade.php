@@ -1,4 +1,5 @@
-{{-- Рекламная карточка: $card — массив title, text, url, image; $layout — feed (картинка слева) или sidebar (картинка сверху) --}}
+{{-- Рекламная карточка: $card — массив title, text, url, image; $layout — feed (картинка слева) или sidebar (картинка сверху);
+     $footer — необязательный партиал под содержимым ленточной карточки (срок и действия владельца) --}}
 @php
     $host = parse_url($card['url'], PHP_URL_HOST) ?: $card['url'];
 @endphp
@@ -35,5 +36,11 @@
                 <div class="small text-muted"><i class="fas fa-link"></i> {{ $host }}</div>
             </div>
         </div>
+
+        @isset($footer)
+            <div class="border-top mt-2 pt-2">
+                @include($footer)
+            </div>
+        @endisset
     </div>
 @endif

@@ -80,6 +80,14 @@ return [
         'my_empty'              => 'You have no active adverts!',
         'advert_saved'          => 'Advert saved successfully!',
         'option_not_paid'       => 'option was not paid',
+        'renew'                 => 'Renew',
+        'renew_advert'          => 'Renew advert',
+        'renew_shown'           => 'Shown until :date',
+        'expired_title'         => 'Expired adverts',
+        'renew_active'          => 'The remaining term is kept and recalculated at the new price if options change',
+        'renew_expired_at'      => 'Expired on :date',
+        'renew_expired'         => 'The advert will reappear right after payment',
+        'renew_until'           => 'Shown until',
     ],
     'cards' => [
         'title'             => 'Advert banners',
@@ -114,5 +122,6 @@ return [
         'price_changed'     => 'The price has changed, please place the order again',
         'login_link'        => 'Sign in',
         'edit'              => 'Edit banner',
+        'renew'             => 'Renew banner',
     ],
 ];

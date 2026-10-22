@@ -91,6 +91,16 @@
                     <span>{{ plural($advert['term'], __('main.plural_days')) }}</span>
                 </div>
 
+                @if ($renewUntil)
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div>
+                            <i class="fa-solid fa-rotate-right text-muted me-2"></i>
+                            {{ __('payment::payments.paid_adverts.renew_until') }}
+                        </div>
+                        <span>{{ dateFixed($renewUntil) }}</span>
+                    </div>
+                @endif
+
                 <!-- Email -->
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>

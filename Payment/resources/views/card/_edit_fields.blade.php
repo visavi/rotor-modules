@@ -1,4 +1,4 @@
-{{-- Поля правки карточки: общие для владельца и админки --}}
+{{-- Поля карточки: общие для покупки, правки владельцем и админки --}}
 <div class="mb-3">
     <label for="title" class="form-label">{{ __('payment::payments.cards.heading') }}:</label>
     <input class="form-control{{ hasError('title') }}" id="title" name="title" type="text" value="{{ old('title', $card->names[0] ?? '') }}" minlength="5" maxlength="60" required>

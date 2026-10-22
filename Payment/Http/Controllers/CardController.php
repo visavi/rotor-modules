@@ -32,9 +32,10 @@ class CardController extends Controller
      */
     public function index(): View
     {
+        $card = new PaidAdvert();
         $places = $this->paymentService->getCardPlaces();
 
-        return view('payment::card/create', compact('places'));
+        return view('payment::card/create', compact('card', 'places'));
     }
 
     /**
@@ -47,6 +48,7 @@ class CardController extends Controller
     public function calculate(CardRequest $request): View
     {
         $validated = $request->validated();
+        $renewed = $request->renewed();
 
         $card = [
             'type'        => Order::TYPE_CARD,
@@ -59,14 +61,46 @@ class CardController extends Controller
             'email'       => $validated['email'],
             'description' => __('payment::payments.cards.order_description', ['title' => $validated['title']]),
             // Место и цена проверены сейчас: оплата старой страницы расчёта проверит их заново
-            'expires_at' => now()->addHour()->getTimestamp(),
+            'expires_at'   => now()->addHour()->getTimestamp(),
+            'renew_id'     => $renewed?->id,
+            'remove_image' => $request->boolean('remove_image'),
         ];
 
         $card['prices'] = $this->paymentService->calculateCard($card);
 
         $data = Crypt::encrypt($card);
 
-        return view('payment::card/calculate', compact('card', 'data'));
+        // Продлеваемая карточка без новой картинки показывается со своей
+        $preview = $card;
+        $renewUntil = null;
+
+        if ($renewed) {
+            $preview['image'] ??= $card['remove_image'] ? null : $renewed->image;
+            $renewUntil = $this->paymentService->renewEnd($renewed, $card);
+        }
+
+        return view('payment::card/calculate', compact('card', 'preview', 'data', 'renewUntil'));
+    }
+
+    /**
+     * Продление своей карточки: форма покупки с данными карточки, всё можно поменять
+     *
+     * Своё место карточка не занимает: продлить можно и на заполненном месте
+     */
+    public function renew(int $id): View
+    {
+        $card = PaidAdvert::query()
+            ->own()
+            ->whereIn('place', PaidAdvert::CARD_PLACES)
+            ->find($id);
+
+        if (! $card) {
+            abort(404, __('payment::payments.paid_adverts.not_found'));
+        }
+
+        $places = $this->paymentService->getCardPlaces($card->id);
+
+        return view('payment::card/renew', compact('card', 'places'));
     }
 
     /**

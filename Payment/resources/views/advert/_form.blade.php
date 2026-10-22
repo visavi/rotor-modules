@@ -1,5 +1,9 @@
 <form action="/payments/calculate" method="post" class="js-advert-form" data-prices="{{ json_encode($prices) }}">
     @csrf
+    @if ($advert->exists)
+        <input type="hidden" name="renew_id" value="{{ $advert->id }}">
+    @endif
+
     <div class="mb-3">
         <label for="place" class="form-label">{{ __('payment::payments.paid_adverts.place') }}:</label>
 

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Modules\Payment\Models\Order;
 use Modules\Payment\Models\PaidAdvert;
+use Modules\Payment\Services\PaymentService;
 use Modules\Payment\Services\YooKassaService;
 use Tests\ModuleTestCase;
 
@@ -592,6 +593,181 @@ class PaymentSmokeTest extends ModuleTestCase
             ->get('/users/' . $user->login)
             ->assertOk()
             ->assertSee('/payments/balance');
+    }
+
+    public function testMyAdvertsShowsRecentlyExpiredForRenew(): void
+    {
+        $user = User::factory()->create();
+        $expired = $this->createAdvert($user, ['names' => ['Expired advert name'], 'deleted_at' => now()->subDays(5)]);
+        $this->createAdvert($user, ['names' => ['Ancient advert name'], 'deleted_at' => now()->subDays(100)]);
+
+        $this->actingAs($user)
+            ->get('/payments/my')
+            ->assertOk()
+            ->assertSee(__('payment::payments.paid_adverts.expired_title'))
+            ->assertSee('Expired advert name')
+            ->assertSee('/payments/my/renew/' . $expired->id)
+            ->assertDontSee('Ancient advert name');
+    }
+
+    public function testRenewFormPrefilled(): void
+    {
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, [
+            'url'        => 'https://renew-site.com',
+            'names'      => ['First advert name', 'Second advert name'],
+            'comment'    => 'Оплата рекламных услуг #15',
+            'deleted_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($user)
+            ->get('/payments/my/renew/' . $advert->id)
+            ->assertOk()
+            ->assertSee('https://renew-site.com')
+            ->assertSee('Second advert name')
+            ->assertSee('name="renew_id" value="' . $advert->id . '"', false)
+            ->assertDontSee('Оплата рекламных услуг #15');
+    }
+
+    public function testRenewForeignOrCardNotFound(): void
+    {
+        $user = User::factory()->create();
+        $foreign = $this->createAdvert(User::factory()->create());
+        $card = $this->createAdvert($user, ['place' => PaidAdvert::CARD_SIDEBAR]);
+
+        $this->actingAs($user)->get('/payments/my/renew/' . $foreign->id)->assertNotFound();
+        $this->actingAs($user)->get('/payments/my/renew/' . $card->id)->assertNotFound();
+    }
+
+    public function testCalculateRenewForeignNotFound(): void
+    {
+        $foreign = $this->createAdvert(User::factory()->create());
+        $guestAdvert = PaidAdvert::factory()->create(['user_id' => null, 'deleted_at' => now()->addDay()]);
+
+        $request = [...$this->advertData(), 'names' => ['Test advert name']];
+
+        $this->actingAs(User::factory()->create())
+            ->post('/payments/calculate', [...$request, 'renew_id' => $foreign->id])
+            ->assertNotFound();
+
+        auth()->logout();
+
+        // У гостя своей рекламы нет: купленная гостем не становится «своей»
+        $this->post('/payments/calculate', [...$request, 'renew_id' => $guestAdvert->id])
+            ->assertNotFound();
+    }
+
+    public function testCalculateRenewShowsNewEnd(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true, 'deleted_at' => now()->addDays(5)]);
+
+        $this->actingAs($user)
+            ->post('/payments/calculate', [...$this->advertData(), 'renew_id' => $advert->id])
+            ->assertOk()
+            ->assertSee('410')
+            ->assertSee(dateFixed(now()->addDays(15)));
+    }
+
+    public function testFulfillRenewsActiveAdvertFromEnd(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#0000ff', 'bold' => true, 'deleted_at' => now()->addDays(5)]);
+
+        $this->fulfillRenew($user, $advert, ['names' => ['Renewed advert name']]);
+
+        $advert->refresh();
+        $this->assertDatabaseCount('paid_adverts', 1);
+        $this->assertSame(['Renewed advert name'], $advert->names);
+        $this->assertSame('#ff0000', $advert->color);
+        $this->assertSame(now()->addDays(15)->getTimestamp(), $advert->deleted_at->getTimestamp());
+    }
+
+    public function testFulfillRenewWithAddedOptionsShortensRemainder(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['deleted_at' => now()->addDays(5)]);
+
+        // Было 35 в сутки, с цветом и жирным 41: 5 оставшихся дней становятся 5 × 35 / 41
+        $this->fulfillRenew($user, $advert);
+
+        $advert->refresh();
+        $this->assertTrue($advert->bold);
+        $this->assertSame(
+            now()->addDays(10)->addSeconds(intdiv(5 * 86400 * 35, 41))->getTimestamp(),
+            $advert->deleted_at->getTimestamp(),
+        );
+    }
+
+    public function testFulfillRenewWithRemovedOptionsExtendsRemainder(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true, 'deleted_at' => now()->addDays(5)]);
+
+        // Было 41 в сутки, без цвета и жирного 35: оплаченный остаток не пропадает
+        $this->fulfillRenew($user, $advert, ['color' => null, 'bold' => 0]);
+
+        $advert->refresh();
+        $this->assertFalse($advert->bold);
+        $this->assertSame(
+            now()->addDays(10)->addSeconds(intdiv(5 * 86400 * 41, 35))->getTimestamp(),
+            $advert->deleted_at->getTimestamp(),
+        );
+    }
+
+    public function testFulfillRenewsExpiredAdvertFromNow(): void
+    {
+        $this->freezeSecond();
+
+        $user = User::factory()->create();
+        $advert = $this->createAdvert($user, ['color' => '#ff0000', 'bold' => true, 'deleted_at' => now()->subDays(3)]);
+
+        $this->fulfillRenew($user, $advert);
+
+        $this->assertDatabaseCount('paid_adverts', 1);
+        $this->assertSame(now()->addDays(10)->getTimestamp(), $advert->fresh()->deleted_at->getTimestamp());
+    }
+
+    public function testFulfillRenewOfMissingAdvertCreatesNew(): void
+    {
+        $user = User::factory()->create();
+        $foreign = $this->createAdvert(User::factory()->create(), ['names' => ['Foreign advert name']]);
+
+        $this->fulfillRenew($user, $foreign);
+
+        $this->assertSame(['Foreign advert name'], $foreign->fresh()->names);
+        $this->assertDatabaseCount('paid_adverts', 2);
+        $this->assertSame(1, PaidAdvert::query()->where('user_id', $user->id)->count());
+    }
+
+    public function testFulfillLongCommentFitsColumn(): void
+    {
+        $order = $this->createOrder(['data' => [...$this->advertData(), 'comment' => str_repeat('я', 255)]]);
+
+        app(PaymentService::class)->fulfill($order);
+
+        $this->assertSame(191, mb_strlen(PaidAdvert::query()->sole()->comment));
+    }
+
+    /**
+     * Выполняет оплаченный заказ продления рекламы
+     */
+    private function fulfillRenew(User $user, PaidAdvert $advert, array $data = []): void
+    {
+        $order = $this->createOrder([
+            'user_id' => $user->id,
+            'data'    => [...$this->advertData(), ...$data, 'renew_id' => $advert->id],
+        ]);
+
+        app(PaymentService::class)->fulfill($order);
     }
 
     /**
