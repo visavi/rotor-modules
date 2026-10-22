@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace Modules\Blog\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
 use App\Support\CategoryTree;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Blog\Http\Requests\ArticleRequest;
+use Modules\Blog\Http\Requests\BlogCategoryRequest;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Blog;
-use Modules\Blog\Models\Tag;
 
 class ArticleController extends AdminController
 {
@@ -49,10 +46,6 @@ class ArticleController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         CategoryTree::reorder(Blog::class, $request->string('order')->toString());
 
         return redirect()
@@ -63,109 +56,62 @@ class ArticleController extends AdminController
     /**
      * Создание раздела
      */
-    public function create(Request $request, Validator $validator): RedirectResponse
+    public function create(BlogCategoryRequest $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
+        $category = Blog::query()->create([
+            'name' => $request->string('name')->value(),
+            'sort' => Blog::query()->max('sort') + 1,
+        ]);
 
-        $name = $request->input('name');
-
-        $validator->length($name, setting('blog_category_min'), setting('blog_category_max'), ['name' => __('validator.text')]);
-
-        if ($validator->isValid()) {
-            $max = Blog::query()->max('sort') + 1;
-
-            $category = Blog::query()->create([
-                'name' => $name,
-                'sort' => $max,
-            ]);
-
-            return redirect()->route('admin.blogs.edit', ['id' => $category->id])
-                ->with('success', __('blog::blogs.category_success_created'));
-        }
-
-        return redirect()->route('admin.blogs.index')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+        return redirect()->route('admin.blogs.edit', ['id' => $category->id])
+            ->with('success', __('blog::blogs.category_success_created'));
     }
 
     /**
      * Редактирование раздела
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
-        $category = Blog::query()->with('children')->find($id);
-
-        if (! $category) {
-            abort(404, __('blog::blogs.category_not_exist'));
-        }
-
+        $category = $this->findCategory($id);
         $categories = $category->getChildren();
-
-        if ($request->isMethod('post')) {
-            $parent = int($request->input('parent'));
-            $name = $request->input('name');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($name, setting('blog_category_min'), setting('blog_category_max'), ['title' => __('validator.text')])
-                ->notEqual($parent, $category->id, ['parent' => __('blog::blogs.category_not_exist')]);
-
-            if ($validator->isValid()) {
-                $category->update([
-                    'parent_id' => $parent,
-                    'name'      => $name,
-                    'closed'    => $closed,
-                ]);
-
-                return redirect()->route('admin.blogs.index')
-                    ->with('success', __('blog::blogs.category_success_edited'));
-            }
-
-            return redirect()->route('admin.blogs.edit', ['id' => $category->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         return view('blog::admin/articles/edit', compact('categories', 'category'));
     }
 
     /**
+     * Сохранение раздела
+     */
+    public function update(int $id, BlogCategoryRequest $request): RedirectResponse
+    {
+        $this->findCategory($id)->update([
+            'parent_id' => $request->integer('parent'),
+            'name'      => $request->string('name')->value(),
+            'closed'    => $request->boolean('closed'),
+        ]);
+
+        return redirect()->route('admin.blogs.index')
+            ->with('success', __('blog::blogs.category_success_edited'));
+    }
+
+    /**
      * Удаление раздела
      */
-    public function delete(int $id, Validator $validator): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
+        $category = $this->findCategory($id);
+        $redirect = redirect()->route('admin.blogs.index');
+
+        if ($category->children->isNotEmpty()) {
+            return $redirect->withErrors(__('blog::blogs.category_has_subcategories'));
         }
 
-        $category = Blog::query()->with('children')->find($id);
-
-        if (! $category) {
-            abort(404, __('blog::blogs.category_not_exist'));
-        }
-
-        $validator->true($category->children->isEmpty(), __('blog::blogs.category_has_subcategories'));
-
-        $article = Article::query()->where('category_id', $category->id)->exists();
-        if ($article) {
-            $validator->addError(__('blog::blogs.articles_in_category'));
-        }
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.blogs.index')
-                ->withErrors($validator->getErrors());
+        if (Article::query()->where('category_id', $category->id)->exists()) {
+            return $redirect->withErrors(__('blog::blogs.articles_in_category'));
         }
 
         $category->delete();
 
-        return redirect()->route('admin.blogs.index')
-            ->with('success', __('blog::blogs.category_success_deleted'));
+        return $redirect->with('success', __('blog::blogs.category_success_deleted'));
     }
 
     /**
@@ -173,10 +119,6 @@ class ArticleController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run('blogs');
 
         return redirect()
@@ -214,83 +156,43 @@ class ArticleController extends AdminController
     /**
      * Редактирование статьи
      */
-    public function editArticle(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editArticle(int $id): View
     {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $cid = int($request->input('cid'));
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $tags = (array) $request->input('tags');
-            $tags = array_unique(array_diff($tags, ['']));
-            $published = $request->input('published');
-
-            $isPublish = $request->input('action') === 'publish';
-            $isDelay = ! $isPublish && $request->boolean('delay');
-
-            $category = Blog::query()->find($cid);
-
-            $validator
-                ->length($title, setting('blog_title_min'), setting('blog_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('blog_text_min'), setting('blog_text_max'), ['text' => __('validator.text')])
-                ->notEmpty($category, ['cid' => __('blog::blogs.category_not_exist')])
-                ->between(count($tags), 1, 10, ['tags' => __('blog::blogs.article_count_tags')]);
-
-            if ($isDelay && Date::parse($published) < now()) {
-                $validator->addError(['published' => __('blog::blogs.article_delayed_time')]);
-            }
-
-            foreach ($tags as $tag) {
-                $validator->length($tag, setting('blog_tag_min'), setting('blog_tag_max'), ['tags' => __('blog::blogs.article_error_tags')]);
-            }
-
-            if ($category) {
-                $validator->empty($category->closed, ['cid' => __('blog::blogs.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                $wasDraft = $article->draft;
-                $isDraft = ! $isPublish && $article->draft;
-                $isActive = $isPublish || (! $isDraft && ! $isDelay && $article->active);
-
-                $article->update([
-                    'category_id'  => $category->id,
-                    'title'        => $title,
-                    'text'         => $text,
-                    'draft'        => $isDraft,
-                    'active'       => $isActive,
-                    'published_at' => $isDelay ? $published : null,
-                ]);
-
-                $tagIds = [];
-                foreach ($tags as $key => $tagName) {
-                    $tag = Tag::query()->firstOrCreate(['name' => Str::lower($tagName)]);
-                    $tagIds[$tag->id] = ['sort' => $key];
-                }
-
-                $article->tags()->sync($tagIds);
-                clearCache('tagCloud');
-
-                $flash = ($wasDraft && $isPublish) ? __('blog::blogs.article_success_created') : __('blog::blogs.article_success_edited');
-
-                return redirect()
-                    ->route('articles.view', ['slug' => $article->slug])
-                    ->with('success', $flash);
-            }
-
-            return redirect()->route('admin.articles.edit', ['id' => $article->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $article = $this->findArticle($id);
         $categories = $article->category->getChildren();
 
         return view('blog::admin/articles/edit_article', compact('article', 'categories'));
+    }
+
+    /**
+     * Сохранение статьи
+     */
+    public function updateArticle(int $id, ArticleRequest $request): RedirectResponse
+    {
+        $article = $this->findArticle($id);
+
+        $isPublish = $request->boolean('publish');
+        $publishedAt = $request->publishedAt();
+        $wasDraft = $article->draft;
+        $isDraft = ! $isPublish && $article->draft;
+
+        $article->update([
+            'category_id'  => $request->category()->id,
+            'title'        => $request->string('title')->value(),
+            'text'         => $request->string('text')->value(),
+            'draft'        => $isDraft,
+            'active'       => $isPublish || (! $isDraft && ! $publishedAt && $article->active),
+            'published_at' => $publishedAt,
+        ]);
+
+        $article->syncTags($request->tagNames());
+        clearCache('tagCloud');
+
+        $flash = ($wasDraft && $isPublish) ? __('blog::blogs.article_success_created') : __('blog::blogs.article_success_edited');
+
+        return redirect()
+            ->route('articles.view', ['slug' => $article->slug])
+            ->with('success', $flash);
     }
 
     /**
@@ -300,11 +202,7 @@ class ArticleController extends AdminController
     {
         $page = int($request->input('page', 1));
 
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+        $article = $this->findArticle($id);
 
         $article->delete();
 
@@ -319,11 +217,7 @@ class ArticleController extends AdminController
      */
     public function publish(int $id): RedirectResponse
     {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+        $article = $this->findArticle($id);
 
         $active = $article->active ^ 1;
 
@@ -361,5 +255,33 @@ class ArticleController extends AdminController
             ->paginate(setting('blogpost'));
 
         return view('blog::admin/articles/new', compact('articles'));
+    }
+
+    /**
+     * Раздел по id
+     */
+    private function findCategory(int $id): Blog
+    {
+        $category = Blog::query()->with('children')->find($id);
+
+        if (! $category) {
+            abort(404, __('blog::blogs.category_not_exist'));
+        }
+
+        return $category;
+    }
+
+    /**
+     * Статья по id
+     */
+    private function findArticle(int $id): Article
+    {
+        $article = Article::query()->find($id);
+
+        if (! $article) {
+            abort(404, __('blog::blogs.article_not_exist'));
+        }
+
+        return $article;
     }
 }

@@ -3,6 +3,7 @@
 ## Unreleased
 - Хуки `onProfileValidate`, `onSettingsValidate` и `onRegisterValidate` получают валидатор Laravel (`Illuminate\Validation\Validator`) вместо `App\Support\Validator`: примеры переписаны на `$validator->errors()->add()`
 - Версионирование: `App\Support\Validator` помечен устаревшим, в новом коде модулей — FormRequest и `Validator::make()`
+- Страница настроек модуля: проверка через `rules()` в контроллере настроек, сохраняются только объявленные ключи
 
 ## 1.0.17
 - Консольные команды: рассылки `add:subscribers` и `add:birthdays` переехали в модуль MailNotify, убрана несуществующая `message:send`

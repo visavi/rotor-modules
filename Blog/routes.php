@@ -33,7 +33,8 @@ Route::middleware('web')
         Route::get('/tags/{tag}', 'getTag')->where('tag', '.+')->name('tag');
         Route::get('/authors', 'authors')->middleware('check.user')->name('authors');
         Route::get('/rss', 'rss')->name('rss');
-        Route::match(['get', 'post'], '/create', 'create')->name('create');
+        Route::get('/create', 'create')->middleware('check.user')->name('create');
+        Route::post('/create', 'store')->middleware('check.user');
         Route::get('/main', 'main')->name('main');
     });
 
@@ -51,7 +52,8 @@ Route::middleware('web')
         // Страницы пользователя — только авторизованным
         Route::get('/active/articles', 'userArticles')->middleware('check.user')->name('user-articles');
         Route::get('/active/comments', 'userComments')->middleware('check.user')->name('user-comments');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::get('/{id}/edit', 'edit')->middleware('check.user')->name('edit');
+        Route::post('/{id}/edit', 'update')->middleware('check.user');
     });
 
 /* Админ — блоги и статьи */
@@ -65,19 +67,25 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/', 'index')->name('index');
 
                 // Строго до GET /{id}: иначе сортировка ушла бы в blog с id = 'sort'
-                Route::post('/sort', 'sort')->name('sort');
+                Route::post('/sort', 'sort')->name('sort')->middleware('check.admin:boss');
                 Route::get('/{id}', 'blog')->name('blog');
-                Route::post('/create', 'create')->name('create');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
+
+                // Разделы и пересчёт — только boss
+                Route::middleware('check.admin:boss')->group(function () {
+                    Route::post('/create', 'create')->name('create');
+                    Route::get('/{id}/edit', 'edit')->name('edit');
+                    Route::post('/{id}/edit', 'update');
+                    Route::delete('/{id}/delete', 'delete')->name('delete');
+                    Route::post('/restatement', 'restatement')->name('restatement');
+                });
             });
 
         Route::controller(AdminArticleController::class)
             ->prefix('articles')
             ->name('admin.articles.')
             ->group(function () {
-                Route::match(['get', 'post'], '/{id}/edit', 'editArticle')->name('edit');
+                Route::get('/{id}/edit', 'editArticle')->name('edit');
+                Route::post('/{id}/edit', 'updateArticle');
                 Route::delete('/{id}/delete', 'deleteArticle')->name('delete');
                 Route::post('/{id}/publish', 'publish')->name('publish');
                 Route::get('/new', 'new')->name('new');

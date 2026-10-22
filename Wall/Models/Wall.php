@@ -7,6 +7,7 @@ namespace Modules\Wall\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Wall extends Model
 {
+    /** @use HasFactory<\Modules\Wall\Tests\Factories\WallFactory> */
+    use HasFactory;
+
     /**
      * The name of the "updated at" column.
      */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Counter\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,6 +17,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Counter24 extends Model
 {
+    /** @use HasFactory<\Modules\Counter\Tests\Factories\Counter24Factory> */
+    use HasFactory;
+
     /**
      * The table associated with the model.
      */

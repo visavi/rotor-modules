@@ -16,11 +16,11 @@
     @if (getUser())
         <div class="section-form mb-3 shadow">
             {{-- Свёрнута в одно поле; после ошибки открыта --}}
-            <form action="/walls/{{ $user->login }}/create" method="post"@unless ($errors->any() || old('msg')) data-compact @endunless>
+            <form action="/walls/{{ $user->login }}/create" method="post"@unless ($errors->any() || old('text')) data-compact @endunless>
                 @csrf
-                <div class="mb-3 compact-field{{ hasError('msg') }}">
-                    <textarea class="form-control tiptap" id="msg" rows="5" name="msg" placeholder="{{ __('main.write_message') }}" required>{{ old('msg') }}</textarea>
-                    <div class="invalid-feedback">{{ textError('msg') }}</div>
+                <div class="mb-3 compact-field{{ hasError('text') }}">
+                    <textarea class="form-control tiptap" id="text" rows="5" name="text" placeholder="{{ __('main.write_message') }}" required>{{ old('text') }}</textarea>
+                    <div class="invalid-feedback">{{ textError('text') }}</div>
                 </div>
 
                 <button class="btn btn-primary">{{ __('main.write') }}</button>

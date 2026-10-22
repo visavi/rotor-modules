@@ -53,8 +53,12 @@ Route::middleware('web')->group(function () {
             Route::get('/{id}/zip/{fid}', [DownController::class, 'zip'])->middleware('check.user')->name('zip');
             Route::get('/{id}/zip/{fid}/{zid}', [DownController::class, 'zipView'])->middleware('check.user')->whereNumber('zid')->name('zip-view');
 
-            Route::match(['get', 'post'], '/create', [DownController::class, 'create'])->name('create');
-            Route::match(['get', 'post'], '/{id}/edit', [DownController::class, 'edit'])->name('edit');
+            Route::middleware('check.user')->group(function () {
+                Route::get('/create', [DownController::class, 'create'])->name('create');
+                Route::post('/create', [DownController::class, 'store']);
+                Route::get('/{id}/edit', [DownController::class, 'edit'])->name('edit');
+                Route::post('/{id}/edit', [DownController::class, 'update']);
+            });
         });
 });
 
@@ -70,22 +74,28 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
                 Route::get('/', 'index')->name('index');
 
                 // Строго до GET /{id}: иначе сортировка ушла бы в load с id = 'sort'
-                Route::post('/sort', 'sort')->name('sort');
-                Route::post('/create', 'create')->name('create');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::delete('/{id}/delete', 'delete')->name('delete');
+                // Разделы, сортировка и пересчёт — только boss
+                Route::middleware('check.admin:boss')->group(function () {
+                    Route::post('/sort', 'sort')->name('sort');
+                    Route::post('/create', 'create')->name('create');
+                    Route::get('/{id}/edit', 'edit')->name('edit');
+                    Route::post('/{id}/edit', 'update');
+                    Route::delete('/{id}/delete', 'delete')->name('delete');
+                    Route::post('/restatement', 'restatement')->name('restatement');
+                });
+
                 Route::get('/{id}', 'load')->name('load');
-                Route::post('/restatement', 'restatement')->name('restatement');
             });
 
         Route::controller(AdminLoadController::class)
             ->prefix('downs')
             ->name('admin.downs.')
             ->group(function () {
-                Route::match(['get', 'post'], '/{id}/edit', 'editDown')->name('edit');
+                Route::get('/{id}/edit', 'editDown')->name('edit');
+                Route::post('/{id}/edit', 'updateDown');
                 Route::get('/new', 'new')->name('new');
                 Route::post('/{id}/publish', 'publish')->name('publish');
-                Route::delete('/delete/{id}', 'deleteDown')->name('delete');
+                Route::delete('/delete/{id}', 'deleteDown')->middleware('check.admin:boss')->name('delete');
             });
 
         /* Настройки */

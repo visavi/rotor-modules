@@ -34,6 +34,7 @@ class RouletteTest extends ModuleTestCase
     public function testSpinChargesBetAndReturnsResult(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/roulette')
             ->post('/games/roulette/spin', ['bet' => 100, 'type' => 'red'])
             ->assertRedirect('games/roulette');
 
@@ -53,6 +54,7 @@ class RouletteTest extends ModuleTestCase
     public function testSpinRejectsUnknownBetType(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/roulette')
             ->post('/games/roulette/spin', ['bet' => 100, 'type' => 'purple'])
             ->assertRedirect('games/roulette');
 
@@ -63,6 +65,7 @@ class RouletteTest extends ModuleTestCase
     public function testSpinRejectsBetOverBalance(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/roulette')
             ->post('/games/roulette/spin', ['bet' => 5001, 'type' => 'red'])
             ->assertRedirect('games/roulette');
 
@@ -73,6 +76,7 @@ class RouletteTest extends ModuleTestCase
     public function testSpinRejectsEmptyBet(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/roulette')
             ->post('/games/roulette/spin', ['bet' => 0, 'type' => 'red'])
             ->assertRedirect('games/roulette');
 
@@ -82,6 +86,7 @@ class RouletteTest extends ModuleTestCase
     public function testNumberBetNeedsNumberInRange(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/roulette')
             ->post('/games/roulette/spin', ['bet' => 100, 'type' => 'number', 'number' => 37])
             ->assertRedirect('games/roulette');
 

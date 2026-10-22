@@ -6,12 +6,13 @@ use Modules\Advert\Http\Controllers\Admin\AdvertController as AdminUserAdvertCon
 use Modules\Advert\Http\Controllers\Admin\SettingController;
 use Modules\Advert\Http\Controllers\AdvertController;
 
-Route::middleware('web')
+Route::middleware(['web', 'check.user'])
     ->controller(AdvertController::class)
     ->prefix('adverts')
     ->group(function () {
         Route::get('/', 'index');
-        Route::match(['get', 'post'], '/create', 'create');
+        Route::get('/create', 'create');
+        Route::post('/create', 'store');
     });
 
 Route::middleware(['web', 'check.admin', 'admin.logger'])
@@ -20,7 +21,8 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
         Route::controller(AdminAdvertController::class)
             ->prefix('admin-adverts')
             ->group(function () {
-                Route::match(['get', 'post'], '/', 'index');
+                Route::get('/', 'index');
+                Route::post('/', 'store');
                 Route::delete('/delete', 'delete');
             });
 
@@ -30,7 +32,8 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             Route::controller(AdminUserAdvertController::class)
                 ->prefix('adverts')
                 ->group(function () {
-                    Route::match(['get', 'post'], '/edit/{id}', 'edit');
+                    Route::get('/edit/{id}', 'edit');
+                    Route::post('/edit/{id}', 'update');
                     Route::post('/delete', 'delete');
                 });
         });

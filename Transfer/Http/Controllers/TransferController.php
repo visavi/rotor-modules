@@ -5,85 +5,43 @@ declare(strict_types=1);
 namespace Modules\Transfer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Modules\Transfer\Models\Transfer;
+use Modules\Transfer\Http\Requests\TransferRequest;
+use Modules\Transfer\Services\TransferService;
 
 class TransferController extends Controller
 {
-    public ?User $user;
-
     /**
      * Конструктор
      */
     public function __construct()
     {
         $this->middleware('check.user');
-
-        $this->middleware(function ($request, $next) {
-            $login = $request->input('user');
-            $this->user = getUserByLogin($login);
-
-            return $next($request);
-        });
     }
 
     /**
      * Главная страница
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('transfer::transfers/index', ['user' => $this->user]);
+        return view('transfer::transfers/index', ['user' => getUserByLogin($request->input('user'))]);
     }
 
     /**
      * Перевод денег
      */
-    public function send(Request $request, Validator $validator): RedirectResponse
+    public function send(TransferRequest $request, TransferService $transfers): RedirectResponse
     {
-        $money = int($request->input('money'));
-        $msg = $request->input('msg');
-
-        $validator
-            ->true($this->user, ['user' => __('validator.user')])
-            ->length($msg, 0, setting('comment_text_max'), ['msg' => __('validator.comment_long')])
-            ->gte(getUser('point'), setting('sendmoneypoint'), ['money' => __('transfer::transfers.transfer_point', ['point' => plural(setting('sendmoneypoint'), setting('scorename'))])])
-            ->gt($money, 0, ['money' => __('transfer::transfers.transfer_wrong_amount')])
-            ->lte($money, getUser('money'), ['money' => __('transfer::transfers.transfer_not_money')]);
-
-        if ($this->user) {
-            $validator
-                ->notEqual($this->user->id, getUser('id'), ['user' => __('transfer::transfers.transfer_yourself')]);
-        }
-
-        if ($validator->isValid()) {
-            DB::transaction(function () use ($money, $msg) {
-                getUser()->decrement('money', $money);
-                $this->user->increment('money', $money);
-
-                $comment = $msg ?? __('main.not_specified');
-                $text = textNotice('transfer', ['login' => getUser('login'), 'money' => plural($money, setting('moneyname')), 'comment' => $comment]);
-                $this->user->sendMessage(null, $text);
-
-                // Запись логов
-                Transfer::query()->create([
-                    'user_id'      => getUser('id'),
-                    'recipient_id' => $this->user->id,
-                    'text'         => $comment,
-                    'total'        => $money,
-                ]);
-            });
-
-            return redirect('transfers')
-                ->with('success', __('transfer::transfers.transfer_success_completed'));
-        }
+        $transfers->send(
+            getUser(),
+            $request->recipient(),
+            $request->integer('money'),
+            $request->string('text')->value() ?: __('main.not_specified'),
+        );
 
         return redirect('transfers')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+            ->with('success', __('transfer::transfers.transfer_success_completed'));
     }
 }

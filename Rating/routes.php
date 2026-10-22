@@ -15,7 +15,8 @@ Route::middleware('web')
                 Route::post('/delete', 'delete');
             });
 
-        Route::match(['get', 'post'], '/users/{login}/rating', 'index');
+        Route::get('/users/{login}/rating', 'index');
+        Route::post('/users/{login}/rating', 'store');
     });
 
 /* Админ — настройки */

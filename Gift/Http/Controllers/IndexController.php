@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace Modules\Gift\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Modules\Gift\Http\Requests\GiftSendRequest;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
-use Throwable;
+use Modules\Gift\Services\GiftService;
 
 class IndexController extends Controller
 {
@@ -37,16 +35,10 @@ class IndexController extends Controller
     }
 
     /**
-     * Sends a gift
-     *
-     * @throws Throwable
+     * Gift sending form
      */
-    public function send(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function send(int $id, Request $request): View
     {
-        if (! getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
         $gift = Gift::query()->find($id);
 
         if (! $gift) {
@@ -54,59 +46,20 @@ class IndexController extends Controller
         }
 
         $maxUsers = (int) setting('gift_max_users');
-
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-            $logins = array_filter((array) $request->input('users', []));
-            $users = User::query()->whereIn('login', $logins)->get();
-            $total = $gift->price * $users->count();
-
-            $validator
-                ->notEmpty($logins, ['users' => __('validator.user')])
-                ->equal($users->count(), count($logins), ['users' => __('gift::gifts.users_not_found')])
-                ->lte($users->count(), $maxUsers, ['users' => __('gift::gifts.max_users', ['max' => $maxUsers])])
-                ->length($msg, 0, 1000, ['msg' => __('validator.text_long')])
-                ->gte(getUser('money'), $total, __('gift::gifts.money_not_enough'));
-
-            if ($validator->isValid()) {
-                GiftsUser::query()->where('deleted_at', '<', now())->delete();
-
-                DB::transaction(static function () use ($gift, $users, $msg, $total) {
-                    getUser()->decrement('money', $total);
-
-                    foreach ($users as $user) {
-                        GiftsUser::query()->create([
-                            'gift_id'      => $gift->id,
-                            'user_id'      => $user->id,
-                            'send_user_id' => getUser('id'),
-                            'text'         => $msg,
-                            'deleted_at'   => now()->addDays((int) setting('gift_days')),
-                        ]);
-                    }
-                });
-
-                foreach ($users as $user) {
-                    $user->sendMessage(null, textNotice('gift_send', [
-                        'login' => getUser('login'),
-                        'gift'  => $gift->getImage(),
-                        'text'  => (string) $msg,
-                        'url'   => '/gifts/' . $user->login,
-                        'title' => __('gift::gifts.my_gifts'),
-                    ]));
-                }
-
-                return redirect('gifts')
-                    ->with('success', __('gift::gifts.gift_sent'));
-            }
-
-            return redirect('gifts/send/' . $gift->id)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         $user = getUserByLogin($request->input('user'));
 
         return view('gift::send', compact('gift', 'user', 'maxUsers'));
+    }
+
+    /**
+     * Sends a gift
+     */
+    public function store(GiftSendRequest $request, GiftService $service): RedirectResponse
+    {
+        $service->send(getUser(), $request->gift(), $request->recipients(), $request->string('text')->value());
+
+        return redirect('gifts')
+            ->with('success', __('gift::gifts.gift_sent'));
     }
 
     /**

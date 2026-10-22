@@ -25,7 +25,7 @@ class DocsTest extends ModuleTestCase
 
     public function testModulesCatalogShowsReleaseDate(): void
     {
-        \App\Models\ModuleRegistry::query()->truncate();
+        \App\Models\ModuleRegistry::query()->delete();
 
         Http::fake([
             '*' => Http::response([
@@ -50,7 +50,7 @@ class DocsTest extends ModuleTestCase
             ]),
         ]);
 
-        \App\Models\ModuleRegistry::query()->create(['url' => 'https://registry.example.com/modules.json', 'active' => true]);
+        \App\Models\ModuleRegistry::factory()->create(['url' => 'https://registry.example.com/modules.json', 'active' => true]);
 
         $response = $this->get('/rotor/modules');
 
@@ -68,7 +68,7 @@ class DocsTest extends ModuleTestCase
 
     public function testModulePageIsRendered(): void
     {
-        \App\Models\ModuleRegistry::query()->truncate();
+        \App\Models\ModuleRegistry::query()->delete();
 
         Http::fake([
             '*' => Http::response([
@@ -88,7 +88,7 @@ class DocsTest extends ModuleTestCase
             ]),
         ]);
 
-        \App\Models\ModuleRegistry::query()->create(['url' => 'https://registry.example.com/modules.json', 'active' => true]);
+        \App\Models\ModuleRegistry::factory()->create(['url' => 'https://registry.example.com/modules.json', 'active' => true]);
 
         $this->get('/rotor/modules/Dated')
             ->assertOk()

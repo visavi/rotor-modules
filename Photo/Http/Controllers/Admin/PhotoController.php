@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Modules\Photo\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Photo\Http\Requests\PhotoRequest;
 use Modules\Photo\Models\Photo;
 
 class PhotoController extends AdminController
@@ -29,45 +28,27 @@ class PhotoController extends AdminController
     }
 
     /**
-     * Редактирование ссылки
+     * Редактирование фото
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id, Request $request): View
     {
         $page = int($request->input('page', 1));
-        $photo = Photo::query()->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('photo_title_min'), setting('photo_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('photo_text_min'), setting('photo_text_max'), ['text' => __('validator.text_long')]);
-
-            if ($validator->isValid()) {
-                $photo->update([
-                    'title'  => $title,
-                    'text'   => $text,
-                    'closed' => $closed,
-                ]);
-
-                clearCache(['statPhotos', 'recentPhotos']);
-
-                return redirect()->route('admin.photos.index', ['page' => $page])
-                    ->with('success', __('photo::photos.photo_success_edited'));
-            }
-
-            return redirect()->route('admin.photos.edit', ['id' => $photo->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $photo = $this->findPhoto($id);
 
         return view('photo::admin/photos/edit', compact('photo', 'page'));
+    }
+
+    /**
+     * Сохранение фото
+     */
+    public function update(int $id, PhotoRequest $request): RedirectResponse
+    {
+        $this->findPhoto($id)->update($request->photoFields());
+
+        clearCache(['statPhotos', 'recentPhotos']);
+
+        return redirect()->route('admin.photos.index', ['page' => int($request->input('page', 1))])
+            ->with('success', __('photo::photos.photo_success_edited'));
     }
 
     /**
@@ -81,13 +62,7 @@ class PhotoController extends AdminController
 
         $page = int($request->input('page', 1));
 
-        $photo = Photo::query()->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_exist'));
-        }
-
-        $photo->delete();
+        $this->findPhoto($id)->delete();
 
         clearCache(['statPhotos', 'recentPhotos']);
 
@@ -100,14 +75,24 @@ class PhotoController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(200, __('main.page_only_owner'));
-        }
-
         Restatement::run('photos');
 
         return redirect()
             ->route('admin.photos.index')
             ->with('success', __('main.success_recounted'));
+    }
+
+    /**
+     * Фото по id
+     */
+    private function findPhoto(int $id): Photo
+    {
+        $photo = Photo::query()->find($id);
+
+        if (! $photo) {
+            abort(404, __('photo::photos.photo_not_exist'));
+        }
+
+        return $photo;
     }
 }

@@ -9,7 +9,7 @@ Route::middleware('web')
     ->prefix('lottery')
     ->group(function () {
         Route::get('/', [IndexController::class, 'index']);
-        Route::post('/buy', [IndexController::class, 'buy']);
+        Route::post('/buy', [IndexController::class, 'buy'])->middleware('check.user');
     });
 
 /* Админ — настройки лотереи */
@@ -19,5 +19,5 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->name('lottery.')
     ->group(function () {
         Route::get('/lottery-settings', 'index')->name('settings');
-        Route::post('/lottery-settings', 'store')->name('settings.update');
+        Route::post('/lottery-settings', 'update')->name('settings.update');
     });

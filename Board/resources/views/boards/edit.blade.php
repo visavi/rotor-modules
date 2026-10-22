@@ -46,18 +46,18 @@
     <div class="section-form mb-3 shadow">
         <form action="{{ route('items.edit', ['id' => $item->id]) }}" method="post">
             @csrf
-            <div class="mb-3{{ hasError('bid') }}">
+            <div class="mb-3{{ hasError('category_id') }}">
                 <label for="inputCategory" class="form-label">{{ __('board::boards.category') }}</label>
 
-                <?php $inputCategory = (int) old('bid', $item->board_id); ?>
-                <select class="form-select" id="inputCategory" name="bid">
+                <?php $inputCategory = (int) old('category_id', $item->board_id); ?>
+                <select class="form-select" id="inputCategory" name="category_id">
                     @foreach ($boards as $data)
                         <option value="{{ $data->id }}"{{ ($inputCategory === $data->id && ! $data->closed) ? ' selected' : '' }}{{ $data->closed ? ' disabled' : '' }}>
                             {{ str_repeat('–', $data->depth) }} {{ $data->name }}
                         </option>
                     @endforeach
                 </select>
-                <div class="invalid-feedback">{{ textError('bid') }}</div>
+                <div class="invalid-feedback">{{ textError('category_id') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('title') }}">

@@ -16,8 +16,6 @@ class AdminChatSmokeTest extends ModuleTestCase
     {
         parent::setUp();
 
-        Chat::query()->delete();
-
         $this->admin = User::factory()->create(['level' => User::ADMIN]);
     }
 
@@ -65,6 +63,62 @@ class AdminChatSmokeTest extends ModuleTestCase
         $this->assertSame('Исправленное сообщение', $post->fresh()->text);
     }
 
+    public function testEditFormOpens(): void
+    {
+        $post = $this->message();
+
+        $this->actingAs($this->admin)
+            ->get('/admin/chats/edit/' . $post->id . '?page=2')
+            ->assertOk()
+            ->assertSee('Сообщение администрации');
+    }
+
+    public function testEditReturnsToPage(): void
+    {
+        $post = $this->message();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/chats/edit/' . $post->id . '?page=2', ['msg' => 'Исправленное сообщение'])
+            ->assertRedirect('admin/chats?page=2');
+    }
+
+    public function testShortEditIsRejected(): void
+    {
+        $post = $this->message();
+        $form = '/admin/chats/edit/' . $post->id . '?page=2';
+
+        $this->actingAs($this->admin)
+            ->from($form)
+            ->post('/admin/chats/edit/' . $post->id, ['msg' => '<p>Ок</p>'])
+            ->assertRedirect($form)
+            ->assertSessionHasErrors('msg');
+
+        $this->assertSame('Сообщение администрации', $post->fresh()->text);
+    }
+
+    public function testOldMessageIsNotEdited(): void
+    {
+        $post = $this->message(['created_at' => now()->subMinutes(11)]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/chats/edit/' . $post->id, ['msg' => 'Исправленное сообщение'])
+            ->assertSee(__('main.editing_impossible'));
+
+        $this->assertSame('Сообщение администрации', $post->fresh()->text);
+    }
+
+    public function testNextOwnMessageIsAppended(): void
+    {
+        $post = $this->message();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/chats', ['msg' => 'Продолжение'])
+            ->assertRedirect('admin/chats');
+
+        $this->assertDatabaseCount('chats', 1);
+        $this->assertSame('Сообщение администрации' . PHP_EOL . 'Продолжение', $post->fresh()->text);
+    }
+
     public function testForeignMessageIsProtected(): void
     {
         $other = User::factory()->create(['level' => User::ADMIN]);
@@ -79,7 +133,7 @@ class AdminChatSmokeTest extends ModuleTestCase
     {
         $this->message();
 
-        $this->actingAs($this->admin)->post('/admin/chats/clear');
+        $this->actingAs($this->admin)->post('/admin/chats/clear')->assertForbidden();
         $this->assertDatabaseCount('chats', 1);
 
         $boss = User::factory()->create(['level' => User::BOSS]);
@@ -90,7 +144,7 @@ class AdminChatSmokeTest extends ModuleTestCase
 
     private function message(array $attributes = []): Chat
     {
-        return Chat::query()->create([
+        return Chat::factory()->create([
             'user_id'    => $this->admin->id,
             'text'       => 'Сообщение администрации',
             'ip'         => '127.0.0.1',

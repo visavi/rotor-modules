@@ -113,7 +113,7 @@ class FeedApiTest extends ModuleTestCase
 
     private function attachFile(Comment $comment, string $name, string $extension, string $mimeType): void
     {
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $comment->id,
             'relate_type' => $comment->getMorphClass(),
             'path'        => '/uploads/comments/' . $name,
@@ -130,14 +130,14 @@ class FeedApiTest extends ModuleTestCase
      */
     private function createCommentInFeed(): array
     {
-        $news = News::query()->create([
+        $news = News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $comment = Comment::query()->create([
+        $comment = Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'text'        => 'Test comment text',

@@ -15,7 +15,7 @@ class ForumSortTest extends ModuleTestCase
     public function testNonAdminCannotSort(): void
     {
         $user = User::factory()->create();
-        $forum = Forum::query()->create(['title' => 'Forum', 'sort' => 1]);
+        $forum = Forum::factory()->create(['title' => 'Forum', 'sort' => 1]);
 
         $this->actingAs($user)
             ->post(route('admin.forums.sort'), ['order' => "{$forum->id}:0"])
@@ -25,7 +25,7 @@ class ForumSortTest extends ModuleTestCase
     public function testAdminBelowBossCannotSort(): void
     {
         $admin = User::factory()->admin()->create();
-        $forum = Forum::query()->create(['title' => 'Forum', 'sort' => 1]);
+        $forum = Forum::factory()->create(['title' => 'Forum', 'sort' => 1]);
 
         $this->actingAs($admin)
             ->post(route('admin.forums.sort'), ['order' => "{$forum->id}:0"])
@@ -36,9 +36,9 @@ class ForumSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Forum::query()->create(['title' => 'Root', 'sort' => 1]);
-        $other = Forum::query()->create(['title' => 'Other', 'sort' => 2]);
-        $child = Forum::query()->create(['title' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
+        $root = Forum::factory()->create(['title' => 'Root', 'sort' => 1]);
+        $other = Forum::factory()->create(['title' => 'Other', 'sort' => 2]);
+        $child = Forum::factory()->create(['title' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
 
         $this->actingAs($boss)
             ->post(route('admin.forums.sort'), [
@@ -55,7 +55,7 @@ class ForumSortTest extends ModuleTestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Forum::query()->create(['title' => 'Root forum', 'sort' => 1]);
+        Forum::factory()->create(['title' => 'Root forum', 'sort' => 1]);
 
         $this->actingAs($admin)
             ->get(route('admin.forums.index'))
@@ -68,9 +68,9 @@ class ForumSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Forum::query()->create(['title' => 'Root forum', 'sort' => 1]);
-        $child = Forum::query()->create(['title' => 'Child forum', 'parent_id' => $root->id, 'sort' => 2]);
-        Forum::query()->create(['title' => 'Grandchild forum', 'parent_id' => $child->id, 'sort' => 3]);
+        $root = Forum::factory()->create(['title' => 'Root forum', 'sort' => 1]);
+        $child = Forum::factory()->create(['title' => 'Child forum', 'parent_id' => $root->id, 'sort' => 2]);
+        Forum::factory()->create(['title' => 'Grandchild forum', 'parent_id' => $child->id, 'sort' => 3]);
 
         $this->actingAs($boss)
             ->get(route('admin.forums.index'))

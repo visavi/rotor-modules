@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Board\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
 use App\Support\CategoryTree;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Board\Http\Requests\BoardCategoryRequest;
+use Modules\Board\Http\Requests\ItemRequest;
 use Modules\Board\Models\Board;
 use Modules\Board\Models\Item;
 
@@ -60,10 +60,6 @@ class BoardController extends AdminController
      */
     public function categories(): View
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         // Дерево строит компонент: он же собирает поле порядка и обязан видеть
         // тот же список, поэтому раскладывать его здесь незачем
         $boards = Board::query()->orderBy('sort')->get();
@@ -80,10 +76,6 @@ class BoardController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         CategoryTree::reorder(Board::class, $request->string('order')->toString());
 
         return redirect()
@@ -94,173 +86,90 @@ class BoardController extends AdminController
     /**
      * Создание раздела
      */
-    public function create(Request $request, Validator $validator): RedirectResponse
+    public function create(BoardCategoryRequest $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
+        $board = Board::query()->create([
+            'name' => $request->string('name')->value(),
+            'sort' => Board::query()->max('sort') + 1,
+        ]);
 
-        $name = $request->input('name');
-
-        $validator->length($name, setting('board_category_min'), setting('board_category_max'), ['name' => __('validator.text')]);
-
-        if ($validator->isValid()) {
-            $max = Board::query()->max('sort') + 1;
-
-            $board = Board::query()->create([
-                'name' => $name,
-                'sort' => $max,
-            ]);
-
-            return redirect()->route('admin.boards.edit', ['id' => $board->id])
-                ->with('success', __('board::boards.category_success_created'));
-        }
-
-        return redirect()->route('admin.boards.categories')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+        return redirect()->route('admin.boards.edit', ['id' => $board->id])
+            ->with('success', __('board::boards.category_success_created'));
     }
 
     /**
      * Редактирование раздела
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
-        $board = Board::query()->with('children')->find($id);
-
-        if (! $board) {
-            abort(404, __('board::boards.category_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $parent = int($request->input('parent'));
-            $name = $request->input('name');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($name, setting('board_category_min'), setting('board_category_max'), ['name' => __('validator.text')])
-                ->notEqual($parent, $board->id, ['parent' => __('board::boards.category_parent_invalid')]);
-
-            if ($validator->isValid()) {
-                $board->update([
-                    'parent_id' => $parent,
-                    'name'      => $name,
-                    'closed'    => $closed,
-                ]);
-
-                return redirect()->route('admin.boards.categories')
-                    ->with('success', __('board::boards.category_success_edited'));
-            }
-
-            return redirect()->route('admin.boards.edit', ['id' => $board->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $board = $this->findCategory($id);
         $boards = $board->getChildren();
 
         return view('board::admin/boards/edit', compact('boards', 'board'));
     }
 
     /**
+     * Сохранение раздела
+     */
+    public function update(int $id, BoardCategoryRequest $request): RedirectResponse
+    {
+        $board = $this->findCategory($id);
+
+        $board->update([
+            'parent_id' => $request->integer('parent'),
+            'name'      => $request->string('name')->value(),
+            'closed'    => $request->boolean('closed'),
+        ]);
+
+        return redirect()->route('admin.boards.categories')
+            ->with('success', __('board::boards.category_success_edited'));
+    }
+
+    /**
      * Удаление раздела
      */
-    public function delete(int $id, Validator $validator): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
+        $board = $this->findCategory($id);
+        $redirect = redirect()->route('admin.boards.categories');
+
+        if ($board->children->isNotEmpty()) {
+            return $redirect->withErrors(__('board::boards.category_has_subsections'));
         }
 
-        $board = Board::query()->with('children')->find($id);
-
-        if (! $board) {
-            abort(404, __('board::boards.category_not_exist'));
-        }
-
-        $validator->true($board->children->isEmpty(), __('board::boards.category_has_subsections'));
-
-        $item = Item::query()->where('board_id', $board->id)->first();
-        if ($item) {
-            $validator->addError(__('board::boards.category_has_items'));
-        }
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.boards.categories')
-                ->withErrors($validator->getErrors());
+        if (Item::query()->where('board_id', $board->id)->exists()) {
+            return $redirect->withErrors(__('board::boards.category_has_items'));
         }
 
         $board->delete();
 
-        return redirect()->route('admin.boards.categories')
-            ->with('success', __('board::boards.category_success_deleted'));
+        return $redirect->with('success', __('board::boards.category_success_deleted'));
     }
 
     /**
      * Редактирование объявления
      */
-    public function editItem(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editItem(int $id): View
     {
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $bid = int($request->input('bid'));
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $price = int($request->input('price'));
-            $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
-            $city = $request->string('city')->value();
-
-            $board = Board::query()->find($bid);
-
-            $validator
-                ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
-                ->phone($phone, ['phone' => __('validator.phone')], false)
-                ->length($city, 2, 50, ['city' => __('validator.text')], false)
-                ->notEmpty($board, ['bid' => __('board::boards.category_not_exist')]);
-
-            if ($board) {
-                $validator->empty($board->closed, ['bid' => __('board::boards.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                if ($item->board_id !== $board->id) {
-                    $board->increment('count_items');
-                    Board::query()->where('id', $item->board_id)->decrement('count_items');
-                }
-
-                $item->update([
-                    'board_id'   => $board->id,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'price'      => $price,
-                    'phone'      => $phone,
-                    'city'       => $city,
-                    'messengers' => $request->input('messengers'),
-                ]);
-
-                clearCache(['statBoards', 'recentBoards']);
-
-                return redirect()->route('admin.items.edit', ['id' => $item->id])
-                    ->with('success', __('board::boards.item_success_edited'));
-            }
-
-            return redirect()->route('admin.items.edit', ['id' => $item->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $item = $this->findItem($id);
         $boards = $item->category->getChildren();
 
         return view('board::admin/boards/edit_item', compact('item', 'boards'));
+    }
+
+    /**
+     * Сохранение объявления
+     */
+    public function updateItem(int $id, ItemRequest $request): RedirectResponse
+    {
+        $item = $this->findItem($id);
+        $item->moveTo($request->category());
+        $item->update($request->itemFields());
+
+        clearCache(['statBoards', 'recentBoards']);
+
+        return redirect()->route('admin.items.edit', ['id' => $item->id])
+            ->with('success', __('board::boards.item_success_edited'));
     }
 
     /**
@@ -268,14 +177,9 @@ class BoardController extends AdminController
      */
     public function deleteItem(int $id): RedirectResponse
     {
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+        $item = $this->findItem($id);
 
         $item->delete();
-        $item->category->decrement('count_items');
 
         clearCache(['statBoards', 'recentBoards']);
 
@@ -288,14 +192,38 @@ class BoardController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run('boards');
 
         return redirect()
             ->route('admin.boards.index')
             ->with('success', __('main.success_recounted'));
+    }
+
+    /**
+     * Категория по id
+     */
+    private function findCategory(int $id): Board
+    {
+        $board = Board::query()->with('children')->find($id);
+
+        if (! $board) {
+            abort(404, __('board::boards.category_not_exist'));
+        }
+
+        return $board;
+    }
+
+    /**
+     * Объявление по id
+     */
+    private function findItem(int $id): Item
+    {
+        $item = Item::query()->find($id);
+
+        if (! $item) {
+            abort(404, __('board::boards.item_not_exist'));
+        }
+
+        return $item;
     }
 }

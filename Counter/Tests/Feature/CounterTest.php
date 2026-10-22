@@ -151,7 +151,7 @@ class CounterTest extends ModuleTestCase
 
     private function counter(array $attributes = []): Counter
     {
-        return Counter::query()->create([
+        return Counter::factory()->create([
             'period'   => now()->format('Y-m-d H:00:00'),
             'allhosts' => 0,
             'allhits'  => 0,

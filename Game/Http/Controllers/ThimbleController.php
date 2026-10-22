@@ -6,10 +6,10 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ThimbleController extends Controller
@@ -63,34 +63,24 @@ class ThimbleController extends Controller
     /**
      * Игра в напёрстки
      */
-    public function go(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
+    public function go(Request $request): View|RedirectResponse|JsonResponse
     {
-        // int() из «abc» сделал бы ноль, поэтому обычный каст и проверка диапазона
-        $thimble = (int) $request->input('thimble');
+        $request->validate([
+            'thimble' => ['required', 'integer', 'between:1,' . self::THIMBLES],
+        ], [
+            'thimble.*' => __('game::games.thimbles_not_chosen') . ' ' . __('validator.between', ['min' => 1, 'max' => self::THIMBLES]),
+        ]);
 
-        $validator
-            ->between($thimble, 1, self::THIMBLES, ['thimble' => __('game::games.thimbles_not_chosen')])
-            ->gte($this->user->money, self::BET, ['thimble' => __('game::games.not_enough_money')]);
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/thimbles')
-                ->withErrors($validator->getErrors());
-        }
+        $thimble = $request->integer('thimble');
 
         $before = $this->user->money;
+
+        if (! $this->user->chargeMoney(self::BET)) {
+            throw ValidationException::withMessages(['thimble' => __('game::games.not_enough_money')]);
+        }
+
         $ball = $this->ball($thimble);
         $won = $thimble === $ball;
-
-        $this->user->decrement('money', self::BET);
 
         if ($won) {
             $this->user->increment('money', self::WIN);

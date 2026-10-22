@@ -36,7 +36,7 @@ class DownWriteApiTest extends ModuleTestCase
         $this->overrideSetting('floodstime', 0);
 
         $this->user = User::factory()->create(['apikey' => Str::random(32)]);
-        $this->category = Load::query()->create(['parent_id' => 0, 'name' => 'Программы', 'sort' => 1]);
+        $this->category = Load::factory()->create(['parent_id' => 0, 'name' => 'Программы', 'sort' => 1]);
     }
 
     public function testStoreRequiresToken(): void
@@ -89,7 +89,10 @@ class DownWriteApiTest extends ModuleTestCase
         $this->overrideSetting('downupload', 0);
         $this->pendingFile();
 
-        $this->postJson('/api/downs', $this->payload(), $this->headers())->assertStatus(422);
+        // Отказ до проверки полей: форму с ошибками исправлять незачем
+        $this->postJson('/api/downs', ['title' => ''] + $this->payload(), $this->headers())
+            ->assertForbidden()
+            ->assertJsonPath('message', __('load::loads.down_closed'));
     }
 
     public function testClosedCategoryIsRejected(): void
@@ -164,7 +167,7 @@ class DownWriteApiTest extends ModuleTestCase
 
     private function file(int $relateId): File
     {
-        return File::query()->create([
+        return File::factory()->create([
             'relate_id'   => $relateId,
             'relate_type' => Down::$morphName,
             'path'        => '/uploads/files/wallpapers.zip',
@@ -178,7 +181,7 @@ class DownWriteApiTest extends ModuleTestCase
 
     private function createDown(int $userId): Down
     {
-        return Down::query()->create([
+        return Down::factory()->create([
             'category_id' => $this->category->id,
             'title'       => 'Архив с обоями',
             'text'        => 'Описание архива с обоями',

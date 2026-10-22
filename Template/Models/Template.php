@@ -7,6 +7,7 @@ namespace Modules\Template\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
@@ -20,6 +21,9 @@ use Illuminate\Support\HtmlString;
  */
 class Template extends Model
 {
+    /** @use HasFactory<\Modules\Template\Tests\Factories\TemplateFactory> */
+    use HasFactory;
+
     /**
      * The name of the "updated at" column.
      */

@@ -9,17 +9,18 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Services\FileService;
 use App\Support\CategoryTree;
-use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Blog\Http\Requests\ArticleRequest;
+use Modules\Blog\Http\Requests\ArticleStoreRequest;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Blog;
 use Modules\Blog\Models\Tag;
@@ -122,17 +123,9 @@ class ArticleController extends Controller
     /**
      * Создание статьи
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(Request $request): View
     {
-        $cid = int($request->input('cid'));
-
-        if (! isAdmin() && ! setting('blog_create')) {
-            abort(200, __('blog::blogs.articles_closed'));
-        }
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $this->checkCreationOpen();
 
         $categories = (new Blog())->getChildren();
 
@@ -140,172 +133,94 @@ class ArticleController extends Controller
             abort(404, __('blog::blogs.categories_not_created'));
         }
 
-        $files = File::query()
-            ->pending(Article::$morphName, $user->id)
-            ->ordered();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $tags = (array) $request->input('tags');
-            $tags = array_unique(array_diff($tags, ['']));
-            $published = $request->input('published');
-
-            $isDelay = $request->boolean('delay');
-            $isDraft = $request->input('action') === 'draft';
-            $isModeration = setting('article_moderation') && ! isAdmin();
-            $isActive = ! $isDraft && ! $isDelay && ! $isModeration;
-
-            $category = Blog::query()->find($cid);
-
-            $validator
-                ->length($title, setting('blog_title_min'), setting('blog_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('blog_text_min'), setting('blog_text_max'), ['text' => __('validator.text')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-                ->notEmpty($category, ['cid' => __('blog::blogs.category_not_exist')])
-                ->between(count($tags), 1, 10, ['tags' => __('blog::blogs.article_count_tags')]);
-
-            if ($isDelay && isAdmin() && Date::parse($published) < now()) {
-                $validator->addError(['published' => __('blog::blogs.article_delayed_time')]);
-            }
-
-            foreach ($tags as $tag) {
-                $validator->length($tag, setting('blog_tag_min'), setting('blog_tag_max'), ['tags' => __('blog::blogs.article_error_tags')]);
-            }
-
-            if ($category) {
-                $validator->empty($category->closed, ['cid' => __('blog::blogs.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                $article = Article::query()->create([
-                    'category_id'  => $category->id,
-                    'user_id'      => $user->id,
-                    'title'        => $title,
-                    'slug'         => $title,
-                    'text'         => $text,
-                    'draft'        => $isDraft,
-                    'active'       => $isActive,
-                    'published_at' => isAdmin() && $isDelay ? $published : null,
-                ]);
-
-                foreach ($tags as $key => $tagName) {
-                    $tag = Tag::query()->firstOrCreate(['name' => Str::lower($tagName)]);
-                    $article->tags()->attach($tag->id, ['sort' => $key]);
-                }
-
-                $files->update(['relate_id' => $article->id]);
-                $flood->saveState();
-
-                $created = $isModeration ? __('blog::blogs.article_moderation_text') : __('blog::blogs.article_success_created');
-                $flash = $isDraft ? __('blog::blogs.article_success_drafts') : $created;
-
-                return redirect()
-                    ->route('articles.view', ['slug' => $article->slug])
-                    ->with('success', $flash);
-            }
-
-            return redirect()->route('blogs.create', ['cid' => $cid])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $cid = int($request->input('cid'));
         $article = new Article();
-        $files = $files->get();
+
+        $files = File::query()
+            ->pending(Article::$morphName, getUser('id'))
+            ->ordered()
+            ->get();
 
         return view('blog::articles/create', compact('article', 'categories', 'cid', 'files'));
     }
 
     /**
+     * Публикация статьи
+     */
+    public function store(ArticleStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
+    {
+        $title = $request->string('title')->value();
+        $publishedAt = $request->publishedAt();
+        $isDraft = $request->boolean('draft');
+        $isModeration = setting('article_moderation') && ! isAdmin();
+
+        $article = Article::query()->create([
+            'category_id'  => $request->category()->id,
+            'user_id'      => getUser('id'),
+            'title'        => $title,
+            'slug'         => $title,
+            'text'         => $request->string('text')->value(),
+            'draft'        => $isDraft,
+            'active'       => ! $isDraft && ! $publishedAt && ! $isModeration,
+            'published_at' => $publishedAt,
+        ]);
+
+        $article->syncTags($request->tagNames());
+
+        $files->attach($article, $request->file('files', []));
+        $flood->saveState();
+
+        $created = $isModeration ? __('blog::blogs.article_moderation_text') : __('blog::blogs.article_success_created');
+        $flash = $isDraft ? __('blog::blogs.article_success_drafts') : $created;
+
+        return redirect()
+            ->route('articles.view', ['slug' => $article->slug])
+            ->with('success', $flash);
+    }
+
+    /**
      * Редактирование статьи
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
-
-        if ($user->id !== $article->user_id) {
-            abort(200, __('main.article_not_author'));
-        }
-
-        if ($request->isMethod('post')) {
-            $cid = int($request->input('cid'));
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $tags = (array) $request->input('tags');
-            $tags = array_unique(array_diff($tags, ['']));
-            $published = $request->input('published');
-
-            $isPublish = $request->input('action') === 'publish';
-            $isDelay = ! $isPublish && $request->boolean('delay');
-
-            $category = Blog::query()->find($cid);
-
-            $validator
-                ->length($title, setting('blog_title_min'), setting('blog_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('blog_text_min'), setting('blog_text_max'), ['text' => __('validator.text')])
-                ->notEmpty($category, ['cid' => __('blog::blogs.category_not_exist')])
-                ->between(count($tags), 1, 10, ['tags' => __('blog::blogs.article_count_tags')]);
-
-            if ($isDelay && isAdmin() && Date::parse($published) < now()) {
-                $validator->addError(['published' => __('blog::blogs.article_delayed_time')]);
-            }
-
-            foreach ($tags as $tag) {
-                $validator->length($tag, setting('blog_tag_min'), setting('blog_tag_max'), ['tags' => __('blog::blogs.article_error_tags')]);
-            }
-
-            if ($category) {
-                $validator->empty($category->closed, ['cid' => __('blog::blogs.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                $isModeration = setting('article_moderation') && ! isAdmin();
-                $wasDraft = $article->draft;
-                $isDraft = ! $isPublish && $article->draft;
-                $isActive = $isPublish || (! $isDraft && ! $isDelay && ! $isModeration && $article->active);
-
-                $article->update([
-                    'category_id'  => $category->id,
-                    'title'        => $title,
-                    'text'         => $text,
-                    'draft'        => $isDraft,
-                    'active'       => $isActive,
-                    'published_at' => isAdmin() && $isDelay ? $published : null,
-                ]);
-
-                $tagIds = [];
-                foreach ($tags as $key => $tagName) {
-                    $tag = Tag::query()->firstOrCreate(['name' => Str::lower($tagName)]);
-                    $tagIds[$tag->id] = ['sort' => $key];
-                }
-
-                $article->tags()->sync($tagIds);
-                clearCache('tagCloud');
-
-                $created = $isModeration ? __('blog::blogs.article_moderation_text') : __('blog::blogs.article_success_created');
-                $flash = ($wasDraft && $isPublish) ? $created : __('blog::blogs.article_success_edited');
-
-                return redirect()
-                    ->route('articles.view', ['slug' => $article->slug])
-                    ->with('success', $flash);
-            }
-
-            return redirect()->route('articles.edit', ['id' => $article->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $article = $this->ownArticle($id);
         $categories = $article->category->getChildren();
 
         return view('blog::articles/edit', compact('article', 'categories'));
+    }
+
+    /**
+     * Сохранение статьи
+     */
+    public function update(int $id, ArticleRequest $request): RedirectResponse
+    {
+        $article = $this->ownArticle($id);
+
+        $isPublish = $request->boolean('publish');
+        $publishedAt = $request->publishedAt();
+        $isModeration = setting('article_moderation') && ! isAdmin();
+        $wasDraft = $article->draft;
+        $isDraft = ! $isPublish && $article->draft;
+
+        $article->update([
+            'category_id' => $request->category()->id,
+            'title'       => $request->string('title')->value(),
+            'text'        => $request->string('text')->value(),
+            'draft'       => $isDraft,
+            // При модерации публикация черновика тоже ждёт проверки
+            'active'       => ! $isModeration && ($isPublish || (! $isDraft && ! $publishedAt && $article->active)),
+            'published_at' => $publishedAt,
+        ]);
+
+        $article->syncTags($request->tagNames());
+        clearCache('tagCloud');
+
+        $created = $isModeration ? __('blog::blogs.article_moderation_text') : __('blog::blogs.article_success_created');
+        $flash = ($wasDraft && $isPublish) ? $created : __('blog::blogs.article_success_edited');
+
+        return redirect()
+            ->route('articles.view', ['slug' => $article->slug])
+            ->with('success', $flash);
     }
 
     /**
@@ -520,5 +435,33 @@ class ArticleController extends Controller
             ->paginate(setting('blogpost'));
 
         return view('blog::articles/main', compact('articles'));
+    }
+
+    /**
+     * Своя статья по id
+     */
+    private function ownArticle(int $id): Article
+    {
+        $article = Article::query()->find($id);
+
+        if (! $article) {
+            abort(404, __('blog::blogs.article_not_exist'));
+        }
+
+        if ($article->user_id !== getUser('id')) {
+            abort(200, __('main.article_not_author'));
+        }
+
+        return $article;
+    }
+
+    /**
+     * Публикация статей может быть закрыта настройкой — кроме администрации
+     */
+    private function checkCreationOpen(): void
+    {
+        if (! isAdmin() && ! setting('blog_create')) {
+            abort(200, __('blog::blogs.articles_closed'));
+        }
     }
 }

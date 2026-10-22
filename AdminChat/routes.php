@@ -10,8 +10,10 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->prefix('chats')
             ->name('admin.chats.')
             ->group(function () {
-                Route::match(['get', 'post'], '/', 'index')->name('index');
-                Route::match(['get', 'post'], '/edit/{id}', 'edit')->name('edit');
-                Route::post('/clear', 'clear')->name('clear');
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'store');
+                Route::get('/edit/{id}', 'edit')->name('edit');
+                Route::post('/edit/{id}', 'update');
+                Route::post('/clear', 'clear')->name('clear')->middleware('check.admin:boss');
             });
     });

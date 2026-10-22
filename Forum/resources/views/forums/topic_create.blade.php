@@ -16,18 +16,18 @@
     <div class="section-form mb-3 shadow">
         <form action="{{ route('forums.create') }}" method="post">
             @csrf
-            <div class="mb-3{{ hasError('fid') }}">
+            <div class="mb-3{{ hasError('forum_id') }}">
                 <label for="inputForum" class="form-label">{{ __('forum::forums.forum') }}:</label>
-                <select class="form-select" id="inputForum" name="fid">
+                <select class="form-select" id="inputForum" name="forum_id">
 
                     @foreach ($forums as $data)
-                        <option value="{{ $data->id }}"{{ $fid === $data->id  && ! $data->closed ? ' selected' : '' }}{{ $data->closed ? ' disabled' : '' }}>
+                        <option value="{{ $data->id }}"{{ (int) old('forum_id', $fid) === $data->id && ! $data->closed ? ' selected' : '' }}{{ $data->closed ? ' disabled' : '' }}>
                             {{ str_repeat('–', $data->depth) }} {{ $data->title }}
                         </option>
                     @endforeach
 
                 </select>
-                <div class="invalid-feedback">{{ textError('fid') }}</div>
+                <div class="invalid-feedback">{{ textError('forum_id') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('title') }}">
@@ -36,10 +36,10 @@
                 <div class="invalid-feedback">{{ textError('title') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" required>{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('forum::forums.post') }}:</label>
+                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="text" rows="5" name="text" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" required>{{ old('text') }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 
@@ -55,6 +55,8 @@
             ])
 
             <label class="form-check mb-3">
+                {{-- Снятый флажок браузер не отправляет, без нуля запрос не узнает, что его сняли --}}
+                <input type="hidden" name="vote" value="0">
                 <input type="checkbox" class="form-check-input" name="vote" onchange="showVoteForm();"{!! $checked !!}> {{ __('forum::forums.create_vote') }}
             </label>
 

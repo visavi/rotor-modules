@@ -6,6 +6,7 @@ namespace Modules\UserLocation\Models;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserLocation extends Model
 {
+    /** @use HasFactory<\Modules\UserLocation\Tests\Factories\UserLocationFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

@@ -58,6 +58,7 @@
                                     "text": {
                                         "type": "string",
                                         "maxLength": 10000,
+                                        "description": "HTML из редактора, длина считается без тегов",
                                         "nullable": true
                                     }
                                 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,6 +17,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class VoteAnswer extends Model
 {
+    /** @use HasFactory<\Modules\Forum\Tests\Factories\VoteAnswerFactory> */
+    use HasFactory;
+
     /**
      * The table associated with the model.
      */

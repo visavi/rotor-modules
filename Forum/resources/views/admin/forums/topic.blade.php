@@ -162,10 +162,10 @@
         <div class="section-form mb-3 shadow">
             <form action="{{ route('topics.create', ['id' => $topic->id]) }}" method="post">
                 @csrf
-                <div class="mb-3{{ hasError('msg') }}">
-                    <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ old('msg') }}</textarea>
-                    <div class="invalid-feedback">{{ textError('msg') }}</div>
+                <div class="mb-3{{ hasError('text') }}">
+                    <label for="text" class="form-label">{{ __('forum::forums.post') }}:</label>
+                    <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="text" rows="5" name="text" data-relate-type="{{ \Modules\Forum\Models\Post::$morphName }}" data-relate-id="0" placeholder="{{ __('forum::forums.post') }}" required>{{ old('text') }}</textarea>
+                    <div class="invalid-feedback">{{ textError('text') }}</div>
                     <span class="js-textarea-counter"></span>
                 </div>
 

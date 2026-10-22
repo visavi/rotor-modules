@@ -82,19 +82,20 @@ class ItemApiTest extends ModuleTestCase
         $response->assertJsonPath('data.files.0.name', 'manual.pdf');
     }
 
-    public function testExpiredItemIsHiddenFromOtherUsers(): void
+    public function testExpiredItemIsOpenToEveryone(): void
     {
         $item = $this->createItem(expired: true);
 
-        // Гость истёкшее объявление видит, как и на сайте
         $this->getJson('/api/items/' . $item->id)
             ->assertOk()
             ->assertJsonPath('data.expired', true);
 
+        // Раньше вошедшему не-автору отвечало 403, хотя гость запись видел
         $stranger = User::factory()->create(['apikey' => Str::random(32)]);
 
         $this->getJson('/api/items/' . $item->id, ['Authorization' => 'Bearer ' . $stranger->apikey])
-            ->assertStatus(403);
+            ->assertOk()
+            ->assertJsonPath('data.expired', true);
 
         $author = User::query()->find($this->user->id);
         $author->update(['apikey' => Str::random(32)]);
@@ -116,8 +117,8 @@ class ItemApiTest extends ModuleTestCase
 
     public function testCategoriesReturnTree(): void
     {
-        $parent = Board::query()->create(['name' => 'Parent board']);
-        Board::query()->create(['name' => 'Child board', 'parent_id' => $parent->id]);
+        $parent = Board::factory()->create(['name' => 'Parent board']);
+        Board::factory()->create(['name' => 'Child board', 'parent_id' => $parent->id]);
 
         $this->getJson('/api/boards')
             ->assertOk()
@@ -132,9 +133,9 @@ class ItemApiTest extends ModuleTestCase
 
     private function createItem(bool $expired = false): Item
     {
-        $board = Board::query()->create(['name' => 'Test board']);
+        $board = Board::factory()->create(['name' => 'Test board']);
 
-        return Item::query()->create([
+        return Item::factory()->create([
             'board_id'   => $board->id,
             'title'      => 'Test item',
             'text'       => 'Test item text',
@@ -150,7 +151,7 @@ class ItemApiTest extends ModuleTestCase
 
     private function attachFile(Item $item, string $name, string $extension, string $mimeType): void
     {
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $item->id,
             'relate_type' => Item::$morphName,
             'path'        => '/uploads/boards/' . $name,

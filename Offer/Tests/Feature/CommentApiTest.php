@@ -96,7 +96,7 @@ class CommentApiTest extends ModuleTestCase
         $offer = $this->createOffer();
 
         // Файл загружен через /api/files до отправки комментария
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Comment::$morphName,
             'path'        => '/uploads/comments/screen.jpg',
@@ -220,7 +220,7 @@ class CommentApiTest extends ModuleTestCase
 
     private function createOffer(): Offer
     {
-        return Offer::query()->create([
+        return Offer::factory()->create([
             'title'      => 'Test issue',
             'text'       => 'Test issue text',
             'type'       => Offer::ISSUE,
@@ -233,7 +233,7 @@ class CommentApiTest extends ModuleTestCase
 
     private function addComment(Offer $offer, string $text, ?int $userId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => Offer::$morphName,
             'relate_id'   => $offer->id,
             'text'        => $text,

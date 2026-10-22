@@ -7,11 +7,12 @@ namespace Modules\Guestbook\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
-use App\Support\Validator;
+use App\Services\FileService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\View\View;
+use Modules\Guestbook\Http\Requests\GuestbookRequest;
+use Modules\Guestbook\Http\Requests\GuestbookTextRequest;
 use Modules\Guestbook\Models\Guestbook;
 
 class GuestbookController extends Controller
@@ -43,81 +44,84 @@ class GuestbookController extends Controller
     /**
      * Добавление сообщения
      */
-    public function add(Request $request, Validator $validator, Flood $flood): RedirectResponse
+    public function add(GuestbookRequest $request, Flood $flood, FileService $files): RedirectResponse
     {
-        $msg = $request->string('msg')->value();
-        $user = $request->user();
+        $msg = $request->string('text')->value();
+        $user = getUser();
+        $active = ! setting('guest_moderation');
+        $guestName = $request->input('guest_name');
 
-        $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')])
-            ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])]);
+        if ($user) {
+            $active = true;
+            $guestName = null;
 
-        if (! $user && setting('bookadds')) {
-            $validator->true(captchaVerify(), ['protect' => __('validator.captcha')]);
-            $validator->true(! str_contains($msg, '//'), ['msg' => __('guestbook::guestbook.without_links')]);
-            $validator->length($request->input('guest_name'), 3, 20, ['guest_name' => __('users.name_short_or_long')], false);
+            $user->increment('point', setting('guestbook_point'));
+            $user->increment('money', setting('guestbook_money'));
         } else {
-            $validator->true($user, ['msg' => __('main.not_authorized')]);
+            // Гостевой текст приходит без разметки, её ставит сам сайт
+            $msg = '<p>' . nl2br(check($msg), false) . '</p>';
         }
 
-        if ($validator->isValid()) {
-            $active = ! setting('guest_moderation');
-            $guestName = $request->input('guest_name');
+        $guestbook = Guestbook::query()->create([
+            'user_id'    => $user->id ?? null,
+            'text'       => $msg,
+            'ip'         => getIp(),
+            'brow'       => getBrowser(),
+            'guest_name' => $guestName,
+            'active'     => $active,
+        ]);
 
-            if ($user) {
-                $active = true;
-                $guestName = null;
-
-                $user->increment('point', setting('guestbook_point'));
-                $user->increment('money', setting('guestbook_money'));
-            } else {
-                $msg = '<p>' . nl2br(check($msg), false) . '</p>';
-            }
-
-            $guestbook = Guestbook::query()->create([
-                'user_id'    => $user->id ?? null,
-                'text'       => $msg,
-                'ip'         => getIp(),
-                'brow'       => getBrowser(),
-                'guest_name' => $guestName,
-                'active'     => $active,
-            ]);
-
-            if ($user) {
-                File::query()
-                    ->pending(Guestbook::$morphName, $user->id)
-                    ->update(['relate_id' => $guestbook->id]);
-            } else {
-                Cookie::queue('guest_name', $guestName, 525600);
-            }
-
-            clearCache('statGuestbook');
-            $flood->saveState();
-
-            sendNotify($msg, route('guestbook.index', absolute: false), __('guestbook::guestbook.guestbook', locale: setting('language')));
-
-            return redirect()
-                ->route('guestbook.index')
-                ->withFragment('post_' . $guestbook->id)
-                ->with('success', $active ? __('main.message_added_success') : __('main.message_publish_moderation'));
+        if ($user) {
+            $files->attach($guestbook, $request->file('files', []));
+        } else {
+            Cookie::queue('guest_name', $guestName, 525600);
         }
 
-        return redirect()->route('guestbook.index')
-            ->withErrors($validator->getErrors())
-            ->withInput();
+        clearCache('statGuestbook');
+        $flood->saveState();
+
+        sendNotify($msg, route('guestbook.index', absolute: false), __('guestbook::guestbook.guestbook', locale: setting('language')));
+
+        return redirect()
+            ->route('guestbook.index')
+            ->withFragment('post_' . $guestbook->id)
+            ->with('success', $active ? __('main.message_added_success') : __('main.message_publish_moderation'));
     }
 
     /**
      * Редактирование сообщения
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! $user = getUser()) {
-            abort(403);
-        }
+        $post = $this->ownPost($id);
 
-        $msg = $request->string('msg')->value();
+        return view('guestbook::guestbook/edit', compact('post'));
+    }
 
-        $post = Guestbook::query()->where('user_id', $user->id)->find($id);
+    /**
+     * Сохранение сообщения
+     */
+    public function update(int $id, GuestbookTextRequest $request): RedirectResponse
+    {
+        $post = $this->ownPost($id);
+
+        $post->update([
+            'text'         => $request->string('text')->value(),
+            'edit_user_id' => getUser('id'),
+        ]);
+
+        return redirect()
+            ->route('guestbook.index')
+            ->withFragment('post_' . $post->id)
+            ->with('success', __('main.message_edited_success'));
+    }
+
+    /**
+     * Своё сообщение, которое ещё можно править
+     */
+    private function ownPost(int $id): Guestbook
+    {
+        $post = Guestbook::query()->where('user_id', getUser('id'))->find($id);
 
         if (! $post) {
             abort(404, __('main.message_not_found'));
@@ -127,24 +131,6 @@ class GuestbookController extends Controller
             abort(200, __('main.editing_impossible'));
         }
 
-        if ($request->isMethod('post')) {
-            $validator->length($msg, setting('guestbook_text_min'), setting('guestbook_text_max'), ['msg' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $post->update([
-                    'text'         => $msg,
-                    'edit_user_id' => $user->id,
-                ]);
-
-                return redirect()
-                    ->route('guestbook.index')
-                    ->withFragment('post_' . $post->id)
-                    ->with('success', __('main.message_edited_success'));
-            }
-
-            return back()->withErrors($validator->getErrors())->withInput();
-        }
-
-        return view('guestbook::guestbook/edit', compact('post'));
+        return $post;
     }
 }

@@ -7,6 +7,7 @@ namespace Modules\Transfer\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Transfer extends Model
 {
+    /** @use HasFactory<\Modules\Transfer\Tests\Factories\TransferFactory> */
+    use HasFactory;
+
     /**
      * The name of the "updated at" column.
      */

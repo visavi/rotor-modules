@@ -6,7 +6,7 @@ namespace Modules\Notebook\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Modules\Notebook\Http\Requests\NotebookRequest;
 use Modules\Notebook\Models\Notebook;
 
 /**
@@ -25,14 +25,10 @@ class NotebookApiController extends Controller
     /**
      * Сохранение заметки
      */
-    public function update(Request $request): JsonResponse
+    public function update(NotebookRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'text' => ['nullable', 'string', 'max:10000'],
-        ]);
-
         $note = $this->note();
-        $note->fill(['text' => $validated['text'] ?? ''])->save();
+        $note->fill(['text' => $request->string('text')->value()])->save();
 
         return response()->json([
             'message' => __('main.record_saved_success'),

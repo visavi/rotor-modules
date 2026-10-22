@@ -15,7 +15,7 @@ class BlogSortTest extends ModuleTestCase
     public function testAdminBelowBossCannotSort(): void
     {
         $admin = User::factory()->admin()->create();
-        $blog = Blog::query()->create(['name' => 'Blog', 'sort' => 1]);
+        $blog = Blog::factory()->create(['name' => 'Blog', 'sort' => 1]);
 
         $this->actingAs($admin)
             ->post(route('admin.blogs.sort'), ['order' => "{$blog->id}:0"])
@@ -26,9 +26,9 @@ class BlogSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Blog::query()->create(['name' => 'Root', 'sort' => 1]);
-        $other = Blog::query()->create(['name' => 'Other', 'sort' => 2]);
-        $child = Blog::query()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
+        $root = Blog::factory()->create(['name' => 'Root', 'sort' => 1]);
+        $other = Blog::factory()->create(['name' => 'Other', 'sort' => 2]);
+        $child = Blog::factory()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
 
         $this->actingAs($boss)
             ->post(route('admin.blogs.sort'), [
@@ -45,9 +45,9 @@ class BlogSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Blog::query()->create(['name' => 'Root blog', 'sort' => 1, 'count_articles' => 1]);
-        $child = Blog::query()->create(['name' => 'Child blog', 'parent_id' => $root->id, 'sort' => 2, 'count_articles' => 2]);
-        Blog::query()->create(['name' => 'Grandchild blog', 'parent_id' => $child->id, 'sort' => 3, 'count_articles' => 4]);
+        $root = Blog::factory()->create(['name' => 'Root blog', 'sort' => 1, 'count_articles' => 1]);
+        $child = Blog::factory()->create(['name' => 'Child blog', 'parent_id' => $root->id, 'sort' => 2, 'count_articles' => 2]);
+        Blog::factory()->create(['name' => 'Grandchild blog', 'parent_id' => $child->id, 'sort' => 3, 'count_articles' => 4]);
 
         $this->actingAs($boss)
             ->get(route('admin.blogs.index'))
@@ -61,7 +61,7 @@ class BlogSortTest extends ModuleTestCase
     {
         $admin = User::factory()->admin()->create();
 
-        Blog::query()->create(['name' => 'Root blog', 'sort' => 1]);
+        Blog::factory()->create(['name' => 'Root blog', 'sort' => 1]);
 
         $this->actingAs($admin)
             ->get(route('admin.blogs.index'))

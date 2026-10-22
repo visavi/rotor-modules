@@ -19,7 +19,7 @@ class TemplateSmokeTest extends ModuleTestCase
     {
         $user = User::factory()->create();
 
-        Template::query()->create([
+        Template::factory()->create([
             'user_id' => $user->id,
             'title'   => 'Test title',
             'text'    => 'Test text',

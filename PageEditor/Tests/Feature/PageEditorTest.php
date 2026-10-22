@@ -346,9 +346,51 @@ class PageEditorTest extends ModuleTestCase
             'root' => 'views',
         ]), [
             'file' => UploadedFile::fake()->create('page_editor_upload.exe', 1),
-        ])->assertRedirect();
+        ])->assertRedirect(route('admin.files.create', ['root' => 'views', 'path' => '']))
+            ->assertSessionHasErrors('file');
 
         $this->assertFileDoesNotExist(resource_path('views/page_editor_upload.exe'));
+    }
+
+    public function testUploadRejectsTooLargeFile(): void
+    {
+        config()->set('page_editor.max_upload_size', 1024);
+
+        $this->actingAs($this->boss)->post(route('admin.files.upload', [
+            'root' => 'views',
+        ]), [
+            'file' => UploadedFile::fake()->create('page_editor_upload.blade.php', 2),
+        ])->assertSessionHasErrors('file');
+
+        $this->assertFileDoesNotExist(resource_path('views/page_editor_upload.blade.php'));
+    }
+
+    public function testCreateErrorsAreShownUnderTheirField(): void
+    {
+        $form = route('admin.files.create', ['root' => 'views', 'path' => '']);
+
+        $this->actingAs($this->boss)
+            ->post(route('admin.files.create', ['root' => 'views']), ['filename' => 'page editor.blade.php'])
+            ->assertRedirect($form)
+            ->assertSessionHasErrors('filename');
+
+        file_put_contents(resource_path('views/page_editor_exists.blade.php'), '');
+
+        $this->actingAs($this->boss)
+            ->post(route('admin.files.create', ['root' => 'views']), ['filename' => 'page_editor_exists.blade.php'])
+            ->assertSessionHasErrors(['filename' => __('page_editor::files.file_exist')]);
+
+        $this->actingAs($this->boss)
+            ->post(route('admin.files.create', ['root' => 'views']), ['dirname' => 'page editor dir'])
+            ->assertSessionHasErrors('dirname');
+
+        // Пустое имя в форме файла — ошибка этой формы, а не «каталог уже есть»
+        $this->actingAs($this->boss)
+            ->post(route('admin.files.create', ['root' => 'views']), ['filename' => ''])
+            ->assertSessionHasErrors(['filename' => __('page_editor::files.file_required')])
+            ->assertSessionDoesntHaveErrors('dirname');
+
+        $this->assertDirectoryDoesNotExist(resource_path('views/page editor dir'));
     }
 
     public function testUploadKeepsExistingFile(): void

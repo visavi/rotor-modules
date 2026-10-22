@@ -6,69 +6,62 @@ namespace Modules\Delivery\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\User;
-use App\Support\Validator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Delivery\Http\Requests\DeliveryRequest;
 
 class DeliveryController extends AdminController
 {
     /**
      * Главная страница
      */
-    public function index(Request $request, Validator $validator): View|RedirectResponse
+    public function index(): View
     {
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-            $type = int($request->input('type'));
-            $users = collect();
+        return view('delivery::admin/delivery/index');
+    }
 
-            $validator
-                ->length($msg, setting('comment_text_min'), setting('comment_text_max'), ['msg' => __('validator.text')])
-                ->between($type, 1, 4, __('delivery::delivery.not_recipients_selected'));
+    /**
+     * Рассылка
+     */
+    public function send(DeliveryRequest $request): RedirectResponse
+    {
+        $users = $this->recipients($request->integer('type'))
+            ->where('id', '<>', getUser('id'))
+            ->get();
 
-            // Рассылка пользователям, которые в онлайне
-            if ($type === 1) {
-                $users = User::query()->whereHas('online')->get();
-            }
-
-            // Рассылка активным пользователям, которые посещали сайт менее недели назад
-            if ($type === 2) {
-                $users = User::query()->where('updated_at', '>', now()->subWeek())->get();
-            }
-
-            // Рассылка администрации
-            if ($type === 3) {
-                $users = User::query()->whereIn('level', User::ADMIN_GROUPS)->get();
-            }
-
-            // Рассылка всем пользователям сайта
-            if ($type === 4) {
-                $users = User::query()->whereIn('level', User::USER_GROUPS)->get();
-            }
-
-            $users = $users->filter(static function ($value, $key) {
-                return $value->id !== getUser('id');
-            });
-
-            if ($users->isEmpty()) {
-                $validator->addError(__('delivery::delivery.not_recipients'));
-            }
-
-            if ($validator->isValid()) {
-                foreach ($users as $user) {
-                    $user->sendMessage(null, $msg);
-                }
-
-                return redirect('admin/delivery')
-                    ->with('success', __('delivery::delivery.success_sent'));
-            }
-
+        if ($users->isEmpty()) {
             return redirect('admin/delivery')
                 ->withInput()
-                ->withErrors($validator->getErrors());
+                ->withErrors(['type' => __('delivery::delivery.not_recipients')]);
         }
 
-        return view('delivery::admin/delivery/index');
+        $text = $request->string('text')->value();
+
+        foreach ($users as $user) {
+            $user->sendMessage(null, $text);
+        }
+
+        return redirect('admin/delivery')
+            ->with('success', __('delivery::delivery.success_sent'));
+    }
+
+    /**
+     * Получатели рассылки по группе
+     *
+     * @return Builder<User>
+     */
+    private function recipients(int $type): Builder
+    {
+        return match ($type) {
+            // Пользователи в онлайне
+            1 => User::query()->whereHas('online'),
+            // Активные: посещали сайт менее недели назад
+            2 => User::query()->where('updated_at', '>', now()->subWeek()),
+            // Администрация
+            3 => User::query()->whereIn('level', User::ADMIN_GROUPS),
+            // Все пользователи сайта
+            default => User::query()->whereIn('level', User::USER_GROUPS),
+        };
     }
 }

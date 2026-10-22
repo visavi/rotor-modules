@@ -17,6 +17,7 @@ use App\Traits\SortableTrait;
 use App\Traits\UploadTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -44,6 +45,9 @@ use Illuminate\Support\HtmlString;
  */
 class Post extends Model
 {
+    /** @use HasFactory<\Modules\Forum\Tests\Factories\PostFactory> */
+    use HasFactory;
+
     use PollableTrait;
     use FileableTrait;
     use ConvertVideoTrait;

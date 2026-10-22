@@ -356,6 +356,31 @@ Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="'
 Модуль, оставшийся на `@extends('layout')` с секцией `content`, продолжает работать
 как отдельная страница — просто без боковой панели.
 
+Контроллер настроек наследует `ModuleSettingController`: он открывает страницу, проверяет
+и сохраняет форму. Свои правила модуль объявляет методом `rules()` (сообщения — `messages()`),
+и тогда сохраняются только перечисленные в нём ключи — чужие имена из формы в настройки
+не попадут. Без `rules()` сохраняются все поля `sets[...]`.
+
+```php
+class MyModuleSettingController extends ModuleSettingController
+{
+    protected string $view = 'mymodule::admin/settings/_mymodule';
+
+    protected string $route = 'mymodule.settings';
+
+    protected function rules(): array
+    {
+        return [
+            'sets.mymodule_per_page' => ['required', 'integer', 'between:1,100'],
+        ];
+    }
+}
+```
+
+Маршрут сохранения — `POST` на метод `update`. Страница настроек открыта только владельцу
+сайта: контроллер сам добавляет `check.admin:boss`. Ошибка поля подсвечивается
+по ключу через точку: `hasError('sets.mymodule_per_page')`.
+
 ## Морф-имена
 
 Каждая модель, участвующая в Registry, объявляет морф-имя:

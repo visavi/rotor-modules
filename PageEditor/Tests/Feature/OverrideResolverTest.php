@@ -259,7 +259,7 @@ class OverrideResolverTest extends ModuleTestCase
         $boss = User::factory()->boss()->create(['login' => 'boss_module_icons']);
 
         // Список активных модулей берётся из БД, в тестовой базе он пуст
-        Module::query()->create(['name' => 'PageEditor', 'version' => '1.0.0', 'active' => true]);
+        Module::factory()->create(['name' => 'PageEditor', 'version' => '1.0.0', 'active' => true]);
         cache()->forget('modules');
 
         $response = $this->actingAs($boss)->get(route('admin.files.index', ['root' => 'modules']));

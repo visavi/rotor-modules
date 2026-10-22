@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\UserField\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
@@ -20,6 +21,9 @@ use Illuminate\Support\Collection;
  */
 class UserData extends Model
 {
+    /** @use HasFactory<\Modules\UserField\Tests\Factories\UserDataFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

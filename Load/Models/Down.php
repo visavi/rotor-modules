@@ -23,6 +23,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -52,6 +53,9 @@ use Illuminate\Support\HtmlString;
  */
 class Down extends Model
 {
+    /** @use HasFactory<\Modules\Load\Tests\Factories\DownFactory> */
+    use HasFactory;
+
     use AddFileToArchiveTrait;
     use CommentableTrait;
     use ConvertVideoTrait;
@@ -66,6 +70,14 @@ class Down extends Model
      * The attributes that aren't mass assignable.
      */
     protected $guarded = [];
+
+    /**
+     * Значения по умолчанию, как в миграции: новая загрузка ждёт проверки
+     * и без явного active не должна попасть в поиск
+     */
+    protected $attributes = [
+        'active' => false,
+    ];
 
     /**
      * Директория загрузки файлов

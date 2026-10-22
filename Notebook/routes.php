@@ -11,7 +11,8 @@ Route::middleware('web')
     ->name('notebooks.')
     ->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::match(['get', 'post'], '/edit', 'edit')->name('edit');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::post('/edit', 'update');
     });
 
 /* ---- API роуты ---- */

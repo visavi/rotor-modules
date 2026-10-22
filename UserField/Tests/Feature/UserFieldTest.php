@@ -24,7 +24,7 @@ class UserFieldTest extends ModuleTestCase
 
         $this->user = User::factory()->create();
 
-        $this->field = UserField::query()->create([
+        $this->field = UserField::factory()->create([
             'sort'     => 1,
             'type'     => UserField::INPUT,
             'name'     => 'Любимая игра',
@@ -107,7 +107,7 @@ class UserFieldTest extends ModuleTestCase
 
     public function testTextareaValueIsSanitized(): void
     {
-        $field = UserField::query()->create([
+        $field = UserField::factory()->create([
             'sort'     => 2,
             'type'     => UserField::TEXTAREA,
             'name'     => 'О себе',
@@ -139,7 +139,7 @@ class UserFieldTest extends ModuleTestCase
 
     public function testFilledFieldIsShownInUserCard(): void
     {
-        UserData::query()->create([
+        UserData::factory()->create([
             'user_id'  => $this->user->id,
             'field_id' => $this->field->id,
             'value'    => 'Героев меча и магии',
@@ -153,7 +153,7 @@ class UserFieldTest extends ModuleTestCase
 
     public function testDataIsRemovedWithUser(): void
     {
-        UserData::query()->create([
+        UserData::factory()->create([
             'user_id'  => $this->user->id,
             'field_id' => $this->field->id,
             'value'    => 'Героев меча и магии',
@@ -172,7 +172,7 @@ class UserFieldTest extends ModuleTestCase
     {
         $boss = User::factory()->create(['level' => User::BOSS]);
 
-        $second = UserField::query()->create([
+        $second = UserField::factory()->create([
             'sort'     => 2,
             'type'     => UserField::INPUT,
             'name'     => 'Город',
@@ -242,7 +242,7 @@ class UserFieldTest extends ModuleTestCase
     public function testUrlFieldDoesNotLinkArbitraryText(): void
     {
         $field = $this->createField(UserField::URL, ['max' => 100]);
-        UserData::query()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'javascript:alert(1)']);
+        UserData::factory()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'javascript:alert(1)']);
 
         $this->actingAs($this->user)
             ->get('/users/' . $this->user->login)
@@ -328,7 +328,7 @@ class UserFieldTest extends ModuleTestCase
     public function testOptionalSelectCanBeCleared(): void
     {
         $field = $this->createField(UserField::SELECT, ['options' => "Москва\nКазань"]);
-        UserData::query()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'Казань']);
+        UserData::factory()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'Казань']);
 
         $this->actingAs($this->user)
             ->get('/profile')
@@ -447,7 +447,7 @@ class UserFieldTest extends ModuleTestCase
     {
         $boss = User::factory()->create(['level' => User::BOSS]);
         $field = $this->createField(UserField::SELECT, ['options' => "Москва\nКазань"]);
-        UserData::query()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'Казань']);
+        UserData::factory()->create(['user_id' => $this->user->id, 'field_id' => $field->id, 'value' => 'Казань']);
 
         // Форма предупреждает заранее
         $this->actingAs($boss)
@@ -464,7 +464,7 @@ class UserFieldTest extends ModuleTestCase
     public function testSameTypeKeepsAnswers(): void
     {
         $boss = User::factory()->create(['level' => User::BOSS]);
-        UserData::query()->create(['user_id' => $this->user->id, 'field_id' => $this->field->id, 'value' => 'Героев меча и магии']);
+        UserData::factory()->create(['user_id' => $this->user->id, 'field_id' => $this->field->id, 'value' => 'Героев меча и магии']);
 
         $this->actingAs($boss)
             ->put('/admin/user-fields/' . $this->field->id, ['type' => UserField::INPUT, 'name' => 'Любимая игра', 'min' => 3, 'max' => 30, 'required' => 0])
@@ -496,7 +496,7 @@ class UserFieldTest extends ModuleTestCase
     {
         $this->user->update(['apikey' => 'api-key-user-field-test']);
         $this->createField(UserField::CHECKBOX, ['name' => 'Согласен с правилами', 'required' => true]);
-        UserData::query()->create(['user_id' => $this->user->id, 'field_id' => $this->field->id, 'value' => 'Героев меча и магии']);
+        UserData::factory()->create(['user_id' => $this->user->id, 'field_id' => $this->field->id, 'value' => 'Героев меча и магии']);
 
         $this->patchJson('/api/user', ['name' => 'Тестовый', 'gender' => User::MALE], ['Authorization' => 'Bearer api-key-user-field-test'])
             ->assertOk();
@@ -547,7 +547,7 @@ class UserFieldTest extends ModuleTestCase
 
     private function createField(string $type, array $attributes = []): UserField
     {
-        return UserField::query()->create($attributes + [
+        return UserField::factory()->create($attributes + [
             'sort'     => 2,
             'type'     => $type,
             'name'     => 'Поле ' . $type,

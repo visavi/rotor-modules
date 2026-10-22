@@ -28,10 +28,10 @@
                 <div class="invalid-feedback">{{ textError('users') }}</div>
             </div>
 
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control tiptap" maxlength="1000" id="msg" rows="5" name="msg" placeholder="{{ __('main.message') }}">{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('main.message') }}:</label>
+                <textarea class="form-control tiptap" maxlength="1000" id="text" rows="5" name="text" placeholder="{{ __('main.message') }}">{{ old('text') }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -23,6 +24,9 @@ use Illuminate\Support\Carbon;
  */
 class Social extends Model
 {
+    /** @use HasFactory<\Modules\SocialAuth\Tests\Factories\SocialFactory> */
+    use HasFactory;
+
     public const ?string UPDATED_AT = null;
 
     public const array PROVIDERS = [

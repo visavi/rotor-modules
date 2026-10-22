@@ -6,11 +6,11 @@ namespace Modules\Rating\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Rating\Http\Requests\RatingRequest;
 use Modules\Rating\Models\Rating;
 
 class RatingController extends Controller
@@ -34,72 +34,38 @@ class RatingController extends Controller
     /**
      * Изменение рейтинга
      */
-    public function index(string $login, Request $request, Validator $validator): View|RedirectResponse
+    public function index(string $login, Request $request): View
     {
+        $user = $this->recipient($login);
         $vote = $request->input('vote');
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
-
-        if ($this->user->id === $user->id) {
-            abort(200, __('rating::ratings.reputation_yourself'));
-        }
-
-        if ($this->user->point < setting('editratingpoint')) {
-            abort(200, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
-        }
-
-        // Голосовать за того же пользователя можно через 90 дней
-        $getRating = Rating::query()
-            ->where('user_id', $this->user->id)
-            ->where('recipient_id', $user->id)
-            ->where('created_at', '>', now()->subMonths(3))
-            ->first();
-
-        if ($getRating) {
-            abort(200, __('rating::ratings.reputation_already_changed'));
-        }
-
-        if ($request->isMethod('post')) {
-            $text = $request->input('text');
-
-            $validator->length($text, 5, 250, ['text' => __('validator.text')]);
-
-            if ($vote === 'minus' && $this->user->rating < 1) {
-                $validator->addError(__('rating::ratings.reputation_positive'));
-            }
-
-            if ($validator->isValid()) {
-                Rating::query()->create([
-                    'user_id'      => $this->user->id,
-                    'recipient_id' => $user->id,
-                    'text'         => $text,
-                    'vote'         => $vote === 'plus' ? '+' : '-',
-                ]);
-
-                if ($vote === 'plus') {
-                    $user->increment('posrating');
-                    $user->update(['rating' => $user->posrating - $user->negrating]);
-                } else {
-                    $user->increment('negrating');
-                    $user->update(['rating' => $user->posrating - $user->negrating]);
-                }
-
-                $message = textNotice('rating', ['login' => $this->user->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
-                $user->sendMessage(null, $message);
-
-                return redirect('users/' . $user->login)
-                    ->with('success', __('rating::ratings.reputation_success_changed'));
-            }
-
-            return redirect('users/' . $user->login . '/rating?vote=' . $vote)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         return view('rating::index', compact('user', 'vote'));
+    }
+
+    /**
+     * Сохранение голоса
+     */
+    public function store(string $login, RatingRequest $request): RedirectResponse
+    {
+        $user = $this->recipient($login);
+        $vote = $request->input('vote');
+        $text = $request->string('text')->value();
+
+        Rating::query()->create([
+            'user_id'      => $this->user->id,
+            'recipient_id' => $user->id,
+            'text'         => $text,
+            'vote'         => $vote === 'plus' ? '+' : '-',
+        ]);
+
+        $user->increment($vote === 'plus' ? 'posrating' : 'negrating');
+        $user->update(['rating' => $user->posrating - $user->negrating]);
+
+        $message = textNotice('rating', ['login' => $this->user->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
+        $user->sendMessage(null, $message);
+
+        return redirect('users/' . $user->login)
+            ->with('success', __('rating::ratings.reputation_success_changed'));
     }
 
     /**
@@ -145,31 +111,69 @@ class RatingController extends Controller
     /**
      *  Удаление истории
      */
-    public function delete(Request $request, Validator $validator): JsonResponse
+    public function delete(Request $request): JsonResponse
     {
-        $id = int($request->input('id'));
-
-        $validator
-            ->true($request->ajax(), __('validator.not_ajax'))
-            ->true(isAdmin(User::ADMIN), __('main.page_only_admins'))
-            ->notEmpty($id, [__('validator.deletion')]);
-
-        if ($validator->isValid()) {
-            $rating = Rating::query()->find($id);
-
-            if ($rating) {
-                $rating->delete();
-            }
-
+        if (! $request->ajax()) {
             return response()->json([
-                'success' => true,
-                'message' => __('main.record_deleted_success'),
+                'success' => false,
+                'message' => __('validator.not_ajax'),
             ]);
         }
 
+        if (! isAdmin(User::ADMIN)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('main.page_only_admins'),
+            ]);
+        }
+
+        $id = int($request->input('id'));
+
+        if (! $id) {
+            return response()->json([
+                'success' => false,
+                'message' => __('validator.deletion'),
+            ]);
+        }
+
+        Rating::query()->find($id)?->delete();
+
         return response()->json([
-            'success' => false,
-            'message' => current($validator->getErrors()),
+            'success' => true,
+            'message' => __('main.record_deleted_success'),
         ]);
+    }
+
+    /**
+     * Пользователь, за которого голосуют, если голос сейчас возможен
+     */
+    private function recipient(string $login): User
+    {
+        $user = getUserByLogin($login);
+
+        if (! $user) {
+            abort(404, __('validator.user'));
+        }
+
+        if ($this->user->id === $user->id) {
+            abort(200, __('rating::ratings.reputation_yourself'));
+        }
+
+        if ($this->user->point < setting('editratingpoint')) {
+            abort(200, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
+        }
+
+        // Голосовать за того же пользователя можно через 90 дней
+        $voted = Rating::query()
+            ->where('user_id', $this->user->id)
+            ->where('recipient_id', $user->id)
+            ->where('created_at', '>', now()->subMonths(3))
+            ->exists();
+
+        if ($voted) {
+            abort(200, __('rating::ratings.reputation_already_changed'));
+        }
+
+        return $user;
     }
 }

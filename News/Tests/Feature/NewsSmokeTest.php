@@ -42,7 +42,7 @@ class NewsSmokeTest extends ModuleTestCase
 
     public function testView(): void
     {
-        $news = News::query()->create([
+        $news = News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
@@ -55,14 +55,14 @@ class NewsSmokeTest extends ModuleTestCase
     public function testAllCommentsLinkToComment(): void
     {
         // Ссылка ведёт к самому комментарию, а не на начало страницы через ?cid=
-        $news = News::query()->create([
+        $news = News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $comment = Comment::query()->create([
+        $comment = Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'text'        => 'Test comment',
@@ -79,14 +79,14 @@ class NewsSmokeTest extends ModuleTestCase
 
     public function testEditDialogOnlyWithEditableComment(): void
     {
-        $news = News::query()->create([
+        $news = News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $comment = fn (User $user) => Comment::query()->create([
+        $comment = fn (User $user) => Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'text'        => 'Test comment',
@@ -121,14 +121,14 @@ class NewsSmokeTest extends ModuleTestCase
     public function testApiCommentFeedOfSection(): void
     {
         // Лента раздела: только его комментарии, с записью для перехода
-        $news = News::query()->create([
+        $news = News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $comment = Comment::query()->create([
+        $comment = Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'text'        => 'Test comment',
@@ -138,7 +138,7 @@ class NewsSmokeTest extends ModuleTestCase
             'created_at'  => now(),
         ]);
 
-        Comment::query()->create([
+        Comment::factory()->create([
             'relate_type' => Comment::$morphName,
             'relate_id'   => 1,
             'text'        => 'Other comment',

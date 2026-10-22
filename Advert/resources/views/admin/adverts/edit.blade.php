@@ -19,7 +19,7 @@
             @csrf
             <div class="mb-3{{ hasError('site') }}">
                 <label for="site" class="form-label">{{ __('advert::adverts.link') }}:</label>
-                <input class="form-control" id="site" name="site" type="text" value="{{ old('site', $link->site) }}" maxlength="50" required>
+                <input class="form-control" id="site" name="site" type="text" value="{{ old('site', $link->site) }}" maxlength="100" required>
                 <div class="invalid-feedback">{{ textError('site') }}</div>
             </div>
 

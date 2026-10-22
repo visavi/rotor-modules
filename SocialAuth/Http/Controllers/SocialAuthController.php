@@ -7,14 +7,15 @@ namespace Modules\SocialAuth\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\BlackList;
 use App\Models\User;
+use App\Rules\EmailRule;
 use App\Services\MailService;
 use App\Services\UserService;
-use App\Support\Validator;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\SocialAuth\Http\Requests\CompleteRequest;
@@ -126,10 +127,6 @@ class SocialAuthController extends Controller
      */
     public function link(string $provider, Request $request): RedirectResponse
     {
-        if (! Auth::check()) {
-            abort(403, __('main.not_authorized'));
-        }
-
         $oauthProvider = $this->resolveProvider($provider);
 
         if (! $oauthProvider) {
@@ -149,12 +146,8 @@ class SocialAuthController extends Controller
      */
     public function unlink(string $provider): RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
         Social::query()
-            ->where('user_id', $user->id)
+            ->where('user_id', getUser('id'))
             ->where('provider', $provider)
             ->delete();
 
@@ -167,9 +160,7 @@ class SocialAuthController extends Controller
      */
     public function accounts(): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $user = getUser();
 
         $socials = Social::query()
             ->where('user_id', $user->id)
@@ -308,7 +299,7 @@ class SocialAuthController extends Controller
 
         $email = Str::lower($email);
 
-        return (new Validator())->email($email, 'email')->isValid() ? $email : null;
+        return Validator::make(['email' => $email], ['email' => [new EmailRule()]])->passes() ? $email : null;
     }
 
     /**

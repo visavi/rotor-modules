@@ -56,6 +56,7 @@ class BaccaratTest extends ModuleTestCase
     public function testDealRejectsUnknownBetType(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/baccarat')
             ->post('/games/baccarat/deal', ['bet' => 100, 'type' => 'dealer'])
             ->assertRedirect('games/baccarat');
 
@@ -67,6 +68,7 @@ class BaccaratTest extends ModuleTestCase
     public function testDealRejectsBetOverBalance(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/baccarat')
             ->post('/games/baccarat/deal', ['bet' => 5001, 'type' => 'banker'])
             ->assertRedirect('games/baccarat');
 
@@ -295,6 +297,7 @@ class BaccaratTest extends ModuleTestCase
     public function testDecisionWithoutGameIsIgnored(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/baccarat')
             ->post('/games/baccarat/decide', ['draw' => '1'])
             ->assertRedirect('games/baccarat');
 

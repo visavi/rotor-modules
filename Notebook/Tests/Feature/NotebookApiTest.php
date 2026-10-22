@@ -59,7 +59,7 @@ class NotebookApiTest extends ModuleTestCase
     {
         $other = User::factory()->create();
 
-        Notebook::query()->create(['user_id' => $other->id, 'text' => 'Чужая заметка']);
+        Notebook::factory()->create(['user_id' => $other->id, 'text' => 'Чужая заметка']);
 
         $this->getJson('/api/notebook', $this->headers())
             ->assertOk()
@@ -71,6 +71,12 @@ class NotebookApiTest extends ModuleTestCase
         $this->patchJson('/api/notebook', ['text' => Str::repeat('a', 10001)], $this->headers())
             ->assertStatus(422)
             ->assertJsonValidationErrors('text');
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->patchJson('/api/notebook', ['text' => '<p>' . Str::repeat('a', 10000) . '</p>'], $this->headers())
+            ->assertOk();
     }
 
     private function headers(): array

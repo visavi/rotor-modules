@@ -23,14 +23,16 @@ Route::middleware('web')
         Route::get('/', 'index')->name('index');
         Route::get('/{id}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
-        Route::delete('/{id}/delete', 'delete')->name('delete');
+        Route::delete('/{id}/delete', 'delete')->middleware('check.user')->name('delete');
         Route::get('/albums', 'albums')->middleware('check.user')->name('albums');
         Route::get('/comments', 'allComments')->name('new-comments');
         // Страницы пользователя — только авторизованным
         Route::get('/active/albums', 'album')->middleware('check.user')->name('user-albums');
         Route::get('/active/comments', 'userComments')->middleware('check.user')->name('user-comments');
-        Route::match(['get', 'post'], '/create', 'create')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::get('/create', 'create')->middleware('check.user')->name('create');
+        Route::post('/create', 'store')->middleware('check.user');
+        Route::get('/{id}/edit', 'edit')->middleware('check.user')->name('edit');
+        Route::post('/{id}/edit', 'update')->middleware('check.user');
     });
 
 /* Админ — галерея */
@@ -42,9 +44,10 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.photos.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::post('/{id}/edit', 'update');
                 Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
+                Route::post('/restatement', 'restatement')->name('restatement')->middleware('check.admin:boss');
             });
 
         Route::controller(PhotoSettingController::class)

@@ -30,7 +30,7 @@ class GiftApiTest extends ModuleTestCase
         $this->user = User::factory()->create(['apikey' => Str::random(32), 'money' => 500]);
         $this->recipient = User::factory()->create();
 
-        $this->gift = Gift::query()->create([
+        $this->gift = Gift::factory()->create([
             'name'       => 'Букет',
             'path'       => '/uploads/gifts/flowers.png',
             'price'      => 100,
@@ -96,7 +96,7 @@ class GiftApiTest extends ModuleTestCase
     {
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
             'users' => [$this->recipient->login, 'nobody'],
-        ], $this->headers())->assertStatus(404);
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('users');
 
         $this->assertDatabaseCount('gifts_users', 0);
     }
@@ -111,7 +111,7 @@ class GiftApiTest extends ModuleTestCase
 
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
             'users' => $logins,
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('users');
 
         $this->assertDatabaseCount('gifts_users', 0);
     }
@@ -122,9 +122,10 @@ class GiftApiTest extends ModuleTestCase
 
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
             'users' => [$this->recipient->login],
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('money');
 
         $this->assertDatabaseCount('gifts_users', 0);
+        $this->assertSame(10, $this->user->fresh()->money);
     }
 
     public function testUnknownGiftIsNotFound(): void
@@ -133,15 +134,24 @@ class GiftApiTest extends ModuleTestCase
             ->assertStatus(404);
     }
 
-    public function testUnknownRecipientIsNotFound(): void
+    public function testUnknownRecipientIsRejected(): void
     {
         $this->postJson('/api/gifts/' . $this->gift->id . '/send', ['users' => ['nobody']], $this->headers())
-            ->assertStatus(404);
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('users');
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->postJson('/api/gifts/' . $this->gift->id . '/send', [
+            'users' => [$this->recipient->login],
+            'text'  => '<p><strong>' . str_repeat('а', 990) . '</strong></p>',
+        ], $this->headers())->assertStatus(201);
     }
 
     public function testUserGiftsAreListed(): void
     {
-        GiftsUser::query()->create([
+        GiftsUser::factory()->create([
             'gift_id'      => $this->gift->id,
             'user_id'      => $this->recipient->id,
             'send_user_id' => $this->user->id,
@@ -160,7 +170,7 @@ class GiftApiTest extends ModuleTestCase
 
     public function testExpiredGiftIsHidden(): void
     {
-        GiftsUser::query()->create([
+        GiftsUser::factory()->create([
             'gift_id'      => $this->gift->id,
             'user_id'      => $this->recipient->id,
             'send_user_id' => $this->user->id,

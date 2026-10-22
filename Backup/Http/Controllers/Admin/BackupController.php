@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\Backup\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Modules\Backup\Http\Requests\BackupRequest;
 
 class BackupController extends AdminController
 {
@@ -41,83 +41,8 @@ class BackupController extends AdminController
     /**
      * Создание нового бэкапа
      */
-    public function create(Request $request, Validator $validator): View|RedirectResponse
+    public function create(): View
     {
-        if ($request->isMethod('post')) {
-            $sheets = check($request->input('sheets'));
-            $method = $request->input('method');
-            $level = int($request->input('level'));
-
-            $validator
-                ->notEmpty($sheets, ['sheets' => __('backup::backup.no_tables_save')])
-                ->in($method, ['none', 'gzip', 'bzip'], ['method' => __('backup::backup.wrong_compression_method')])
-                ->between($level, 0, 9, ['level' => __('backup::backup.wrong_compression_ratio')]);
-
-            if ($validator->isValid()) {
-                $placeholders = implode(',', array_fill(0, count($sheets), '?'));
-                $selectTables = DB::select('SHOW TABLE STATUS WHERE name IN(' . $placeholders . ')', (array) $sheets);
-
-                $limit = 3000;
-                $filename = 'backup_' . $this->date . '.sql';
-
-                $fp = $this->fopen(storage_path('backups/' . $filename), 'w', $method, $level);
-
-                foreach ($selectTables as $table) {
-                    $show = DB::selectOne("SHOW CREATE TABLE `{$table->Name}`");
-                    $columnsFields = DB::select("SHOW COLUMNS FROM `{$table->Name}`");
-                    $columns = '(' . implode(',', array_column($columnsFields, 'Field')) . ')';
-
-                    $this->fwrite($fp, "--\n-- Structure table `{$table->Name}`\n--\n\n", $method);
-                    $isView = $table->Engine === null;
-                    $createSql = $isView ? $show->{'Create View'} : $show->{'Create Table'};
-                    $dropSql = $isView ? "DROP VIEW IF EXISTS `{$table->Name}`" : "DROP TABLE IF EXISTS `{$table->Name}`";
-                    $this->fwrite($fp, "{$dropSql};\n{$createSql};\n\n", $method);
-
-                    if ($table->Engine === null) {
-                        continue;
-                    }
-
-                    $total = DB::table($table->Name)->count();
-
-                    if (! $total) {
-                        continue;
-                    }
-
-                    $this->fwrite($fp, "--\n-- Dump table `{$table->Name}`\n--\n\n", $method);
-                    $this->fwrite($fp, "INSERT INTO `{$table->Name}` {$columns} VALUES ", $method);
-
-                    for ($i = 0; $i < $total; $i += $limit) {
-                        $cols = DB::table($table->Name)->lockForUpdate()->limit($limit)->offset($i)->get();
-
-                        foreach ($cols as $key => $col) {
-                            $records = get_object_vars($col);
-                            $columns = [];
-
-                            foreach ($records as $record) {
-                                $record = is_int($record) || is_null($record) ? $record : "'" . str_replace("'", "''", $record) . "'";
-                                $columns[] = $record ?? 'null';
-                            }
-
-                            $this->fwrite($fp, ($key || $i ? ',' : '') . '(' . implode(',', $columns) . ')', $method);
-                            unset($columns);
-                        }
-                        unset($cols);
-                    }
-
-                    $this->fwrite($fp, ";\n\n", $method);
-                }
-
-                $this->fclose($fp, $method);
-
-                return redirect('admin/backups')
-                    ->with('success', __('backup::backup.database_success_saved'));
-            }
-
-            return redirect('admin/backups/create')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         $tables = DB::select('SHOW TABLE STATUS');
 
         $bzopen = function_exists('bzopen');
@@ -129,29 +54,135 @@ class BackupController extends AdminController
     }
 
     /**
+     * Сохранение бэкапа
+     */
+    public function store(BackupRequest $request): RedirectResponse
+    {
+        $sheets = $request->validated('sheets');
+        $method = $request->string('method')->value();
+        $level = $request->integer('level');
+
+        $placeholders = implode(',', array_fill(0, count($sheets), '?'));
+        $selectTables = DB::select('SHOW TABLE STATUS WHERE name IN(' . $placeholders . ')', (array) $sheets);
+
+        $filename = 'backup_' . $this->date . '.sql';
+
+        $fp = $this->fopen(storage_path('backups/' . $filename), 'w', $method, $level);
+
+        // Одна транзакция — один снимок InnoDB на все чтения, как mysqldump --single-transaction:
+        // записи, вставленные во время бэкапа, не сдвигают страницы и не попадают в дамп наполовину
+        DB::transaction(function () use ($selectTables, $fp, $method) {
+            foreach ($selectTables as $table) {
+                $this->dumpTable($fp, $table, $method);
+            }
+        });
+
+        $this->fclose($fp, $method);
+
+        return redirect('admin/backups')
+            ->with('success', __('backup::backup.database_success_saved'));
+    }
+
+    /**
      * Удаляет сохраненный бэкап
      */
-    public function delete(Request $request, Validator $validator): RedirectResponse
+    public function delete(Request $request): RedirectResponse
     {
-        $file = $request->input('file');
+        $file = $request->string('file')->value();
+        $fullPath = realpath(storage_path('backups') . '/' . $file);
 
-        $backupDir = storage_path('backups');
-        $fullPath = realpath($backupDir . '/' . $file);
+        $error = match (true) {
+            $file === ''                                              => __('backup::backup.backup_not_indicated'),
+            ! preg_match('#^[\w\-]+\.(sql\.)?(gz|bz2|sql)$#i', $file) => __('backup::backup.invalid_backup_name'),
+            $fullPath === false || ! is_file($fullPath)               => __('backup::backup.backup_not_exist'),
+            default                                                   => null,
+        };
 
-        $validator
-            ->notEmpty($file, __('backup::backup.backup_not_indicated'))
-            ->regex($file, '#^[\w\-]+\.(sql\.)?(gz|bz2|sql)$#i', __('backup::backup.invalid_backup_name'))
-            ->true($fullPath !== false && is_file($fullPath), __('backup::backup.backup_not_exist'));
-
-        if (! $validator->isValid()) {
-            return redirect('admin/backups')
-                ->withErrors($validator->getErrors());
+        if ($error) {
+            return redirect('admin/backups')->withErrors($error);
         }
 
         unlink($fullPath);
 
         return redirect('admin/backups')
             ->with('success', __('backup::backup.backup_success_deleted'));
+    }
+
+    /**
+     * Пишет в дамп структуру таблицы и её строки
+     *
+     * @param resource $fp
+     */
+    private function dumpTable($fp, object $table, string $method): void
+    {
+        $limit = 3000;
+        $pdo = DB::getPdo();
+
+        $show = DB::selectOne("SHOW CREATE TABLE `{$table->Name}`");
+        $fields = array_column(DB::select("SHOW COLUMNS FROM `{$table->Name}`"), 'Field');
+
+        $this->fwrite($fp, "--\n-- Structure table `{$table->Name}`\n--\n\n", $method);
+        $isView = $table->Engine === null;
+        $createSql = $isView ? $show->{'Create View'} : $show->{'Create Table'};
+        $dropSql = $isView ? "DROP VIEW IF EXISTS `{$table->Name}`" : "DROP TABLE IF EXISTS `{$table->Name}`";
+        $this->fwrite($fp, "{$dropSql};\n{$createSql};\n\n", $method);
+
+        if ($isView) {
+            return;
+        }
+
+        $total = DB::table($table->Name)->count();
+
+        if (! $total) {
+            return;
+        }
+
+        // Колонки в кавычках: имя вроде key или order иначе ломает восстановление
+        $columns = '(' . implode(',', array_map(static fn (string $field) => '`' . $field . '`', $fields)) . ')';
+
+        $this->fwrite($fp, "--\n-- Dump table `{$table->Name}`\n--\n\n", $method);
+        $this->fwrite($fp, "INSERT INTO `{$table->Name}` {$columns} VALUES ", $method);
+
+        // Без ORDER BY страницы LIMIT/OFFSET могут пересекаться: строки задваиваются или теряются
+        $query = DB::table($table->Name);
+
+        foreach ($this->orderColumns($table->Name) ?: $fields as $field) {
+            $query->orderBy($field);
+        }
+
+        for ($i = 0; $i < $total; $i += $limit) {
+            foreach ($query->clone()->limit($limit)->offset($i)->get() as $key => $row) {
+                $values = [];
+
+                foreach (get_object_vars($row) as $value) {
+                    // Строку экранирует само соединение: замена ' на '' оставляла обратную
+                    // косую черту, и дамп со значением вроде «C:\path\» не восстанавливался
+                    $values[] = match (true) {
+                        $value === null => 'null',
+                        is_int($value)  => $value,
+                        default         => $pdo->quote((string) $value),
+                    };
+                }
+
+                $this->fwrite($fp, ($key || $i ? ',' : '') . '(' . implode(',', $values) . ')', $method);
+            }
+        }
+
+        $this->fwrite($fp, ";\n\n", $method);
+    }
+
+    /**
+     * Колонки первичного ключа по порядку, пусто — ключа нет
+     *
+     * @return list<string>
+     */
+    private function orderColumns(string $table): array
+    {
+        $keys = DB::select("SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY'");
+
+        usort($keys, static fn (object $a, object $b) => $a->Seq_in_index <=> $b->Seq_in_index);
+
+        return array_column($keys, 'Column_name');
     }
 
     /**

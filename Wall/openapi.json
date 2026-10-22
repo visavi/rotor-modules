@@ -95,7 +95,8 @@
                                 ],
                                 "properties": {
                                     "text": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "HTML из редактора; длина — по настройкам комментариев, считается без тегов"
                                     }
                                 }
                             }

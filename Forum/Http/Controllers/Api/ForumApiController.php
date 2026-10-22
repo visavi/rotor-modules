@@ -8,19 +8,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiPagination;
-use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Forum\Http\Requests\PostRequest;
+use Modules\Forum\Http\Requests\TopicRequest;
 use Modules\Forum\Http\Resources\ForumResource;
 use Modules\Forum\Http\Resources\PostResource;
 use Modules\Forum\Http\Resources\TopicResource;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
-use Modules\Forum\Models\Vote;
-use Modules\Forum\Models\VoteAnswer;
+use Modules\Forum\Services\TopicService;
 
 class ForumApiController extends Controller
 {
@@ -158,48 +158,14 @@ class ForumApiController extends Controller
     /**
      * Создание сообщения
      */
-    public function createPost(int $id, Request $request, Flood $flood, FileService $files): JsonResponse
+    public function createPost(PostRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        $user = getUser();
-
-        $topic = Topic::query()
-            ->where('topics.id', $id)
-            ->with('forum.parent')
-            ->first();
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $lastPost = Post::query()->where('topic_id', $topic->id)->orderByDesc('id')->value('text');
-
-        $validated = $request->validate([
-            'text' => [
-                'required',
-                'string',
-                'min:' . setting('forum_text_min'),
-                'max:' . setting('forum_text_max'),
-                function (string $attribute, mixed $value, Closure $fail) use ($topic, $flood, $lastPost) {
-                    if ($topic->closed) {
-                        $fail(__('forum::forums.topic_closed'));
-                    }
-
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-
-                    if ($lastPost === $value) {
-                        $fail(__('forum::forums.post_repeat'));
-                    }
-                },
-            ],
-        ] + FileService::rules(Post::$morphName));
-
-        $msg = $validated['text'];
+        $topic = $request->topic();
+        $msg = $request->string('text')->value();
 
         $post = Post::query()->create([
             'topic_id' => $topic->id,
-            'user_id'  => $user->id,
+            'user_id'  => getUser('id'),
             'text'     => $msg,
             'ip'       => getIp(),
             'brow'     => getBrowser(),
@@ -222,67 +188,19 @@ class ForumApiController extends Controller
     /**
      * Создание темы
      */
-    public function createTopic(int $id, Request $request, Flood $flood, FileService $files): JsonResponse
+    public function createTopic(TopicRequest $request, Flood $flood, TopicService $service): JsonResponse
     {
-        $user = getUser();
-
-        $forum = Forum::query()->find($id);
-
-        if (! $forum) {
-            abort(404, __('forum::forums.forum_not_exist'));
-        }
-
-        $validated = $request->validate([
-            'title' => [
-                'required',
-                'string',
-                'min:' . setting('forum_title_min'),
-                'max:' . setting('forum_title_max'),
-                function (string $attribute, mixed $value, Closure $fail) use ($forum, $flood) {
-                    if ($forum->closed) {
-                        $fail(__('forum::forums.forum_closed'));
-                    }
-
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-            'text'      => ['required', 'string', 'min:' . setting('forum_text_min'), 'max:' . setting('forum_text_max')],
-            'question'  => ['nullable', 'string', 'min:' . setting('vote_title_min'), 'max:' . setting('vote_title_max')],
-            'answers'   => ['required_with:question', 'array', 'min:2', 'max:10'],
-            'answers.*' => ['string', 'min:' . setting('vote_answer_min'), 'max:' . setting('vote_answer_max')],
-        ] + FileService::rules(Post::$morphName));
-
-        $topic = Topic::query()->create([
-            'forum_id'   => $forum->id,
-            'title'      => $validated['title'],
-            'user_id'    => $user->id,
-            'updated_at' => now(),
-        ]);
-
-        $post = Post::query()->create([
-            'topic_id' => $topic->id,
-            'user_id'  => $user->id,
-            'text'     => $validated['text'],
-            'ip'       => getIp(),
-            'brow'     => getBrowser(),
-        ]);
-
-        $files->attach($post, $request->file('files', []));
+        $topic = $service->create(
+            getUser(),
+            $request->forum(),
+            $request->string('title')->value(),
+            $request->string('text')->value(),
+            $request->input('question'),
+            $request->answers(),
+            $request->file('files', []),
+        );
 
         $flood->saveState();
-
-        if (! empty($validated['question']) && ! empty($validated['answers'])) {
-            $answers = array_unique(array_diff($validated['answers'], ['']));
-            $poll = Vote::query()->create([
-                'title'    => $validated['question'],
-                'topic_id' => $topic->id,
-            ]);
-
-            $prepareAnswers = array_map(static fn ($answer) => ['vote_id' => $poll->id, 'answer' => $answer], $answers);
-            VoteAnswer::query()->insert($prepareAnswers);
-        }
 
         $topic->refresh()->load('user', 'lastPost.user');
 

@@ -6,11 +6,12 @@ namespace Modules\Wall\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
-use App\Support\Validator;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Wall\Http\Requests\WallRequest;
 use Modules\Wall\Models\Wall;
 
 class WallController extends Controller
@@ -20,11 +21,7 @@ class WallController extends Controller
      */
     public function index(string $login): View
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = $this->findUser($login);
 
         $messages = Wall::query()
             ->where('user_id', $user->id)
@@ -38,80 +35,77 @@ class WallController extends Controller
     /**
      * Добавление записи на стену
      */
-    public function create(string $login, Request $request, Validator $validator, Flood $flood): RedirectResponse
+    public function create(string $login, WallRequest $request, Flood $flood): RedirectResponse
     {
-        if (! getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $user = $this->findUser($login);
+        $text = $request->string('text')->value();
 
-        $user = getUserByLogin($login);
+        Wall::query()->create([
+            'user_id'   => $user->id,
+            'author_id' => getUser('id'),
+            'text'      => $text,
+        ]);
 
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $flood->saveState();
+        sendNotify($text, route('walls.index', ['login' => $user->login], absolute: false), __('wall::walls.wall_posts_login', ['login' => $user->getName()], setting('language')));
 
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator
-                ->length($msg, setting('comment_text_min'), setting('comment_text_max'), ['msg' => __('validator.text')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])]);
-
-            if ($validator->isValid()) {
-                Wall::query()->create([
-                    'user_id'   => $user->id,
-                    'author_id' => getUser('id'),
-                    'text'      => $msg,
-                ]);
-
-                $flood->saveState();
-                sendNotify($msg, route('walls.index', ['login' => $user->login], absolute: false), __('wall::walls.wall_posts_login', ['login' => $user->getName()], setting('language')));
-
-                return redirect('walls/' . $user->login)
-                    ->with('success', __('main.record_added_success'));
-            }
-
-            return redirect('walls/' . $user->login)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return redirect('walls/' . $user->login);
+        return redirect('walls/' . $user->login)
+            ->with('success', __('main.record_added_success'));
     }
 
     /**
      * Удаление записи со стены
      */
-    public function delete(string $login, Request $request, Validator $validator): JsonResponse
+    public function delete(string $login, Request $request): JsonResponse
     {
+        $user = $this->findUser($login);
+
+        if (! $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('validator.not_ajax'),
+            ]);
+        }
+
+        // Чистит стену её хозяин, чужие записи трогает только администрация
+        if (! isAdmin() && getUser('id') !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => __('main.deleted_only_admins'),
+            ]);
+        }
+
         $id = int($request->input('id'));
+
+        if (! $id) {
+            return response()->json([
+                'success' => false,
+                'message' => __('validator.deletion'),
+            ]);
+        }
+
+        Wall::query()
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => __('main.record_deleted_success'),
+        ]);
+    }
+
+    /**
+     * Владелец стены
+     */
+    private function findUser(string $login): User
+    {
         $user = getUserByLogin($login);
 
         if (! $user) {
             abort(404, __('validator.user'));
         }
 
-        $validator
-            ->true($request->ajax(), __('validator.not_ajax'))
-            ->notEmpty($id, __('validator.deletion'))
-            ->notEmpty($user, __('validator.user'))
-            ->true(isAdmin() || getUser('id') === $user->id, __('main.deleted_only_admins'));
-
-        if ($validator->isValid()) {
-            Wall::query()
-                ->where('id', $id)
-                ->where('user_id', $user->id)
-                ->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => __('main.record_deleted_success'),
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => current($validator->getErrors()),
-        ]);
+        return $user;
     }
 }

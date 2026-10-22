@@ -7,6 +7,7 @@ namespace Modules\Rating\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Rating extends Model
 {
+    /** @use HasFactory<\Modules\Rating\Tests\Factories\RatingFactory> */
+    use HasFactory;
+
     /**
      * The table associated with the model.
      */

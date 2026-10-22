@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Counter\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -20,6 +21,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Counter extends Model
 {
+    /** @use HasFactory<\Modules\Counter\Tests\Factories\CounterFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

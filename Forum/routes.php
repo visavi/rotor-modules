@@ -32,16 +32,19 @@ Route::middleware('web')->group(function () {
             Route::get('/{id}', [ForumController::class, 'forum'])->name('forum');
 
             Route::get('/rss', [ForumController::class, 'rss'])->name('rss');
-            Route::match(['get', 'post'], '/create', [ForumController::class, 'create'])->name('create');
+            Route::get('/create', [ForumController::class, 'create'])->middleware('check.user')->name('create');
+            Route::post('/create', [ForumController::class, 'store'])->middleware('check.user');
 
             // Страницы пользователя — только авторизованным
             Route::get('/active/posts', [ActiveController::class, 'posts'])->middleware('check.user')->name('active-posts');
             Route::get('/active/topics', [ActiveController::class, 'topics'])->middleware('check.user')->name('active-topics');
             Route::delete('/active/{id}/delete', [ActiveController::class, 'destroy'])->name('active-delete');
 
-            Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
-            Route::post('/bookmarks/delete', [BookmarkController::class, 'delete'])->name('bookmarks.delete');
-            Route::post('/bookmarks/perform', [BookmarkController::class, 'perform'])->name('bookmarks.perform');
+            Route::middleware('check.user')->group(function () {
+                Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks');
+                Route::post('/bookmarks/delete', [BookmarkController::class, 'delete'])->name('bookmarks.delete');
+                Route::post('/bookmarks/perform', [BookmarkController::class, 'perform'])->name('bookmarks.perform');
+            });
         });
 
     Route::prefix('topics')
@@ -50,19 +53,24 @@ Route::middleware('web')->group(function () {
             Route::get('/', [NewController::class, 'topics'])->name('index');
 
             Route::get('/{id}', [TopicController::class, 'index'])->name('topic');
-            Route::post('/{id}/vote', [TopicController::class, 'vote'])->name('vote');
-            Route::post('/{id}/open', [TopicController::class, 'open'])->name('open');
-            Route::post('/{id}/close', [TopicController::class, 'close'])->name('close');
-            Route::post('/{id}/create', [TopicController::class, 'create'])->name('create');
-            Route::post('/{id}/delete', [TopicController::class, 'delete'])->name('delete');
-            Route::match(['get', 'post'], '/{id}/edit', [TopicController::class, 'edit'])->name('edit');
+
+            Route::middleware('check.user')->group(function () {
+                Route::post('/{id}/vote', [TopicController::class, 'vote'])->name('vote');
+                Route::post('/{id}/open', [TopicController::class, 'open'])->name('open');
+                Route::post('/{id}/close', [TopicController::class, 'close'])->name('close');
+                Route::post('/{id}/create', [TopicController::class, 'create'])->name('create');
+                Route::post('/{id}/delete', [TopicController::class, 'delete'])->name('delete');
+                Route::get('/{id}/edit', [TopicController::class, 'edit'])->name('edit');
+                Route::post('/{id}/edit', [TopicController::class, 'update']);
+            });
         });
 
     Route::prefix('posts')
         ->name('posts.')
         ->group(function () {
             Route::get('/', [NewController::class, 'posts'])->name('index');
-            Route::match(['get', 'post'], '/{id}/edit', [TopicController::class, 'editPost'])->name('edit');
+            Route::get('/{id}/edit', [TopicController::class, 'editPost'])->middleware('check.user')->name('edit');
+            Route::post('/{id}/edit', [TopicController::class, 'updatePost'])->middleware('check.user');
         });
 });
 
@@ -75,12 +83,17 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.forums.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::post('/sort', 'sort')->name('sort');
+                Route::post('/sort', 'sort')->name('sort')->middleware('check.admin:boss');
                 Route::get('/{id}', 'forum')->name('forum');
-                Route::post('/create', 'create')->name('create');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
+
+                // Разделы и пересчёт — только boss
+                Route::middleware('check.admin:boss')->group(function () {
+                    Route::post('/create', 'create')->name('create');
+                    Route::get('/{id}/edit', 'edit')->name('edit');
+                    Route::post('/{id}/edit', 'update');
+                    Route::delete('/{id}/delete', 'delete')->name('delete');
+                    Route::post('/restatement', 'restatement')->name('restatement');
+                });
             });
 
         Route::controller(AdminForumController::class)
@@ -88,8 +101,10 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.topics.')
             ->group(function () {
                 Route::get('/{id}', 'topic')->name('topic');
-                Route::match(['get', 'post'], '/{id}/edit', 'editTopic')->name('edit');
-                Route::match(['get', 'post'], '/{id}/move', 'moveTopic')->name('move');
+                Route::get('/{id}/edit', 'editTopic')->name('edit');
+                Route::post('/{id}/edit', 'updateTopic');
+                Route::get('/{id}/move', 'moveTopic')->name('move');
+                Route::post('/{id}/move', 'storeMove');
                 Route::post('/{id}/action', 'actionTopic')->name('action');
                 Route::delete('/{id}/delete', 'deleteTopic')->name('delete');
             });
@@ -98,7 +113,8 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->prefix('posts')
             ->name('admin.posts.')
             ->group(function () {
-                Route::match(['get', 'post'], '/{id}/edit', 'editPost')->name('edit');
+                Route::get('/{id}/edit', 'editPost')->name('edit');
+                Route::post('/{id}/edit', 'updatePost');
                 Route::post('/delete', 'deletePosts')->name('delete');
             });
 

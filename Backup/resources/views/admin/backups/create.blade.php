@@ -58,7 +58,7 @@
 
                 <?php $inputLevel = (int) old('level', 7); ?>
 
-                <div class="mb-3">
+                <div class="mb-3{{ hasError('level') }}">
                     <label for="level" class="form-label">{{ __('backup::backup.compress_ratio') }}:</label>
                     <select class="form-select" id="level" name="level">
                         @foreach ($levels as $key => $level)

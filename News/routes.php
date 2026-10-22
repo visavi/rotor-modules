@@ -34,10 +34,12 @@ Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
             ->name('admin.news.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::match(['get', 'post'], '/create', 'create')->name('create');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/create', 'store');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::post('/{id}/edit', 'update');
                 Route::delete('/{id}/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
+                Route::post('/restatement', 'restatement')->name('restatement')->middleware('check.admin:boss');
             });
 
         /* Настройки */

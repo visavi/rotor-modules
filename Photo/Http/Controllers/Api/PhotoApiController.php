@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Modules\Photo\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\File;
 use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Photo\Http\Requests\PhotoRequest;
+use Modules\Photo\Http\Requests\PhotoStoreRequest;
 use Modules\Photo\Http\Resources\PhotoResource;
 use Modules\Photo\Models\Photo;
 
@@ -62,50 +62,18 @@ class PhotoApiController extends Controller
     /**
      * Загрузка фотографии
      */
-    public function store(Request $request, Flood $flood, FileService $files): JsonResponse
+    public function store(PhotoStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
         if (! isAdmin() && ! setting('photos_create')) {
             abort(422, __('photo::photos.photos_closed'));
         }
 
-        $user = getUser();
-
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'min:' . setting('photo_title_min'), 'max:' . setting('photo_title_max')],
-            'text'  => [
-                'nullable',
-                'string',
-                'min:' . setting('photo_text_min'),
-                'max:' . setting('photo_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-            'closed' => ['nullable', 'boolean'],
-        ] + FileService::rules(Photo::$morphName));
-
-        $uploaded = $request->file('files', []);
-
-        // Снимок обязателен: он и есть содержимое записи. Считаем и приложенные
-        // к запросу, и загруженные заранее через POST /api/files
-        $pending = File::query()
-            ->pending(Photo::$morphName, $user->id)
-            ->exists();
-
-        if (! $uploaded && ! $pending) {
-            abort(422, __('validator.image_upload_failed'));
-        }
-
-        $photo = Photo::query()->create([
-            'user_id' => $user->id,
-            'title'   => $validated['title'],
-            'text'    => (string) ($validated['text'] ?? ''),
-            'closed'  => (int) ($validated['closed'] ?? 0),
+        $photo = Photo::query()->create($request->photoFields() + [
+            'user_id' => getUser('id'),
         ]);
 
-        $files->attach($photo, $uploaded);
+        // Снимок можно приложить к запросу или загрузить заранее через POST /api/files
+        $files->attach($photo, $request->file('files', []));
 
         clearCache(['statPhotos', 'recentPhotos']);
         $flood->saveState();
@@ -121,21 +89,11 @@ class PhotoApiController extends Controller
     /**
      * Редактирование своей фотографии
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, PhotoRequest $request): JsonResponse
     {
         $photo = $this->findOwnPhoto($id);
 
-        $validated = $request->validate([
-            'title'  => ['required', 'string', 'min:' . setting('photo_title_min'), 'max:' . setting('photo_title_max')],
-            'text'   => ['nullable', 'string', 'min:' . setting('photo_text_min'), 'max:' . setting('photo_text_max')],
-            'closed' => ['nullable', 'boolean'],
-        ]);
-
-        $photo->update([
-            'title'  => $validated['title'],
-            'text'   => (string) ($validated['text'] ?? ''),
-            'closed' => (int) ($validated['closed'] ?? 0),
-        ]);
+        $photo->update($request->photoFields());
 
         $photo->load('user', 'files');
 

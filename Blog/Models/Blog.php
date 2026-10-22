@@ -6,6 +6,7 @@ namespace Modules\Blog\Models;
 
 use App\Traits\CategoryTreeTrait;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +28,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Blog extends Model
 {
+    /** @use HasFactory<\Modules\Blog\Tests\Factories\BlogFactory> */
+    use HasFactory;
+
     use CategoryTreeTrait;
 
     /**

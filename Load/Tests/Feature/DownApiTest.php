@@ -154,8 +154,8 @@ class DownApiTest extends ModuleTestCase
     {
         $down = $this->createDown();
 
-        $other = Load::query()->create(['name' => 'Other category']);
-        Down::query()->create([
+        $other = Load::factory()->create(['name' => 'Other category']);
+        Down::factory()->create([
             'category_id' => $other->id,
             'title'       => 'Other down',
             'text'        => 'Other down text',
@@ -186,8 +186,8 @@ class DownApiTest extends ModuleTestCase
 
     public function testCategoriesReturnTree(): void
     {
-        $parent = Load::query()->create(['name' => 'Parent category']);
-        Load::query()->create(['name' => 'Child category', 'parent_id' => $parent->id]);
+        $parent = Load::factory()->create(['name' => 'Parent category']);
+        Load::factory()->create(['name' => 'Child category', 'parent_id' => $parent->id]);
 
         $this->getJson('/api/loads')
             ->assertOk()
@@ -202,9 +202,9 @@ class DownApiTest extends ModuleTestCase
 
     private function createDown(bool $active = true): Down
     {
-        $load = Load::query()->create(['name' => 'Test category']);
+        $load = Load::factory()->create(['name' => 'Test category']);
 
-        return Down::query()->create([
+        return Down::factory()->create([
             'category_id' => $load->id,
             'title'       => 'Test down',
             'text'        => 'Test down text',
@@ -216,7 +216,7 @@ class DownApiTest extends ModuleTestCase
 
     private function attachFile(Down $down, string $name, string $extension, string $mimeType): File
     {
-        return File::query()->create([
+        return File::factory()->create([
             'relate_id'   => $down->id,
             'relate_type' => Down::$morphName,
             'path'        => '/uploads/files/' . $name,
@@ -230,7 +230,7 @@ class DownApiTest extends ModuleTestCase
 
     private function addComment(Down $down, string $text, ?int $parentId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => Down::$morphName,
             'relate_id'   => $down->id,
             'parent_id'   => $parentId,

@@ -26,9 +26,9 @@
     <div class="section-form mb-3 shadow">
         <form action="{{ route('admin.topics.move', ['id' => $topic->id]) }}" method="post">
             @csrf
-            <div class="mb-3{{ hasError('fid') }}">
+            <div class="mb-3{{ hasError('forum_id') }}">
                 <label for="fid" class="form-label">{{ __('forum::forums.forum') }}:</label>
-                <select class="form-select" id="fid" name="fid">
+                <select class="form-select" id="fid" name="forum_id">
                     @foreach ($forums as $data)
                         <option value="{{ $data->id }}"{{ $data->closed || $topic->forum_id === $data->id ? ' disabled' : '' }}>
                             {{ str_repeat('–', $data->depth) }} {{ $data->title }}
@@ -36,7 +36,7 @@
                     @endforeach
 
                 </select>
-                <div class="invalid-feedback">{{ textError('fid') }}</div>
+                <div class="invalid-feedback">{{ textError('forum_id') }}</div>
             </div>
 
             <button class="btn btn-primary">{{ __('main.move') }}</button>

@@ -9,14 +9,16 @@ use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
+use App\Services\FileService;
 use App\Support\CategoryTree;
-use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Board\Http\Requests\ItemRequest;
+use Modules\Board\Http\Requests\ItemStoreRequest;
 use Modules\Board\Models\Board;
 use Modules\Board\Models\Item;
 
@@ -76,10 +78,6 @@ class BoardController extends Controller
 
         if (! $item) {
             abort(404, __('board::boards.item_not_exist'));
-        }
-
-        if ($item->expires_at->lte(now()) && getUser() && getUser('id') !== $item->user_id) {
-            abort(200, __('board::boards.item_not_active'));
         }
 
         Reader::countingStat($item);
@@ -149,17 +147,9 @@ class BoardController extends Controller
     /**
      * Создание объявления
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(Request $request): View
     {
-        $bid = int($request->input('bid'));
-
-        if (! isAdmin() && ! setting('boards_create')) {
-            abort(200, __('board::boards.boards_closed'));
-        }
-
-        if (! $user = getUser()) {
-            abort(403);
-        }
+        $this->checkCreationOpen();
 
         $boards = (new Board())->getChildren();
 
@@ -167,62 +157,10 @@ class BoardController extends Controller
             abort(200, __('board::boards.categories_not_created'));
         }
 
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $price = int($request->input('price'));
-            $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
-            $city = $request->string('city')->value();
-
-            $board = Board::query()->find($bid);
-
-            $validator
-                ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
-                ->phone($phone, ['phone' => __('validator.phone')], false)
-                ->length($city, 2, 50, ['city' => __('validator.text')], false)
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-                ->notEmpty($board, ['category' => __('board::boards.category_not_exist')]);
-
-            if ($board) {
-                $validator->empty($board->closed, ['category' => __('board::boards.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                $item = Item::query()->create([
-                    'board_id'   => $board->id,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'user_id'    => $user->id,
-                    'price'      => $price,
-                    'phone'      => $phone,
-                    'city'       => $city,
-                    'messengers' => $request->input('messengers'),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                    'expires_at' => now()->addDays((int) setting('boards_period')),
-                ]);
-
-                $item->category->increment('count_items');
-
-                File::query()
-                    ->pending(Item::$morphName, $user->id)
-                    ->update(['relate_id' => $item->id]);
-
-                clearCache(['statBoards', 'recentBoards']);
-                $flood->saveState();
-
-                return redirect()->route('items.view', ['id' => $item->id])
-                    ->with('success', __('board::boards.item_success_added'));
-            }
-
-            return redirect()->route('items.create', ['bid' => $bid])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $bid = int($request->input('bid'));
 
         $files = File::query()
-            ->pending(Item::$morphName, $user->id)
+            ->pending(Item::$morphName, getUser('id'))
             ->ordered()
             ->get();
 
@@ -230,76 +168,43 @@ class BoardController extends Controller
     }
 
     /**
+     * Публикация объявления
+     */
+    public function store(ItemStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
+    {
+        $this->checkCreationOpen();
+
+        $item = Item::query()->create($request->itemFields() + [
+            'user_id'    => getUser('id'),
+            'created_at' => now(),
+            'updated_at' => now(),
+            'expires_at' => now()->addDays((int) setting('boards_period')),
+        ]);
+
+        $item->category->increment('count_items');
+
+        $files->attach($item, $request->file('files', []));
+
+        clearCache(['statBoards', 'recentBoards']);
+        $flood->saveState();
+
+        return redirect()->route('items.view', ['id' => $item->id])
+            ->with('success', __('board::boards.item_success_added'));
+    }
+
+    /**
      * Редактирование объявления
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View|RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+        $item = $this->findItem($id);
 
         // Форма только для автора: админ правит чужое объявление в админке
-        if ($item->user_id !== $user->id) {
-            if (isAdmin()) {
-                return redirect()->route('admin.items.edit', ['id' => $item->id]);
-            }
-
-            abort(403, __('board::boards.item_not_author'));
+        if ($item->user_id !== getUser('id') && isAdmin()) {
+            return redirect()->route('admin.items.edit', ['id' => $item->id]);
         }
 
-        if ($request->isMethod('post')) {
-            $bid = int($request->input('bid'));
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $price = int($request->input('price'));
-            $phone = preg_replace('/[^\d+]/', '', $request->input('phone') ?? '');
-            $city = $request->string('city')->value();
-
-            $board = Board::query()->find($bid);
-
-            $validator
-                ->length($title, setting('board_title_min'), setting('board_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('board_text_min'), setting('board_text_max'), ['text' => __('validator.text')])
-                ->phone($phone, ['phone' => __('validator.phone')], false)
-                ->length($city, 2, 50, ['city' => __('validator.text')], false)
-                ->notEmpty($board, ['category' => __('board::boards.category_not_exist')]);
-
-            if ($board) {
-                $validator->empty($board->closed, ['category' => __('board::boards.category_closed')]);
-            }
-
-            if ($validator->isValid()) {
-                if ($item->board_id !== $board->id) {
-                    $board->increment('count_items');
-                    Board::query()->where('id', $item->board_id)->decrement('count_items');
-                }
-
-                $item->update([
-                    'board_id'   => $board->id,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'price'      => $price,
-                    'phone'      => $phone,
-                    'city'       => $city,
-                    'messengers' => $request->input('messengers'),
-                ]);
-
-                clearCache(['statBoards', 'recentBoards']);
-
-                return redirect()->route('items.view', ['id' => $item->id])
-                    ->with('success', __('board::boards.item_success_edited'));
-            }
-
-            return redirect()->route('items.edit', ['id' => $item->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $this->checkAuthor($item);
 
         $boards = $item->category->getChildren();
 
@@ -307,46 +212,40 @@ class BoardController extends Controller
     }
 
     /**
+     * Сохранение объявления
+     */
+    public function update(int $id, ItemRequest $request): RedirectResponse
+    {
+        $item = $this->findItem($id);
+        $this->checkAuthor($item);
+
+        $item->moveTo($request->category());
+        $item->update($request->itemFields());
+
+        clearCache(['statBoards', 'recentBoards']);
+
+        return redirect()->route('items.view', ['id' => $item->id])
+            ->with('success', __('board::boards.item_success_edited'));
+    }
+
+    /**
      * Снятие / Публикация объявления
      */
-    public function close(int $id, Validator $validator): RedirectResponse
+    public function close(int $id): RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $item = $this->findItem($id);
 
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
-
-        $validator->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('items.edit', ['id' => $item->id])
-                ->withErrors($validator->getErrors());
+        if ($item->user_id !== getUser('id')) {
+            return redirect()->route('items.view', ['id' => $item->id])
+                ->withErrors(__('board::boards.item_not_author'));
         }
 
         if ($item->expires_at->gt(now())) {
+            $item->unpublish();
             $status = __('board::boards.item_success_unpublished');
-            $item->update([
-                'expires_at' => now(),
-            ]);
-
-            $item->category->decrement('count_items');
         } else {
+            $item->publish();
             $status = __('board::boards.item_success_published');
-            $period = (int) setting('boards_period');
-
-            $expired = $item->updated_at->addDays($period)->lte(now());
-
-            $item->update([
-                'expires_at' => now()->addDays($period),
-                'updated_at' => $expired ? now() : $item->updated_at,
-            ]);
-
-            $item->category->increment('count_items');
         }
 
         return redirect()->route('items.edit', ['id' => $item->id])
@@ -356,28 +255,16 @@ class BoardController extends Controller
     /**
      * Удаление объявления
      */
-    public function delete(int $id, Validator $validator): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $item = $this->findItem($id);
 
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
-
-        $validator->equal($item->user_id, $user->id, __('board::boards.item_not_author'));
-
-        if (! $validator->isValid()) {
+        if ($item->user_id !== getUser('id')) {
             return redirect()->route('boards.index', ['id' => $item->board_id])
-                ->withErrors($validator->getErrors());
+                ->withErrors(__('board::boards.item_not_author'));
         }
 
         $item->delete();
-
-        $item->category->decrement('count_items');
 
         clearCache(['statBoards', 'recentBoards']);
 
@@ -390,9 +277,7 @@ class BoardController extends Controller
      */
     public function active(Request $request): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $user = getUser();
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
@@ -420,5 +305,39 @@ class BoardController extends Controller
             ->appends(compact('type', 'sort', 'order'));
 
         return view('board::boards/active', compact('items', 'sort', 'order', 'sorting', 'type', 'otherCount'));
+    }
+
+    /**
+     * Объявление по id
+     */
+    private function findItem(int $id): Item
+    {
+        $item = Item::query()->find($id);
+
+        if (! $item) {
+            abort(404, __('board::boards.item_not_exist'));
+        }
+
+        return $item;
+    }
+
+    /**
+     * Править объявление может только автор
+     */
+    private function checkAuthor(Item $item): void
+    {
+        if ($item->user_id !== getUser('id')) {
+            abort(403, __('board::boards.item_not_author'));
+        }
+    }
+
+    /**
+     * Подача объявлений может быть закрыта настройкой — кроме администрации
+     */
+    private function checkCreationOpen(): void
+    {
+        if (! isAdmin() && ! setting('boards_create')) {
+            abort(200, __('board::boards.boards_closed'));
+        }
     }
 }

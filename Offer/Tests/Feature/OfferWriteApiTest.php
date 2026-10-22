@@ -64,7 +64,7 @@ class OfferWriteApiTest extends ModuleTestCase
 
     public function testStoreAttachesPendingMedia(): void
     {
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Offer::$morphName,
             'path'        => '/uploads/offers/screen.jpg',
@@ -119,7 +119,18 @@ class OfferWriteApiTest extends ModuleTestCase
             'type'  => Offer::ISSUE,
             'title' => 'Тестовая проблема',
             'text'  => 'Описание тестовой проблемы',
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('point');
+
+        $this->assertDatabaseCount('offers', 0);
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->postJson('/api/offers', [
+            'type'  => Offer::ISSUE,
+            'title' => 'Тестовая проблема',
+            'text'  => '<p><strong><em>Коротко</em></strong></p>',
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('text');
     }
 
     public function testUpdateOwnOffer(): void
@@ -166,7 +177,7 @@ class OfferWriteApiTest extends ModuleTestCase
 
     private function createOffer(int $userId): Offer
     {
-        return Offer::query()->create([
+        return Offer::factory()->create([
             'title'      => 'Test issue',
             'text'       => 'Test issue text',
             'type'       => Offer::ISSUE,

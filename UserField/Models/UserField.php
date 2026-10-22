@@ -10,6 +10,7 @@ use App\Support\HtmlSanitizer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
@@ -33,6 +34,9 @@ use Illuminate\Support\Facades\Validator;
  */
 class UserField extends Model
 {
+    /** @use HasFactory<\Modules\UserField\Tests\Factories\UserFieldFactory> */
+    use HasFactory;
+
     /**
      * Type fields
      */

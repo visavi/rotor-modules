@@ -66,11 +66,11 @@ class DiceController extends Controller
      */
     public function roll(Request $request): View|JsonResponse
     {
-        if ($this->user->money < self::BET) {
+        $before = $this->user->money;
+
+        if (! $this->user->chargeMoney(self::BET)) {
             abort(200, __('game::games.cannot_play'));
         }
-
-        $before = $this->user->money;
 
         $dices = [
             'user'   => [$this->rollUser(), $this->rollUser()],
@@ -87,8 +87,6 @@ class DiceController extends Controller
             $scores['user'] < $scores['banker'] => 'lost',
             default                             => 'draw',
         };
-
-        $this->user->decrement('money', self::BET);
 
         // Победа возвращает ставку с выигрышем, ничья — одну ставку
         if ($result === 'victory') {

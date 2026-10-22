@@ -238,4 +238,33 @@ class FeedbackTest extends ModuleTestCase
 
         $this->assertSame(1, Message::query()->where('user_id', $boss->id)->count());
     }
+
+    public function testCaptchaIsChecked(): void
+    {
+        $this->overrideSetting('captcha_type', 'graphical');
+        User::factory()->create(['level' => User::BOSS]);
+
+        $this->post('/feedback', [
+            'name'    => 'Гость',
+            'email'   => 'guest@example.com',
+            'message' => '<p>Обращение без капчи</p>',
+            'protect' => 'неверно',
+        ])
+            ->assertRedirect('/feedback')
+            ->assertSessionHasErrors('protect');
+
+        $this->assertSame(0, Message::query()->count());
+    }
+
+    public function testUserIsNotAskedForNameAndEmail(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post('/feedback', ['message' => '<p>Вопрос по сайту</p>'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, Message::query()->where('user_id', $boss->id)->count());
+    }
 }

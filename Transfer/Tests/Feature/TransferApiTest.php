@@ -96,14 +96,16 @@ class TransferApiTest extends ModuleTestCase
         $this->postJson('/api/transfers', [
             'user'  => $this->recipient->login,
             'money' => 100,
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('money');
 
         $this->assertSame(500, (int) $this->user->fresh()->money);
     }
 
     public function testHistoryShowsBothDirections(): void
     {
-        Transfer::query()->create([
+        Transfer::factory()->create([
             'user_id'      => $this->user->id,
             'recipient_id' => $this->recipient->id,
             'text'         => 'Отправленный',
@@ -111,7 +113,7 @@ class TransferApiTest extends ModuleTestCase
             'created_at'   => now()->subMinute(),
         ]);
 
-        Transfer::query()->create([
+        Transfer::factory()->create([
             'user_id'      => $this->recipient->id,
             'recipient_id' => $this->user->id,
             'text'         => 'Полученный',

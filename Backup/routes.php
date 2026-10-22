@@ -11,7 +11,8 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
             ->prefix('backups')
             ->group(function () {
                 Route::get('/', 'index');
-                Route::match(['get', 'post'], '/create', 'create');
+                Route::get('/create', 'create');
+                Route::post('/create', 'store');
                 Route::delete('/delete', 'delete');
             });
     });

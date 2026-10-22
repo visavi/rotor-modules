@@ -7,7 +7,7 @@ return [
     'name'        => 'Стена сообщений',
     'description' => 'Стена сообщений в профиле пользователя',
     'version'     => '1.1.6',
-    'requires'    => '14.8.0',
+    'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

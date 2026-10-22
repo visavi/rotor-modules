@@ -9,10 +9,10 @@ use App\Http\Resources\AuthorResource;
 use App\Models\Flood;
 use App\Models\User;
 use App\Traits\HandlesApiPagination;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Wall\Http\Requests\WallRequest;
 use Modules\Wall\Http\Resources\WallResource;
 use Modules\Wall\Models\Wall;
 
@@ -40,35 +40,21 @@ class WallApiController extends Controller
     /**
      * Запись на стену пользователя
      */
-    public function store(string $login, Request $request, Flood $flood): JsonResponse
+    public function store(string $login, WallRequest $request, Flood $flood): JsonResponse
     {
         $user = $this->findUser($login);
-
-        // Длина та же, что у комментариев: на сайте стена берёт их настройки
-        $validated = $request->validate([
-            'text' => [
-                'required',
-                'string',
-                'min:' . setting('comment_text_min'),
-                'max:' . setting('comment_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-        ]);
+        $text = $request->string('text')->value();
 
         $message = Wall::query()->create([
             'user_id'   => $user->id,
             'author_id' => getUser('id'),
-            'text'      => $validated['text'],
+            'text'      => $text,
         ]);
 
         $flood->saveState();
 
         sendNotify(
-            $validated['text'],
+            $text,
             route('walls.index', ['login' => $user->login], absolute: false),
             __('wall::walls.wall_posts_login', ['login' => $user->getName()], setting('language')),
         );

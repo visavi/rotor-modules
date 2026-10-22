@@ -6,6 +6,7 @@ namespace Modules\Advert\Models;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
@@ -25,6 +26,9 @@ use Illuminate\Support\Facades\Cache;
  */
 class Advert extends Model
 {
+    /** @use HasFactory<\Modules\Advert\Tests\Factories\AdvertFactory> */
+    use HasFactory;
+
     public const string TYPE_USER = 'user';
     public const string TYPE_ADMIN = 'admin';
 

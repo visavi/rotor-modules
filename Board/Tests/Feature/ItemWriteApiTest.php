@@ -33,7 +33,7 @@ class ItemWriteApiTest extends ModuleTestCase
         $this->overrideSetting('floodstime', 0);
 
         $this->user = User::factory()->create(['apikey' => Str::random(32)]);
-        $this->board = Board::query()->create(['parent_id' => 0, 'name' => 'Электроника', 'sort' => 1]);
+        $this->board = Board::factory()->create(['parent_id' => 0, 'name' => 'Электроника', 'sort' => 1]);
     }
 
     public function testStoreRequiresToken(): void
@@ -82,7 +82,7 @@ class ItemWriteApiTest extends ModuleTestCase
 
     public function testStoreAttachesPendingMedia(): void
     {
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Item::$morphName,
             'path'        => '/uploads/boards/screen.jpg',
@@ -109,13 +109,34 @@ class ItemWriteApiTest extends ModuleTestCase
     {
         $this->board->update(['closed' => 1]);
 
-        $this->postJson('/api/items', $this->payload(), $this->headers())->assertStatus(422);
+        $this->postJson('/api/items', $this->payload(), $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('category_id');
+    }
+
+    public function testStoreChecksPhoneFormat(): void
+    {
+        $this->postJson('/api/items', ['phone' => '12-34'] + $this->payload(), $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('phone');
+
+        // Без телефона объявление подаётся
+        $this->postJson('/api/items', ['phone' => null] + $this->payload(), $this->headers())
+            ->assertStatus(201)
+            ->assertJsonPath('item.phone', '');
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->postJson('/api/items', ['text' => '<p><strong>Коротко</strong></p>'] + $this->payload(), $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('text');
     }
 
     public function testUpdateMovesCountersBetweenCategories(): void
     {
         $item = $this->createItem($this->user->id);
-        $other = Board::query()->create(['parent_id' => 0, 'name' => 'Транспорт', 'sort' => 2]);
+        $other = Board::factory()->create(['parent_id' => 0, 'name' => 'Транспорт', 'sort' => 2]);
 
         $this->patchJson('/api/items/' . $item->id, [
             'category_id' => $other->id,
@@ -178,7 +199,7 @@ class ItemWriteApiTest extends ModuleTestCase
 
     private function createItem(int $userId): Item
     {
-        $item = Item::query()->create([
+        $item = Item::factory()->create([
             'board_id'   => $this->board->id,
             'title'      => 'Продам телефон',
             'text'       => 'Описание телефона для теста',

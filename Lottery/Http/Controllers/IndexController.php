@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Modules\Lottery\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Modules\Lottery\Http\Requests\TicketRequest;
 use Modules\Lottery\Models\Lottery;
 use Modules\Lottery\Services\LotteryService;
 use Throwable;
@@ -58,22 +57,19 @@ class IndexController extends Controller
     /**
      * Buy ticket
      *
+     * Баланс проверяется ещё раз при списании: деньги могли уйти в другом
+     * разделе после проверки, и без условия баланс ушёл бы в минус
      *
      * @throws Throwable
      */
-    public function buy(Request $request, Validator $validator, LotteryService $service): RedirectResponse
+    public function buy(TicketRequest $request, LotteryService $service): RedirectResponse
     {
         // Без планировщика тираж мог не смениться с прошлых суток
         $service->draw();
 
-        $number = int($request->input('number'));
+        $user = getUser();
+        $number = $request->integer('number');
         $ticketPrice = (int) setting('lottery_ticket_price');
-        $min = (int) setting('lottery_min');
-        $max = (int) setting('lottery_max');
-
-        if (! $user = getUser()) {
-            abort(403);
-        }
 
         $lottery = Lottery::query()
             ->orderByDesc('day')
@@ -83,48 +79,35 @@ class IndexController extends Controller
             abort(200, __('lottery::lottery.lottery_not_activated'));
         }
 
-        $ticketExist = $lottery->lotteryUsers()
-            ->where('user_id', $user->id)
-            ->exists();
+        $error = DB::transaction(static function () use ($user, $number, $lottery, $ticketPrice) {
+            // Блокировка тиража: двойной клик иначе покупал два билета
+            $lottery = Lottery::query()->whereKey($lottery->id)->lockForUpdate()->first();
 
-        $validator
-            ->false($ticketExist, ['number' => __('lottery::lottery.already_bought_ticket')])
-            ->lte($ticketPrice, getUser('money'), ['number' => __('lottery::lottery.no_money')])
-            ->between($number, $min, $max, ['number' => __('lottery::lottery.must_enter_number')]);
-
-        if ($validator->isValid()) {
-            $bought = DB::transaction(
-                static function () use ($user, $number, $lottery, $ticketPrice) {
-                    // Блокировка тиража: двойной клик иначе покупал два билета
-                    $lottery = Lottery::query()->whereKey($lottery->id)->lockForUpdate()->first();
-
-                    if (! $lottery || $lottery->lotteryUsers()->where('user_id', $user->id)->exists()) {
-                        return false;
-                    }
-
-                    $user->decrement('money', $ticketPrice);
-                    $lottery->increment('amount', $ticketPrice);
-
-                    $lottery->lotteryUsers()->create([
-                        'user_id' => $user->id,
-                        'number'  => $number,
-                    ]);
-
-                    return true;
-                }
-            );
-
-            if (! $bought) {
-                return redirect('lottery')
-                    ->withErrors(['number' => __('lottery::lottery.already_bought_ticket')]);
+            if (! $lottery || $lottery->lotteryUsers()->where('user_id', $user->id)->exists()) {
+                return __('lottery::lottery.already_bought_ticket');
             }
 
+            if (! $user->chargeMoney($ticketPrice)) {
+                return __('lottery::lottery.no_money');
+            }
+
+            $lottery->increment('amount', $ticketPrice);
+
+            $lottery->lotteryUsers()->create([
+                'user_id' => $user->id,
+                'number'  => $number,
+            ]);
+
+            return null;
+        });
+
+        if ($error) {
             return redirect('lottery')
-                ->with('success', __('lottery::lottery.ticket_success_purchased'));
+                ->withInput()
+                ->withErrors(['number' => $error]);
         }
 
         return redirect('lottery')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+            ->with('success', __('lottery::lottery.ticket_success_purchased'));
     }
 }

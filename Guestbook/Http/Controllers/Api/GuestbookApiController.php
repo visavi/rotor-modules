@@ -6,13 +6,13 @@ namespace Modules\Guestbook\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
-use App\Services\CaptchaService;
 use App\Services\FileService;
 use App\Traits\HandlesApiPagination;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Guestbook\Http\Requests\GuestbookRequest;
+use Modules\Guestbook\Http\Requests\GuestbookTextRequest;
 use Modules\Guestbook\Http\Resources\GuestbookResource;
 use Modules\Guestbook\Models\Guestbook;
 
@@ -36,53 +36,11 @@ class GuestbookApiController extends Controller
 
     /**
      * Добавление сообщения
-     *
-     * Гостю разрешено писать, если это открыто настройкой — тогда нужна капча,
-     * а ссылки в тексте не принимаются
      */
-    public function store(Request $request, Flood $flood, FileService $files, CaptchaService $captcha): JsonResponse
+    public function store(GuestbookRequest $request, Flood $flood, FileService $files): JsonResponse
     {
         $user = getUser();
-
-        if (! $user && ! setting('bookadds')) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $rules = [
-            'text' => [
-                'required',
-                'string',
-                'min:' . setting('guestbook_text_min'),
-                'max:' . setting('guestbook_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-        ];
-
-        if (! $user) {
-            $rules['text'][] = static function (string $attribute, mixed $value, Closure $fail) use ($captcha, $request) {
-                if (str_contains((string) $value, '//')) {
-                    $fail(__('guestbook::guestbook.without_links'));
-                }
-
-                if (! $captcha->verify($request)) {
-                    $fail(__('validator.captcha'));
-                }
-            };
-
-            $rules['guest_name'] = ['nullable', 'string', 'min:3', 'max:20'];
-        }
-
-        // Вложения — только от пользователей, как на сайте: файл гостя открыт
-        // по ссылке ещё до модерации и обходит запрет ссылок в тексте
-        $rules += $user ? FileService::rules(Guestbook::$morphName) : ['files' => ['prohibited']];
-
-        $validated = $request->validate($rules);
-
-        $text = $validated['text'];
+        $text = $request->string('text')->value();
         $active = true;
         $guestName = null;
 
@@ -93,7 +51,7 @@ class GuestbookApiController extends Controller
             // Гостевой текст приходит без разметки, её ставит сам сайт
             $text = '<p>' . nl2br(check($text), false) . '</p>';
             $active = ! setting('guest_moderation');
-            $guestName = $validated['guest_name'] ?? null;
+            $guestName = $request->input('guest_name');
         }
 
         $post = Guestbook::query()->create([
@@ -130,7 +88,7 @@ class GuestbookApiController extends Controller
     /**
      * Правка своего сообщения
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, GuestbookTextRequest $request): JsonResponse
     {
         $post = Guestbook::query()
             ->where('user_id', getUser('id'))
@@ -145,17 +103,8 @@ class GuestbookApiController extends Controller
             abort(422, __('main.editing_impossible'));
         }
 
-        $validated = $request->validate([
-            'text' => [
-                'required',
-                'string',
-                'min:' . setting('guestbook_text_min'),
-                'max:' . setting('guestbook_text_max'),
-            ],
-        ]);
-
         $post->update([
-            'text'         => $validated['text'],
+            'text'         => $request->string('text')->value(),
             'edit_user_id' => getUser('id'),
         ]);
 

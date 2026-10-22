@@ -7,6 +7,7 @@ namespace Modules\AdminChat\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
@@ -25,6 +26,9 @@ use Illuminate\Support\HtmlString;
  */
 class Chat extends Model
 {
+    /** @use HasFactory<\Modules\AdminChat\Tests\Factories\ChatFactory> */
+    use HasFactory;
+
     /**
      * The attributes that aren't mass assignable.
      */

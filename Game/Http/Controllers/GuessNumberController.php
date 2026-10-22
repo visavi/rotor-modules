@@ -6,10 +6,10 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class GuessNumberController extends Controller
@@ -65,32 +65,22 @@ class GuessNumberController extends Controller
     /**
      * Попытка
      */
-    public function go(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
+    public function go(Request $request): View|RedirectResponse|JsonResponse
     {
-        // int() из «abc» сделал бы ноль и списал деньги, поэтому обычный каст
-        $number = (int) $request->input('guess');
+        $request->validate([
+            'guess' => ['required', 'integer', 'between:' . self::MIN . ',' . self::MAX],
+        ], [
+            'guess.*' => __('game::games.guess_number_required') . ' ' . __('validator.between', ['min' => self::MIN, 'max' => self::MAX]),
+        ]);
 
-        $validator
-            // Границы к сообщению дописывает сам валидатор
-            ->between($number, self::MIN, self::MAX, ['guess' => __('game::games.guess_number_required')])
-            ->gte($this->user->money, self::PRICE, ['guess' => __('game::games.not_enough_money')]);
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/guess')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $number = $request->integer('guess');
 
         $before = $this->user->money;
+
+        // Списание до новой партии: без денег она не должна начаться
+        if (! $this->user->chargeMoney(self::PRICE)) {
+            throw ValidationException::withMessages(['guess' => __('game::games.not_enough_money')]);
+        }
 
         if ($request->session()->missing('guess.number')) {
             $request->session()->put('guess', [
@@ -102,7 +92,6 @@ class GuessNumberController extends Controller
 
         $guess = $request->session()->get('guess');
 
-        $this->user->decrement('money', self::PRICE);
         $guess['try']--;
 
         $hint = match (true) {

@@ -78,7 +78,7 @@ class PaidCardTest extends ModuleTestCase
      */
     private function createCard(?User $user = null, array $attributes = []): PaidAdvert
     {
-        return PaidAdvert::query()->create(array_merge([
+        return PaidAdvert::factory()->create(array_merge([
             'place'      => PaidAdvert::CARD_SIDEBAR,
             'url'        => 'https://example.com',
             'names'      => ['Заголовок карточки'],
@@ -320,7 +320,7 @@ class PaidCardTest extends ModuleTestCase
         $boss = User::factory()->boss()->create(['language' => 'ru']);
         $buyer = User::factory()->create();
 
-        Order::query()->create([
+        Order::factory()->create([
             'user_id'     => $buyer->id,
             'type'        => Order::TYPE_CARD,
             'amount'      => 150,

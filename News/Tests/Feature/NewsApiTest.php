@@ -119,7 +119,7 @@ class NewsApiTest extends ModuleTestCase
 
     private function createNews(): News
     {
-        return News::query()->create([
+        return News::factory()->create([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
@@ -129,7 +129,7 @@ class NewsApiTest extends ModuleTestCase
 
     private function attachFile(News $news, string $name, string $extension, string $mimeType): void
     {
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $news->id,
             'relate_type' => News::$morphName,
             'path'        => '/uploads/news/' . $name,
@@ -143,7 +143,7 @@ class NewsApiTest extends ModuleTestCase
 
     private function addComment(News $news, string $text, ?int $parentId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'parent_id'   => $parentId,

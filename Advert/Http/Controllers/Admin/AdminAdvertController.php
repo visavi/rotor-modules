@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Modules\Advert\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Advert\Http\Requests\AdvertRequest;
 use Modules\Advert\Models\Advert;
 
 class AdminAdvertController extends AdminController
@@ -16,48 +15,31 @@ class AdminAdvertController extends AdminController
     /**
      * Главная страница
      */
-    public function index(Request $request, Validator $validator): View|RedirectResponse
+    public function index(): View
     {
         $advert = Advert::query()
             ->where('type', Advert::TYPE_ADMIN)
             ->where('user_id', getUser('id'))
             ->firstOrNew();
 
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $name = $request->input('name');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-
-            $validator
-                ->regex($site, '|^https?://[а-яa-z0-9_\-.]+(\.[а-яa-z0-9/\-?_=#]+)+$|iu', ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->length($name, 5, 35, ['name' => __('validator.text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false);
-
-            if ($validator->fails()) {
-                return redirect('admin/admin-adverts')
-                    ->withErrors($validator->getErrors())
-                    ->withInput();
-            }
-
-            Advert::query()->updateOrCreate([
-                'type'    => Advert::TYPE_ADMIN,
-                'user_id' => getUser('id'),
-            ], [
-                'site'       => $site,
-                'name'       => $name,
-                'color'      => $color,
-                'bold'       => $bold,
-                'deleted_at' => now()->addDays((int) setting('rekadmintime')),
-            ]);
-
-            clearCache('adminAdverts');
-
-            return redirect('admin/admin-adverts')->with('success', __('main.record_saved_success'));
-        }
-
         return view('advert::admin/admin-adverts/index', compact('advert'));
+    }
+
+    /**
+     * Сохранение своей ссылки
+     */
+    public function store(AdvertRequest $request): RedirectResponse
+    {
+        Advert::query()->updateOrCreate([
+            'type'    => Advert::TYPE_ADMIN,
+            'user_id' => getUser('id'),
+        ], $request->advertFields() + [
+            'deleted_at' => now()->addDays((int) setting('rekadmintime')),
+        ]);
+
+        clearCache('adminAdverts');
+
+        return redirect('admin/admin-adverts')->with('success', __('main.record_saved_success'));
     }
 
     /**

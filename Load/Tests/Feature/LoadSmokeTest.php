@@ -31,16 +31,16 @@ class LoadSmokeTest extends ModuleTestCase
 
     public function testCategory(): void
     {
-        $load = Load::query()->create(['name' => 'Test category']);
+        $load = Load::factory()->create(['name' => 'Test category']);
 
         $this->get(route('loads.load', ['id' => $load->id]))->assertOk();
     }
 
     public function testDown(): void
     {
-        $load = Load::query()->create(['name' => 'Test category']);
+        $load = Load::factory()->create(['name' => 'Test category']);
 
-        $down = Down::query()->create([
+        $down = Down::factory()->create([
             'category_id' => $load->id,
             'title'       => 'Test down',
             'text'        => 'Test down text',
@@ -55,9 +55,9 @@ class LoadSmokeTest extends ModuleTestCase
     public function testNewCommentsLinkToComment(): void
     {
         // Ссылка ведёт к самому комментарию, а не на начало страницы через ?cid=
-        $load = Load::query()->create(['name' => 'Test category']);
+        $load = Load::factory()->create(['name' => 'Test category']);
 
-        $down = Down::query()->create([
+        $down = Down::factory()->create([
             'category_id' => $load->id,
             'title'       => 'Test down',
             'text'        => 'Test down text',
@@ -66,7 +66,7 @@ class LoadSmokeTest extends ModuleTestCase
             'created_at'  => now(),
         ]);
 
-        $comment = Comment::query()->create([
+        $comment = Comment::factory()->create([
             'relate_type' => Down::$morphName,
             'relate_id'   => $down->id,
             'text'        => 'Test comment',

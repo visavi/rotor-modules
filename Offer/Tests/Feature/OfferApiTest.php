@@ -129,7 +129,7 @@ class OfferApiTest extends ModuleTestCase
     {
         $this->createOffer();
 
-        Offer::query()->create([
+        Offer::factory()->create([
             'type'       => Offer::OFFER,
             'title'      => 'Test offer',
             'text'       => 'Test offer text',
@@ -158,7 +158,7 @@ class OfferApiTest extends ModuleTestCase
 
     private function createOffer(): Offer
     {
-        return Offer::query()->create([
+        return Offer::factory()->create([
             'type'       => Offer::ISSUE,
             'title'      => 'Test issue',
             'text'       => 'Test issue text',
@@ -171,7 +171,7 @@ class OfferApiTest extends ModuleTestCase
 
     private function addComment(Offer $offer, string $text, ?int $parentId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => Offer::$morphName,
             'relate_id'   => $offer->id,
             'parent_id'   => $parentId,

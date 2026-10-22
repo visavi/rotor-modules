@@ -25,7 +25,7 @@ class AdminSocialsTest extends ModuleTestCase
 
     private function makeSocial(User $user, string $provider, ?string $lastLoginAt = null): Social
     {
-        return Social::query()->create([
+        return Social::factory()->create([
             'user_id'       => $user->id,
             'provider'      => $provider,
             'provider_id'   => $provider . '-' . $user->id,

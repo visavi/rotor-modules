@@ -24,7 +24,7 @@ class AntimatTest extends ModuleTestCase
 
     public function testFilterReplacesWords(): void
     {
-        Antimat::query()->create(['string' => 'xxx']);
+        Antimat::factory()->create(['string' => 'xxx']);
 
         $this->assertSame('test', Registry::filterText('test'));
         $this->assertSame('test***test', Registry::filterText('testxxxtest'));
@@ -34,8 +34,8 @@ class AntimatTest extends ModuleTestCase
 
     public function testFilterReplacesLongerWordsFirst(): void
     {
-        Antimat::query()->create(['string' => 'xx']);
-        Antimat::query()->create(['string' => 'xxxx']);
+        Antimat::factory()->create(['string' => 'xx']);
+        Antimat::factory()->create(['string' => 'xxxx']);
 
         $this->assertSame('a***b', Registry::filterText('axxxxb'));
     }
@@ -47,14 +47,14 @@ class AntimatTest extends ModuleTestCase
 
     public function testFilterEscapesRegexCharacters(): void
     {
-        Antimat::query()->create(['string' => 'a.b']);
+        Antimat::factory()->create(['string' => 'a.b']);
 
         $this->assertSame('axb ***', Registry::filterText('axb a.b'));
     }
 
     public function testWholeWordMode(): void
     {
-        Antimat::query()->create(['string' => 'бяка']);
+        Antimat::factory()->create(['string' => 'бяка']);
 
         $this->overrideSetting('antimat_whole_word', 1);
         $this->assertSame('бякалка ***', Registry::filterText('бякалка бяка'));
@@ -66,7 +66,7 @@ class AntimatTest extends ModuleTestCase
 
     public function testCustomReplacement(): void
     {
-        Antimat::query()->create(['string' => 'бяка']);
+        Antimat::factory()->create(['string' => 'бяка']);
 
         $this->overrideSetting('antimat_replace', '[цензура]');
         $this->assertSame('ну [цензура]', Registry::filterText('ну бяка'));
@@ -82,9 +82,9 @@ class AntimatTest extends ModuleTestCase
 
     public function testModelTextFilteredOnReadOnly(): void
     {
-        Antimat::query()->create(['string' => 'бяка']);
+        Antimat::factory()->create(['string' => 'бяка']);
 
-        $comment = Comment::query()->create([
+        $comment = Comment::factory()->create([
             'relate_type' => 'test',
             'relate_id'   => 1,
             'user_id'     => $this->admin->id,
@@ -101,13 +101,13 @@ class AntimatTest extends ModuleTestCase
     {
         $this->assertSame('бяка', Registry::filterText('бяка'));
 
-        $word = Antimat::query()->create(['string' => 'бяка']);
+        $word = Antimat::factory()->create(['string' => 'бяка']);
         $this->assertSame('***', Registry::filterText('бяка'));
 
         $word->delete();
         $this->assertSame('бяка', Registry::filterText('бяка'));
 
-        Antimat::query()->create(['string' => 'бяка']);
+        Antimat::factory()->create(['string' => 'бяка']);
         $boss = User::factory()->boss()->create(['login' => 'boss_cache']);
         $this->actingAs($boss)->post('/admin/antimat/clear');
 
@@ -157,7 +157,7 @@ class AntimatTest extends ModuleTestCase
 
     public function testIndexShowsWords(): void
     {
-        Antimat::query()->create(['string' => 'тестослово']);
+        Antimat::factory()->create(['string' => 'тестослово']);
 
         $this->actingAs($this->admin)
             ->get('/admin/antimat')
@@ -199,14 +199,23 @@ class AntimatTest extends ModuleTestCase
         $response = $this->actingAs($this->admin)
             ->post('/admin/antimat', ['word' => '']);
 
-        $response->assertSessionHasErrors();
+        $response->assertSessionHasErrors('word');
 
         $this->assertDatabaseCount('antimat', 0);
     }
 
+    public function testAddZeroWord(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/antimat', ['word' => '0'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('antimat', ['string' => '0']);
+    }
+
     public function testAddDuplicateWordFails(): void
     {
-        Antimat::query()->create(['string' => 'тестослово']);
+        Antimat::factory()->create(['string' => 'тестослово']);
 
         $response = $this->actingAs($this->admin)
             ->from('/admin/antimat')
@@ -224,7 +233,7 @@ class AntimatTest extends ModuleTestCase
 
     public function testDeleteWord(): void
     {
-        $word = Antimat::query()->create(['string' => 'тестослово']);
+        $word = Antimat::factory()->create(['string' => 'тестослово']);
 
         $response = $this->actingAs($this->admin)
             ->delete('/admin/antimat/delete', ['id' => $word->id]);
@@ -245,7 +254,7 @@ class AntimatTest extends ModuleTestCase
 
     public function testClearAsBoss(): void
     {
-        Antimat::query()->create(['string' => 'тестослово']);
+        Antimat::factory()->create(['string' => 'тестослово']);
 
         $boss = User::factory()->boss()->create(['login' => 'boss_antimat']);
 
@@ -260,11 +269,11 @@ class AntimatTest extends ModuleTestCase
 
     public function testClearAsAdminIsForbidden(): void
     {
-        Antimat::query()->create(['string' => 'тестослово']);
+        Antimat::factory()->create(['string' => 'тестослово']);
 
         $this->actingAs($this->admin)
             ->post('/admin/antimat/clear')
-            ->assertSessionHasErrors();
+            ->assertForbidden();
 
         $this->assertDatabaseCount('antimat', 1);
     }

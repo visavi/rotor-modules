@@ -6,13 +6,13 @@ namespace Modules\Load\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\File;
-use App\Models\User;
 use App\Support\CategoryTree;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Load\Http\Requests\DownRequest;
+use Modules\Load\Http\Requests\LoadCategoryRequest;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
 
@@ -46,10 +46,6 @@ class LoadController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         CategoryTree::reorder(Load::class, $request->string('order')->toString());
 
         return redirect()
@@ -60,109 +56,62 @@ class LoadController extends AdminController
     /**
      * Создание раздела
      */
-    public function create(Request $request, Validator $validator): RedirectResponse
+    public function create(LoadCategoryRequest $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
+        $load = Load::query()->create([
+            'name' => $request->string('name')->value(),
+            'sort' => Load::query()->max('sort') + 1,
+        ]);
 
-        $name = $request->input('name');
-
-        $validator->length($name, setting('down_category_min'), setting('down_category_max'), ['title' => __('validator.text')]);
-
-        if ($validator->isValid()) {
-            $max = Load::query()->max('sort') + 1;
-
-            $load = Load::query()->create([
-                'name' => $name,
-                'sort' => $max,
-            ]);
-
-            return redirect()->route('admin.loads.edit', ['id' => $load->id])
-                ->with('success', __('load::loads.load_success_created'));
-        }
-
-        return redirect()->route('admin.loads.index')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+        return redirect()->route('admin.loads.edit', ['id' => $load->id])
+            ->with('success', __('load::loads.load_success_created'));
     }
 
     /**
      * Редактирование раздела
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
-        $load = Load::query()->with('children')->find($id);
-
-        if (! $load) {
-            abort(404, __('load::loads.load_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $parent = int($request->input('parent'));
-            $name = $request->input('name');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($name, setting('down_category_min'), setting('down_category_max'), ['title' => __('validator.text')])
-                ->notEqual($parent, $load->id, ['parent' => __('load::loads.load_parent_invalid')]);
-
-            if ($validator->isValid()) {
-                $load->update([
-                    'parent_id' => $parent,
-                    'name'      => $name,
-                    'closed'    => $closed,
-                ]);
-
-                return redirect()->route('admin.loads.index')
-                    ->with('success', __('load::loads.load_success_edited'));
-            }
-
-            return redirect()->route('admin.loads.edit', ['id' => $load->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $load = $this->findLoad($id);
         $loads = $load->getChildren();
 
         return view('load::admin/downs/edit', compact('loads', 'load'));
     }
 
     /**
+     * Сохранение раздела
+     */
+    public function update(int $id, LoadCategoryRequest $request): RedirectResponse
+    {
+        $this->findLoad($id)->update([
+            'parent_id' => $request->integer('parent'),
+            'name'      => $request->string('name')->value(),
+            'closed'    => $request->boolean('closed'),
+        ]);
+
+        return redirect()->route('admin.loads.index')
+            ->with('success', __('load::loads.load_success_edited'));
+    }
+
+    /**
      * Удаление раздела
      */
-    public function delete(int $id, Validator $validator): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
+        $load = $this->findLoad($id);
+        $redirect = redirect()->route('admin.loads.index');
+
+        if ($load->children->isNotEmpty()) {
+            return $redirect->withErrors(__('load::loads.load_has_subcategories'));
         }
 
-        $load = Load::query()->with('children')->find($id);
-
-        if (! $load) {
-            abort(404, __('load::loads.load_not_exist'));
-        }
-
-        $validator->true($load->children->isEmpty(), __('load::loads.load_has_subcategories'));
-
-        $down = Down::query()->where('category_id', $load->id)->first();
-        if ($down) {
-            $validator->addError(__('load::loads.load_has_downs'));
-        }
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.loads.index')
-                ->withErrors($validator->getErrors());
+        if (Down::query()->where('category_id', $load->id)->exists()) {
+            return $redirect->withErrors(__('load::loads.load_has_downs'));
         }
 
         $load->delete();
 
-        return redirect()->route('admin.loads.index')
-            ->with('success', __('load::loads.load_success_deleted'));
+        return $redirect->with('success', __('load::loads.load_success_deleted'));
     }
 
     /**
@@ -170,10 +119,6 @@ class LoadController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run('loads');
 
         return redirect()
@@ -217,15 +162,10 @@ class LoadController extends AdminController
     /**
      * Редактирование загрузки
      */
-    public function editDown(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editDown(int $id, Request $request): View
     {
         $cid = int($request->input('category'));
-
-        $down = Down::query()->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = $this->findDown($id);
 
         $files = File::query()
             ->where('relate_type', Down::$morphName)
@@ -233,71 +173,41 @@ class LoadController extends AdminController
             ->ordered()
             ->get();
 
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $links = (array) $request->input('links');
-            $links = array_unique(array_diff($links, ['']));
-
-            $category = Load::query()->find($cid);
-
-            $validator
-                ->length($title, setting('down_title_min'), setting('down_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('down_text_min'), setting('down_text_max'), ['text' => __('validator.text')])
-                ->notEmpty($category, ['category' => __('load::loads.load_not_exist')]);
-
-            $duplicate = Down::query()
-                ->where('title', $title)
-                ->where('id', '<>', $down->id)
-                ->count();
-
-            $validator->empty($duplicate, ['title' => __('load::loads.down_name_exists')]);
-
-            $validator->notEmpty($files->count() + count($links), ['files' => __('validator.file_upload_one')]);
-            $validator->lte($files->count() + count($links), setting('maxfiles'), ['files' => __('validator.files_max', ['max' => setting('maxfiles')])]);
-
-            if ($validator->isValid()) {
-                foreach ($links as $link) {
-                    $validator->length($link, setting('down_link_min'), setting('down_link_max'), ['links' => __('validator.text')])
-                        ->url($link, ['links' => __('validator.url')]);
-                }
-            }
-
-            if ($validator->isValid()) {
-                $oldDown = $down->replicate();
-                $links = setting('down_allow_links') ? array_values($links) : null;
-
-                $down->update([
-                    'category_id' => $category->id,
-                    'title'       => $title,
-                    'text'        => $text,
-                    'links'       => $links,
-                ]);
-
-                if ($down->category->id !== $oldDown->category->id && $down->active) {
-                    $down->category->increment('count_downs');
-                    $oldDown->category->decrement('count_downs');
-                }
-
-                if (! $down->active) {
-                    $text = textNotice('down_change', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
-                    $down->user->sendMessage(null, $text);
-                }
-
-                clearCache(['statLoads', 'recentDowns']);
-
-                return redirect()->route('admin.downs.edit', ['id' => $down->id])
-                    ->with('success', __('load::loads.down_edited_success'));
-            }
-
-            return redirect()->route('admin.downs.edit', ['id' => $down->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         $categories = $down->category->getChildren();
 
         return view('load::admin/downs/edit_down', compact('categories', 'down', 'cid', 'files'));
+    }
+
+    /**
+     * Сохранение загрузки
+     */
+    public function updateDown(int $id, DownRequest $request): RedirectResponse
+    {
+        $down = $this->findDown($id);
+        $oldCategory = $down->category;
+
+        $down->update([
+            'category_id' => $request->category()->id,
+            'title'       => $request->string('title')->value(),
+            'text'        => $request->string('text')->value(),
+            'links'       => $request->links(),
+        ]);
+
+        // Счётчик ведёт только опубликованные загрузки
+        if ($down->active && $down->category_id !== $oldCategory->id) {
+            $request->category()->increment('count_downs');
+            $oldCategory->decrement('count_downs');
+        }
+
+        if (! $down->active) {
+            $text = textNotice('down_change', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
+            $down->user->sendMessage(null, $text);
+        }
+
+        clearCache(['statLoads', 'recentDowns']);
+
+        return redirect()->route('admin.downs.edit', ['id' => $down->id])
+            ->with('success', __('load::loads.down_edited_success'));
     }
 
     /**
@@ -309,10 +219,6 @@ class LoadController extends AdminController
 
         if (! $down) {
             abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
         }
 
         if ($down->active) {
@@ -383,5 +289,33 @@ class LoadController extends AdminController
 
         return redirect()->route('admin.downs.edit', ['id' => $down->id])
             ->with('success', $status);
+    }
+
+    /**
+     * Раздел по id
+     */
+    private function findLoad(int $id): Load
+    {
+        $load = Load::query()->with('children')->find($id);
+
+        if (! $load) {
+            abort(404, __('load::loads.load_not_exist'));
+        }
+
+        return $load;
+    }
+
+    /**
+     * Загрузка по id
+     */
+    private function findDown(int $id): Down
+    {
+        $down = Down::query()->find($id);
+
+        if (! $down) {
+            abort(404, __('load::loads.down_not_exist'));
+        }
+
+        return $down;
     }
 }

@@ -11,7 +11,7 @@ Route::middleware('web')
     ->name('walls.')
     ->group(function () {
         Route::get('/{login}', 'index')->name('index');
-        Route::post('/{login}/create', 'create')->name('create');
+        Route::post('/{login}/create', 'create')->name('create')->middleware('check.user');
         Route::post('/{login}/delete', 'delete')->name('delete');
     });
 

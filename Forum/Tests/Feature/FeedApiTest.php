@@ -71,7 +71,7 @@ class FeedApiTest extends ModuleTestCase
 
     public function testFeedReturnsBreadcrumbs(): void
     {
-        $parent = Forum::query()->create(['title' => 'Parent forum']);
+        $parent = Forum::factory()->create(['title' => 'Parent forum']);
         [$topic] = $this->createTopicInFeed();
         $topic->forum->update(['parent_id' => $parent->id]);
 
@@ -135,16 +135,16 @@ class FeedApiTest extends ModuleTestCase
      */
     private function createTopicInFeed(): array
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'   => $forum->id,
             'title'      => 'Test topic',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $post = Post::query()->create([
+        $post = Post::factory()->create([
             'topic_id' => $topic->id,
             'user_id'  => $this->user->id,
             'text'     => 'Последнее сообщение темы',

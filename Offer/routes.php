@@ -20,8 +20,13 @@ Route::middleware('web')
         Route::get('/{type?}', 'index')->where('type', 'offer|issue')->name('index');
         Route::get('/{id}', 'view')->name('view');
         Route::post('/{id}/comments', 'storeComment')->name('add-comment');
-        Route::match(['get', 'post'], '/create', 'create')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+
+        Route::middleware('check.user')->group(function () {
+            Route::get('/create', 'create')->name('create');
+            Route::post('/create', 'store');
+            Route::get('/{id}/edit', 'edit')->name('edit');
+            Route::post('/{id}/edit', 'update');
+        });
     });
 
 /* Админ */
@@ -34,10 +39,12 @@ Route::middleware(['web', 'check.admin:admin', 'admin.logger'])
             ->group(function () {
                 Route::get('/{type?}', 'index')->where('type', 'offer|issue')->name('index');
                 Route::get('/{id}', 'view')->name('view');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
-                Route::match(['get', 'post'], '/delete', 'delete')->name('delete');
-                Route::post('/restatement', 'restatement')->name('restatement');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::post('/{id}/edit', 'update');
+                Route::get('/{id}/reply', 'reply')->name('reply');
+                Route::post('/{id}/reply', 'storeReply');
+                Route::post('/delete', 'delete')->name('delete');
+                Route::post('/restatement', 'restatement')->name('restatement')->middleware('check.admin:boss');
             });
 
         /* Настройки */

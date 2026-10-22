@@ -30,7 +30,7 @@ class BoardSmokeTest extends ModuleTestCase
 
     public function testCategory(): void
     {
-        $board = Board::query()->create(['name' => 'Test board']);
+        $board = Board::factory()->create(['name' => 'Test board']);
 
         $this->get(route('boards.index', ['id' => $board->id]))->assertOk();
     }
@@ -52,18 +52,17 @@ class BoardSmokeTest extends ModuleTestCase
         $admin = User::factory()->boss()->create();
 
         $this->actingAs($admin)
-            ->from(route('boards.index'))
             ->post(route('board.settings.update'))
-            ->assertRedirect(route('boards.index'));
+            ->assertRedirect(route('board.settings'));
 
         self::assertSame(__('settings.settings_empty'), session('danger'));
     }
 
     public function testItem(): void
     {
-        $board = Board::query()->create(['name' => 'Test board']);
+        $board = Board::factory()->create(['name' => 'Test board']);
 
-        $item = Item::query()->create([
+        $item = Item::factory()->create([
             'board_id'   => $board->id,
             'title'      => 'Test item',
             'text'       => 'Test item text',
@@ -168,7 +167,7 @@ class BoardSmokeTest extends ModuleTestCase
     public function testCreateFormTakesCityFromProfile(): void
     {
         $this->overrideSetting('boards_create', 1);
-        Board::query()->create(['name' => 'Test board']);
+        Board::factory()->create(['name' => 'Test board']);
 
         $this->user->update(['city' => 'Казань']);
 
@@ -248,9 +247,9 @@ class BoardSmokeTest extends ModuleTestCase
 
     private function createItem(string $phone, array $attributes = []): Item
     {
-        $board = Board::query()->create(['name' => 'Test board']);
+        $board = Board::factory()->create(['name' => 'Test board']);
 
-        return Item::query()->create($attributes + [
+        return Item::factory()->create($attributes + [
             'board_id'   => $board->id,
             'title'      => 'Test item',
             'text'       => 'Test item text',

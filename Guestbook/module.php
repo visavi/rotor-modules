@@ -6,7 +6,7 @@ return [
     'name'        => 'Гостевая книга',
     'description' => 'Гостевая книга сайта с модерацией и официальными ответами администрации',
     'version'     => '1.2.0',
-    'requires'    => '14.8.0',
+    'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',

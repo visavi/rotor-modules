@@ -129,7 +129,7 @@ class WallApiTest extends ModuleTestCase
 
     private function createPost(): Wall
     {
-        return Wall::query()->create([
+        return Wall::factory()->create([
             'user_id'    => $this->owner->id,
             'author_id'  => $this->user->id,
             'text'       => 'Запись на стене',

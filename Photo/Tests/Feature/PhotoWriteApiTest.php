@@ -44,7 +44,7 @@ class PhotoWriteApiTest extends ModuleTestCase
         $this->postJson('/api/photos', [
             'title' => 'Прогулка по лесу',
             'text'  => 'Описание прогулки',
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertStatus(422)->assertJsonValidationErrors('files');
     }
 
     public function testStoreCreatesPhoto(): void
@@ -119,7 +119,7 @@ class PhotoWriteApiTest extends ModuleTestCase
     {
         $photo = $this->createPhoto($this->user->id);
 
-        Comment::query()->create([
+        Comment::factory()->create([
             'relate_type' => Photo::$morphName,
             'relate_id'   => $photo->id,
             'text'        => 'Красивое фото',
@@ -137,7 +137,7 @@ class PhotoWriteApiTest extends ModuleTestCase
 
     private function pendingFile(): File
     {
-        return File::query()->create([
+        return File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Photo::$morphName,
             'path'        => '/uploads/photos/forest.jpg',
@@ -156,7 +156,7 @@ class PhotoWriteApiTest extends ModuleTestCase
 
     private function createPhoto(int $userId): Photo
     {
-        return Photo::query()->create([
+        return Photo::factory()->create([
             'user_id'    => $userId,
             'title'      => 'Прогулка по лесу',
             'text'       => 'Описание прогулки',

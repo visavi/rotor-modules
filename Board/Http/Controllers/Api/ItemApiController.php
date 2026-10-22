@@ -8,11 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiPagination;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Validation\Rule;
+use Modules\Board\Http\Requests\ItemRequest;
+use Modules\Board\Http\Requests\ItemStoreRequest;
 use Modules\Board\Http\Resources\BoardResource;
 use Modules\Board\Http\Resources\ItemResource;
 use Modules\Board\Models\Board;
@@ -76,58 +76,21 @@ class ItemApiController extends Controller
             abort(404, __('board::boards.item_not_exist'));
         }
 
-        // Истёкшее объявление остаётся доступным автору, как и на сайте
-        if ($item->expires_at->lte(now()) && getUser() && getUser('id') !== $item->user_id) {
-            abort(403, __('board::boards.item_not_active'));
-        }
-
+        // Истёкшее объявление открыто всем, признак — в поле expired
         return ItemResource::make($item);
     }
 
     /**
      * Создание объявления
      */
-    public function store(Request $request, Flood $flood, FileService $files): JsonResponse
+    public function store(ItemStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
         if (! isAdmin() && ! setting('boards_create')) {
             abort(422, __('board::boards.boards_closed'));
         }
 
-        $user = getUser();
-
-        $validated = $request->validate([
-            'category_id' => ['required', 'integer', 'min:1'],
-            'title'       => ['required', 'string', 'min:' . setting('board_title_min'), 'max:' . setting('board_title_max')],
-            'text'        => [
-                'required',
-                'string',
-                'min:' . setting('board_text_min'),
-                'max:' . setting('board_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-            'price' => ['nullable', 'integer', 'min:0'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'city'  => ['nullable', 'string', 'min:2', 'max:50'],
-            // Ключи Item::MESSENGERS
-            'messengers'   => ['nullable', 'array'],
-            'messengers.*' => ['string', Rule::in(array_keys(Item::MESSENGERS))],
-        ] + FileService::rules(Item::$morphName));
-
-        $board = $this->findOpenCategory((int) $validated['category_id']);
-
-        $item = Item::query()->create([
-            'board_id'   => $board->id,
-            'title'      => $validated['title'],
-            'text'       => $validated['text'],
-            'user_id'    => $user->id,
-            'price'      => (int) ($validated['price'] ?? 0),
-            'phone'      => $this->normalizePhone($validated['phone'] ?? null),
-            'city'       => $validated['city'] ?? null,
-            'messengers' => $validated['messengers'] ?? [],
+        $item = Item::query()->create($request->itemFields() + [
+            'user_id'    => getUser('id'),
             'created_at' => now(),
             'updated_at' => now(),
             // Объявление живёт ограниченный срок и потом пропадает из списков
@@ -153,38 +116,12 @@ class ItemApiController extends Controller
     /**
      * Редактирование своего объявления
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, ItemRequest $request): JsonResponse
     {
         $item = $this->findOwnItem($id);
 
-        $validated = $request->validate([
-            'category_id'  => ['required', 'integer', 'min:1'],
-            'title'        => ['required', 'string', 'min:' . setting('board_title_min'), 'max:' . setting('board_title_max')],
-            'text'         => ['required', 'string', 'min:' . setting('board_text_min'), 'max:' . setting('board_text_max')],
-            'price'        => ['nullable', 'integer', 'min:0'],
-            'phone'        => ['nullable', 'string', 'max:20'],
-            'city'         => ['nullable', 'string', 'min:2', 'max:50'],
-            'messengers'   => ['nullable', 'array'],
-            'messengers.*' => ['string', Rule::in(array_keys(Item::MESSENGERS))],
-        ]);
-
-        $board = $this->findOpenCategory((int) $validated['category_id']);
-
-        // Счётчики категорий переезжают вместе с объявлением
-        if ($item->board_id !== $board->id) {
-            $board->increment('count_items');
-            Board::query()->where('id', $item->board_id)->decrement('count_items');
-        }
-
-        $item->update([
-            'board_id'   => $board->id,
-            'title'      => $validated['title'],
-            'text'       => $validated['text'],
-            'price'      => (int) ($validated['price'] ?? 0),
-            'phone'      => $this->normalizePhone($validated['phone'] ?? null),
-            'city'       => $validated['city'] ?? null,
-            'messengers' => $validated['messengers'] ?? [],
-        ]);
+        $item->moveTo($request->category());
+        $item->update($request->itemFields());
 
         clearCache(['statBoards', 'recentBoards']);
 
@@ -204,21 +141,10 @@ class ItemApiController extends Controller
         $item = $this->findOwnItem($id);
 
         if ($item->expires_at->gt(now())) {
-            $item->update(['expires_at' => now()]);
-            $item->category->decrement('count_items');
-
+            $item->unpublish();
             $message = __('board::boards.item_success_unpublished');
         } else {
-            $period = (int) setting('boards_period');
-            // Давно снятое объявление всплывает наверх, свежее сохраняет позицию
-            $expired = $item->updated_at->addDays($period)->lte(now());
-
-            $item->update([
-                'expires_at' => now()->addDays($period),
-                'updated_at' => $expired ? now() : $item->updated_at,
-            ]);
-            $item->category->increment('count_items');
-
+            $item->publish();
             $message = __('board::boards.item_success_published');
         }
 
@@ -235,11 +161,7 @@ class ItemApiController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $item = $this->findOwnItem($id);
-        $category = $item->category;
-
-        $item->delete();
-        $category->decrement('count_items');
+        $this->findOwnItem($id)->delete();
 
         clearCache(['statBoards', 'recentBoards']);
 
@@ -262,31 +184,5 @@ class ItemApiController extends Controller
         }
 
         return $item;
-    }
-
-    /**
-     * Находит открытую категорию объявлений
-     */
-    private function findOpenCategory(int $id): Board
-    {
-        $board = Board::query()->find($id);
-
-        if (! $board) {
-            abort(422, __('board::boards.category_not_exist'));
-        }
-
-        if ($board->closed) {
-            abort(422, __('board::boards.category_closed'));
-        }
-
-        return $board;
-    }
-
-    /**
-     * Оставляет в телефоне только цифры и плюс
-     */
-    private function normalizePhone(?string $phone): string
-    {
-        return preg_replace('/[^\d+]/', '', (string) $phone);
     }
 }

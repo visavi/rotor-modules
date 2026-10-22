@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Forum\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Bookmark extends Model
 {
+    /** @use HasFactory<\Modules\Forum\Tests\Factories\BookmarkFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

@@ -116,13 +116,16 @@
                                         "type": "string"
                                     },
                                     "text": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "HTML из редактора, длина считается без тегов"
                                     },
                                     "price": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "minimum": 0
                                     },
                                     "phone": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "От 8 до 13 цифр, можно с плюсом; пробелы, скобки и дефисы отбрасываются"
                                     },
                                     "city": {
                                         "type": "string",
@@ -173,7 +176,7 @@
                         "description": "Неверный токен"
                     },
                     "422": {
-                        "description": "Раздел закрыт, категория недоступна, антифлуд или данные не прошли проверку"
+                        "description": "Раздел закрыт, данные не прошли проверку или антифлуд; недоступная категория — ошибка в поле category_id"
                     },
                     "429": {
                         "description": "Превышен общий лимит запросов"
@@ -299,13 +302,16 @@
                                         "type": "string"
                                     },
                                     "text": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "HTML из редактора, длина считается без тегов"
                                     },
                                     "price": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "minimum": 0
                                     },
                                     "phone": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "От 8 до 13 цифр, можно с плюсом; пробелы, скобки и дефисы отбрасываются"
                                     },
                                     "city": {
                                         "type": "string",
@@ -362,7 +368,7 @@
                         "description": "Объявление не найдено"
                     },
                     "422": {
-                        "description": "Категория недоступна или данные не прошли проверку"
+                        "description": "Данные не прошли проверку; недоступная категория — ошибка в поле category_id"
                     },
                     "429": {
                         "description": "Превышен общий лимит запросов"

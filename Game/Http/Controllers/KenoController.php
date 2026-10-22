@@ -6,14 +6,18 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class KenoController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Размер поля
      */
@@ -119,39 +123,30 @@ class KenoController extends Controller
     /**
      * Тираж
      */
-    public function play(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
+    public function play(Request $request): View|RedirectResponse|JsonResponse
     {
-        $bet = int($request->input('bet'));
         $picks = $this->picks($request);
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')])
-            ->true(count($picks) === self::PICKS, ['numbers' => __('game::games.keno_picks_invalid', [
-                'picks' => self::PICKS,
-            ])]);
+        $validator = Validator::make($request->all(), ['bet' => $this->betRules()], $this->betMessages());
 
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
+        $validator->after(static function ($validator) use ($picks) {
+            if (count($picks) !== self::PICKS) {
+                $validator->errors()->add('numbers', __('game::games.keno_picks_invalid', ['picks' => self::PICKS]));
             }
+        });
 
-            return redirect('games/keno')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $validator->validate();
+
+        $bet = $request->integer('bet');
 
         $before = $this->user->money;
         $drawn = $this->draw();
         $matched = array_values(array_intersect($picks, $drawn));
         $win = $this->payout($bet, count($matched));
 
-        $this->user->decrement('money', $bet);
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
+        }
 
         if ($win) {
             $this->user->increment('money', $win);

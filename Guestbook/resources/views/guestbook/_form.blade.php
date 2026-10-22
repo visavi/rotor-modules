@@ -2,16 +2,16 @@
 
 @php
     // Свёрнута, пока нечего показывать: после ошибки или с прикреплёнными файлами форма открыта
-    $compact = ! $errors->any() && ! old('msg') && (! getUser() || $files->isEmpty());
+    $compact = ! $errors->any() && ! old('text') && (! getUser() || $files->isEmpty());
 @endphp
 
 @if (getUser())
     <div class="section-form mb-3 shadow">
         <form action="{{ route('guestbook.create') }}" method="post"@if ($compact) data-compact @endif>
             @csrf
-            <div class="mb-3 compact-field{{ hasError('msg') }}">
-                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ \Modules\Guestbook\Models\Guestbook::$morphName }}" data-relate-id="0" placeholder="{{ __('main.write_message') }}" required>{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3 compact-field{{ hasError('text') }}">
+                <textarea class="form-control tiptap" maxlength="{{ setting('guestbook_text_max') }}" id="text" rows="5" name="text" data-relate-type="{{ \Modules\Guestbook\Models\Guestbook::$morphName }}" data-relate-id="0" placeholder="{{ __('main.write_message') }}" required>{{ old('text') }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 
@@ -29,9 +29,9 @@
         <form action="{{ route('guestbook.create') }}" method="post"@if ($compact) data-compact @endif>
             @csrf
             {{-- Имя под сообщением: при раскрытии над полем с курсором ничего не появляется --}}
-            <div class="mb-3 compact-field{{ hasError('msg') }}">
-                <textarea class="form-control" id="msg" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="msg" placeholder="{{ __('main.write_message') }}" required>{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3 compact-field{{ hasError('text') }}">
+                <textarea class="form-control" id="text" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="text" placeholder="{{ __('main.write_message') }}" required>{{ old('text') }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
             <div class="mb-3{{ hasError('guest_name') }}">

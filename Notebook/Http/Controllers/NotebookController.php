@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Modules\Notebook\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Notebook\Http\Requests\NotebookRequest;
 use Modules\Notebook\Models\Notebook;
 
 class NotebookController extends Controller
@@ -44,25 +43,19 @@ class NotebookController extends Controller
     /**
      * Редактирование
      */
-    public function edit(Request $request, Validator $validator): View|RedirectResponse
+    public function edit(): View
     {
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator->length($msg, 0, 10000, ['msg' => __('validator.text_long')], false);
-
-            if ($validator->isValid()) {
-                $this->note->fill(['text' => $msg])->save();
-
-                return redirect()->route('notebooks.index')
-                    ->with('success', __('main.record_saved_success'));
-            }
-
-            return redirect()->route('notebooks.edit')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         return view('notebook::notebooks/edit', ['note' => $this->note]);
+    }
+
+    /**
+     * Сохранение
+     */
+    public function update(NotebookRequest $request): RedirectResponse
+    {
+        $this->note->fill(['text' => $request->string('text')->value()])->save();
+
+        return redirect()->route('notebooks.index')
+            ->with('success', __('main.record_saved_success'));
     }
 }

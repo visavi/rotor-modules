@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -57,6 +58,9 @@ use Illuminate\Support\Str;
  */
 class Article extends Model
 {
+    /** @use HasFactory<\Modules\Blog\Tests\Factories\ArticleFactory> */
+    use HasFactory;
+
     use CommentableTrait;
     use PollableTrait;
     use FileableTrait;
@@ -166,6 +170,23 @@ class Article extends Model
         return $this->belongsToMany(Tag::class, 'article_tags', 'article_id', 'tag_id')
             ->withPivot('sort')
             ->orderBy('article_tags.sort');
+    }
+
+    /**
+     * Пересобирает теги статьи, порядок сохраняется
+     *
+     * @param list<string> $names
+     */
+    public function syncTags(array $names): void
+    {
+        $tagIds = [];
+
+        foreach (array_values(array_unique($names)) as $key => $name) {
+            $tag = Tag::query()->firstOrCreate(['name' => Str::lower($name)]);
+            $tagIds[$tag->id] = ['sort' => $key];
+        }
+
+        $this->tags()->sync($tagIds);
     }
 
     /**

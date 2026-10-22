@@ -7,6 +7,7 @@ namespace Modules\Notebook\Models;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\HtmlString;
@@ -22,6 +23,9 @@ use Illuminate\Support\HtmlString;
  */
 class Notebook extends Model
 {
+    /** @use HasFactory<\Modules\Notebook\Tests\Factories\NotebookFactory> */
+    use HasFactory;
+
     /**
      * The attributes that aren't mass assignable.
      */

@@ -13,7 +13,7 @@ Route::middleware(['web', 'check.admin:moder', 'admin.logger'])
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::delete('/delete', 'delete')->name('delete');
-        Route::post('/clear', 'clear')->name('clear');
+        Route::post('/clear', 'clear')->name('clear')->middleware('check.admin:boss');
     });
 
 /* Админ — настройки антимата */

@@ -38,13 +38,13 @@
             @csrf
             <div class="mb-3">
                 <label for="site" class="form-label">{{ __('advert::adverts.link') }}:</label>
-                <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="50" required>
+                <input class="form-control{{ hasError('site') }}" id="site" name="site" type="text" value="{{ old('site', $advert->site) }}" maxlength="100" required>
                 <div class="invalid-feedback">{{ textError('site') }}</div>
             </div>
 
             <div class="mb-3">
                 <label for="name" class="form-label">{{ __('advert::adverts.name') }}:</label>
-                <input class="form-control{{ hasError('site') }}" id="name" name="name" type="text" maxlength="35" value="{{ old('name', $advert->name) }}" required>
+                <input class="form-control{{ hasError('name') }}" id="name" name="name" type="text" maxlength="35" value="{{ old('name', $advert->name) }}" required>
                 <div class="invalid-feedback">{{ textError('name') }}</div>
             </div>
 

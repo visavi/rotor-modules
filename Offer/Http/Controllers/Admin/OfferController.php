@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Modules\Offer\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Admin\DeleteSelectedRequest;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Offer\Http\Requests\OfferReplyRequest;
+use Modules\Offer\Http\Requests\OfferRequest;
 use Modules\Offer\Models\Offer;
 
 class OfferController extends Controller
@@ -43,11 +44,7 @@ class OfferController extends Controller
      */
     public function view(int $id): View
     {
-        $offer = Offer::query()->where('offers.id', $id)->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+        $offer = $this->findOffer($id);
 
         return view('offer::admin/offers/view', compact('offer'));
     }
@@ -55,98 +52,71 @@ class OfferController extends Controller
     /**
      * Редактирование записи
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        $offer = Offer::query()->where('id', $id)->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $type = $request->input('type');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('offer_title_min'), setting('offer_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('offer_text_min'), setting('offer_text_max'), ['text' => __('validator.text')])
-                ->in($type, Offer::TYPES, ['type' => __('offer::offers.type_invalid')]);
-
-            if ($validator->isValid()) {
-                $offer->update([
-                    'type'       => $type,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'closed'     => $closed,
-                    'updated_at' => now(),
-                ]);
-
-                return redirect()->route('admin.offers.view', ['id' => $offer->id])
-                    ->with('success', __('main.record_changed_success'));
-            }
-
-            return redirect()->route('admin.offers.edit', ['id' => $offer->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $offer = $this->findOffer($id);
 
         return view('offer::admin/offers/edit', compact('offer'));
     }
 
     /**
+     * Сохранение изменений
+     */
+    public function update(int $id, OfferRequest $request): RedirectResponse
+    {
+        $offer = $this->findOffer($id);
+
+        $offer->update([
+            'type'       => $request->input('type'),
+            'title'      => $request->string('title')->value(),
+            'text'       => $request->string('text')->value(),
+            'closed'     => $request->boolean('closed'),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.offers.view', ['id' => $offer->id])
+            ->with('success', __('main.record_changed_success'));
+    }
+
+    /**
      * Ответ на предложение
      */
-    public function reply(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function reply(int $id): View
     {
-        $offer = Offer::query()->where('id', $id)->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
-
-        if ($request->isMethod('post')) {
-            $reply = $request->input('reply');
-            $status = $request->input('status');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($reply, setting('offer_reply_min'), setting('offer_reply_max'), ['reply' => __('validator.text')])
-                ->in($status, Offer::STATUSES, ['status' => __('offer::offers.status_invalid')]);
-
-            if ($validator->isValid()) {
-                $offer->update([
-                    'reply'         => $reply,
-                    'reply_user_id' => getUser('id'),
-                    'status'        => $status,
-                    'closed'        => $closed,
-                    'updated_at'    => now(),
-                ]);
-
-                $text = textNotice('offer_reply', [
-                    'url'    => route('offers.view', ['id' => $offer->id], false),
-                    'title'  => $offer->title,
-                    'text'   => $offer->reply,
-                    'status' => strip_tags($offer->getStatus()->toHtml()),
-                ]);
-
-                if ($offer->user->exists) {
-                    $offer->user->sendMessage(null, $text);
-                }
-
-                return redirect()->route('admin.offers.view', ['id' => $offer->id])
-                    ->with('success', __('offer::offers.answer_success_added'));
-            }
-
-            return redirect()->route('admin.offers.reply', ['id' => $offer->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $offer = $this->findOffer($id);
         $statuses = Offer::STATUSES;
 
         return view('offer::admin/offers/reply', compact('offer', 'statuses'));
+    }
+
+    /**
+     * Сохранение ответа
+     */
+    public function storeReply(int $id, OfferReplyRequest $request): RedirectResponse
+    {
+        $offer = $this->findOffer($id);
+
+        $offer->update([
+            'reply'         => $request->string('reply')->value(),
+            'reply_user_id' => getUser('id'),
+            'status'        => $request->input('status'),
+            'closed'        => $request->boolean('closed'),
+            'updated_at'    => now(),
+        ]);
+
+        $text = textNotice('offer_reply', [
+            'url'    => route('offers.view', ['id' => $offer->id], false),
+            'title'  => $offer->title,
+            'text'   => $offer->reply,
+            'status' => strip_tags($offer->getStatus()->toHtml()),
+        ]);
+
+        if ($offer->user->exists) {
+            $offer->user->sendMessage(null, $text);
+        }
+
+        return redirect()->route('admin.offers.view', ['id' => $offer->id])
+            ->with('success', __('offer::offers.answer_success_added'));
     }
 
     /**
@@ -154,10 +124,6 @@ class OfferController extends Controller
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run('offers');
 
         return redirect()
@@ -168,26 +134,28 @@ class OfferController extends Controller
     /**
      * Удаление записей
      */
-    public function delete(Request $request, Validator $validator): RedirectResponse
+    public function delete(DeleteSelectedRequest $request): RedirectResponse
     {
         $page = int($request->input('page', 1));
-        $del = intar($request->input('del'));
         $type = $request->input('type') === Offer::OFFER ? Offer::OFFER : Offer::ISSUE;
 
-        $validator->true($del, __('validator.deletion'));
+        Offer::query()->whereIn('id', $request->ids())->get()->each->delete();
 
-        $redirect = redirect()->route('admin.offers.index', ['type' => $type, 'page' => $page]);
+        return redirect()->route('admin.offers.index', ['type' => $type, 'page' => $page])
+            ->with('success', __('main.records_deleted_success'));
+    }
 
-        if (! $validator->isValid()) {
-            return $redirect->withErrors($validator->getErrors());
+    /**
+     * Запись по id
+     */
+    private function findOffer(int $id): Offer
+    {
+        $offer = Offer::query()->find($id);
+
+        if (! $offer) {
+            abort(404, __('main.record_not_found'));
         }
 
-        $offers = Offer::query()->whereIn('id', $del)->get();
-
-        $offers->each(static function (Offer $offer) {
-            $offer->delete();
-        });
-
-        return $redirect->with('success', __('main.records_deleted_success'));
+        return $offer;
     }
 }

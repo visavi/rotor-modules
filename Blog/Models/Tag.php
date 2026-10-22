@@ -6,6 +6,7 @@ namespace Modules\Blog\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Cache;
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\Cache;
  */
 class Tag extends Model
 {
+    /** @use HasFactory<\Modules\Blog\Tests\Factories\TagFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

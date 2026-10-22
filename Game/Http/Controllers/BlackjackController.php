@@ -6,15 +6,18 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class BlackjackController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Банкир добирает карты, пока не наберёт столько очков
      */
@@ -48,30 +51,24 @@ class BlackjackController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request, Validator $validator): RedirectResponse
+    public function bet(Request $request): RedirectResponse|JsonResponse
     {
-        $bet = int($request->input('bet'));
-
         if ($request->session()->has('blackjack.bet')) {
             return redirect('games/blackjack/game');
         }
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')]);
+        $request->validate(['bet' => $this->betRules()], $this->betMessages());
 
-        if ($validator->isValid()) {
-            $request->session()->put('blackjack.bet', $bet);
+        $bet = $request->integer('bet');
 
-            $this->user->decrement('money', $bet);
-
-            return redirect('games/blackjack/game')
-                ->with('success', __('game::games.bj_bet_made'));
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
-        return redirect('games/blackjack')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+        $request->session()->put('blackjack.bet', $bet);
+
+        return redirect('games/blackjack/game')
+            ->with('success', __('game::games.bj_bet_made'));
     }
 
     /**

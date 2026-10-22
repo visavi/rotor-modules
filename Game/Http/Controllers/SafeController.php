@@ -6,10 +6,10 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class SafeController extends Controller
@@ -60,33 +60,21 @@ class SafeController extends Controller
     /**
      * Попытка взлома
      */
-    public function go(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
+    public function go(Request $request): View|RedirectResponse|JsonResponse
     {
         $codes = $this->codes($request);
         $fresh = $request->session()->missing('safe.cipher');
 
-        $validator->true(count($codes) === self::LENGTH, ['code' => __('game::games.safe_code_invalid')]);
-
-        if ($fresh) {
-            $validator->gte($this->user->money, self::PRICE, ['code' => __('game::games.not_enough_money')]);
-        }
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/safe')
-                ->withInput()
-                ->withErrors($validator->getErrors());
+        if (count($codes) !== self::LENGTH) {
+            throw ValidationException::withMessages(['code' => __('game::games.safe_code_invalid')]);
         }
 
         $before = $this->user->money;
+
+        // Новая партия оплачивается до начала: без денег она не должна начаться
+        if ($fresh && ! $this->user->chargeMoney(self::PRICE)) {
+            throw ValidationException::withMessages(['code' => __('game::games.not_enough_money')]);
+        }
 
         if ($fresh) {
             $request->session()->put('safe', [
@@ -94,8 +82,6 @@ class SafeController extends Controller
                 'try'     => self::TRIES,
                 'history' => [],
             ]);
-
-            $this->user->decrement('money', self::PRICE);
         }
 
         $safe = $request->session()->get('safe');

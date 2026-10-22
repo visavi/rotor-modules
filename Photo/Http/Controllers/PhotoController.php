@@ -8,11 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
-use App\Support\Validator;
+use App\Services\FileService;
 use App\Traits\HandlesComments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Photo\Http\Requests\PhotoRequest;
+use Modules\Photo\Http\Requests\PhotoStoreRequest;
 use Modules\Photo\Models\Photo;
 
 class PhotoController extends Controller
@@ -67,57 +69,12 @@ class PhotoController extends Controller
     /**
      * Форма загрузки фото
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(): View
     {
-        if (! isAdmin() && ! setting('photos_create')) {
-            abort(200, __('photo::photos.photos_closed'));
-        }
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('photo_title_min'), setting('photo_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('photo_text_min'), setting('photo_text_max'), ['text' => __('validator.text_long')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])]);
-
-            $existFiles = File::query()
-                ->pending(Photo::$morphName, $user->id)
-                ->exists();
-            $validator->true($existFiles, ['files' => __('validator.image_upload_failed')]);
-
-            if ($validator->isValid()) {
-                $photo = Photo::query()->create([
-                    'user_id' => $user->id,
-                    'title'   => $title,
-                    'text'    => $text,
-                    'closed'  => $closed,
-                ]);
-
-                File::query()
-                    ->pending(Photo::$morphName, $user->id)
-                    ->update(['relate_id' => $photo->id]);
-
-                clearCache(['statPhotos', 'recentPhotos']);
-                $flood->saveState();
-
-                return redirect()->route('photos.view', ['id' => $photo->id])
-                    ->with('success', __('photo::photos.photo_success_uploaded'));
-            }
-
-            return redirect()->route('photos.create')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $this->checkCreationOpen();
 
         $files = File::query()
-            ->pending(Photo::$morphName, $user->id)
+            ->pending(Photo::$morphName, getUser('id'))
             ->ordered()
             ->get();
 
@@ -125,75 +82,58 @@ class PhotoController extends Controller
     }
 
     /**
+     * Загрузка фото
+     */
+    public function store(PhotoStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
+    {
+        $this->checkCreationOpen();
+
+        $photo = Photo::query()->create($request->photoFields() + [
+            'user_id' => getUser('id'),
+        ]);
+
+        $files->attach($photo, $request->file('files', []));
+
+        clearCache(['statPhotos', 'recentPhotos']);
+        $flood->saveState();
+
+        return redirect()->route('photos.view', ['id' => $photo->id])
+            ->with('success', __('photo::photos.photo_success_uploaded'));
+    }
+
+    /**
      * Редактирование фото
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id, Request $request): View
     {
         $page = int($request->input('page', 1));
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $photo = Photo::query()->where('user_id', $user->id)->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_author'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('photo_title_min'), setting('photo_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('photo_text_min'), setting('photo_text_max'), ['text' => __('validator.text_long')]);
-
-            if ($validator->isValid()) {
-                $photo->update([
-                    'title'  => $title,
-                    'text'   => $text,
-                    'closed' => $closed,
-                ]);
-
-                return redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page])
-                    ->with('success', __('photo::photos.photo_success_edited'));
-            }
-
-            return redirect()->route('photos.edit', ['id' => $photo->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $photo = $this->ownPhoto($id);
         $checked = $photo->closed ? ' checked' : '';
 
         return view('photo::photos/edit', compact('photo', 'checked', 'page'));
     }
 
     /**
+     * Сохранение фото
+     */
+    public function update(int $id, PhotoRequest $request): RedirectResponse
+    {
+        $this->ownPhoto($id)->update($request->photoFields());
+
+        return redirect()->route('photos.user-albums', ['user' => getUser('login'), 'page' => int($request->input('page', 1))])
+            ->with('success', __('photo::photos.photo_success_edited'));
+    }
+
+    /**
      * Удаление фотографий
      */
-    public function delete(int $id, Request $request, Validator $validator): RedirectResponse
+    public function delete(int $id, Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $photo = $this->ownPhoto($id);
+        $redirect = redirect()->route('photos.user-albums', ['user' => getUser('login'), 'page' => int($request->input('page', 1))]);
 
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $photo = Photo::query()->where('user_id', $user->id)->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_author'));
-        }
-
-        $validator->empty($photo->count_comments, __('photo::photos.photo_has_comments'));
-
-        $redirect = redirect()->route('photos.user-albums', ['user' => $user->login, 'page' => $page]);
-
-        if (! $validator->isValid()) {
-            return $redirect->withErrors($validator->getErrors());
+        if ($photo->count_comments) {
+            return $redirect->withErrors(__('photo::photos.photo_has_comments'));
         }
 
         $photo->delete();
@@ -282,5 +222,29 @@ class PhotoController extends Controller
             ->appends(['user' => $user->login]);
 
         return view('photo::photos/user_comments', compact('comments', 'user'));
+    }
+
+    /**
+     * Своё фото по id
+     */
+    private function ownPhoto(int $id): Photo
+    {
+        $photo = Photo::query()->where('user_id', getUser('id'))->find($id);
+
+        if (! $photo) {
+            abort(404, __('photo::photos.photo_not_author'));
+        }
+
+        return $photo;
+    }
+
+    /**
+     * Загрузка фото может быть закрыта настройкой — кроме администрации
+     */
+    private function checkCreationOpen(): void
+    {
+        if (! isAdmin() && ! setting('photos_create')) {
+            abort(200, __('photo::photos.photos_closed'));
+        }
     }
 }

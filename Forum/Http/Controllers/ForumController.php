@@ -8,18 +8,17 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
 use App\Support\CategoryTree;
-use App\Support\Validator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Modules\Forum\Http\Requests\TopicRequest;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
-use Modules\Forum\Models\Vote;
-use Modules\Forum\Models\VoteAnswer;
+use Modules\Forum\Services\TopicService;
 
 class ForumController extends Controller
 {
@@ -97,107 +96,43 @@ class ForumController extends Controller
     /**
      * Создание новой темы
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(Request $request): View
     {
-        $fid = int($request->input('fid'));
-
         $forums = (new Forum())->getChildren();
 
         if ($forums->isEmpty()) {
             abort(200, __('forum::forums.empty_forums'));
         }
 
-        if (! $user = getUser()) {
-            abort(403);
-        }
+        $fid = int($request->input('fid'));
 
         $files = File::query()
-            ->pending(Post::$morphName, $user->id)
-            ->ordered();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $msg = $request->input('msg');
-            $vote = empty($request->input('vote')) ? 0 : 1;
-            $question = $request->input('question');
-            $answers = (array) $request->input('answers');
-
-            $forum = Forum::query()->find($fid);
-
-            $validator
-                ->notEmpty($forum, ['fid' => __('forum::forums.forum_not_exist')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-                ->length($title, setting('forum_title_min'), setting('forum_title_max'), ['title' => __('validator.text')])
-                ->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
-
-            if ($forum) {
-                $validator->empty($forum->closed, ['fid' => __('forum::forums.forum_closed')]);
-            }
-
-            if ($vote) {
-                $validator->length($question, setting('vote_title_min'), setting('vote_title_max'), ['question' => __('validator.text')]);
-                $answers = array_unique(array_diff($answers, ['']));
-
-                foreach ($answers as $answer) {
-                    $validator->length($answer, setting('vote_answer_min'), setting('vote_answer_max'), ['answers' => __('forum::forums.vote_answer_wrong_length')]);
-                }
-
-                $validator->between(count($answers), 2, 10, ['answers' => __('forum::forums.vote_answer_not_enough')]);
-            }
-
-            /* TODO: Сделать проверку поиска похожей темы */
-
-            if ($validator->isValid()) {
-                $topic = Topic::query()->create([
-                    'forum_id'   => $forum->id,
-                    'title'      => $title,
-                    'user_id'    => getUser('id'),
-                    'updated_at' => now(),
-                ]);
-
-                $post = Post::query()->create([
-                    'topic_id' => $topic->id,
-                    'user_id'  => getUser('id'),
-                    'text'     => $msg,
-                    'ip'       => getIp(),
-                    'brow'     => getBrowser(),
-                ]);
-
-                $files->update(['relate_id' => $post->id]);
-
-                // Создание голосования
-                if ($vote) {
-                    $vote = Vote::query()->create([
-                        'title'    => $question,
-                        'topic_id' => $topic->id,
-                    ]);
-
-                    $prepareAnswers = [];
-                    foreach ($answers as $answer) {
-                        $prepareAnswers[] = [
-                            'vote_id' => $vote->id,
-                            'answer'  => $answer,
-                        ];
-                    }
-
-                    VoteAnswer::query()->insert($prepareAnswers);
-                }
-
-                clearCache(['statForums', 'recentTopics']);
-                $flood->saveState();
-
-                return redirect()->route('topics.topic', ['id' => $topic->id])
-                    ->with('success', __('forum::forums.topic_success_created'));
-            }
-
-            return redirect()->route('forums.create', ['fid' => $fid])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        $files = $files->get();
+            ->pending(Post::$morphName, getUser('id'))
+            ->ordered()
+            ->get();
 
         return view('forum::forums/topic_create', compact('forums', 'fid', 'files'));
+    }
+
+    /**
+     * Сохранение темы
+     */
+    public function store(TopicRequest $request, Flood $flood, TopicService $service): RedirectResponse
+    {
+        $topic = $service->create(
+            getUser(),
+            $request->forum(),
+            $request->string('title')->value(),
+            $request->string('text')->value(),
+            $request->input('question'),
+            $request->answers(),
+            $request->file('files', []),
+        );
+
+        $flood->saveState();
+
+        return redirect()->route('topics.topic', ['id' => $topic->id])
+            ->with('success', __('forum::forums.topic_success_created'));
     }
 
     /**

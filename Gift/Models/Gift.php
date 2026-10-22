@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Gift\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -18,6 +19,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Gift extends Model
 {
+    /** @use HasFactory<\Modules\Gift\Tests\Factories\GiftFactory> */
+    use HasFactory;
+
     /**
      * The name of the "updated at" column.
      */

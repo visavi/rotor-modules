@@ -9,10 +9,9 @@ use App\Models\Flood;
 use App\Models\User;
 use App\Services\MailService;
 use App\Support\HtmlSanitizer;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Feedback\Http\Requests\FeedbackRequest;
 use Modules\Feedback\Support\Feedback;
 
 class FeedbackController extends Controller
@@ -33,31 +32,12 @@ class FeedbackController extends Controller
     /**
      * Отправка обращения: в личку владельцу или письмом, как выбрано в настройках
      */
-    public function send(Request $request, Validator $validator, Flood $flood, MailService $mail): RedirectResponse
+    public function send(FeedbackRequest $request, Flood $flood, MailService $mail): RedirectResponse
     {
         $user = getUser();
         $message = $request->string('message')->value();
         $name = $user ? $user->login : $request->string('name')->trim()->value();
         $email = Feedback::asksEmail($user) ? $request->string('email')->trim()->value() : (string) $user?->email;
-
-        $validator
-            ->true(captchaVerify(), ['protect' => __('validator.captcha')])
-            ->false($flood->isFlood(), ['message' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-            ->length($message, 5, 50000, ['message' => __('validator.text')]);
-
-        if (! $user) {
-            $validator->length($name, 3, 100, ['name' => __('feedback::feedback.name_short_or_long')]);
-        }
-
-        if (Feedback::asksEmail($user)) {
-            $validator->email($email, ['email' => __('validator.email')]);
-        }
-
-        if (! $validator->isValid()) {
-            return redirect()->route('feedback.index')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         if (Feedback::byEmail()) {
             $this->sendEmail($mail, $message, $name, $email);

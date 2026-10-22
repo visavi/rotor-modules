@@ -126,15 +126,14 @@ class BanditController extends Controller
      */
     public function spin(Request $request): View|RedirectResponse|JsonResponse
     {
-        if ($this->user->money < self::BET) {
+        $before = $this->user->money;
+
+        if (! $this->user->chargeMoney(self::BET)) {
             abort(200, __('game::games.cannot_play'));
         }
 
-        $before = $this->user->money;
         $cells = $this->roll();
         [$results, $sum] = $this->score($cells);
-
-        $this->user->decrement('money', self::BET);
 
         if ($sum > 0) {
             $this->user->increment('money', $sum);

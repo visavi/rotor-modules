@@ -16,13 +16,14 @@
     <div class="section-form mb-3 shadow">
         <form method="post">
             @csrf
-            <label for="inputRating" class="form-label">{{ __('main.rating') }}</label>
-            <select class="form-select" id="inputRating" name="vote">
-                <?php $selected = ($vote === 'plus') ? ' selected' : ''; ?>
-                <option value="plus"{{ $selected }}>{{ __('main.plus') }}</option>
-                <?php $selected = ($vote === 'minus') ? ' selected' : ''; ?>
-                <option value="minus"{{ $selected }}>{{ __('main.minus') }}</option>
-            </select>
+            <div class="mb-3{{ hasError('vote') }}">
+                <label for="inputRating" class="form-label">{{ __('main.rating') }}</label>
+                <select class="form-select" id="inputRating" name="vote">
+                    <option value="plus" @selected(old('vote', $vote) === 'plus')>{{ __('main.plus') }}</option>
+                    <option value="minus" @selected(old('vote', $vote) === 'minus')>{{ __('main.minus') }}</option>
+                </select>
+                <div class="invalid-feedback">{{ textError('vote') }}</div>
+            </div>
 
             <div class="mb-3{{ hasError('text') }}">
                 <label for="text" class="form-label">{{ __('main.comment') }}:</label>

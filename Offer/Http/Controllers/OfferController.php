@@ -7,11 +7,13 @@ namespace Modules\Offer\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
-use App\Support\Validator;
+use App\Services\FileService;
 use App\Traits\HandlesComments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Offer\Http\Requests\OfferRequest;
+use Modules\Offer\Http\Requests\OfferStoreRequest;
 use Modules\Offer\Models\Offer;
 
 class OfferController extends Controller
@@ -68,53 +70,12 @@ class OfferController extends Controller
     /**
      * Создание записи
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(Request $request): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
         $type = $request->input('type');
 
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-
-            $validator
-                ->length($title, setting('offer_title_min'), setting('offer_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('offer_text_min'), setting('offer_text_max'), ['text' => __('validator.text')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-                ->in($type, Offer::TYPES, ['type' => __('offer::offers.type_invalid')])
-                ->gte(getUser('point'), setting('addofferspoint'), __('offer::offers.condition_add', ['point' => plural(setting('addofferspoint'), setting('scorename'))]));
-
-            if ($validator->isValid()) {
-                $offer = Offer::query()->create([
-                    'type'    => $type,
-                    'title'   => $title,
-                    'text'    => $text,
-                    'user_id' => $user->id,
-                    'rating'  => 1,
-                    'status'  => 'wait',
-                ]);
-
-                // Файлы загружаются до создания записи, привязываем их к ней
-                File::query()
-                    ->pending(Offer::$morphName, $user->id)
-                    ->update(['relate_id' => $offer->id]);
-
-                $flood->saveState();
-
-                return redirect()->route('offers.view', ['id' => $offer->id])
-                    ->with('success', __('main.record_added_success'));
-            }
-
-            return redirect()->route('offers.create', ['type' => $type])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         $files = File::query()
-            ->pending(Offer::$morphName, $user->id)
+            ->pending(Offer::$morphName, getUser('id'))
             ->ordered()
             ->get();
 
@@ -122,54 +83,73 @@ class OfferController extends Controller
     }
 
     /**
+     * Сохранение записи
+     */
+    public function store(OfferStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
+    {
+        $offer = Offer::query()->create([
+            'type'    => $request->input('type'),
+            'title'   => $request->string('title')->value(),
+            'text'    => $request->string('text')->value(),
+            'user_id' => getUser('id'),
+            'rating'  => 1,
+            'status'  => Offer::WAIT,
+        ]);
+
+        $files->attach($offer, $request->file('files', []));
+
+        $flood->saveState();
+
+        return redirect()->route('offers.view', ['id' => $offer->id])
+            ->with('success', __('main.record_added_success'));
+    }
+
+    /**
      * Редактирование записи
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $offer = $this->ownOffer($id);
 
+        return view('offer::offers/edit', compact('offer'));
+    }
+
+    /**
+     * Сохранение изменений
+     */
+    public function update(int $id, OfferRequest $request): RedirectResponse
+    {
+        $offer = $this->ownOffer($id);
+
+        $offer->update([
+            'type'       => $request->input('type'),
+            'title'      => $request->string('title')->value(),
+            'text'       => $request->string('text')->value(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('offers.view', ['id' => $offer->id])
+            ->with('success', __('main.record_changed_success'));
+    }
+
+    /**
+     * Своя запись, ещё не решённая
+     */
+    private function ownOffer(int $id): Offer
+    {
         $offer = Offer::query()
             ->where('id', $id)
-            ->where('user_id', $user->id)
+            ->where('user_id', getUser('id'))
             ->first();
 
         if (! $offer) {
             abort(404, __('main.record_not_found'));
         }
 
-        if (! in_array($offer->status, ['wait', 'process'])) {
+        if (! in_array($offer->status, [Offer::WAIT, Offer::PROCESS], true)) {
             abort(200, __('offer::offers.already_resolved'));
         }
 
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $type = $request->input('type');
-
-            $validator
-                ->length($title, setting('offer_title_min'), setting('offer_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('offer_text_min'), setting('offer_text_max'), ['text' => __('validator.text')])
-                ->in($type, Offer::TYPES, ['type' => __('offer::offers.type_invalid')]);
-
-            if ($validator->isValid()) {
-                $offer->update([
-                    'type'       => $type,
-                    'title'      => $title,
-                    'text'       => $text,
-                    'updated_at' => now(),
-                ]);
-
-                return redirect()->route('offers.view', ['id' => $offer->id])
-                    ->with('success', __('main.record_changed_success'));
-            }
-
-            return redirect()->route('offers.edit', ['id' => $offer->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return view('offer::offers/edit', compact('offer'));
+        return $offer;
     }
 }

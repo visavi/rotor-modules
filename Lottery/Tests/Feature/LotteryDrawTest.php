@@ -163,7 +163,7 @@ class LotteryDrawTest extends ModuleTestCase
      */
     private function yesterday(int $amount): Lottery
     {
-        return Lottery::query()->create([
+        return Lottery::factory()->create([
             'day'    => now()->subDay()->format('Y-m-d'),
             'amount' => $amount,
             'number' => null,

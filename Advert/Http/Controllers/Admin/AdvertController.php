@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Modules\Advert\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Support\Validator;
+use App\Http\Requests\Admin\DeleteSelectedRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Advert\Http\Requests\AdvertRequest;
 use Modules\Advert\Models\Advert;
 
 class AdvertController extends AdminController
@@ -31,69 +32,53 @@ class AdvertController extends AdminController
     /**
      * Редактирование ссылки
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id, Request $request): View
     {
         $page = int($request->input('page', 1));
+        $link = $this->findLink($id);
+
+        return view('advert::admin/adverts/edit', compact('link', 'page'));
+    }
+
+    /**
+     * Сохранение ссылки
+     */
+    public function update(int $id, AdvertRequest $request): RedirectResponse
+    {
+        $link = $this->findLink($id);
+
+        $link->update($request->advertFields());
+
+        clearCache('adverts');
+
+        return redirect('admin/adverts?page=' . int($request->input('page', 1)))
+            ->with('success', __('main.record_changed_success'));
+    }
+
+    /**
+     * Удаление записей
+     */
+    public function delete(DeleteSelectedRequest $request): RedirectResponse
+    {
+        Advert::query()->whereIn('id', $request->ids())->delete();
+
+        clearCache('adverts');
+
+        return redirect('admin/adverts?page=' . int($request->input('page', 1)))
+            ->with('success', __('main.records_deleted_success'));
+    }
+
+    /**
+     * Ссылка по id
+     */
+    private function findLink(int $id): Advert
+    {
         $link = Advert::query()->find($id);
 
         if (! $link) {
             abort(404, __('main.record_not_found'));
         }
 
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $name = $request->input('name');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-
-            $validator
-                ->regex($site, '|^https?://([а-яa-z0-9_\-\.])+(\.([а-яa-z0-9\/\-?_=#])+)+$|iu', ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->length($name, 5, 35, ['name' => __('validator.text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false);
-
-            if ($validator->isValid()) {
-                $link->update([
-                    'site'  => $site,
-                    'name'  => $name,
-                    'color' => $color,
-                    'bold'  => $bold,
-                ]);
-
-                clearCache('adverts');
-
-                return redirect('admin/adverts?page=' . $page)
-                    ->with('success', __('main.record_changed_success'));
-            }
-
-            return redirect('admin/adverts/edit/' . $link->id . '?page=' . $page)
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return view('advert::admin/adverts/edit', compact('link', 'page'));
-    }
-
-    /**
-     * Удаление записей
-     */
-    public function delete(Request $request, Validator $validator): RedirectResponse
-    {
-        $page = int($request->input('page', 1));
-        $del = intar($request->input('del'));
-
-        $validator->true($del, __('validator.deletion'));
-
-        if (! $validator->isValid()) {
-            return redirect('admin/adverts?page=' . $page)
-                ->withErrors($validator->getErrors());
-        }
-
-        Advert::query()->whereIn('id', $del)->delete();
-
-        clearCache('adverts');
-
-        return redirect('admin/adverts?page=' . $page)
-            ->with('success', __('main.records_deleted_success'));
+        return $link;
     }
 }

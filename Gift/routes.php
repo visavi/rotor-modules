@@ -11,14 +11,16 @@ Route::middleware('web')
     ->prefix('gifts')
     ->group(function () {
         Route::get('/', [IndexController::class, 'index']);
-        Route::match(['get', 'post'], '/send/{id}', [IndexController::class, 'send']);
+        Route::get('/send/{id}', [IndexController::class, 'send'])->middleware('check.user');
+        Route::post('/send/{id}', [IndexController::class, 'store'])->middleware('check.user');
         Route::get('/{login}', [IndexController::class, 'gifts']);
     });
 
 Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
-        Route::match(['get', 'post'], '/gifts', [PanelController::class, 'index']);
+        Route::get('/gifts', [PanelController::class, 'index']);
+        Route::post('/gifts', [PanelController::class, 'update']);
         Route::delete('/gifts/{id}', [PanelController::class, 'delete']);
 
         Route::controller(GiftSettingController::class)

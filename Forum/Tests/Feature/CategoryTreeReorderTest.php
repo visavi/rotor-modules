@@ -14,8 +14,8 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderSetsParentAndSort(): void
     {
-        $first = Forum::query()->create(['title' => 'First', 'sort' => 1]);
-        $second = Forum::query()->create(['title' => 'Second', 'sort' => 2]);
+        $first = Forum::factory()->create(['title' => 'First', 'sort' => 1]);
+        $second = Forum::factory()->create(['title' => 'Second', 'sort' => 2]);
 
         CategoryTree::reorder(Forum::class, "{$second->id}:0,{$first->id}:{$second->id}");
 
@@ -27,9 +27,9 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderMovesBranchWithChildren(): void
     {
-        $root = Forum::query()->create(['title' => 'Root', 'sort' => 1]);
-        $other = Forum::query()->create(['title' => 'Other', 'sort' => 2]);
-        $child = Forum::query()->create(['title' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
+        $root = Forum::factory()->create(['title' => 'Root', 'sort' => 1]);
+        $other = Forum::factory()->create(['title' => 'Other', 'sort' => 2]);
+        $child = Forum::factory()->create(['title' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
 
         CategoryTree::reorder(Forum::class, "{$other->id}:0,{$root->id}:{$other->id},{$child->id}:{$root->id}");
 
@@ -39,8 +39,8 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderIgnoresCycle(): void
     {
-        $first = Forum::query()->create(['title' => 'First', 'sort' => 1]);
-        $second = Forum::query()->create(['title' => 'Second', 'parent_id' => $first->id, 'sort' => 2]);
+        $first = Forum::factory()->create(['title' => 'First', 'sort' => 1]);
+        $second = Forum::factory()->create(['title' => 'Second', 'parent_id' => $first->id, 'sort' => 2]);
 
         CategoryTree::reorder(Forum::class, "{$first->id}:{$second->id},{$second->id}:{$first->id}");
 
@@ -50,8 +50,8 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderIgnoresCycleThroughDatabaseState(): void
     {
-        $parent = Forum::query()->create(['title' => 'Parent', 'sort' => 1]);
-        $child = Forum::query()->create(['title' => 'Child', 'parent_id' => $parent->id, 'sort' => 2]);
+        $parent = Forum::factory()->create(['title' => 'Parent', 'sort' => 1]);
+        $child = Forum::factory()->create(['title' => 'Child', 'parent_id' => $parent->id, 'sort' => 2]);
 
         // Пара переворачивает связь, но вторую половину кольца строка не присылает:
         // цикл виден только вместе с текущим состоянием базы
@@ -65,7 +65,7 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderIgnoresUnknownIdAndParent(): void
     {
-        $forum = Forum::query()->create(['title' => 'Forum', 'sort' => 5]);
+        $forum = Forum::factory()->create(['title' => 'Forum', 'sort' => 5]);
 
         CategoryTree::reorder(Forum::class, "999999:0,{$forum->id}:888888,мусор");
 
@@ -75,8 +75,8 @@ class CategoryTreeReorderTest extends ModuleTestCase
 
     public function testReorderKeepsRecordsOutsideOrder(): void
     {
-        $listed = Forum::query()->create(['title' => 'Listed', 'sort' => 1]);
-        $untouched = Forum::query()->create(['title' => 'Untouched', 'parent_id' => $listed->id, 'sort' => 7]);
+        $listed = Forum::factory()->create(['title' => 'Listed', 'sort' => 1]);
+        $untouched = Forum::factory()->create(['title' => 'Untouched', 'parent_id' => $listed->id, 'sort' => 7]);
 
         CategoryTree::reorder(Forum::class, "{$listed->id}:0");
 

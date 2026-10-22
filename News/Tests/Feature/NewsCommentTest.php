@@ -31,7 +31,7 @@ class NewsCommentTest extends ModuleTestCase
 
     private function makeNews(array $attributes = []): News
     {
-        return News::query()->create(array_merge([
+        return News::factory()->create(array_merge([
             'title'      => 'Test news',
             'text'       => 'Test news text',
             'user_id'    => $this->user->id,
@@ -41,7 +41,7 @@ class NewsCommentTest extends ModuleTestCase
 
     private function makeComment(News $news): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => News::$morphName,
             'relate_id'   => $news->id,
             'text'        => 'Исходный комментарий',
@@ -140,10 +140,8 @@ class NewsCommentTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->patchJson('/comments/' . $comment->id, ['msg' => '<p></p>'])
-            ->assertJson([
-                'success' => false,
-                'message' => __('validator.length_min', ['length' => 5]),
-            ]);
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['msg' => __('validator.length_min', ['length' => 5])]);
 
         $this->assertSame('Исходный комментарий', (string) $comment->fresh()->text);
     }

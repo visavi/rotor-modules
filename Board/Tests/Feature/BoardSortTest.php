@@ -15,7 +15,7 @@ class BoardSortTest extends ModuleTestCase
     public function testAdminBelowBossCannotSort(): void
     {
         $admin = User::factory()->admin()->create();
-        $board = Board::query()->create(['name' => 'Board', 'sort' => 1]);
+        $board = Board::factory()->create(['name' => 'Board', 'sort' => 1]);
 
         $this->actingAs($admin)
             ->post(route('admin.boards.sort'), ['order' => "{$board->id}:0"])
@@ -26,9 +26,9 @@ class BoardSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Board::query()->create(['name' => 'Root', 'sort' => 1]);
-        $other = Board::query()->create(['name' => 'Other', 'sort' => 2]);
-        $child = Board::query()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
+        $root = Board::factory()->create(['name' => 'Root', 'sort' => 1]);
+        $other = Board::factory()->create(['name' => 'Other', 'sort' => 2]);
+        $child = Board::factory()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 3]);
 
         $this->actingAs($boss)
             ->post(route('admin.boards.sort'), [
@@ -45,9 +45,9 @@ class BoardSortTest extends ModuleTestCase
     {
         $boss = User::factory()->boss()->create();
 
-        $root = Board::query()->create(['name' => 'Root board', 'sort' => 1, 'count_items' => 1]);
-        $child = Board::query()->create(['name' => 'Child board', 'parent_id' => $root->id, 'sort' => 2, 'count_items' => 2]);
-        Board::query()->create(['name' => 'Grandchild board', 'parent_id' => $child->id, 'sort' => 3, 'count_items' => 4]);
+        $root = Board::factory()->create(['name' => 'Root board', 'sort' => 1, 'count_items' => 1]);
+        $child = Board::factory()->create(['name' => 'Child board', 'parent_id' => $root->id, 'sort' => 2, 'count_items' => 2]);
+        Board::factory()->create(['name' => 'Grandchild board', 'parent_id' => $child->id, 'sort' => 3, 'count_items' => 4]);
 
         $this->actingAs($boss)
             ->get(route('admin.boards.categories'))

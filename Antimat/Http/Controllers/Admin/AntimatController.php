@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Modules\Antimat\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Antimat\Http\Requests\AntimatWordRequest;
 use Modules\Antimat\Models\Antimat;
 
 class AntimatController extends AdminController
@@ -28,24 +26,10 @@ class AntimatController extends AdminController
     /**
      * Добавление слова в список
      */
-    public function store(Request $request, Validator $validator): RedirectResponse
+    public function store(AntimatWordRequest $request): RedirectResponse
     {
-        $word = Str::lower((string) $request->input('word'));
-
-        $validator->notEmpty($word, __('antimat::antimat.not_enter_word'))
-            ->length($word, 0, 100, ['word' => __('validator.text')]);
-
-        $duplicate = Antimat::query()->where('string', $word)->first();
-        $validator->empty($duplicate, __('antimat::antimat.word_listed'));
-
-        if (! $validator->isValid()) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         Antimat::query()->create([
-            'string' => $word,
+            'string' => $request->string('word')->value(),
         ]);
 
         return redirect()->route('admin.antimat.index')
@@ -55,16 +39,13 @@ class AntimatController extends AdminController
     /**
      * Удаление слова из списка
      */
-    public function delete(Request $request, Validator $validator): RedirectResponse
+    public function delete(Request $request): RedirectResponse
     {
-        $id = int($request->input('id'));
+        $word = Antimat::query()->find(int($request->input('id')));
 
-        $word = Antimat::query()->find($id);
-        $validator->notEmpty($word, __('main.record_not_found'));
-
-        if (! $validator->isValid()) {
+        if (! $word) {
             return redirect()->route('admin.antimat.index')
-                ->withErrors($validator->getErrors());
+                ->withErrors(__('main.record_not_found'));
         }
 
         $word->delete();
@@ -76,15 +57,8 @@ class AntimatController extends AdminController
     /**
      * Очистка списка слов
      */
-    public function clear(Validator $validator): RedirectResponse
+    public function clear(): RedirectResponse
     {
-        $validator->true(isAdmin(User::BOSS), __('main.page_only_owner'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.antimat.index')
-                ->withErrors($validator->getErrors());
-        }
-
         Antimat::query()->delete();
         Antimat::flushCache();
 

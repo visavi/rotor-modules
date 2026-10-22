@@ -6,14 +6,17 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class HighLowController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Доля заведения: каждый шаг оплачивается на 5% дешевле честной цены
      */
@@ -60,35 +63,21 @@ class HighLowController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request, Validator $validator): RedirectResponse|JsonResponse
+    public function bet(Request $request): RedirectResponse|JsonResponse
     {
         if ($request->session()->has('highlow')) {
             return redirect('games/highlow');
         }
 
-        $bet = int($request->input('bet'));
+        $request->validate(['bet' => $this->betRules()], $this->betMessages());
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')]);
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/highlow')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $bet = $request->integer('bet');
 
         $before = $this->user->money;
-        $this->user->decrement('money', $bet);
+
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
+        }
 
         $deck = range(1, self::DECK);
         $card = $this->pull($deck);

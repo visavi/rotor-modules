@@ -95,7 +95,7 @@ class UserLocationTest extends ModuleTestCase
 
     private function location(array $attributes = []): UserLocation
     {
-        return UserLocation::query()->create([
+        return UserLocation::factory()->create([
             'user_id'    => $this->user->id,
             'path'       => '/forums',
             'title'      => 'Форум',

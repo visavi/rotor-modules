@@ -234,14 +234,14 @@ class NotifierTest extends ModuleTestCase
         $author = User::factory()->create();
 
         for ($i = 0; $i < $count; $i++) {
-            $message = Message::query()->create([
+            $message = Message::factory()->create([
                 'user_id'    => $this->user->id,
                 'author_id'  => $author->id,
                 'text'       => 'Текст сообщения ' . $i,
                 'created_at' => now(),
             ]);
 
-            Dialogue::query()->create([
+            Dialogue::factory()->create([
                 'message_id' => $message->id,
                 'user_id'    => $this->user->id,
                 'author_id'  => $author->id,

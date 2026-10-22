@@ -11,6 +11,7 @@ use App\Traits\SearchableTrait;
 use App\Traits\SortableTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,6 +48,9 @@ use Illuminate\Support\HtmlString;
  */
 class Topic extends Model
 {
+    /** @use HasFactory<\Modules\Forum\Tests\Factories\TopicFactory> */
+    use HasFactory;
+
     use SearchableTrait;
     use SortableTrait;
     use CappableTrait;

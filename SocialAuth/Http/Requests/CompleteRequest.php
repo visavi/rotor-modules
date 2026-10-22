@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Http\Requests;
 
 use App\Models\BlackList;
+use App\Rules\EmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class CompleteRequest extends FormRequest
         return [
             'email' => [
                 'required',
-                'email:rfc,filter',
+                new EmailRule(),
                 function (string $attribute, mixed $value, \Closure $fail) {
                     $email = Str::lower($value);
                     $domain = Str::afterLast($email, '@');

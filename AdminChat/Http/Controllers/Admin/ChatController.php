@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Modules\AdminChat\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\AdminChat\Http\Requests\ChatRequest;
 use Modules\AdminChat\Models\Chat;
 
 class ChatController extends AdminController
@@ -18,7 +17,7 @@ class ChatController extends AdminController
     /**
      * Главная страница
      */
-    public function index(Request $request, Validator $validator): View|RedirectResponse
+    public function index(): View
     {
         $user = getUser();
 
@@ -26,43 +25,6 @@ class ChatController extends AdminController
             $user->update([
                 'newchat' => statsNewChat(),
             ]);
-        }
-
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator->length($msg, 5, 1500, ['msg' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $post = Chat::query()->orderByDesc('created_at')->first();
-
-                if ($post
-                    && $post->created_at->gt(now()->subMinutes(30))
-                    && $user->id === $post->user_id
-                    && (Str::length($msg) + Str::length($post->text) <= 1500)
-                ) {
-                    $post->update([
-                        'text' => $post->text . PHP_EOL . $msg,
-                    ]);
-                } else {
-                    Chat::query()->create([
-                        'user_id' => $user->id,
-                        'text'    => $msg,
-                        'ip'      => getIp(),
-                        'brow'    => getBrowser(),
-                    ]);
-                }
-
-                clearCache('statChat');
-                sendNotify($msg, route('admin.chats.index', absolute: false), __('admin_chat::admin_chat.admin_chat', locale: setting('language')));
-
-                return redirect('admin/chats')
-                    ->with('success', __('main.message_added_success'));
-            }
-
-            return redirect('admin/chats')
-                ->withInput()
-                ->withErrors($validator->getErrors());
         }
 
         $posts = Chat::query()
@@ -74,17 +36,84 @@ class ChatController extends AdminController
     }
 
     /**
-     * Редактирование сообщения
+     * Добавление сообщения
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function store(ChatRequest $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $user = getUser();
+        $msg = $request->string('msg')->value();
+        $post = Chat::query()->orderByDesc('created_at')->first();
 
-        if (! $user = getUser()) {
-            abort(403);
+        // Своё сообщение подряд в течение получаса дописывается к предыдущему
+        if ($post
+            && $post->created_at->gt(now()->subMinutes(30))
+            && $user->id === $post->user_id
+            && (Str::length($msg) + Str::length($post->text) <= ChatRequest::MAX_LENGTH)
+        ) {
+            $post->update([
+                'text' => $post->text . PHP_EOL . $msg,
+            ]);
+        } else {
+            Chat::query()->create([
+                'user_id' => $user->id,
+                'text'    => $msg,
+                'ip'      => getIp(),
+                'brow'    => getBrowser(),
+            ]);
         }
 
-        $post = Chat::query()->where('user_id', $user->id)->find($id);
+        clearCache('statChat');
+        sendNotify($msg, route('admin.chats.index', absolute: false), __('admin_chat::admin_chat.admin_chat', locale: setting('language')));
+
+        return redirect('admin/chats')
+            ->with('success', __('main.message_added_success'));
+    }
+
+    /**
+     * Редактирование сообщения
+     */
+    public function edit(int $id, Request $request): View
+    {
+        $post = $this->ownPost($id);
+        $page = int($request->input('page', 1));
+
+        return view('admin_chat::admin/chats/edit', compact('post', 'page'));
+    }
+
+    /**
+     * Сохранение сообщения
+     */
+    public function update(int $id, ChatRequest $request): RedirectResponse
+    {
+        $post = $this->ownPost($id);
+        $page = int($request->input('page', 1));
+
+        $post->update([
+            'text'         => $request->string('msg')->value(),
+            'edit_user_id' => getUser('id'),
+        ]);
+
+        return redirect('admin/chats?page=' . $page)
+            ->with('success', __('main.message_edited_success'));
+    }
+
+    /**
+     * Очистка чата
+     */
+    public function clear(): RedirectResponse
+    {
+        Chat::query()->delete();
+
+        return redirect()->route('admin.chats.index')
+            ->with('success', __('admin_chat::admin_chat.success_cleared'));
+    }
+
+    /**
+     * Своё сообщение, которое ещё можно править
+     */
+    private function ownPost(int $id): Chat
+    {
+        $post = Chat::query()->where('user_id', getUser('id'))->find($id);
 
         if (! $post) {
             abort(200, __('main.message_deleted'));
@@ -94,44 +123,6 @@ class ChatController extends AdminController
             abort(200, __('main.editing_impossible'));
         }
 
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator->length($msg, 5, 1500, ['msg' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $post->update([
-                    'text'         => $msg,
-                    'edit_user_id' => $user->id,
-                ]);
-
-                return redirect('admin/chats?page=' . $page)
-                    ->with('success', __('main.message_edited_success'));
-            }
-
-            return redirect()->route('admin.chats.edit', ['id' => $post->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return view('admin_chat::admin/chats/edit', compact('post', 'page'));
-    }
-
-    /**
-     * Очистка чата
-     */
-    public function clear(Validator $validator): RedirectResponse
-    {
-        $validator->true(isAdmin(User::BOSS), __('main.page_only_admins'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.chats.index')
-                ->withErrors($validator->getErrors());
-        }
-
-        Chat::query()->truncate();
-
-        return redirect()->route('admin.chats.index')
-            ->with('success', __('admin_chat::admin_chat.success_cleared'));
+        return $post;
     }
 }

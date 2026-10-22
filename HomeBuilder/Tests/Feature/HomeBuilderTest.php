@@ -195,6 +195,43 @@ class HomeBuilderTest extends ModuleTestCase
             ->assertSee($code, false);
     }
 
+    public function testHtmlBlockOfTagsOnlyIsAccepted(): void
+    {
+        // Длина кода считалась без тегов: виджет из одного iframe отклонялся как пустой
+        $code = '<iframe src="https://example.com/widget" width="300" height="200"></iframe>';
+
+        $this->actingAs($this->boss)
+            ->post('/admin/home-builder/create?type=html', $this->form(['code' => $code]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('home_blocks', ['type' => Block::HTML, 'code' => $code]);
+    }
+
+    public function testRightsAreCheckedBeforeFields(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/home-builder/create?type=html', $this->form(['code' => '']))
+            ->assertForbidden();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/home-builder/create?type=feed', $this->form())
+            ->assertNotFound();
+    }
+
+    public function testEditErrorReturnsToBlockForm(): void
+    {
+        $block = $this->createBlock(['type' => Block::TEXT, 'text' => '<p>Привет</p>']);
+        $form = route('admin.home-builder.edit', ['id' => $block->id]);
+
+        $this->actingAs($this->admin)
+            ->from($form)
+            ->post('/admin/home-builder/' . $block->id . '/edit', $this->form(['text' => '<p><b></b></p>']))
+            ->assertRedirect($form)
+            ->assertSessionHasErrors('text');
+
+        $this->assertSame('<p>Привет</p>', $block->fresh()->text);
+    }
+
     public function testAdminCannotManageBossBlocks(): void
     {
         $html = $this->createBlock(['type' => Block::HTML, 'code' => '<b>Код</b>']);
@@ -358,11 +395,40 @@ class HomeBuilderTest extends ModuleTestCase
 
     public function testTemplateMustExist(): void
     {
+        // Форма шлёт пустой template_name всегда — раньше из-за него шаблон не проверялся
         $this->actingAs($this->boss)
-            ->post('/admin/home-builder/create?type=template', $this->form(['template' => '../../views/index']))
+            ->post('/admin/home-builder/create?type=template', $this->form(['template' => '../../views/index', 'template_name' => '']))
+            ->assertSessionHasErrors('template');
+
+        $this->actingAs($this->boss)
+            ->post('/admin/home-builder/create?type=template', $this->form(['template' => '', 'template_name' => '']))
             ->assertSessionHasErrors('template');
 
         $this->assertDatabaseCount('home_blocks', 0);
+    }
+
+    public function testSourcesNotArrayIsFormError(): void
+    {
+        // Раньше строка вместо списка и вложенный массив роняли проверку с 500
+        $this->actingAs($this->boss)
+            ->post('/admin/home-builder/create?type=entries', $this->form(['sources' => 'blogs']))
+            ->assertSessionHasErrors('sources');
+
+        $this->actingAs($this->boss)
+            ->post('/admin/home-builder/create?type=entries', $this->form(['sources' => [[TestEntry::$morphName]]]))
+            ->assertSessionHasErrors('sources');
+
+        $this->assertDatabaseCount('home_blocks', 0);
+    }
+
+    public function testSourcesAreStoredAsList(): void
+    {
+        // Ключи из запроса раньше попадали в JSON, и список сохранялся объектом {"5": ...}
+        $this->actingAs($this->boss)
+            ->post('/admin/home-builder/create?type=entries', $this->form(['sources' => [5 => TestEntry::$morphName]]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame([TestEntry::$morphName], Block::query()->firstOrFail()->sources);
     }
 
     public function testBlockWithDeletedTemplateIsSkipped(): void
@@ -604,7 +670,7 @@ class HomeBuilderTest extends ModuleTestCase
 
     private function createBlock(array $attributes): Block
     {
-        return Block::query()->create($attributes + ['title' => '', 'items' => 5, 'sort' => 0, 'active' => true]);
+        return Block::factory()->create($attributes + ['title' => '', 'items' => 5, 'sort' => 0, 'active' => true]);
     }
 
     /**

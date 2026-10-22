@@ -54,6 +54,7 @@ class MinerTest extends ModuleTestCase
     public function testBetRejectsForeignMineCount(): void
     {
         $this->actingAs($this->user)
+            ->from('/games/miner')
             ->post('/games/miner/bet', ['bet' => 100, 'mines' => 24])
             ->assertRedirect('games/miner');
 
@@ -74,6 +75,7 @@ class MinerTest extends ModuleTestCase
 
         // Доигранная партия не принимает ходы
         $this->actingAs($this->user)
+            ->from('/games/miner')
             ->post('/games/miner/go', ['cell' => $this->safeCell()])
             ->assertRedirect('games/miner');
     }

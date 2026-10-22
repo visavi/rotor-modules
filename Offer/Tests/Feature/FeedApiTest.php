@@ -37,7 +37,7 @@ class FeedApiTest extends ModuleTestCase
     {
         $offer = $this->createOfferInFeed();
 
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $offer->id,
             'relate_type' => Offer::$morphName,
             'path'        => '/uploads/offers/screen.jpg',
@@ -61,7 +61,7 @@ class FeedApiTest extends ModuleTestCase
     private function createOfferInFeed(): Offer
     {
         // Запись сама попадает в ленту через FeedableTrait
-        return Offer::query()->create([
+        return Offer::factory()->create([
             'type'       => Offer::ISSUE,
             'title'      => 'Test issue',
             'text'       => 'Test issue text',

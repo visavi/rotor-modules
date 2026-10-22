@@ -6,6 +6,7 @@ namespace Modules\Payment\Models;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Payment\Services\YooKassaService;
@@ -30,6 +31,9 @@ use Modules\Payment\Services\YooKassaService;
  */
 class Order extends Model
 {
+    /** @use HasFactory<\Modules\Payment\Tests\Factories\OrderFactory> */
+    use HasFactory;
+
     public const string TYPE_ADVERT = 'advert';
 
     public const string TYPE_BALANCE = 'balance';

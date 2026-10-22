@@ -9,13 +9,15 @@ use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
-use App\Support\Validator;
 use App\Traits\HandlesComments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Load\Http\Requests\DownStoreRequest;
+use Modules\Load\Http\Requests\OwnDownRequest;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
+use Modules\Load\Services\DownService;
 use Modules\Load\Services\ZipMap;
 use Modules\Load\Services\ZipTree;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,7 +51,8 @@ class DownController extends Controller
             abort(404, __('load::loads.down_not_exist'));
         }
 
-        if (! isAdmin(User::ADMIN) && (! $down->active && getUser() && getUser('id') !== $down->user_id)) {
+        // Непроверенная загрузка доступна только автору и администрации, как и в API
+        if (! $down->active && ! isAdmin(User::ADMIN) && getUser('id') !== $down->user_id) {
             abort(200, __('load::loads.down_not_verified'));
         }
 
@@ -63,17 +66,9 @@ class DownController extends Controller
     /**
      * Создание загрузки
      */
-    public function create(Request $request, Validator $validator, Flood $flood): View|RedirectResponse
+    public function create(Request $request): View
     {
-        $cid = int($request->input('category'));
-
-        if (! isAdmin() && ! setting('downupload')) {
-            abort(200, __('load::loads.down_closed'));
-        }
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $this->checkUploadOpen();
 
         $categories = (new Load())->getChildren();
 
@@ -81,163 +76,43 @@ class DownController extends Controller
             abort(200, __('load::loads.empty_loads'));
         }
 
-        $files = File::query()
-            ->pending(Down::$morphName, $user->id)
-            ->ordered();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $links = (array) $request->input('links');
-            $links = array_unique(array_diff($links, ['']));
-
-            $category = Load::query()->find($cid);
-
-            $validator
-                ->length($title, setting('down_title_min'), setting('down_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('down_text_min'), setting('down_text_max'), ['text' => __('validator.text')])
-                ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-                ->notEmpty($category, ['category' => __('load::loads.load_not_exist')]);
-
-            if ($category) {
-                $validator->empty($category->closed, ['category' => __('load::loads.load_closed')]);
-
-                $duplicate = Down::query()->where('title', $title)->count();
-                $validator->empty($duplicate, ['title' => __('load::loads.down_name_exists')]);
-            }
-
-            $validator->notEmpty($files->count() + count($links), ['files' => __('validator.file_upload_one')]);
-            $validator->lte($files->count() + count($links), setting('maxfiles'), ['files' => __('validator.files_max', ['max' => setting('maxfiles')])]);
-
-            if ($validator->isValid()) {
-                foreach ($links as $link) {
-                    $validator->length($link, 5, 100, ['links' => __('validator.text')])
-                        ->url($link, ['links' => __('validator.url')]);
-                }
-            }
-
-            if ($validator->isValid()) {
-                $down = Down::query()->create([
-                    'category_id' => $category->id,
-                    'title'       => $title,
-                    'text'        => $text,
-                    'user_id'     => $user->id,
-                    'active'      => isAdmin(User::ADMIN),
-                    'links'       => $links ? array_values($links) : null,
-                ]);
-
-                $files->update(['relate_id' => $down->id]);
-
-                if (isAdmin(User::ADMIN)) {
-                    $down->category->increment('count_downs');
-                    clearCache(['statLoads', 'recentDowns']);
-                } else {
-                    $admins = User::query()->whereIn('level', [User::BOSS, User::ADMIN])->get();
-
-                    if ($admins->isNotEmpty()) {
-                        $text = textNotice('down_upload', ['url' => route('admin.downs.edit', ['id' => $down->id], false), 'title' => $down->title]);
-
-                        foreach ($admins as $admin) {
-                            $admin->sendMessage($user, $text, false);
-                        }
-                    }
-                }
-
-                $flood->saveState();
-
-                return redirect()->route('downs.view', ['id' => $down->id])
-                    ->with('success', __('load::loads.down_added_success'));
-            }
-
-            return redirect()->route('downs.create', ['category' => $cid])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $cid = int($request->input('category'));
         $down = new Down();
-        $files = $files->get();
+
+        $files = File::query()
+            ->pending(Down::$morphName, getUser('id'))
+            ->ordered()
+            ->get();
 
         return view('load::downs/create', compact('categories', 'down', 'cid', 'files'));
     }
 
     /**
+     * Публикация загрузки
+     */
+    public function store(DownStoreRequest $request, Flood $flood, DownService $service): RedirectResponse
+    {
+        $down = $service->create(getUser(), $request, $request->file('files', []));
+
+        $flood->saveState();
+
+        return redirect()->route('downs.view', ['id' => $down->id])
+            ->with('success', __('load::loads.down_added_success'));
+    }
+
+    /**
      * Редактирование загрузки
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id, Request $request): View
     {
         $cid = int($request->input('category'));
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $down = Down::query()->where('user_id', $user->id)->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if ($down->active) {
-            abort(200, __('load::loads.down_verified'));
-        }
+        $down = $this->ownDown($id);
 
         $files = File::query()
             ->where('relate_type', Down::$morphName)
             ->where('relate_id', $down->id)
-            ->where('user_id', $user->id)
             ->ordered()
             ->get();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $links = (array) $request->input('links');
-            $links = array_unique(array_diff($links, ['']));
-
-            $category = Load::query()->find($cid);
-
-            $validator
-                ->length($title, setting('down_title_min'), setting('down_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('down_text_min'), setting('down_text_max'), ['text' => __('validator.text')])
-                ->notEmpty($category, ['category' => __('load::loads.load_not_exist')])
-                ->empty($category->closed, ['category' => __('load::loads.load_closed')]);
-
-            $duplicate = Down::query()
-                ->where('title', $title)
-                ->where('id', '<>', $down->id)
-                ->count();
-
-            $validator->empty($duplicate, ['title' => __('load::loads.down_name_exists')]);
-            $validator->notEmpty($files->count() + count($links), ['files' => __('validator.file_upload_one')]);
-            $validator->lte($files->count() + count($links), setting('maxfiles'), ['files' => __('validator.files_max', ['max' => setting('maxfiles')])]);
-
-            if ($validator->isValid()) {
-                foreach ($links as $link) {
-                    $validator->length($link, setting('down_link_min'), setting('down_link_max'), ['links' => __('validator.text')])
-                        ->url($link, ['links' => __('validator.url')]);
-                }
-            }
-
-            if ($validator->isValid()) {
-                $links = setting('down_allow_links') ? array_values($links) : null;
-
-                $down->update([
-                    'category_id' => $category->id,
-                    'title'       => $title,
-                    'text'        => $text,
-                    'links'       => $links,
-                ]);
-
-                clearCache(['statLoads', 'recentDowns']);
-
-                return redirect()->route('downs.view', ['id' => $down->id])
-                    ->with('success', __('load::loads.down_edited_success'));
-            }
-
-            return redirect()->route('downs.edit', ['id' => $down->id, 'category' => $cid])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         $categories = $down->category->getChildren();
 
@@ -245,9 +120,29 @@ class DownController extends Controller
     }
 
     /**
+     * Сохранение загрузки
+     */
+    public function update(int $id, OwnDownRequest $request): RedirectResponse
+    {
+        $down = $this->ownDown($id);
+
+        $down->update([
+            'category_id' => $request->category()->id,
+            'title'       => $request->string('title')->value(),
+            'text'        => $request->string('text')->value(),
+            'links'       => $request->links(),
+        ]);
+
+        clearCache(['statLoads', 'recentDowns']);
+
+        return redirect()->route('downs.view', ['id' => $down->id])
+            ->with('success', __('load::loads.down_edited_success'));
+    }
+
+    /**
      * Скачивание файла
      */
-    public function download(int $id, int $fid, Validator $validator): Response
+    public function download(int $id, int $fid): Response
     {
         $file = File::query()->where('relate_type', Down::$morphName)->find($fid);
         $down = $file?->relate;
@@ -264,11 +159,9 @@ class DownController extends Controller
             abort(200, __('load::loads.down_not_verified'));
         }
 
-        $validator->true(file_exists(public_path($file->path)), __('load::loads.down_not_exist'));
-
-        if (! $validator->isValid()) {
+        if (! file_exists(public_path($file->path))) {
             return redirect()->route('downs.view', ['id' => $down->id])
-                ->withErrors($validator->getErrors());
+                ->withErrors(__('load::loads.down_not_exist'));
         }
 
         Reader::countingStat($down);
@@ -279,7 +172,7 @@ class DownController extends Controller
     /**
      * Скачивание файла по ссылке
      */
-    public function downloadLink(int $id, int $linkId, Validator $validator): Response
+    public function downloadLink(int $id, int $linkId): Response
     {
         $down = Down::query()->find($id);
 
@@ -295,11 +188,9 @@ class DownController extends Controller
             abort(200, __('load::loads.down_not_verified'));
         }
 
-        $validator->true($down->links[$linkId] ?? false, __('load::loads.down_not_exist'));
-
-        if (! $validator->isValid()) {
+        if (! isset($down->links[$linkId])) {
             return redirect()->route('downs.view', ['id' => $down->id])
-                ->withErrors($validator->getErrors());
+                ->withErrors(__('load::loads.down_not_exist'));
         }
 
         Reader::countingStat($down);
@@ -453,5 +344,33 @@ class DownController extends Controller
         }
 
         return $archive;
+    }
+
+    /**
+     * Своя загрузка, ещё не проверенная модератором
+     */
+    private function ownDown(int $id): Down
+    {
+        $down = Down::query()->where('user_id', getUser('id'))->find($id);
+
+        if (! $down) {
+            abort(404, __('load::loads.down_not_exist'));
+        }
+
+        if ($down->active) {
+            abort(200, __('load::loads.down_verified'));
+        }
+
+        return $down;
+    }
+
+    /**
+     * Загрузка файлов может быть закрыта настройкой — кроме администрации
+     */
+    private function checkUploadOpen(): void
+    {
+        if (! isAdmin() && ! setting('downupload')) {
+            abort(200, __('load::loads.down_closed'));
+        }
     }
 }

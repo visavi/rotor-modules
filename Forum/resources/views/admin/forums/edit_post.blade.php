@@ -28,10 +28,10 @@
     <div class="section-form mb-3 shadow">
         <form action="{{ route('admin.posts.edit', ['id' => $post->id, 'page' => $page]) }}" method="post">
             @csrf
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('forum::forums.post') }}:</label>
-                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="msg" rows="5" name="msg" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ old('msg', $post->text) }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('forum::forums.post') }}:</label>
+                <textarea class="form-control tiptap" maxlength="{{ setting('forum_text_max') }}" id="text" rows="5" name="text" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ old('text', $post->text) }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 

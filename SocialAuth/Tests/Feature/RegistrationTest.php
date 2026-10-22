@@ -170,7 +170,7 @@ class RegistrationTest extends ModuleTestCase
     public function testExistingSocialLogsInWithoutCreatingUser(): void
     {
         $user = User::factory()->create(['email' => 'exist@example.com']);
-        $social = Social::query()->create([
+        $social = Social::factory()->create([
             'user_id'     => $user->id,
             'provider'    => 'google',
             'provider_id' => 'G-100',
@@ -424,7 +424,7 @@ class RegistrationTest extends ModuleTestCase
 
     public function testBlacklistedEmailFromProviderBlocksRegistration(): void
     {
-        BlackList::query()->create([
+        BlackList::factory()->create([
             'type'       => 'email',
             'value'      => 'banned@example.com',
             'user_id'    => 0,
@@ -451,7 +451,7 @@ class RegistrationTest extends ModuleTestCase
 
     public function testBlacklistedDomainFromProviderBlocksRegistration(): void
     {
-        BlackList::query()->create([
+        BlackList::factory()->create([
             'type'       => 'domain',
             'value'      => 'spam.com',
             'user_id'    => 0,
@@ -478,7 +478,7 @@ class RegistrationTest extends ModuleTestCase
 
     public function testBlacklistedEmailBlocksCompleteForm(): void
     {
-        BlackList::query()->create([
+        BlackList::factory()->create([
             'type'       => 'email',
             'value'      => 'banned@example.com',
             'user_id'    => 0,
@@ -504,7 +504,7 @@ class RegistrationTest extends ModuleTestCase
 
     public function testBlacklistedLoginRegeneratesInsteadOfBlocking(): void
     {
-        BlackList::query()->create([
+        BlackList::factory()->create([
             'type'       => 'login',
             'value'      => 'john-doe',
             'user_id'    => 0,
@@ -541,5 +541,32 @@ class RegistrationTest extends ModuleTestCase
         $response->assertRedirect('login');
         $this->assertGuest();
         $this->assertSame(0, User::query()->count());
+    }
+
+    public function testAccountPagesAreForUsersOnly(): void
+    {
+        $this->get('/social/accounts')->assertForbidden();
+        $this->get('/social/google/link')->assertForbidden();
+        $this->delete('/social/google/unlink')->assertForbidden();
+    }
+
+    public function testUserUnlinksOwnProvider(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+
+        Social::factory()->create(['user_id' => $user->id, 'provider' => 'google', 'provider_id' => '1', 'token' => 't', 'last_login_at' => now()]);
+        Social::factory()->create(['user_id' => $other->id, 'provider' => 'google', 'provider_id' => '2', 'token' => 't', 'last_login_at' => now()]);
+
+        $this->actingAs($user)
+            ->get('/social/accounts')
+            ->assertOk();
+
+        $this->actingAs($user)
+            ->delete('/social/google/unlink')
+            ->assertRedirect(route('social.accounts'));
+
+        $this->assertDatabaseMissing('socials', ['user_id' => $user->id]);
+        $this->assertDatabaseHas('socials', ['user_id' => $other->id]);
     }
 }

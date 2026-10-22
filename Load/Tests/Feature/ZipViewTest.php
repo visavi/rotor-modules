@@ -27,10 +27,10 @@ class ZipViewTest extends ModuleTestCase
 
         Relation::morphMap([Down::$morphName => Down::class]);
 
-        $load = Load::query()->create(['name' => 'Категория']);
+        $load = Load::factory()->create(['name' => 'Категория']);
         $this->user = User::factory()->create();
 
-        $this->down = Down::query()->create([
+        $this->down = Down::factory()->create([
             'category_id' => $load->id,
             'title'       => 'Загрузка',
             'text'        => 'Описание',
@@ -180,7 +180,7 @@ class ZipViewTest extends ModuleTestCase
         $archive->addFromString('docs/guide.txt', 'Файл в папке');
         $archive->close();
 
-        return File::query()->create([
+        return File::factory()->create([
             'relate_id'   => $this->down->id,
             'relate_type' => Down::$morphName,
             'path'        => 'uploads/files/' . $name,

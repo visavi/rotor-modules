@@ -1,16 +1,17 @@
 <form method="post">
     @csrf
-    <div class="mb-3{{ hasError('category') }}">
+    <div class="mb-3{{ hasError('category_id') }}">
         <label for="inputCategory" class="form-label">{{ __('load::loads.load') }}:</label>
 
-        <select class="form-select" id="inputCategory" name="category">
+        <?php $inputCategory = (int) old('category_id', $down->category_id ?? $cid); ?>
+        <select class="form-select" id="inputCategory" name="category_id">
             @foreach ($categories as $category)
-                <option value="{{ $category->id }}"{{ $cid === $category->id || $down->category_id === $category->id ? ' selected' : '' }}{{ $category->closed && $category->id !== $down->category_id ? ' disabled' : '' }}>
+                <option value="{{ $category->id }}"{{ $inputCategory === $category->id ? ' selected' : '' }}{{ $category->closed && $category->id !== $down->category_id ? ' disabled' : '' }}>
                     {{ str_repeat('–', $category->depth) }} {{ $category->name }}
                 </option>
             @endforeach
         </select>
-        <div class="invalid-feedback">{{ textError('category') }}</div>
+        <div class="invalid-feedback">{{ textError('category_id') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('title') }}">
@@ -32,7 +33,7 @@
 
     @php $links = array_values(array_diff((array) old('links', $down->links), [''])); @endphp
     @if (setting('down_allow_links'))
-        <div class="mb-3{{ hasError('links') }}">
+        <div class="mb-3{{ hasError('links*') }}">
             <div class="js-links-list">
                 @for ($i = 0, $countLinks = count($links); $i < $countLinks; $i++)
                     <div class="input-group mt-1 js-links-append">
@@ -43,7 +44,7 @@
                     </div>
                 @endfor
             </div>
-            <div class="invalid-feedback">{{ textError('links') }}</div>
+            <div class="invalid-feedback">{{ textError('links*') }}</div>
         </div>
     @endif
 
@@ -63,7 +64,7 @@
         linksAdd?.addEventListener('click', function (e) {
             e.preventDefault();
             linksList.insertAdjacentHTML('beforeend', '<div class="input-group mt-1 js-links-append">' +
-                '<input class="form-control" name="links[]" type="text" value="" maxlength="<?= setting('down_category_max') ?>" placeholder="https://">' +
+                '<input class="form-control" name="links[]" type="text" value="" maxlength="<?= setting('down_link_max') ?>" placeholder="https://">' +
                 '<span class="input-group-text">' +
                 '<a class="js-links-remove" href="#"><i class="fa fa-times"></i></a>' +
                 '</span>' +

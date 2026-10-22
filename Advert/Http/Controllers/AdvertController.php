@@ -5,40 +5,22 @@ declare(strict_types=1);
 namespace Modules\Advert\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Advert\Http\Requests\AdvertPurchaseRequest;
 use Modules\Advert\Models\Advert;
 
 class AdvertController extends Controller
 {
-    public ?User $user;
-
-    /**
-     * Конструктор
-     */
-    public function __construct()
-    {
-        $this->middleware('check.user');
-
-        $this->middleware(function ($request, $next) {
-            $this->user = getUser();
-
-            return $next($request);
-        });
-
-        if (! setting('rekuseractive')) {
-            abort(200, __('advert::adverts.advert_closed'));
-        }
-    }
-
     /**
      * Главная страница
      */
     public function index(): View
     {
+        $this->checkOpen();
+
         $adverts = Advert::query()
             ->where('type', Advert::TYPE_USER)
             ->where('deleted_at', '>', now())
@@ -52,72 +34,74 @@ class AdvertController extends Controller
     /**
      * Покупка рекламы
      */
-    public function create(Request $request, Validator $validator): View|RedirectResponse
+    public function create(): View
     {
-        if ($this->user->point < setting('rekuserpoint')) {
+        $this->checkCanBuy();
+
+        return view('advert::adverts/create');
+    }
+
+    /**
+     * Оплата и размещение ссылки
+     *
+     * Баланс проверяется ещё раз при списании: два одновременных запроса
+     * проходят проверку оба, и без условия баланс ушёл бы в минус
+     */
+    public function store(AdvertPurchaseRequest $request): RedirectResponse
+    {
+        $this->checkCanBuy();
+
+        $user = getUser();
+        $price = $request->price();
+
+        DB::transaction(static function () use ($request, $user, $price) {
+            if (! $user->chargeMoney($price)) {
+                throw ValidationException::withMessages(['money' => __('advert::adverts.advert_not_money')]);
+            }
+
+            Advert::query()->create($request->advertFields() + [
+                'type'       => Advert::TYPE_USER,
+                'user_id'    => $user->id,
+                'deleted_at' => now()->addHours((int) setting('rekusertime')),
+            ]);
+        });
+
+        clearCache('adverts');
+
+        return redirect('adverts')
+            ->with('success', __('advert::adverts.advert_success_posted'));
+    }
+
+    /**
+     * Раздел включается настройкой
+     */
+    private function checkOpen(): void
+    {
+        if (! setting('rekuseractive')) {
+            abort(200, __('advert::adverts.advert_closed'));
+        }
+    }
+
+    /**
+     * Купить ссылку можно, набрав порог баллов, и только одну за раз
+     */
+    private function checkCanBuy(): void
+    {
+        $this->checkOpen();
+
+        if (getUser('point') < setting('rekuserpoint')) {
             abort(200, __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]));
         }
 
         Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', now())->delete();
 
-        $advert = Advert::query()
+        $posted = Advert::query()
             ->where('type', Advert::TYPE_USER)
-            ->where('user_id', $this->user->id)
-            ->first();
+            ->where('user_id', getUser('id'))
+            ->exists();
 
-        if ($advert) {
+        if ($posted) {
             abort(200, __('advert::adverts.advert_already_posted'));
         }
-
-        if ($request->isMethod('post')) {
-            $site = $request->input('site');
-            $name = $request->input('name');
-            $color = $request->input('color');
-            $bold = empty($request->input('bold')) ? 0 : 1;
-
-            $price = setting('rekuserprice');
-
-            if ($color) {
-                $price += setting('rekuseroptprice');
-            }
-
-            if ($bold) {
-                $price += setting('rekuseroptprice');
-            }
-
-            $validator
-                ->gte($this->user->point, setting('rekuserpoint'), __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]))
-                ->true(captchaVerify(), ['protect' => __('validator.captcha')])
-                ->regex($site, '|^https?://([а-яa-z0-9_\-\.])+(\.([а-яa-z0-9\/\-?_=#])+)+$|iu', ['site' => __('validator.url')])
-                ->length($site, 5, 100, ['site' => __('validator.url_text')])
-                ->length($name, 5, 35, ['name' => __('validator.text')])
-                ->regex($color, '|^#+[A-f0-9]{6}$|', ['color' => __('validator.color')], false)
-                ->gte($this->user->money, $price, __('advert::adverts.advert_not_money'));
-
-            if ($validator->isValid()) {
-                Advert::query()->create([
-                    'site'       => $site,
-                    'name'       => $name,
-                    'color'      => $color,
-                    'bold'       => $bold,
-                    'type'       => Advert::TYPE_USER,
-                    'user_id'    => $this->user->id,
-                    'deleted_at' => now()->addHours((int) setting('rekusertime')),
-                ]);
-
-                $this->user->decrement('money', $price);
-
-                clearCache('adverts');
-
-                return redirect('adverts')
-                    ->with('success', __('advert::adverts.advert_success_posted'));
-            }
-
-            return redirect('adverts/create')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return view('advert::adverts/create');
     }
 }

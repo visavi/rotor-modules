@@ -1,17 +1,17 @@
 <form method="post">
     @csrf
-    <div class="mb-3{{ hasError('cid') }}">
+    <div class="mb-3{{ hasError('category_id') }}">
         <label for="inputCategory" class="form-label">{{ __('blog::blogs.blog') }}:</label>
 
-        <?php $inputCategory = (int) old('cid', $article->category_id ?? $cid); ?>
-        <select class="form-select" id="inputCategory" name="cid">
+        <?php $inputCategory = (int) old('category_id', $article->category_id ?? $cid); ?>
+        <select class="form-select" id="inputCategory" name="category_id">
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}"{{ ($inputCategory === $category->id && ! $category->closed) ? ' selected' : '' }}{{ $category->closed ? ' disabled' : '' }}>
                     {{ str_repeat('–', $category->depth) }} {{ $category->name }}
                 </option>
             @endforeach
         </select>
-        <div class="invalid-feedback">{{ textError('cid') }}</div>
+        <div class="invalid-feedback">{{ textError('category_id') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('title') }}">
@@ -44,14 +44,16 @@
             $isDelayed = old('delay', $article->published_at > now());
         @endphp
         <div class="form-check mb-3">
+            {{-- Снятый флажок браузер не отправляет, без нуля запрос не узнает, что его сняли --}}
+            <input type="hidden" name="delay" value="0">
             <input type="checkbox" class="form-check-input" value="1" name="delay" id="delay" onchange="showDelayForm(this);" @checked($isDelayed)>
             <label for="delay" class="form-check-label">{{ __('blog::blogs.delay_publication') }}</label>
         </div>
 
         <div class="col-sm-6 col-md-4 mb-3 js-published" @style(['display: none' => !$isDelayed])>
-            <label for="published" class="form-label">{{ __('blog::blogs.date_publication') }}</label>
-            <input class="form-control<?= hasError('published') ?>" type="datetime-local" name="published" id="published" value="{{ old('published', date('Y-m-d\TH:i', $article->published_at?->timestamp)) }}">
-            <div class="invalid-feedback">{{ textError('published') }}</div>
+            <label for="published_at" class="form-label">{{ __('blog::blogs.date_publication') }}</label>
+            <input class="form-control{{ hasError('published_at') }}" type="datetime-local" name="published_at" id="published_at" value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}">
+            <div class="invalid-feedback">{{ textError('published_at') }}</div>
         </div>
     @endif
 

@@ -8,11 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Validation\Rule;
+use Modules\Offer\Http\Requests\OfferRequest;
+use Modules\Offer\Http\Requests\OfferStoreRequest;
 use Modules\Offer\Http\Resources\OfferResource;
 use Modules\Offer\Models\Offer;
 
@@ -64,38 +64,13 @@ class OfferApiController extends Controller
     /**
      * Создание записи
      */
-    public function store(Request $request, Flood $flood, FileService $files): JsonResponse
+    public function store(OfferStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        $user = getUser();
-
-        $validated = $request->validate([
-            'type'  => ['required', Rule::in(Offer::TYPES)],
-            'title' => ['required', 'string', 'min:' . setting('offer_title_min'), 'max:' . setting('offer_title_max')],
-            'text'  => [
-                'required',
-                'string',
-                'min:' . setting('offer_text_min'),
-                'max:' . setting('offer_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-        ] + FileService::rules(Offer::$morphName));
-
-        // Раздел платный: за создание записи списывается порог баллов, как на сайте
-        if ($user->point < setting('addofferspoint')) {
-            abort(422, __('offer::offers.condition_add', [
-                'point' => plural(setting('addofferspoint'), setting('scorename')),
-            ]));
-        }
-
         $offer = Offer::query()->create([
-            'type'    => $validated['type'],
-            'title'   => $validated['title'],
-            'text'    => $validated['text'],
-            'user_id' => $user->id,
+            'type'    => $request->input('type'),
+            'title'   => $request->string('title')->value(),
+            'text'    => $request->string('text')->value(),
+            'user_id' => getUser('id'),
             'rating'  => 1,
             'status'  => Offer::WAIT,
         ]);
@@ -116,7 +91,7 @@ class OfferApiController extends Controller
     /**
      * Редактирование своей записи
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, OfferRequest $request): JsonResponse
     {
         $offer = Offer::query()
             ->where('id', $id)
@@ -132,16 +107,10 @@ class OfferApiController extends Controller
             abort(422, __('offer::offers.already_resolved'));
         }
 
-        $validated = $request->validate([
-            'type'  => ['required', Rule::in(Offer::TYPES)],
-            'title' => ['required', 'string', 'min:' . setting('offer_title_min'), 'max:' . setting('offer_title_max')],
-            'text'  => ['required', 'string', 'min:' . setting('offer_text_min'), 'max:' . setting('offer_text_max')],
-        ]);
-
         $offer->update([
-            'type'       => $validated['type'],
-            'title'      => $validated['title'],
-            'text'       => $validated['text'],
+            'type'       => $request->input('type'),
+            'title'      => $request->string('title')->value(),
+            'text'       => $request->string('text')->value(),
             'updated_at' => now(),
         ]);
 

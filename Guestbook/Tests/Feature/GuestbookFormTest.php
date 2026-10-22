@@ -61,7 +61,7 @@ class GuestbookFormTest extends ModuleTestCase
 
     public function testFormIsOpenWithPendingFiles(): void
     {
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Guestbook::$morphName,
             'path'        => '/uploads/guestbook/screen.jpg',
@@ -80,7 +80,7 @@ class GuestbookFormTest extends ModuleTestCase
 
     public function testFormIsOpenAfterFailedSubmit(): void
     {
-        $this->withSession(['_old_input' => ['msg' => 'Недописанное сообщение']])
+        $this->withSession(['_old_input' => ['text' => 'Недописанное сообщение']])
             ->get('/guestbook')
             ->assertOk()
             ->assertDontSee('data-compact', false);

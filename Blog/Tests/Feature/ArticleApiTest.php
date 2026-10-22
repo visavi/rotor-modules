@@ -65,7 +65,7 @@ class ArticleApiTest extends ModuleTestCase
     public function testViewReturnsTags(): void
     {
         $article = $this->createArticle();
-        $tag = Tag::query()->create(['name' => 'laravel']);
+        $tag = Tag::factory()->create(['name' => 'laravel']);
         $article->tags()->attach($tag->id, ['sort' => 1]);
 
         $response = $this->getJson('/api/articles/' . $article->slug);
@@ -116,8 +116,8 @@ class ArticleApiTest extends ModuleTestCase
     {
         $article = $this->createArticle();
 
-        $other = Blog::query()->create(['name' => 'Other category']);
-        Article::query()->create([
+        $other = Blog::factory()->create(['name' => 'Other category']);
+        Article::factory()->create([
             'category_id' => $other->id,
             'user_id'     => $this->user->id,
             'title'       => 'Other article',
@@ -139,8 +139,8 @@ class ArticleApiTest extends ModuleTestCase
 
     public function testCategoriesReturnTree(): void
     {
-        $parent = Blog::query()->create(['name' => 'Parent category']);
-        Blog::query()->create(['name' => 'Child category', 'parent_id' => $parent->id]);
+        $parent = Blog::factory()->create(['name' => 'Parent category']);
+        Blog::factory()->create(['name' => 'Child category', 'parent_id' => $parent->id]);
 
         $this->getJson('/api/blogs')
             ->assertOk()
@@ -156,9 +156,9 @@ class ArticleApiTest extends ModuleTestCase
 
     private function createArticle(): Article
     {
-        $blog = Blog::query()->create(['name' => 'Test category']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
 
-        return Article::query()->create([
+        return Article::factory()->create([
             'category_id' => $blog->id,
             'user_id'     => $this->user->id,
             'title'       => 'Test article',
@@ -171,7 +171,7 @@ class ArticleApiTest extends ModuleTestCase
 
     private function addComment(Article $article, string $text, ?int $parentId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => Article::$morphName,
             'relate_id'   => $article->id,
             'parent_id'   => $parentId,
@@ -189,7 +189,7 @@ class ArticleApiTest extends ModuleTestCase
         $other = $this->createArticle();
         $other->update(['user_id' => User::factory()->create()->id]);
 
-        $tag = Tag::query()->create(['name' => 'laravel']);
+        $tag = Tag::factory()->create(['name' => 'laravel']);
         $other->tags()->attach($tag->id, ['sort' => 0]);
 
         // Списки пользователя — только с токеном, как страницы сайта
@@ -212,8 +212,8 @@ class ArticleApiTest extends ModuleTestCase
         $first = $this->createArticle();
         $second = $this->createArticle();
 
-        $php = Tag::query()->create(['name' => 'php']);
-        $phpstan = Tag::query()->create(['name' => 'phpstan']);
+        $php = Tag::factory()->create(['name' => 'php']);
+        $phpstan = Tag::factory()->create(['name' => 'phpstan']);
         $first->tags()->attach([$php->id => ['sort' => 0], $phpstan->id => ['sort' => 1]]);
         $second->tags()->attach($php->id, ['sort' => 0]);
 
@@ -232,7 +232,7 @@ class ArticleApiTest extends ModuleTestCase
         $this->getJson('/api/tags?query=p')->assertOk()->assertJsonCount(0, 'data');
 
         // Числовой тег приходит строкой, а не роняет ответ
-        $year = Tag::query()->create(['name' => '2026']);
+        $year = Tag::factory()->create(['name' => '2026']);
         $second->tags()->attach($year->id, ['sort' => 1]);
 
         $this->getJson('/api/tags?query=20')->assertOk()->assertJsonPath('data.0.name', '2026');
@@ -240,7 +240,7 @@ class ArticleApiTest extends ModuleTestCase
         // Тег одних черновиков не предлагается: по нему список статей пуст
         $draft = $this->createArticle();
         $draft->update(['active' => false]);
-        $draftTag = Tag::query()->create(['name' => 'draftonly']);
+        $draftTag = Tag::factory()->create(['name' => 'draftonly']);
         $draft->tags()->attach([$draftTag->id => ['sort' => 0], $php->id => ['sort' => 1]]);
         Cache::forget('tagCloud');
 

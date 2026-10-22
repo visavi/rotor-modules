@@ -71,7 +71,8 @@
                                 ],
                                 "properties": {
                                     "text": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Длина — по настройкам гостевой, считается без тегов"
                                     },
                                     "guest_name": {
                                         "type": "string",
@@ -83,7 +84,8 @@
                                         "type": "string"
                                     },
                                     "protect": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Ответ капчи; неверный ответ — ошибка этого поля"
                                     },
                                     "files[]": {
                                         "type": "array",
@@ -155,7 +157,8 @@
                                 ],
                                 "properties": {
                                     "text": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Длина — по настройкам гостевой, считается без тегов"
                                     }
                                 }
                             }

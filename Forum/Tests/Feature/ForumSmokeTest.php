@@ -37,16 +37,16 @@ class ForumSmokeTest extends ModuleTestCase
 
     public function testForum(): void
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
         $this->get(route('forums.forum', ['id' => $forum->id]))->assertOk();
     }
 
     public function testTopic(): void
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -101,9 +101,9 @@ class ForumSmokeTest extends ModuleTestCase
 
     public function testApiTopicContainsForum(): void
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -128,9 +128,9 @@ class ForumSmokeTest extends ModuleTestCase
         // их не было видно и нечем было удалить
         $this->overrideSetting('editforumpoint', 0);
 
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -138,7 +138,7 @@ class ForumSmokeTest extends ModuleTestCase
             'created_at'  => now(),
         ]);
 
-        $post = Post::query()->create([
+        $post = Post::factory()->create([
             'topic_id' => $topic->id,
             'user_id'  => $this->user->id,
             'text'     => 'Первое сообщение',
@@ -146,7 +146,7 @@ class ForumSmokeTest extends ModuleTestCase
             'brow'     => 'test',
         ]);
 
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => $post->id,
             'relate_type' => Post::$morphName,
             'path'        => '/uploads/forums/doc.pdf',
@@ -165,9 +165,9 @@ class ForumSmokeTest extends ModuleTestCase
 
     public function testApiReadingIsOpenForGuests(): void
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -182,7 +182,7 @@ class ForumSmokeTest extends ModuleTestCase
 
     public function testApiWritingRequiresToken(): void
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
         $this->postJson('/api/forums/' . $forum->id, ['title' => 'New topic', 'text' => 'Text'])
             ->assertStatus(400);
@@ -197,9 +197,9 @@ class ForumSmokeTest extends ModuleTestCase
         $this->overrideSetting('forum_text_min', 1);
         $this->overrideSetting('forum_text_max', 1000);
 
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -223,9 +223,9 @@ class ForumSmokeTest extends ModuleTestCase
         $this->overrideSetting('forum_text_min', 1);
         $this->overrideSetting('forum_text_max', 1000);
 
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -233,7 +233,7 @@ class ForumSmokeTest extends ModuleTestCase
             'created_at'  => now(),
         ]);
 
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Post::$morphName,
             'path'        => '/uploads/forums/doc.pdf',
@@ -263,9 +263,9 @@ class ForumSmokeTest extends ModuleTestCase
         $this->overrideSetting('filesize', 1024 * 1024);
         $this->overrideSetting('maxfiles', 5);
 
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -274,7 +274,7 @@ class ForumSmokeTest extends ModuleTestCase
         ]);
 
         foreach (['first.pdf', 'second.pdf'] as $i => $name) {
-            File::query()->create([
+            File::factory()->create([
                 'relate_id'   => 0,
                 'relate_type' => Post::$morphName,
                 'path'        => '/uploads/forums/' . $name,
@@ -313,9 +313,9 @@ class ForumSmokeTest extends ModuleTestCase
      */
     private function createTopicWithPosts(int $count): array
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $forum->id,
             'title'       => 'Test topic',
             'user_id'     => $this->user->id,
@@ -326,7 +326,7 @@ class ForumSmokeTest extends ModuleTestCase
         $posts = [];
 
         foreach (range(1, $count) as $i) {
-            $posts[] = Post::query()->create([
+            $posts[] = Post::factory()->create([
                 'topic_id'   => $topic->id,
                 'user_id'    => $this->user->id,
                 'text'       => 'Сообщение ' . $i,

@@ -11,6 +11,7 @@ use App\Services\FeedService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\View;
@@ -45,6 +46,9 @@ use Throwable;
  */
 class Block extends Model
 {
+    /** @use HasFactory<\Modules\HomeBuilder\Tests\Factories\BlockFactory> */
+    use HasFactory;
+
     public const string TEXT = 'text';
     public const string HTML = 'html';
     public const string TEMPLATE = 'template';
@@ -202,6 +206,48 @@ class Block extends Model
     {
         return self::canManage($this->type)
             && ($this->layout !== self::LAYOUT_TEMPLATE || isAdmin(User::BOSS));
+    }
+
+    /**
+     * Блок по id или 404, блок владельца — 403
+     */
+    public static function findManageable(int $id): self
+    {
+        $block = self::query()->find($id);
+
+        if (! $block) {
+            abort(404, __('home_builder::home_builder.block_not_found'));
+        }
+
+        if (! $block->isManageable()) {
+            abort(403, __('home_builder::home_builder.boss_only'));
+        }
+
+        return $block;
+    }
+
+    /**
+     * Новый блок типа с настройками по умолчанию: неизвестный тип — 404, тип владельца — 403
+     */
+    public static function draft(string $type): self
+    {
+        if (! isset(self::types()[$type])) {
+            abort(404, __('home_builder::home_builder.type_not_found'));
+        }
+
+        if (! self::canManage($type)) {
+            abort(403, __('home_builder::home_builder.boss_only'));
+        }
+
+        return new self([
+            'type'          => $type,
+            'layout'        => $type === self::ENTRIES ? 'list' : '',
+            'items'         => 5,
+            'cache_minutes' => 0,
+            'width'         => 12,
+            'visibility'    => self::VISIBLE_ALL,
+            'active'        => true,
+        ]);
     }
 
     /**

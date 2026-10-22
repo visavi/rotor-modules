@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Lottery\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -19,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Lottery extends Model
 {
+    /** @use HasFactory<\Modules\Lottery\Tests\Factories\LotteryFactory> */
+    use HasFactory;
+
     /**
      * The table associated with the model.
      */

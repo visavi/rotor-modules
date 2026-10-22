@@ -8,11 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
-use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Str;
+use Modules\Blog\Http\Requests\ArticleRequest;
+use Modules\Blog\Http\Requests\ArticleStoreRequest;
 use Modules\Blog\Http\Resources\ArticleResource;
 use Modules\Blog\Http\Resources\BlogResource;
 use Modules\Blog\Models\Article;
@@ -105,33 +106,26 @@ class ArticleApiController extends Controller
     /**
      * Создание статьи
      */
-    public function store(Request $request, Flood $flood, FileService $files): JsonResponse
+    public function store(ArticleStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        if (! isAdmin() && ! setting('blog_create')) {
-            abort(422, __('blog::blogs.articles_closed'));
-        }
-
-        $user = getUser();
-        $validated = $this->validateArticle($request, $flood, FileService::rules(Article::$morphName));
-        $category = $this->findOpenCategory((int) $validated['category_id']);
-
-        $isDraft = (bool) ($validated['draft'] ?? false);
-        $publishedAt = $this->resolvePublishedAt($validated['published_at'] ?? null);
+        $title = $request->string('title')->value();
+        $isDraft = $request->boolean('draft');
+        $publishedAt = $request->publishedAt();
         // Статьи проходят модерацию, если она включена и автор не из администрации
         $isModeration = setting('article_moderation') && ! isAdmin();
 
         $article = Article::query()->create([
-            'category_id'  => $category->id,
-            'user_id'      => $user->id,
-            'title'        => $validated['title'],
-            'slug'         => $validated['title'],
-            'text'         => $validated['text'],
+            'category_id'  => $request->category()->id,
+            'user_id'      => getUser('id'),
+            'title'        => $title,
+            'slug'         => $title,
+            'text'         => $request->string('text')->value(),
             'draft'        => $isDraft,
             'active'       => ! $isDraft && ! $publishedAt && ! $isModeration,
             'published_at' => $publishedAt,
         ]);
 
-        $this->syncTags($article, $validated['tags']);
+        $article->syncTags($request->tagNames());
 
         // Файлы можно приложить к запросу или загрузить заранее — с relate_id = 0
         $files->attach($article, $request->file('files', []));
@@ -148,7 +142,7 @@ class ArticleApiController extends Controller
     /**
      * Редактирование своей статьи
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id, ArticleRequest $request): JsonResponse
     {
         $article = Article::query()->find($id);
 
@@ -160,25 +154,23 @@ class ArticleApiController extends Controller
             abort(403, __('main.article_not_author'));
         }
 
-        $validated = $this->validateArticle($request);
-        $category = $this->findOpenCategory((int) $validated['category_id']);
-
         // publish переводит черновик в публикацию, иначе статья остаётся в прежнем состоянии
         $isPublish = $request->boolean('publish');
-        $publishedAt = $isPublish ? null : $this->resolvePublishedAt($validated['published_at'] ?? null);
+        $publishedAt = $request->publishedAt();
         $isDraft = ! $isPublish && $article->draft;
         $isModeration = setting('article_moderation') && ! isAdmin();
 
         $article->update([
-            'category_id'  => $category->id,
-            'title'        => $validated['title'],
-            'text'         => $validated['text'],
-            'draft'        => $isDraft,
-            'active'       => $isPublish || (! $isDraft && ! $publishedAt && ! $isModeration && $article->active),
+            'category_id' => $request->category()->id,
+            'title'       => $request->string('title')->value(),
+            'text'        => $request->string('text')->value(),
+            'draft'       => $isDraft,
+            // При модерации публикация черновика тоже ждёт проверки
+            'active'       => ! $isModeration && ($isPublish || (! $isDraft && ! $publishedAt && $article->active)),
             'published_at' => $publishedAt,
         ]);
 
-        $this->syncTags($article, $validated['tags']);
+        $article->syncTags($request->tagNames());
         clearCache('tagCloud');
 
         $article->load('user', 'category', 'tags', 'files');
@@ -187,58 +179,6 @@ class ArticleApiController extends Controller
             'message' => __('blog::blogs.article_success_edited'),
             'article' => ArticleResource::make($article),
         ]);
-    }
-
-    /**
-     * Общие правила статьи
-     *
-     * Файлы — только при создании: правка идёт PATCH, а его multipart PHP не разбирает.
-     * Вложения существующей статьи — через POST /api/files с её id
-     */
-    private function validateArticle(Request $request, ?Flood $flood = null, array $fileRules = []): array
-    {
-        return $request->validate([
-            'category_id' => ['required', 'integer', 'min:1'],
-            'title'       => ['required', 'string', 'min:' . setting('blog_title_min'), 'max:' . setting('blog_title_max')],
-            'text'        => [
-                'required',
-                'string',
-                'min:' . setting('blog_text_min'),
-                'max:' . setting('blog_text_max'),
-                static function (string $attribute, mixed $value, Closure $fail) use ($flood) {
-                    if ($flood && $flood->isFlood()) {
-                        $fail(__('validator.flood', ['sec' => $flood->getPeriod()]));
-                    }
-                },
-            ],
-            'tags'         => ['required', 'array', 'min:1', 'max:10'],
-            'tags.*'       => ['string', 'min:' . setting('blog_tag_min'), 'max:' . setting('blog_tag_max')],
-            'draft'        => ['nullable', 'boolean'],
-            'published_at' => ['nullable', 'date', 'after:now'],
-        ] + $fileRules);
-    }
-
-    /**
-     * Отложенная публикация доступна только администрации
-     */
-    private function resolvePublishedAt(?string $publishedAt): ?string
-    {
-        return $publishedAt && isAdmin() ? $publishedAt : null;
-    }
-
-    /**
-     * Пересобирает теги статьи, порядок сохраняется
-     */
-    private function syncTags(Article $article, array $tags): void
-    {
-        $tagIds = [];
-
-        foreach (array_values(array_unique($tags)) as $key => $name) {
-            $tag = Tag::query()->firstOrCreate(['name' => Str::lower($name)]);
-            $tagIds[$tag->id] = ['sort' => $key];
-        }
-
-        $article->tags()->sync($tagIds);
     }
 
     /**
@@ -253,23 +193,5 @@ class ArticleApiController extends Controller
         return $isModeration
             ? __('blog::blogs.article_moderation_text')
             : __('blog::blogs.article_success_created');
-    }
-
-    /**
-     * Находит открытую категорию блога
-     */
-    private function findOpenCategory(int $id): Blog
-    {
-        $category = Blog::query()->find($id);
-
-        if (! $category) {
-            abort(422, __('blog::blogs.category_not_exist'));
-        }
-
-        if ($category->closed) {
-            abort(422, __('blog::blogs.category_closed'));
-        }
-
-        return $category;
     }
 }

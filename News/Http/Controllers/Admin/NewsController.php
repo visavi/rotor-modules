@@ -6,12 +6,12 @@ namespace Modules\News\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Models\File;
-use App\Models\User;
+use App\Services\FileService;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\News\Http\Requests\NewsRequest;
 use Modules\News\Models\News;
 
 class NewsController extends AdminController
@@ -32,91 +32,67 @@ class NewsController extends AdminController
     /**
      * Редактирование новости
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id, Request $request): View
     {
-        $news = News::query()->find($id);
+        $news = $this->findNews($id);
         $page = int($request->input('page', 1));
-
-        if (! $news) {
-            abort(404, __('news::news.news_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-            $pinned = empty($request->input('pinned')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('news_text_min'), setting('news_text_max'), ['text' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $news->update([
-                    'title'  => $title,
-                    'text'   => $text,
-                    'closed' => $closed,
-                    'pinned' => $pinned,
-                ]);
-
-                clearCache(['statNews', 'pinnedNews']);
-
-                return redirect()->route('news.view', ['id' => $news->id])
-                    ->with('success', __('news::news.news_success_edited'));
-            }
-
-            return redirect()->route('admin.news.edit', ['id' => $news->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
 
         return view('news::admin/news/edit', compact('news', 'page'));
     }
 
     /**
+     * Сохранение новости
+     */
+    public function update(int $id, NewsRequest $request): RedirectResponse
+    {
+        $news = $this->findNews($id);
+
+        $news->update([
+            'title'  => $request->string('title')->value(),
+            'text'   => $request->string('text')->value(),
+            'closed' => $request->boolean('closed'),
+            'pinned' => $request->boolean('pinned'),
+        ]);
+
+        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
+
+        return redirect()->route('news.view', ['id' => $news->id])
+            ->with('success', __('news::news.news_success_edited'));
+    }
+
+    /**
      * Создание новости
      */
-    public function create(Request $request, Validator $validator): View|RedirectResponse
+    public function create(): View
     {
         $files = File::query()
             ->pending(News::$morphName, getUser('id'))
-            ->ordered();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $text = $request->input('text');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-            $pinned = empty($request->input('pinned')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('news_title_min'), setting('news_title_max'), ['title' => __('validator.text')])
-                ->length($text, setting('news_text_min'), setting('news_text_max'), ['text' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $news = News::query()->create([
-                    'user_id' => getUser('id'),
-                    'title'   => $title,
-                    'text'    => $text,
-                    'closed'  => $closed,
-                    'pinned'  => $pinned,
-                ]);
-
-                $files->update(['relate_id' => $news->id]);
-
-                clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
-
-                return redirect()->route('news.view', ['id' => $news->id])
-                    ->with('success', __('news::news.news_success_added'));
-            }
-
-            return redirect()->route('admin.news.create')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        $files = $files->get();
+            ->ordered()
+            ->get();
 
         return view('news::admin/news/create', compact('files'));
+    }
+
+    /**
+     * Публикация новости
+     */
+    public function store(NewsRequest $request, FileService $files): RedirectResponse
+    {
+        $news = News::query()->create([
+            'user_id' => getUser('id'),
+            'title'   => $request->string('title')->value(),
+            'text'    => $request->string('text')->value(),
+            'closed'  => $request->boolean('closed'),
+            'pinned'  => $request->boolean('pinned'),
+        ]);
+
+        // Файлы загружаются в редактор до публикации
+        $files->attach($news, []);
+
+        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
+
+        return redirect()->route('news.view', ['id' => $news->id])
+            ->with('success', __('news::news.news_success_added'));
     }
 
     /**
@@ -124,10 +100,6 @@ class NewsController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run('news');
 
         return redirect()
@@ -142,15 +114,25 @@ class NewsController extends AdminController
     {
         $page = int($request->input('page', 1));
 
+        $this->findNews($id)->delete();
+
+        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
+
+        return redirect()->route('admin.news.index', ['page' => $page])
+            ->with('success', __('news::news.news_success_deleted'));
+    }
+
+    /**
+     * Новость по id
+     */
+    private function findNews(int $id): News
+    {
         $news = News::query()->find($id);
 
         if (! $news) {
             abort(404, __('news::news.news_not_exist'));
         }
 
-        $news->delete();
-
-        return redirect()->route('admin.news.index', ['page' => $page])
-            ->with('success', __('news::news.news_success_deleted'));
+        return $news;
     }
 }

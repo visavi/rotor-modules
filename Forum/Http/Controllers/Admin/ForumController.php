@@ -5,15 +5,19 @@ declare(strict_types=1);
 namespace Modules\Forum\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Requests\Admin\DeleteSelectedRequest;
 use App\Models\File;
 use App\Models\User;
 use App\Support\CategoryTree;
 use App\Support\Restatement;
-use App\Support\Validator;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Forum\Http\Requests\ForumCategoryRequest;
+use Modules\Forum\Http\Requests\PostEditRequest;
+use Modules\Forum\Http\Requests\TopicAdminRequest;
+use Modules\Forum\Http\Requests\TopicMoveRequest;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
@@ -51,112 +55,63 @@ class ForumController extends AdminController
     /**
      * Создание раздела
      */
-    public function create(Request $request, Validator $validator): RedirectResponse
+    public function create(ForumCategoryRequest $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
+        $forum = Forum::query()->create([
+            'title' => $request->string('title')->value(),
+            'sort'  => Forum::query()->max('sort') + 1,
+        ]);
 
-        $title = $request->input('title');
-
-        $validator->length($title, setting('forum_category_min'), setting('forum_category_max'), ['title' => __('validator.text')]);
-
-        if ($validator->isValid()) {
-            $max = Forum::query()->max('sort') + 1;
-
-            $forum = Forum::query()->create([
-                'title' => $title,
-                'sort'  => $max,
-            ]);
-
-            return redirect()->route('admin.forums.edit', ['id' => $forum->id])
-                ->with('success', __('forum::forums.forum_success_created'));
-        }
-
-        return redirect()->route('admin.forums.index')
-            ->withInput()
-            ->withErrors($validator->getErrors());
+        return redirect()->route('admin.forums.edit', ['id' => $forum->id])
+            ->with('success', __('forum::forums.forum_success_created'));
     }
 
     /**
      * Редактирование форума
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
-        $forum = Forum::query()->with('children')->find($id);
-
-        if (! $forum) {
-            abort(404, __('forum::forums.forum_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $parent = int($request->input('parent'));
-            $title = $request->input('title');
-            $description = $request->input('description');
-            $closed = empty($request->input('closed')) ? 0 : 1;
-
-            $validator
-                ->length($title, setting('forum_category_min'), setting('forum_category_max'), ['title' => __('validator.text')])
-                ->length($description, setting('forum_description_min'), setting('forum_description_max'), ['description' => __('validator.text')])
-                ->notEqual($parent, $forum->id, ['parent' => __('forum::forums.forum_invalid')]);
-
-            if ($validator->isValid()) {
-                $forum->update([
-                    'parent_id'   => $parent,
-                    'title'       => $title,
-                    'description' => $description,
-                    'closed'      => $closed,
-                ]);
-
-                return redirect()->route('admin.forums.index')
-                    ->with('success', __('forum::forums.forum_success_edited'));
-            }
-
-            return redirect()->route('admin.forums.edit', ['id' => $forum->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $forum = $this->findForum($id);
         $forums = $forum->getChildren();
 
         return view('forum::admin/forums/edit', compact('forums', 'forum'));
     }
 
     /**
+     * Сохранение форума
+     */
+    public function update(int $id, ForumCategoryRequest $request): RedirectResponse
+    {
+        $this->findForum($id)->update([
+            'parent_id'   => $request->integer('parent'),
+            'title'       => $request->string('title')->value(),
+            'description' => $request->string('description')->value(),
+            'closed'      => $request->boolean('closed'),
+        ]);
+
+        return redirect()->route('admin.forums.index')
+            ->with('success', __('forum::forums.forum_success_edited'));
+    }
+
+    /**
      * Удаление раздела
      */
-    public function delete(int $id, Validator $validator): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
+        $forum = $this->findForum($id);
+        $redirect = redirect()->route('admin.forums.index');
+
+        if ($forum->children->isNotEmpty()) {
+            return $redirect->withErrors(__('forum::forums.forum_has_subforums'));
         }
 
-        $forum = Forum::query()->with('children')->find($id);
-
-        if (! $forum) {
-            abort(404, __('forum::forums.forum_not_exist'));
-        }
-
-        $validator->true($forum->children->isEmpty(), __('forum::forums.forum_has_subforums'));
-
-        $topic = Topic::query()->where('forum_id', $forum->id)->first();
-        if ($topic) {
-            $validator->addError(__('forum::forums.forum_has_topics'));
-        }
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.forums.index')
-                ->withErrors($validator->getErrors());
+        if (Topic::query()->where('forum_id', $forum->id)->exists()) {
+            return $redirect->withErrors(__('forum::forums.forum_has_topics'));
         }
 
         $forum->delete();
 
-        return redirect()->route('admin.forums.index')
-            ->with('success', __('forum::forums.forum_success_deleted'));
+        return $redirect->with('success', __('forum::forums.forum_success_deleted'));
     }
 
     /**
@@ -164,10 +119,6 @@ class ForumController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         CategoryTree::reorder(Forum::class, $request->string('order')->toString());
 
         return redirect()
@@ -180,10 +131,6 @@ class ForumController extends AdminController
      */
     public function restatement(): RedirectResponse
     {
-        if (! isAdmin(User::BOSS)) {
-            abort(403, __('errors.forbidden'));
-        }
-
         Restatement::run(['forums', 'votes']);
 
         return redirect()
@@ -233,101 +180,63 @@ class ForumController extends AdminController
     /**
      * Редактирование темы
      */
-    public function editTopic(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editTopic(int $id): View
     {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $note = $request->input('note');
-            $moderators = array_filter((array) $request->input('moderators', []), static fn ($login) => is_string($login) && $login !== '');
-            $locked = empty($request->input('locked')) ? 0 : 1;
-            $closed = empty($request->input('closed')) ? 0 : 1;
-            $closeUserId = $closed ? getUser('id') : null;
-
-            $curators = User::query()->whereIn('login', $moderators)->pluck('login');
-            $missing = array_diff($moderators, $curators->all());
-
-            $validator
-                ->length($title, setting('forum_title_min'), setting('forum_title_max'), ['title' => __('validator.text')])
-                ->length($note, setting('forum_note_min'), setting('forum_note_max'), ['note' => __('validator.text_long')])
-                ->empty($missing, ['moderators' => __('validator.user_login', ['login' => implode(', ', $missing)])])
-                ->lte(count($moderators), self::MAX_CURATORS, ['moderators' => __('forum::forums.curators_limit', ['limit' => self::MAX_CURATORS])]);
-
-            if ($validator->isValid()) {
-                $topic->update([
-                    'title'         => $title,
-                    'note'          => $note,
-                    'moderators'    => $curators->implode(','),
-                    'locked'        => $locked,
-                    'closed'        => $closed,
-                    'close_user_id' => $closeUserId,
-                ]);
-
-                clearCache(['statForums', 'recentTopics']);
-
-                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
-                    ->with('success', __('forum::forums.topic_success_edited'));
-            }
-
-            return redirect()->route('admin.topics.edit', ['id' => $topic->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $topic = $this->findTopic($id);
 
         return view('forum::admin/forums/edit_topic', compact('topic'));
     }
 
     /**
+     * Сохранение темы
+     */
+    public function updateTopic(int $id, TopicAdminRequest $request): RedirectResponse
+    {
+        $topic = $this->findTopic($id);
+        $closed = $request->boolean('closed');
+
+        $topic->update([
+            'title'         => $request->string('title')->value(),
+            'note'          => $request->string('note')->value(),
+            'moderators'    => $request->curators(),
+            'locked'        => $request->boolean('locked'),
+            'closed'        => $closed,
+            'close_user_id' => $closed ? getUser('id') : null,
+        ]);
+
+        clearCache(['statForums', 'recentTopics']);
+
+        return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
+            ->with('success', __('forum::forums.topic_success_edited'));
+    }
+
+    /**
      * Перенос темы
      */
-    public function moveTopic(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function moveTopic(int $id): View
     {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        if ($request->isMethod('post')) {
-            $fid = int($request->input('fid'));
-
-            $forum = Forum::query()->find($fid);
-
-            $validator->notEmpty($forum, ['forum' => __('forum::forums.forum_not_exist')]);
-
-            if ($forum) {
-                $validator->empty($forum->closed, ['forum' => __('forum::forums.forum_closed')]);
-                $validator->notEqual($topic->forum_id, $forum->id, ['forum' => __('forum::forums.forum_invalid')]);
-            }
-
-            if ($validator->isValid()) {
-                $oldTopic = $topic->replicate();
-
-                $topic->update([
-                    'forum_id' => $forum->id,
-                ]);
-
-                // Обновление счетчиков
-                $topic->forum->restatement();
-                $oldTopic->forum->restatement();
-
-                return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
-                    ->with('success', __('forum::forums.topic_success_moved'));
-            }
-
-            return redirect()->route('admin.topics.move', ['id' => $topic->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        $topic = $this->findTopic($id);
         $forums = $topic->forum->getChildren();
 
         return view('forum::admin/forums/move_topic', compact('forums', 'topic'));
+    }
+
+    /**
+     * Сохранение переноса
+     */
+    public function storeMove(int $id, TopicMoveRequest $request): RedirectResponse
+    {
+        $topic = $this->findTopic($id);
+        $oldForum = $topic->forum;
+
+        $topic->update(['forum_id' => $request->forum()->id]);
+
+        // Обновление счетчиков
+        $request->forum()->restatement();
+        $oldForum->restatement();
+
+        return redirect()->route('admin.forums.forum', ['id' => $topic->forum_id])
+            ->with('success', __('forum::forums.topic_success_moved'));
     }
 
     /**
@@ -439,73 +348,89 @@ class ForumController extends AdminController
     /**
      * Редактирование сообщения
      */
-    public function editPost(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editPost(int $id, Request $request): View
     {
         $page = int($request->input('page', 1));
+        $post = $this->findPost($id);
 
+        return view('forum::admin/forums/edit_post', compact('post', 'page'));
+    }
+
+    /**
+     * Сохранение сообщения
+     */
+    public function updatePost(int $id, PostEditRequest $request): RedirectResponse
+    {
+        $post = $this->findPost($id);
+
+        $post->update([
+            'text'         => $request->string('text')->value(),
+            'edit_user_id' => getUser('id'),
+        ]);
+
+        return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page', 1))])
+            ->with('success', __('main.message_edited_success'));
+    }
+
+    /**
+     * Удаление сообщений
+     */
+    public function deletePosts(DeleteSelectedRequest $request): RedirectResponse
+    {
+        $topic = $this->findTopic(int($request->input('tid')));
+
+        // Только сообщения этой темы: счётчики пересчитываются у неё одной
+        Post::query()
+            ->where('topic_id', $topic->id)
+            ->whereIn('id', $request->ids())
+            ->get()
+            ->each->delete();
+
+        $topic->restatement();
+
+        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => int($request->input('page', 1))])
+            ->with('success', __('main.messages_deleted_success'));
+    }
+
+    /**
+     * Раздел по id
+     */
+    private function findForum(int $id): Forum
+    {
+        $forum = Forum::query()->with('children')->find($id);
+
+        if (! $forum) {
+            abort(404, __('forum::forums.forum_not_exist'));
+        }
+
+        return $forum;
+    }
+
+    /**
+     * Тема по id
+     */
+    private function findTopic(int $id): Topic
+    {
+        $topic = Topic::query()->find($id);
+
+        if (! $topic) {
+            abort(404, __('forum::forums.topic_not_exist'));
+        }
+
+        return $topic;
+    }
+
+    /**
+     * Сообщение по id
+     */
+    private function findPost(int $id): Post
+    {
         $post = Post::query()->find($id);
 
         if (! $post) {
             abort(404, __('forum::forums.post_not_exist'));
         }
 
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $post->update([
-                    'text'         => $msg,
-                    'edit_user_id' => getUser('id'),
-                ]);
-
-                return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => $page])
-                    ->with('success', __('main.message_edited_success'));
-            }
-
-            return redirect()->route('admin.posts.edit', ['id' => $post->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
-        return view('forum::admin/forums/edit_post', compact('post', 'page'));
-    }
-
-    /**
-     * Удаление сообщений
-     */
-    public function deletePosts(Request $request, Validator $validator): RedirectResponse
-    {
-        $tid = int($request->input('tid'));
-        $page = int($request->input('page', 1));
-        $del = intar($request->input('del'));
-
-        $topic = Topic::query()->where('id', $tid)->first();
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $validator->true($del, __('validator.deletion'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page])
-                ->withErrors($validator->getErrors());
-        }
-
-        $posts = Post::query()
-            ->whereIn('id', $del)
-            ->get();
-
-        $posts->each(static function (Post $post) {
-            $post->delete();
-        });
-
-        // Обновление счетчиков
-        $topic->restatement();
-
-        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page])
-            ->with('success', __('main.messages_deleted_success'));
+        return $post;
     }
 }

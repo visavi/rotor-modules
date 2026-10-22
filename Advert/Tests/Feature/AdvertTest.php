@@ -92,13 +92,99 @@ class AdvertTest extends ModuleTestCase
         $this->user->update(['money' => 10]);
 
         $this->actingAs($this->user)
+            ->withSession(['protect' => 'ключ'])
             ->post('/adverts/create', [
-                'site' => 'https://visavi.net',
-                'name' => 'Мой сайт',
+                'site'    => 'https://visavi.net',
+                'name'    => 'Мой сайт',
+                'protect' => 'ключ',
             ])
-            ->assertSessionHasErrors();
+            ->assertSessionHasErrors('money');
 
         $this->assertDatabaseCount('adverts', 0);
+    }
+
+    public function testCaptchaIsChecked(): void
+    {
+        $this->actingAs($this->user)
+            ->withSession(['protect' => 'ключ'])
+            ->post('/adverts/create', [
+                'site'    => 'https://visavi.net',
+                'name'    => 'Мой сайт',
+                'protect' => 'другое',
+            ])
+            ->assertSessionHasErrors('protect');
+
+        $this->assertDatabaseCount('adverts', 0);
+        $this->assertSame(1000, $this->user->fresh()->money);
+    }
+
+    public function testWrongColorIsRejected(): void
+    {
+        // Старая проверка цвета пропускала буквы дальше f и несколько решёток
+        foreach (['#zzzzzz', '##ff0000'] as $color) {
+            $this->actingAs($this->user)
+                ->withSession(['protect' => 'ключ'])
+                ->post('/adverts/create', [
+                    'site'    => 'https://visavi.net',
+                    'name'    => 'Мой сайт',
+                    'color'   => $color,
+                    'protect' => 'ключ',
+                ])
+                ->assertSessionHasErrors('color');
+        }
+
+        $this->assertDatabaseCount('adverts', 0);
+    }
+
+    public function testAdminEditsAndDeletesUserLinks(): void
+    {
+        $admin = User::factory()->create(['level' => User::ADMIN]);
+        $link = $this->advert();
+
+        $this->actingAs($admin)
+            ->get('/admin/adverts/edit/' . $link->id)
+            ->assertOk()
+            ->assertSee('maxlength="100"', false);
+
+        $this->actingAs($admin)
+            ->post('/admin/adverts/edit/' . $link->id . '?page=2', ['site' => 'https://visavi.net', 'name' => 'Ой'])
+            ->assertSessionHasErrors('name');
+
+        $this->actingAs($admin)
+            ->post('/admin/adverts/edit/' . $link->id . '?page=2', [
+                'site'  => 'https://rotor.visavi.net',
+                'name'  => 'Новое имя',
+                'color' => '#00AA00',
+                'bold'  => 1,
+            ])
+            ->assertRedirect('admin/adverts?page=2');
+
+        $link->refresh();
+        $this->assertSame('Новое имя', $link->name);
+        $this->assertSame('#00AA00', $link->color);
+        $this->assertTrue((bool) $link->bold);
+
+        $this->actingAs($admin)
+            ->post('/admin/adverts/delete?page=2', ['del' => []])
+            ->assertSessionHasErrors('del');
+
+        $this->actingAs($admin)
+            ->post('/admin/adverts/delete?page=2', ['del' => [$link->id]])
+            ->assertRedirect('admin/adverts?page=2');
+
+        $this->assertNull($link->fresh());
+    }
+
+    public function testAdminAdvertNameErrorIsShownUnderName(): void
+    {
+        $admin = User::factory()->create(['level' => User::BOSS]);
+
+        $this->actingAs($admin)
+            ->from('/admin/admin-adverts')
+            ->followingRedirects()
+            ->post('/admin/admin-adverts', ['site' => 'https://example.com', 'name' => 'Ой'])
+            ->assertSee('form-control is-invalid" id="name"', false)
+            ->assertDontSee('form-control is-invalid" id="site"', false);
     }
 
     public function testPurchaseNeedsPoints(): void
@@ -225,7 +311,7 @@ class AdvertTest extends ModuleTestCase
 
     private function advert(array $attributes = []): Advert
     {
-        return Advert::query()->create([
+        return Advert::factory()->create([
             'site'       => 'https://visavi.net',
             'name'       => 'Реклама',
             'type'       => Advert::TYPE_USER,

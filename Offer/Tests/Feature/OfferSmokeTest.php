@@ -53,7 +53,7 @@ class OfferSmokeTest extends ModuleTestCase
     public function testCreateAttachesUploadedFiles(): void
     {
         // Файл загружается до создания записи и висит с relate_id = 0
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Offer::$morphName,
             'path'        => '/uploads/offers/screen.jpg',
@@ -80,7 +80,7 @@ class OfferSmokeTest extends ModuleTestCase
     {
         $offer = $this->createOffer();
 
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $offer->id,
             'relate_type' => Offer::$morphName,
             'path'        => '/uploads/offers/screen.jpg',
@@ -101,7 +101,7 @@ class OfferSmokeTest extends ModuleTestCase
 
     private function createOffer(): Offer
     {
-        return Offer::query()->create([
+        return Offer::factory()->create([
             'type'       => Offer::ISSUE,
             'title'      => 'Test offer',
             'text'       => 'Test offer text',

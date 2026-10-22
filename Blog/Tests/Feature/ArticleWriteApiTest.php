@@ -35,7 +35,7 @@ class ArticleWriteApiTest extends ModuleTestCase
         $this->overrideSetting('floodstime', 0);
 
         $this->user = User::factory()->create(['apikey' => Str::random(32)]);
-        $this->category = Blog::query()->create(['parent_id' => 0, 'name' => 'Технологии', 'sort' => 1]);
+        $this->category = Blog::factory()->create(['parent_id' => 0, 'name' => 'Технологии', 'sort' => 1]);
     }
 
     public function testStoreRequiresToken(): void
@@ -61,7 +61,7 @@ class ArticleWriteApiTest extends ModuleTestCase
 
     public function testStoreAttachesPendingFiles(): void
     {
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Article::$morphName,
             'path'        => '/uploads/articles/screen.jpg',
@@ -112,14 +112,26 @@ class ArticleWriteApiTest extends ModuleTestCase
     {
         $this->overrideSetting('blog_create', 0);
 
-        $this->postJson('/api/articles', $this->payload(), $this->headers())->assertStatus(422);
+        // Отказ до проверки полей: форму с ошибками исправлять незачем
+        $this->postJson('/api/articles', ['title' => ''] + $this->payload(), $this->headers())
+            ->assertForbidden()
+            ->assertJsonPath('message', __('blog::blogs.articles_closed'));
     }
 
     public function testClosedCategoryIsRejected(): void
     {
         $this->category->update(['closed' => 1]);
 
-        $this->postJson('/api/articles', $this->payload(), $this->headers())->assertStatus(422);
+        $this->postJson('/api/articles', $this->payload(), $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('category_id');
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->postJson('/api/articles', ['text' => '<p><strong>Коротко</strong></p>'] + $this->payload(), $this->headers())
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('text');
     }
 
     public function testUpdateOwnArticle(): void
@@ -182,7 +194,7 @@ class ArticleWriteApiTest extends ModuleTestCase
 
     private function createArticle(int $userId): Article
     {
-        return Article::query()->create([
+        return Article::factory()->create([
             'category_id' => $this->category->id,
             'user_id'     => $userId,
             'title'       => 'Статья про телефоны',

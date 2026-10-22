@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,9 @@ use Illuminate\Support\HtmlString;
  */
 class Item extends Model
 {
+    /** @use HasFactory<\Modules\Board\Tests\Factories\ItemFactory> */
+    use HasFactory;
+
     use ConvertVideoTrait;
     use FeedableTrait;
     use FileableTrait;
@@ -121,6 +125,13 @@ class Item extends Model
         static::saving(static function (self $item) {
             if (blank($item->phone)) {
                 $item->messengers = [];
+            }
+        });
+
+        // Счётчик категории держит объявления с active: снятое уже вычтено
+        static::deleted(static function (self $item) {
+            if ($item->active) {
+                Board::query()->whereKey($item->board_id)->decrement('count_items');
             }
         });
     }
@@ -200,6 +211,63 @@ class Item extends Model
     protected function active(Builder $query, bool $active = true): void
     {
         $query->where('active', $active);
+    }
+
+    /**
+     * Снимает объявление с публикации
+     *
+     * Счётчик категории держит объявления с active. Снятое вручную помечается
+     * сразу, иначе ежечасный board:deactivation вычел бы его второй раз
+     */
+    public function unpublish(): void
+    {
+        if ($this->active) {
+            $this->category->decrement('count_items');
+        }
+
+        $this->update([
+            'active'     => false,
+            'expires_at' => now(),
+        ]);
+    }
+
+    /**
+     * Публикует объявление на новый срок
+     */
+    public function publish(): void
+    {
+        $period = (int) setting('boards_period');
+
+        // Давно снятое объявление всплывает наверх, свежее сохраняет позицию
+        $expired = $this->updated_at->addDays($period)->lte(now());
+
+        if (! $this->active) {
+            $this->category->increment('count_items');
+        }
+
+        $this->update([
+            'active'     => true,
+            'expires_at' => now()->addDays($period),
+            'updated_at' => $expired ? now() : $this->updated_at,
+        ]);
+    }
+
+    /**
+     * Переносит объявление в другую категорию вместе со счётчиком
+     */
+    public function moveTo(Board $board): void
+    {
+        if ($this->board_id === $board->id) {
+            return;
+        }
+
+        if ($this->active) {
+            $board->increment('count_items');
+            Board::query()->whereKey($this->board_id)->decrement('count_items');
+        }
+
+        $this->board_id = $board->id;
+        $this->unsetRelation('category');
     }
 
     /**

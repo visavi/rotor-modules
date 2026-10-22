@@ -319,7 +319,7 @@ class PaymentSmokeTest extends ModuleTestCase
      */
     private function createAdvert(User $user, array $attributes = []): PaidAdvert
     {
-        return PaidAdvert::query()->create(array_merge([
+        return PaidAdvert::factory()->create(array_merge([
             'place'      => PaidAdvert::TOP,
             'url'        => 'https://example.com',
             'names'      => ['Test advert name'],
@@ -601,7 +601,7 @@ class PaymentSmokeTest extends ModuleTestCase
     {
         $data = $this->advertData();
 
-        return Order::query()->create(array_merge([
+        return Order::factory()->create(array_merge([
             'user_id'     => null,
             'type'        => Order::TYPE_ADVERT,
             'amount'      => $data['prices']['total'],

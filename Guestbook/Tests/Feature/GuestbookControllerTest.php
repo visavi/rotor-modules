@@ -22,7 +22,7 @@ class GuestbookControllerTest extends ModuleTestCase
     {
         Guestbook::unsetEventDispatcher();
 
-        $guest = Guestbook::query()->create([
+        $guest = Guestbook::factory()->create([
             'user_id'    => 1,
             'text'       => 'Test text message',
             'ip'         => '127.0.0.1',

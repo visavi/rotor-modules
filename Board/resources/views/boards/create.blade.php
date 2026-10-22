@@ -15,17 +15,18 @@
 @section('content')
     <form action="{{ route('items.create') }}" method="post">
         @csrf
-        <div class="mb-3{{ hasError('category') }}">
+        <div class="mb-3{{ hasError('category_id') }}">
             <label for="inputCategory" class="form-label">{{ __('board::boards.category') }}</label>
 
-            <select class="form-select" id="inputCategory" name="bid">
+            <?php $inputCategory = (int) old('category_id', $bid); ?>
+            <select class="form-select" id="inputCategory" name="category_id">
                 @foreach ($boards as $board)
-                    <option value="{{ $board->id }}"{{ ($bid === $board->id && ! $board->closed) ? ' selected' : '' }}{{ $board->closed ? ' disabled' : '' }}>
+                    <option value="{{ $board->id }}"{{ ($inputCategory === $board->id && ! $board->closed) ? ' selected' : '' }}{{ $board->closed ? ' disabled' : '' }}>
                         {{ str_repeat('–', $board->depth) }} {{ $board->name }}
                     </option>
                 @endforeach
             </select>
-            <div class="invalid-feedback">{{ textError('category') }}</div>
+            <div class="invalid-feedback">{{ textError('category_id') }}</div>
         </div>
 
         <div class="mb-3{{ hasError('title') }}">

@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Modules\MailNotify\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\ModuleSettingController;
-use App\Models\Setting;
-use Illuminate\Http\RedirectResponse;
-use Modules\MailNotify\Http\Requests\MailNotifySettingRequest;
 
 class MailNotifySettingController extends ModuleSettingController
 {
@@ -15,22 +12,19 @@ class MailNotifySettingController extends ModuleSettingController
 
     protected string $route = 'mail-notify.settings';
 
-    /**
-     * Сохранение настроек
-     */
-    public function store(MailNotifySettingRequest $request): RedirectResponse
+    protected function rules(): array
     {
-        $days = $request->integer('sets.sendprivatmailday');
-        $packet = $request->integer('sets.sendmailpacket');
+        return [
+            'sets.sendprivatmailday' => ['required', 'integer', 'between:1,99'],
+            'sets.sendmailpacket'    => ['required', 'integer', 'between:1,999'],
+        ];
+    }
 
-        // Пишем только свои ключи: чужие имена из формы не должны попадать в настройки
-        foreach (['sendprivatmailday' => $days, 'sendmailpacket' => $packet] as $name => $value) {
-            Setting::query()->updateOrCreate(['name' => $name], ['value' => (string) $value]);
-        }
-
-        clearCache('settings');
-
-        return redirect()->route($this->route)
-            ->with('success', __('settings.settings_success_saved'));
+    protected function messages(): array
+    {
+        return [
+            'sets.sendprivatmailday' => __('mail_notify::mail_notify.days_invalid'),
+            'sets.sendmailpacket'    => __('mail_notify::mail_notify.packet_invalid'),
+        ];
     }
 }

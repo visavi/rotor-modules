@@ -33,7 +33,7 @@ class LogTest extends ModuleTestCase
 
     public function testIndexAccessibleByBoss(): void
     {
-        Log::query()->create([
+        Log::factory()->create([
             'user_id' => $this->boss->id,
             'request' => '/admin/test',
             'referer' => '/admin',
@@ -48,7 +48,7 @@ class LogTest extends ModuleTestCase
 
     public function testClearByBoss(): void
     {
-        Log::query()->create([
+        Log::factory()->create([
             'user_id' => $this->boss->id,
             'request' => '/admin/test',
             'referer' => '/admin',
@@ -66,7 +66,7 @@ class LogTest extends ModuleTestCase
 
     public function testDeleteLogsCommand(): void
     {
-        Log::query()->create([
+        Log::factory()->create([
             'user_id'    => $this->boss->id,
             'request'    => '/admin/old',
             'referer'    => '/admin',
@@ -75,7 +75,7 @@ class LogTest extends ModuleTestCase
             'created_at' => now()->subMonths(2),
         ]);
 
-        Log::query()->create([
+        Log::factory()->create([
             'user_id' => $this->boss->id,
             'request' => '/admin/fresh',
             'referer' => '/admin',

@@ -226,15 +226,12 @@ class GuessNumberTest extends ModuleTestCase
     {
         // Страница не перезагружается, поэтому ошибка должна прийти json-ом,
         // иначе игрок жмёт кнопку и не понимает, почему ничего не происходит
-        $response = $this->actingAs($this->user)->postJson(
-            '/games/guess/go',
-            ['guess' => GuessNumberController::MAX + 50],
-            ['X-Requested-With' => 'XMLHttpRequest'],
-        );
+        // ajax ядра сводит 422 к {success: false, message}
+        $this->actingAs($this->user)
+            ->postJson('/games/guess/go', ['guess' => GuessNumberController::MAX + 50])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('guess');
 
-        $response->assertOk()->assertJson(['success' => false]);
-
-        $this->assertNotEmpty($response->json('message'));
         $this->assertSame(5000, $this->user->fresh()->money);
     }
 

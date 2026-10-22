@@ -63,9 +63,22 @@ class RatingTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->post('/users/' . $this->recipient->login . '/rating?vote=minus', ['text' => 'Нарушает правила'])
-            ->assertSessionHasErrors();
+            ->assertSessionHasErrors('vote');
 
         $this->assertDatabaseCount('rating', 0);
+    }
+
+    public function testUnknownVoteIsRejected(): void
+    {
+        // Раньше любое значение, кроме plus, шло минусом в обход проверки своей репутации
+        $this->user->update(['rating' => 0]);
+
+        $this->actingAs($this->user)
+            ->post('/users/' . $this->recipient->login . '/rating?vote=down', ['text' => 'Нарушает правила'])
+            ->assertSessionHasErrors('vote');
+
+        $this->assertDatabaseCount('rating', 0);
+        $this->assertSame(0, $this->recipient->fresh()->negrating);
     }
 
     public function testShortTextIsRejected(): void
@@ -75,6 +88,32 @@ class RatingTest extends ModuleTestCase
             ->assertSessionHasErrors('text');
 
         $this->assertDatabaseCount('rating', 0);
+    }
+
+    public function testMarkupIsNotCountedInLength(): void
+    {
+        $this->actingAs($this->user)
+            ->post('/users/' . $this->recipient->login . '/rating?vote=plus', ['text' => '<p><b>Ок</b></p>'])
+            ->assertSessionHasErrors('text');
+
+        $this->assertDatabaseCount('rating', 0);
+    }
+
+    public function testFormOpens(): void
+    {
+        $this->actingAs($this->user)
+            ->get('/users/' . $this->recipient->login . '/rating?vote=minus')
+            ->assertOk()
+            ->assertSee('value="minus" selected', false);
+    }
+
+    public function testFormIsClosedWhenVoteIsBlocked(): void
+    {
+        $this->vote();
+
+        $this->actingAs($this->user)
+            ->get('/users/' . $this->recipient->login . '/rating?vote=plus')
+            ->assertSee(__('rating::ratings.reputation_already_changed'));
     }
 
     public function testVoteNeedsPoints(): void
@@ -186,7 +225,7 @@ class RatingTest extends ModuleTestCase
 
     private function vote(array $attributes = []): Rating
     {
-        return Rating::query()->create([
+        return Rating::factory()->create([
             'user_id'      => $this->user->id,
             'recipient_id' => $this->recipient->id,
             'text'         => 'Хороший человек',

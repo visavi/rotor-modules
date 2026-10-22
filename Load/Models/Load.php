@@ -6,6 +6,7 @@ namespace Modules\Load\Models;
 
 use App\Traits\CategoryTreeTrait;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +28,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Load extends Model
 {
+    /** @use HasFactory<\Modules\Load\Tests\Factories\LoadFactory> */
+    use HasFactory;
+
     use CategoryTreeTrait;
 
     /**

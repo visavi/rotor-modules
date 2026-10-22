@@ -16,10 +16,10 @@
     <div class="section-form mb-3 shadow">
         <form action="/admin/delivery" method="post">
             @csrf
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea rows="5" class="form-control tiptap" id="msg" name="msg" required>{{ old('msg') }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('main.message') }}:</label>
+                <textarea rows="5" class="form-control tiptap" id="text" name="text" required>{{ old('text') }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
             {{ __('main.send') }}:<br>

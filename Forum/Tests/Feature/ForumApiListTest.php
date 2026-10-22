@@ -31,7 +31,7 @@ class ForumApiListTest extends ModuleTestCase
         ]);
 
         $this->user = User::factory()->create(['apikey' => Str::random(32)]);
-        $this->forum = Forum::query()->create(['title' => 'Test forum']);
+        $this->forum = Forum::factory()->create(['title' => 'Test forum']);
     }
 
     public function testPostsCarryUserVote(): void
@@ -40,7 +40,7 @@ class ForumApiListTest extends ModuleTestCase
         $topic = $this->createTopic($this->user);
         $post = $this->createPost($topic, User::factory()->create());
 
-        Poll::query()->create([
+        Poll::factory()->create([
             'relate_type' => Post::$morphName,
             'relate_id'   => $post->id,
             'user_id'     => $this->user->id,
@@ -62,7 +62,7 @@ class ForumApiListTest extends ModuleTestCase
         $topic = $this->createTopic($this->user);
         $post = $this->createPost($topic, User::factory()->create());
 
-        Poll::query()->create([
+        Poll::factory()->create([
             'relate_type' => Post::$morphName,
             'relate_id'   => $post->id,
             'user_id'     => $this->user->id,
@@ -180,7 +180,7 @@ class ForumApiListTest extends ModuleTestCase
         $topic->update(['count_posts' => 5]);
         $this->createTopic(User::factory()->create());
 
-        Bookmark::query()->create([
+        Bookmark::factory()->create([
             'user_id'     => $this->user->id,
             'topic_id'    => $topic->id,
             'count_posts' => 3,
@@ -214,7 +214,7 @@ class ForumApiListTest extends ModuleTestCase
 
     private function createTopic(User $user, ?DateTimeInterface $updatedAt = null): Topic
     {
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'    => $this->forum->id,
             'title'       => 'Test topic',
             'user_id'     => $user->id,
@@ -231,7 +231,7 @@ class ForumApiListTest extends ModuleTestCase
 
     private function createPost(Topic $topic, User $user): Post
     {
-        return Post::query()->create([
+        return Post::factory()->create([
             'topic_id' => $topic->id,
             'user_id'  => $user->id,
             'text'     => 'Сообщение',

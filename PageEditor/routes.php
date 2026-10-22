@@ -14,8 +14,10 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
             ->name('admin.files.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::match(['get', 'post'], '/edit', 'edit')->name('edit');
-                Route::match(['get', 'post'], '/create', 'create')->name('create');
+                Route::get('/edit', 'edit')->name('edit');
+                Route::post('/edit', 'update');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/create', 'store');
                 Route::delete('/delete', 'delete')->name('delete');
                 Route::post('/rename', 'rename')->name('rename');
                 Route::post('/upload', 'upload')->name('upload');

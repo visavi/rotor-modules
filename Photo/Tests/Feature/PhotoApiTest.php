@@ -113,7 +113,7 @@ class PhotoApiTest extends ModuleTestCase
 
     private function createPhoto(?string $text = 'Test photo text'): Photo
     {
-        return Photo::query()->create([
+        return Photo::factory()->create([
             'title'      => 'Test photo',
             'text'       => $text,
             'user_id'    => $this->user->id,
@@ -123,7 +123,7 @@ class PhotoApiTest extends ModuleTestCase
 
     private function attachFile(Photo $photo, string $name, string $extension, string $mimeType): void
     {
-        File::query()->create([
+        File::factory()->create([
             'relate_id'   => $photo->id,
             'relate_type' => Photo::$morphName,
             'path'        => '/uploads/photos/' . $name,
@@ -137,7 +137,7 @@ class PhotoApiTest extends ModuleTestCase
 
     private function addComment(Photo $photo, string $text, ?int $parentId = null): Comment
     {
-        return Comment::query()->create([
+        return Comment::factory()->create([
             'relate_type' => Photo::$morphName,
             'relate_id'   => $photo->id,
             'parent_id'   => $parentId,

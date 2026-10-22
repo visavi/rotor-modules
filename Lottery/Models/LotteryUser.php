@@ -6,6 +6,7 @@ namespace Modules\Lottery\Models;
 
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,6 +22,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LotteryUser extends Model
 {
+    /** @use HasFactory<\Modules\Lottery\Tests\Factories\LotteryUserFactory> */
+    use HasFactory;
+
     /**
      * The name of the "updated at" column.
      */

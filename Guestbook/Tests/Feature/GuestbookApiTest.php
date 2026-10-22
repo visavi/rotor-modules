@@ -104,7 +104,7 @@ class GuestbookApiTest extends ModuleTestCase
 
     public function testStoreAttachesPendingFiles(): void
     {
-        $file = File::query()->create([
+        $file = File::factory()->create([
             'relate_id'   => 0,
             'relate_type' => Guestbook::$morphName,
             'path'        => '/uploads/guestbook/screen.jpg',
@@ -132,7 +132,7 @@ class GuestbookApiTest extends ModuleTestCase
     {
         $this->postJson('/api/guestbook', ['text' => 'Сообщение от гостя', 'guest_name' => 'Гость'])
             ->assertStatus(422)
-            ->assertJsonValidationErrors('text');
+            ->assertJsonValidationErrors('protect');
     }
 
     public function testGuestPostsWithCaptcha(): void
@@ -227,7 +227,7 @@ class GuestbookApiTest extends ModuleTestCase
 
     private function createPost(array $attributes = []): Guestbook
     {
-        return Guestbook::query()->create($attributes + [
+        return Guestbook::factory()->create($attributes + [
             'user_id'    => $this->user->id,
             'text'       => 'Сообщение в гостевой',
             'ip'         => '127.0.0.1',

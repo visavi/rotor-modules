@@ -6,14 +6,18 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class RouletteController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Порядок чисел на европейском колесе, по часовой стрелке от зеро
      */
@@ -97,41 +101,28 @@ class RouletteController extends Controller
     /**
      * Спин
      */
-    public function spin(Request $request, Validator $validator): View|RedirectResponse|JsonResponse
+    public function spin(Request $request): View|RedirectResponse|JsonResponse
     {
-        $bet = int($request->input('bet'));
-        $type = (string) $request->input('type');
-        $guess = int($request->input('number'));
+        $request->validate([
+            'bet'    => $this->betRules(),
+            'type'   => ['required', Rule::in(array_keys(self::BETS))],
+            'number' => ['exclude_unless:type,number', 'required', 'integer', 'between:0,36'],
+        ], $this->betMessages() + [
+            'type.*'   => __('game::games.roulette_bet_invalid'),
+            'number.*' => __('game::games.roulette_number_invalid'),
+        ]);
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')])
-            ->true(isset(self::BETS[$type]), ['type' => __('game::games.roulette_bet_invalid')]);
-
-        if ($type === 'number') {
-            $validator->true($guess >= 0 && $guess <= 36, ['number' => __('game::games.roulette_number_invalid')]);
-        }
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/roulette')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $bet = $request->integer('bet');
+        $type = $request->string('type')->value();
+        $guess = $request->integer('number');
 
         $before = $this->user->money;
         $number = random_int(0, 36);
         $win = $this->isWin($type, $number, $guess) ? $bet * self::BETS[$type] : 0;
 
-        $this->user->decrement('money', $bet);
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
+        }
 
         if ($win) {
             $this->user->increment('money', $win);

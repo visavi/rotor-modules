@@ -13,7 +13,8 @@ Route::middleware('web')
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/create', 'add')->name('create');
-        Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
+        Route::get('/{id}/edit', 'edit')->name('edit')->middleware('check.user');
+        Route::post('/{id}/edit', 'update')->middleware('check.user');
     });
 
 Route::middleware(['web', 'check.admin', 'admin.logger'])
@@ -24,11 +25,13 @@ Route::middleware(['web', 'check.admin', 'admin.logger'])
             ->name('admin.guestbook.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
-                Route::match(['get', 'post'], '/{id}/edit', 'edit')->name('edit');
-                Route::match(['get', 'post'], '/{id}/reply', 'reply')->name('reply');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::post('/{id}/edit', 'update');
+                Route::get('/{id}/reply', 'reply')->name('reply');
+                Route::post('/{id}/reply', 'storeReply');
                 Route::post('/delete', 'delete')->name('delete');
                 Route::post('/publish', 'publish')->name('publish');
-                Route::post('/clear', 'clear')->name('clear');
+                Route::post('/clear', 'clear')->name('clear')->middleware('check.admin:boss');
             });
 
         Route::controller(GuestbookSettingController::class)

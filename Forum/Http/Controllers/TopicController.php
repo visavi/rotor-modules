@@ -11,7 +11,7 @@ use App\Models\Flood;
 use App\Models\Poll;
 use App\Models\Reader;
 use App\Models\User;
-use App\Support\Validator;
+use App\Services\FileService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +19,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Modules\Forum\Http\Requests\PostEditRequest;
+use Modules\Forum\Http\Requests\PostRequest;
+use Modules\Forum\Http\Requests\TopicEditRequest;
 use Modules\Forum\Models\Bookmark;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
@@ -114,42 +117,17 @@ class TopicController extends Controller
     /**
      * Message creation
      */
-    public function create(int $id, Request $request, Validator $validator, Flood $flood): RedirectResponse
+    public function create(PostRequest $request, Flood $flood, FileService $files): RedirectResponse
     {
-        $msg = $request->string('msg')->value();
+        $user = getUser();
+        $topic = $request->topic();
+        $post = $request->lastPost();
+        $msg = $request->string('text')->value();
 
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $topic = Topic::query()
-            ->where('topics.id', $id)
-            ->with('forum.parent')
-            ->first();
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $validator
-            ->empty($topic->closed, ['msg' => __('forum::forums.topic_closed')])
-            ->false($flood->isFlood(), ['msg' => __('validator.flood', ['sec' => $flood->getPeriod()])])
-            ->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
-
-        // Проверка сообщения на схожесть
-        $post = Post::query()->where('topic_id', $topic->id)->orderByDesc('id')->first();
-        $validator->notEqual($msg, $post->text ?? '', ['msg' => __('forum::forums.post_repeat')]);
-
-        if (! $validator->isValid()) {
-            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => Topic::pageOf($topic->count_posts)])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
+        // Загруженные заранее и пришедшие с формой: склеенный пост не должен превысить лимит
         $countFiles = File::query()
             ->pending(Post::$morphName, $user->id)
-            ->orderBy('created_at')
-            ->count();
+            ->count() + count($request->file('files', []));
 
         if (
             $post
@@ -178,9 +156,7 @@ class TopicController extends Controller
             ]);
         }
 
-        File::query()
-            ->pending(Post::$morphName, $user->id)
-            ->update(['relate_id' => $post->id]);
+        $files->attach($post, $request->file('files', []));
 
         $flood->saveState();
         sendNotify($msg, route('topics.topic', ['id' => $topic->id, 'pid' => $post->id], false), $topic->title);
@@ -196,101 +172,81 @@ class TopicController extends Controller
     /**
      * Delete messages
      */
-    public function delete(int $id, Request $request, Validator $validator): RedirectResponse
+    public function delete(int $id, Request $request): RedirectResponse
     {
         $del = intar($request->input('del'));
-        $page = int($request->input('page'));
+        $topic = $this->findTopic($id);
 
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
+        $error = match (true) {
+            ! $del                           => __('validator.deletion'),
+            (bool) $topic->closed            => __('forum::forums.topic_closed'),
+            ! $topic->isModerator(getUser()) => __('forum::forums.posts_deleted_curators'),
+            default                          => null,
+        };
+
+        $redirect = redirect()->route('topics.topic', ['id' => $topic->id, 'page' => int($request->input('page'))]);
+
+        if ($error) {
+            return $redirect->withErrors($error);
         }
 
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        $validator
-            ->notEmpty($del, __('validator.deletion'))
-            ->empty($topic->closed, __('forum::forums.topic_closed'))
-            ->equal($topic->isModerator($user), true, __('forum::forums.posts_deleted_curators'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page])
-                ->withErrors($validator->getErrors());
-        }
-
-        $posts = Post::query()
+        Post::query()
             ->where('topic_id', $topic->id)
             ->whereIn('id', $del)
-            ->get();
+            ->get()
+            ->each->delete();
 
-        $posts->each(static function (Post $post) {
-            $post->delete();
-        });
-
-        return redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $page])
-            ->with('success', __('main.messages_deleted_success'));
+        return $redirect->with('success', __('main.messages_deleted_success'));
     }
 
     /**
      * Close topic
      */
-    public function close(int $id, Validator $validator): RedirectResponse
+    public function close(int $id): RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $user = getUser();
+        $topic = $this->findTopic($id);
 
-        $topic = Topic::query()->find($id);
+        $error = match (true) {
+            $user->point < setting('editforumpoint') => __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]),
+            $topic->user_id !== $user->id            => __('forum::forums.topic_not_author'),
+            (bool) $topic->closed                    => __('forum::forums.topic_closed'),
+            default                                  => null,
+        };
 
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $redirect = redirect()->route('topics.topic', ['id' => $topic->id]);
 
-        $validator
-            ->gte($user->point, setting('editforumpoint'), __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]))
-            ->equal($topic->user_id, $user->id, __('forum::forums.topic_not_author'))
-            ->empty($topic->closed, __('forum::forums.topic_closed'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('topics.topic', ['id' => $topic->id])
-                ->withErrors($validator->getErrors());
+        if ($error) {
+            return $redirect->withErrors($error);
         }
 
         $topic->update([
             'closed'        => 1,
-            'close_user_id' => getUser('id'),
+            'close_user_id' => $user->id,
         ]);
 
-        return redirect()->route('topics.topic', ['id' => $topic->id])
-            ->with('success', __('forum::forums.topic_success_closed'));
+        return $redirect->with('success', __('forum::forums.topic_success_closed'));
     }
 
     /**
      * Open topic
      */
-    public function open(int $id, Validator $validator): RedirectResponse
+    public function open(int $id): RedirectResponse
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $user = getUser();
+        $topic = $this->findTopic($id);
 
-        $topic = Topic::query()->find($id);
+        $error = match (true) {
+            $topic->user_id !== $user->id       => __('forum::forums.topic_not_author'),
+            $topic->close_user_id !== $user->id => __('forum::forums.topic_opened_author'),
+            ! $topic->closed                    => __('forum::forums.topic_already_open'),
+            default                             => null,
+        };
 
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $redirect = redirect()->route('topics.topic', ['id' => $topic->id]);
 
-        $validator
-            ->equal($topic->user_id, $user->id, __('forum::forums.topic_not_author'))
-            ->equal($topic->close_user_id, $user->id, __('forum::forums.topic_opened_author'))
-            ->notEmpty($topic->closed, __('forum::forums.topic_already_open'));
-
-        if (! $validator->isValid()) {
-            return redirect()->route('topics.topic', ['id' => $topic->id])
-                ->withErrors($validator->getErrors());
+        if ($error) {
+            return $redirect->withErrors($error);
         }
 
         $topic->update([
@@ -298,119 +254,18 @@ class TopicController extends Controller
             'close_user_id' => null,
         ]);
 
-        return redirect()->route('topics.topic', ['id' => $topic->id])
-            ->with('success', __('forum::forums.topic_success_opened'));
+        return $redirect->with('success', __('forum::forums.topic_success_opened'));
     }
 
     /**
      * Topic editing
      */
-    public function edit(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function edit(int $id): View
     {
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
+        $topic = $this->editableTopic($id);
 
-        if ($user->point < setting('editforumpoint')) {
-            abort(200, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
-        }
-
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
-
-        if ($topic->user_id !== $user->id) {
-            abort(200, __('forum::forums.topic_not_author'));
-        }
-
-        if ($topic->closed) {
-            abort(200, __('forum::forums.topic_closed'));
-        }
-
-        $post = Post::query()->where('topic_id', $topic->id)
-            ->orderBy('id')
-            ->first();
-
-        $vote = Vote::query()->where('topic_id', $id)->first();
-
-        if ($request->isMethod('post')) {
-            $title = $request->input('title');
-            $msg = $request->input('msg');
-            $question = $request->input('question');
-            $answers = (array) $request->input('answers');
-
-            $validator
-                ->length($title, setting('forum_title_min'), setting('forum_title_max'), ['title' => __('validator.text')]);
-
-            if ($post) {
-                $validator->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
-            }
-
-            if ($vote) {
-                $validator->length($question, 5, 100, ['question' => __('validator.text')]);
-
-                if ($answers) {
-                    $validator->empty($vote->count, ['question' => __('forum::forums.vote_answer_changed_impossible')]);
-
-                    $answers = array_unique(array_diff($answers, ['']));
-
-                    foreach ($answers as $answer) {
-                        $validator->length($answer, setting('vote_answer_min'), setting('vote_answer_max'), ['answers' => __('forum::forums.vote_answer_wrong_length')]);
-                    }
-
-                    $validator->between(count($answers), 2, 10, ['answers' => __('forum::forums.vote_answer_not_enough')]);
-                }
-            }
-
-            if ($validator->isValid()) {
-                $topic->update(['title' => $title]);
-
-                if ($post) {
-                    $post->update([
-                        'text'         => $msg,
-                        'edit_user_id' => $user->id,
-                    ]);
-                }
-
-                if ($vote) {
-                    $vote->update([
-                        'title' => $question,
-                    ]);
-
-                    if ($answers) {
-                        $existingAnswerIds = $vote->answers()->pluck('id')->toArray();
-                        $answerIdsToDelete = array_diff($existingAnswerIds, array_keys($answers));
-
-                        if ($answerIdsToDelete !== []) {
-                            $vote->answers()->whereIn('id', $answerIdsToDelete)->delete();
-                        }
-
-                        $existingAnswers = $vote->answers()->get()->keyBy('id');
-                        $countAnswers = $existingAnswers->count();
-
-                        foreach ($answers as $answerId => $answer) {
-                            $ans = $existingAnswers->get($answerId);
-
-                            if ($ans) {
-                                $ans->update(['answer' => $answer]);
-                            } elseif ($countAnswers < 10) {
-                                $vote->answers()->create(['answer' => $answer]);
-                                $countAnswers++;
-                            }
-                        }
-                    }
-                }
-
-                return redirect()->route('topics.topic', ['id' => $topic->id])
-                    ->with('success', __('forum::forums.topic_success_changed'));
-            }
-
-            return redirect()->route('topics.edit', ['id' => $topic->id])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $post = Post::query()->where('topic_id', $topic->id)->orderBy('id')->first();
+        $vote = Vote::query()->where('topic_id', $topic->id)->first();
 
         if ($vote) {
             $vote->getAnswers = $vote->answers->pluck('answer', 'id')->all();
@@ -420,79 +275,90 @@ class TopicController extends Controller
     }
 
     /**
+     * Topic saving
+     */
+    public function update(int $id, TopicEditRequest $request): RedirectResponse
+    {
+        $topic = $this->editableTopic($id);
+        $vote = $request->vote();
+
+        $topic->update(['title' => $request->string('title')->value()]);
+
+        $request->firstPost()?->update([
+            'text'         => $request->string('text')->value(),
+            'edit_user_id' => getUser('id'),
+        ]);
+
+        if ($vote) {
+            $vote->update(['title' => $request->string('question')->value()]);
+
+            $answers = $request->validated('answers') ?? [];
+
+            if ($answers) {
+                // Ключи формы — id прежних вариантов, у новых свои: сравниваем в PHP
+                $removed = array_diff($vote->answers()->pluck('id')->all(), array_keys($answers));
+
+                if ($removed) {
+                    $vote->answers()->whereIn('id', $removed)->delete();
+                }
+
+                $existingAnswers = $vote->answers()->get()->keyBy('id');
+                $countAnswers = $existingAnswers->count();
+
+                foreach ($answers as $answerId => $answer) {
+                    $existing = $existingAnswers->get($answerId);
+
+                    if ($existing) {
+                        $existing->update(['answer' => $answer]);
+                    } elseif ($countAnswers < 10) {
+                        $vote->answers()->create(['answer' => $answer]);
+                        $countAnswers++;
+                    }
+                }
+            }
+        }
+
+        return redirect()->route('topics.topic', ['id' => $topic->id])
+            ->with('success', __('forum::forums.topic_success_changed'));
+    }
+
+    /**
      * Post editing
      */
-    public function editPost(int $id, Request $request, Validator $validator): View|RedirectResponse
+    public function editPost(int $id, Request $request): View
     {
         $page = int($request->input('page'));
-
-        if (! $user = getUser()) {
-            abort(403, __('main.not_authorized'));
-        }
-
-        $post = Post::query()
-            ->with('topic')
-            ->where('id', $id)
-            ->first();
-
-        if (! $post) {
-            abort(404, __('forum::forums.post_not_exist'));
-        }
-
-        if ($post->topic->closed) {
-            abort(200, __('forum::forums.topic_closed'));
-        }
-
-        $isModer = $post->topic->isModerator($user);
-
-        if (! $isModer && $post->user_id !== $user->id) {
-            abort(200, __('forum::forums.posts_edited_curators'));
-        }
-
-        if (! $isModer && $post->created_at->lt(now()->subMinutes(10))) {
-            abort(200, __('main.editing_impossible'));
-        }
-
-        if ($request->isMethod('post')) {
-            $msg = $request->input('msg');
-
-            $validator
-                ->length($msg, setting('forum_text_min'), setting('forum_text_max'), ['msg' => __('validator.text')]);
-
-            if ($validator->isValid()) {
-                $post->update([
-                    'text'         => $msg,
-                    'edit_user_id' => $user->id,
-                ]);
-
-                return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => $page])
-                    ->withFragment('post_' . $post->id)
-                    ->with('success', __('main.message_edited_success'));
-            }
-
-            return redirect()->route('posts.edit', ['id' => $post->id, 'page' => $page])
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $post = $this->editablePost($id);
 
         return view('forum::forums/topic_edit_post', compact('post', 'page'));
     }
 
     /**
+     * Post saving
+     */
+    public function updatePost(int $id, PostEditRequest $request): RedirectResponse
+    {
+        $post = $this->editablePost($id);
+
+        $post->update([
+            'text'         => $request->string('text')->value(),
+            'edit_user_id' => getUser('id'),
+        ]);
+
+        return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page'))])
+            ->withFragment('post_' . $post->id)
+            ->with('success', __('main.message_edited_success'));
+    }
+
+    /**
      * Voting
      */
-    public function vote(int $id, Request $request, Validator $validator): RedirectResponse|JsonResponse
+    public function vote(int $id, Request $request): RedirectResponse|JsonResponse
     {
-        if (! $user = getUser()) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => __('main.not_authorized')]);
-            }
-
-            abort(403, __('main.not_authorized'));
-        }
-
+        $user = getUser();
         $topic = Topic::query()->find($id);
         $vote = $topic ? Vote::query()->where('topic_id', $id)->first() : null;
+        $page = int($request->input('page'));
 
         if (! $vote) {
             if ($request->ajax()) {
@@ -503,33 +369,23 @@ class TopicController extends Controller
         }
 
         $poll = int($request->input('poll'));
-        $page = int($request->input('page'));
+        $answer = $poll ? $vote->answers()->where('id', $poll)->first() : null;
 
-        $validator
-            ->notEmpty($poll, __('forum::forums.vote_answer_not_chosen'))
-            ->empty($topic->closed, __('forum::forums.topic_closed'));
+        $error = match (true) {
+            ! $poll                 => __('forum::forums.vote_answer_not_chosen'),
+            (bool) $topic->closed   => __('forum::forums.topic_closed'),
+            $vote->poll()->exists() => __('forum::forums.vote_passed'),
+            ! $answer               => __('forum::forums.vote_answer_not_found'),
+            default                 => null,
+        };
 
-        if ($validator->isValid()) {
-            $votePoll = $vote->poll()->first();
-            $validator->empty($votePoll, __('forum::forums.vote_passed'));
-        }
-
-        if ($validator->isValid()) {
-            $answer = $vote->answers()
-                ->where('id', $poll)
-                ->where('vote_id', $vote->id)
-                ->first();
-
-            $validator->notEmpty($answer, __('forum::forums.vote_answer_not_found'));
-        }
-
-        if (! $validator->isValid()) {
+        if ($error) {
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => current($validator->getErrors())]);
+                return response()->json(['success' => false, 'message' => $error]);
             }
 
             return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
-                ->withErrors($validator->getErrors());
+                ->withErrors($error);
         }
 
         $vote->increment('count');
@@ -555,5 +411,69 @@ class TopicController extends Controller
 
         return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
             ->with('success', __('forum::forums.vote_success'));
+    }
+
+    /**
+     * Тема по id
+     */
+    private function findTopic(int $id): Topic
+    {
+        $topic = Topic::query()->find($id);
+
+        if (! $topic) {
+            abort(404, __('forum::forums.topic_not_exist'));
+        }
+
+        return $topic;
+    }
+
+    /**
+     * Своя открытая тема, если хватает баллов на правку
+     */
+    private function editableTopic(int $id): Topic
+    {
+        if (getUser('point') < setting('editforumpoint')) {
+            abort(200, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
+        }
+
+        $topic = $this->findTopic($id);
+
+        if ($topic->user_id !== getUser('id')) {
+            abort(200, __('forum::forums.topic_not_author'));
+        }
+
+        if ($topic->closed) {
+            abort(200, __('forum::forums.topic_closed'));
+        }
+
+        return $topic;
+    }
+
+    /**
+     * Сообщение, которое можно править: своё первые 10 минут, куратору — любое
+     */
+    private function editablePost(int $id): Post
+    {
+        $post = Post::query()->with('topic')->find($id);
+
+        if (! $post) {
+            abort(404, __('forum::forums.post_not_exist'));
+        }
+
+        if ($post->topic->closed) {
+            abort(200, __('forum::forums.topic_closed'));
+        }
+
+        $isModer = $post->topic->isModerator(getUser());
+
+        if (! $isModer && $post->user_id !== getUser('id')) {
+            abort(200, __('forum::forums.posts_edited_curators'));
+        }
+
+        if (! $isModer && $post->created_at->lt(now()->subMinutes(10))) {
+            abort(200, __('main.editing_impossible'));
+        }
+
+        return $post;
     }
 }

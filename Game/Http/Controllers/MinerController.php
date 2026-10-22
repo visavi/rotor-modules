@@ -6,14 +6,18 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class MinerController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Размер поля и допустимое количество мин
      */
@@ -73,11 +77,8 @@ class MinerController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request, Validator $validator): RedirectResponse|JsonResponse
+    public function bet(Request $request): RedirectResponse|JsonResponse
     {
-        $bet = int($request->input('bet'));
-        $mines = int($request->input('mines'));
-
         $current = $request->session()->get('miner');
 
         // Доигранную партию повтор ставки просто сменяет
@@ -87,27 +88,19 @@ class MinerController extends Controller
 
         $request->session()->forget('miner');
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')])
-            ->true(in_array($mines, self::MINES, true), ['mines' => __('game::games.miner_mines_invalid')]);
+        $request->validate([
+            'bet'   => $this->betRules(),
+            'mines' => ['required', 'integer', Rule::in(self::MINES)],
+        ], $this->betMessages() + [
+            'mines.*' => __('game::games.miner_mines_invalid'),
+        ]);
 
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
+        $bet = $request->integer('bet');
+        $mines = $request->integer('mines');
 
-            return redirect('games/miner')
-                ->withInput()
-                ->withErrors($validator->getErrors());
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
-
-        $this->user->decrement('money', $bet);
 
         $miner = [
             'bet'    => $bet,

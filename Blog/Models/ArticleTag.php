@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blog\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ArticleTag extends Model
 {
+    /** @use HasFactory<\Modules\Blog\Tests\Factories\ArticleTagFactory> */
+    use HasFactory;
+
     /**
      * Indicates if the model should be timestamped.
      */

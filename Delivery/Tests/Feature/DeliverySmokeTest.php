@@ -38,7 +38,7 @@ class DeliverySmokeTest extends ModuleTestCase
         $admin = User::factory()->create(['level' => User::ADMIN]);
 
         $this->actingAs($this->boss)
-            ->post('/admin/delivery', ['msg' => 'Сообщение администрации', 'type' => 3])
+            ->post('/admin/delivery', ['text' => 'Сообщение администрации', 'type' => 3])
             ->assertRedirect();
 
         $this->assertSame(1, $admin->fresh()->getCountMessages());
@@ -52,14 +52,24 @@ class DeliverySmokeTest extends ModuleTestCase
         User::factory()->create(['level' => User::ADMIN]);
 
         $this->actingAs($this->boss)
-            ->post('/admin/delivery', ['msg' => 'Ок', 'type' => 3])
-            ->assertSessionHasErrors('msg');
+            ->post('/admin/delivery', ['text' => '<p><b>Ок</b></p>', 'type' => 3])
+            ->assertSessionHasErrors('text');
     }
 
     public function testUnknownRecipientTypeIsRejected(): void
     {
         $this->actingAs($this->boss)
-            ->post('/admin/delivery', ['msg' => 'Сообщение администрации', 'type' => 9])
-            ->assertSessionHasErrors();
+            ->post('/admin/delivery', ['text' => 'Сообщение администрации', 'type' => 9])
+            ->assertSessionHasErrors('type');
+    }
+
+    public function testNoRecipientsIsShownUnderType(): void
+    {
+        // Кроме отправителя администрации нет — слать некому
+        $this->actingAs($this->boss)
+            ->post('/admin/delivery', ['text' => 'Сообщение администрации', 'type' => 3])
+            ->assertSessionHasErrors(['type' => __('delivery::delivery.not_recipients')]);
+
+        $this->assertSame(0, $this->boss->fresh()->getCountMessages());
     }
 }

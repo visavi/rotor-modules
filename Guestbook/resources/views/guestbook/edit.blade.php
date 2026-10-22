@@ -18,10 +18,10 @@
     <div class="section-form mb-3 shadow">
         <form action="{{ route('guestbook.edit', ['id' => $post->id]) }}" method="post">
             @csrf
-            <div class="mb-3{{ hasError('msg') }}">
-                <label for="msg" class="form-label">{{ __('main.message') }}:</label>
-                <textarea class="form-control tiptap" id="msg" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="msg" placeholder="{{ __('main.message') }}" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ old('msg', $post->text) }}</textarea>
-                <div class="invalid-feedback">{{ textError('msg') }}</div>
+            <div class="mb-3{{ hasError('text') }}">
+                <label for="text" class="form-label">{{ __('main.message') }}:</label>
+                <textarea class="form-control tiptap" id="text" rows="5" maxlength="{{ setting('guestbook_text_max') }}" name="text" placeholder="{{ __('main.message') }}" data-relate-type="{{ $post->getMorphClass() }}" data-relate-id="{{ $post->id }}" required>{{ old('text', $post->text) }}</textarea>
+                <div class="invalid-feedback">{{ textError('text') }}</div>
                 <span class="js-textarea-counter"></span>
             </div>
 

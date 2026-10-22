@@ -88,7 +88,7 @@ class VoteTest extends ModuleTestCase
         [$topic] = $this->createTopicWithVote();
 
         // Ответ в теме сдвигает запись ленты на второе сообщение — опрос там не нужен
-        $reply = Post::query()->create([
+        $reply = Post::factory()->create([
             'topic_id' => $topic->id,
             'user_id'  => $this->user->id,
             'text'     => 'Ответ в теме',
@@ -194,16 +194,16 @@ class VoteTest extends ModuleTestCase
      */
     private function createTopicWithVote(): array
     {
-        $forum = Forum::query()->create(['title' => 'Test forum']);
+        $forum = Forum::factory()->create(['title' => 'Test forum']);
 
-        $topic = Topic::query()->create([
+        $topic = Topic::factory()->create([
             'forum_id'   => $forum->id,
             'title'      => 'Test topic',
             'user_id'    => $this->user->id,
             'created_at' => now(),
         ]);
 
-        $post = Post::query()->create([
+        $post = Post::factory()->create([
             'topic_id' => $topic->id,
             'user_id'  => $this->user->id,
             'text'     => 'Последнее сообщение темы',
@@ -213,7 +213,7 @@ class VoteTest extends ModuleTestCase
 
         $topic->update(['last_post_id' => $post->id, 'count_posts' => 1]);
 
-        $vote = Vote::query()->create([
+        $vote = Vote::factory()->create([
             'topic_id'   => $topic->id,
             'title'      => 'Любимый цвет?',
             'count'      => 0,
@@ -221,8 +221,8 @@ class VoteTest extends ModuleTestCase
         ]);
 
         $answers = [
-            VoteAnswer::query()->create(['vote_id' => $vote->id, 'answer' => 'Красный', 'result' => 0]),
-            VoteAnswer::query()->create(['vote_id' => $vote->id, 'answer' => 'Зелёный', 'result' => 0]),
+            VoteAnswer::factory()->create(['vote_id' => $vote->id, 'answer' => 'Красный', 'result' => 0]),
+            VoteAnswer::factory()->create(['vote_id' => $vote->id, 'answer' => 'Зелёный', 'result' => 0]),
         ];
 
         Feed::query()->updateOrInsert([

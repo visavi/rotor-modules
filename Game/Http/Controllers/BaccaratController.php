@@ -6,14 +6,18 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Modules\Game\Http\Controllers\Concerns\HandlesBets;
 
 class BaccaratController extends Controller
 {
+    use HandlesBets;
+
     /**
      * Типы ставок и множители выплаты вместе с возвратом ставки
      *
@@ -64,33 +68,23 @@ class BaccaratController extends Controller
     /**
      * Раздача
      */
-    public function deal(Request $request, Validator $validator): RedirectResponse|JsonResponse
+    public function deal(Request $request): RedirectResponse|JsonResponse
     {
-        $bet = int($request->input('bet'));
-        $type = (string) $request->input('type');
+        $request->validate([
+            'bet'  => $this->betRules(),
+            'type' => ['required', Rule::in(array_keys(self::BETS))],
+        ], $this->betMessages() + [
+            'type.*' => __('game::games.baccarat_bet_invalid'),
+        ]);
 
-        $validator
-            ->gt($bet, 0, ['bet' => __('game::games.bj_bet_required')])
-            ->gte($this->user->money, $bet, ['bet' => __('game::games.not_enough_money')])
-            ->true(isset(self::BETS[$type]), ['type' => __('game::games.baccarat_bet_invalid')]);
-
-        if (! $validator->isValid()) {
-            // Ставка уходит ajax-ом: редирект с withErrors до игрока не дойдёт,
-            // ошибка возвращается тем же json, что понимает ajax ядра
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => implode(' ', $validator->getErrors()),
-                ]);
-            }
-
-            return redirect('games/baccarat')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
+        $bet = $request->integer('bet');
+        $type = $request->string('type')->value();
 
         $before = $this->user->money;
-        $this->user->decrement('money', $bet);
+
+        if (! $this->user->chargeMoney($bet)) {
+            throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
+        }
 
         $deck = array_combine(range(1, 52), range(1, 52));
 

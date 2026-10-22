@@ -33,16 +33,16 @@ class BlogSmokeTest extends ModuleTestCase
 
     public function testCategory(): void
     {
-        $blog = Blog::query()->create(['name' => 'Test category']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
 
         $this->get(route('blogs.blog', ['id' => $blog->id]))->assertOk();
     }
 
     public function testArticle(): void
     {
-        $blog = Blog::query()->create(['name' => 'Test category']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
 
-        $article = Article::query()->create([
+        $article = Article::factory()->create([
             'category_id' => $blog->id,
             'user_id'     => $this->user->id,
             'title'       => 'Test article',
@@ -66,9 +66,9 @@ class BlogSmokeTest extends ModuleTestCase
     public function testCommentToInactiveArticleIsRejected(): void
     {
         // Форма к неопубликованной статье не выводится, но запрос можно отправить напрямую
-        $blog = Blog::query()->create(['name' => 'Test category']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
 
-        $article = Article::query()->create([
+        $article = Article::factory()->create([
             'category_id' => $blog->id,
             'user_id'     => $this->user->id,
             'title'       => 'Draft article',
@@ -88,10 +88,10 @@ class BlogSmokeTest extends ModuleTestCase
     public function testApiCommentFeedHidesInactiveArticle(): void
     {
         // Заголовок неопубликованной статьи в ленту не попадает
-        $blog = Blog::query()->create(['name' => 'Test category']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
 
         foreach ([true, false] as $active) {
-            $article = Article::query()->create([
+            $article = Article::factory()->create([
                 'category_id' => $blog->id,
                 'user_id'     => $this->user->id,
                 'title'       => $active ? 'Public article' : 'Draft article',
@@ -101,7 +101,7 @@ class BlogSmokeTest extends ModuleTestCase
                 'created_at'  => now(),
             ]);
 
-            Comment::query()->create([
+            Comment::factory()->create([
                 'relate_type' => Article::$morphName,
                 'relate_id'   => $article->id,
                 'text'        => 'Comment',
@@ -121,8 +121,8 @@ class BlogSmokeTest extends ModuleTestCase
     public function testTagCloudOrderIsStableBetweenViews(): void
     {
         // Облако перемешано, но не скачет при обновлении страницы
-        $blog = Blog::query()->create(['name' => 'Test category']);
-        $article = Article::query()->create([
+        $blog = Blog::factory()->create(['name' => 'Test category']);
+        $article = Article::factory()->create([
             'category_id' => $blog->id,
             'user_id'     => $this->user->id,
             'title'       => 'Test article',
@@ -133,7 +133,7 @@ class BlogSmokeTest extends ModuleTestCase
         ]);
 
         foreach (range(1, 10) as $i) {
-            $article->tags()->attach(Tag::query()->create(['name' => 'tag' . $i])->id, ['sort' => $i]);
+            $article->tags()->attach(Tag::factory()->create(['name' => 'tag' . $i])->id, ['sort' => $i]);
         }
 
         $order = fn () => preg_match_all('~/blogs/tags/(tag\d+)~', $this->get(route('blogs.tags'))->assertOk()->getContent(), $m) ? $m[1] : [];
@@ -146,11 +146,11 @@ class BlogSmokeTest extends ModuleTestCase
 
     public function testTagPageHidesDrafts(): void
     {
-        $blog = Blog::query()->create(['name' => 'Test category']);
-        $tag = Tag::query()->create(['name' => 'rotor']);
+        $blog = Blog::factory()->create(['name' => 'Test category']);
+        $tag = Tag::factory()->create(['name' => 'rotor']);
 
         foreach (['Public article' => true, 'Draft article' => false] as $title => $active) {
-            Article::query()->create([
+            Article::factory()->create([
                 'category_id' => $blog->id,
                 'user_id'     => $this->user->id,
                 'title'       => $title,
@@ -172,8 +172,8 @@ class BlogSmokeTest extends ModuleTestCase
         // Облако считает только опубликованные — публикация должна его пересобрать
         Cache::put('tagCloud', ['stale' => 1], 3600);
 
-        $article = Article::query()->create([
-            'category_id' => Blog::query()->create(['name' => 'Test category'])->id,
+        $article = Article::factory()->create([
+            'category_id' => Blog::factory()->create(['name' => 'Test category'])->id,
             'user_id'     => $this->user->id,
             'title'       => 'Draft',
             'slug'        => 'draft',

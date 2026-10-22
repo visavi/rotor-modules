@@ -80,9 +80,10 @@ class LotterySmokeTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->post('/lottery/buy', ['number' => 42])
-            ->assertSessionHasErrors('number');
+            ->assertSessionHasErrors(['number' => __('lottery::lottery.no_money')]);
 
         $this->assertDatabaseCount('lottery_users', 0);
+        $this->assertSame(10, $this->user->fresh()->money);
     }
 
     public function testGuestCannotBuy(): void
@@ -96,7 +97,7 @@ class LotterySmokeTest extends ModuleTestCase
     {
         Lottery::query()->delete();
 
-        return Lottery::query()->create([
+        return Lottery::factory()->create([
             'day'    => now()->format('Y-m-d'),
             'amount' => 0,
             'number' => 0,

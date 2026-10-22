@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Modules\Gift\Http\Controllers;
 
 use App\Http\Controllers\Admin\AdminController;
-use App\Support\Validator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Gift\Http\Requests\GiftPricesRequest;
 use Modules\Gift\Models\Gift;
 use Modules\Gift\Models\GiftsUser;
 
@@ -17,27 +17,8 @@ class PanelController extends AdminController
     /**
      * Main page
      */
-    public function index(Request $request, Validator $validator): View|RedirectResponse
+    public function index(): View
     {
-        if ($request->isMethod('post')) {
-            $gifts = intar($request->input('gifts'));
-
-            $validator->notEmpty($gifts, __('gift::gifts.prices_not_transferred'));
-
-            if ($validator->isValid()) {
-                foreach ($gifts as $id => $price) {
-                    Gift::query()->where('id', $id)->update(['price' => $price]);
-                }
-
-                return redirect('admin/gifts')
-                    ->with('success', __('gift::gifts.prices_saved'));
-            }
-
-            return redirect('admin/gifts')
-                ->withInput()
-                ->withErrors($validator->getErrors());
-        }
-
         $gifts = Gift::query()
             ->orderBy('price')
             ->paginate(50);
@@ -46,18 +27,29 @@ class PanelController extends AdminController
     }
 
     /**
+     * Saves gift prices
+     */
+    public function update(GiftPricesRequest $request): RedirectResponse
+    {
+        foreach (intar($request->validated('gifts')) as $id => $price) {
+            Gift::query()->where('id', $id)->update(['price' => $price]);
+        }
+
+        return redirect('admin/gifts')
+            ->with('success', __('gift::gifts.prices_saved'));
+    }
+
+    /**
      * Removes gifts
      */
-    public function delete(Request $request, Validator $validator, int $id): RedirectResponse
+    public function delete(int $id, Request $request): RedirectResponse
     {
         $login = $request->input('user');
-
         $gift = GiftsUser::query()->find($id);
-        $validator->notEmpty($gift, __('gift::gifts.gift_not_found'));
 
-        if (! $validator->isValid()) {
+        if (! $gift) {
             return redirect('gifts/' . $login)
-                ->withErrors($validator->getErrors());
+                ->withErrors(__('gift::gifts.gift_not_found'));
         }
 
         $gift->delete();
