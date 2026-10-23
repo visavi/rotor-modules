@@ -183,7 +183,7 @@ class CommentApiTest extends ModuleTestCase
 
         $this->patchJson('/api/comments/' . $comment->id, [
             'text' => 'Исправленный текст',
-        ], $this->headers())->assertStatus(404);
+        ], $this->headers())->assertForbidden();
     }
 
     public function testUpdateAfterTimeoutIsRejected(): void

@@ -80,7 +80,8 @@ class PhotoWriteApiTest extends ModuleTestCase
         $this->pendingFile();
 
         $this->postJson('/api/photos', ['title' => 'Прогулка по лесу'], $this->headers())
-            ->assertStatus(422);
+            ->assertForbidden()
+            ->assertJsonPath('message', __('photo::photos.photos_closed'));
     }
 
     public function testUpdateOwnPhoto(): void
@@ -102,8 +103,9 @@ class PhotoWriteApiTest extends ModuleTestCase
         $photo = $this->createPhoto(User::factory()->create()->id);
 
         $this->patchJson('/api/photos/' . $photo->id, ['title' => 'Изменённый заголовок'], $this->headers())
-            ->assertStatus(404);
-        $this->deleteJson('/api/photos/' . $photo->id, [], $this->headers())->assertStatus(404);
+            ->assertForbidden();
+        $this->deleteJson('/api/photos/' . $photo->id, [], $this->headers())->assertForbidden();
+        $this->assertNotNull($photo->fresh());
     }
 
     public function testDestroyRemovesPhoto(): void

@@ -61,10 +61,6 @@ class PhotoApiController extends Controller
      */
     public function store(PhotoStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        if (! isAdmin() && ! setting('photos_create')) {
-            abort(422, __('photo::photos.photos_closed'));
-        }
-
         $photo = Photo::query()->create($request->photoFields() + [
             'user_id' => auth()->id(),
         ]);
@@ -121,11 +117,8 @@ class PhotoApiController extends Controller
      */
     private function findOwnPhoto(int $id): Photo
     {
-        $photo = Photo::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_author'));
-        }
+        $photo = Photo::query()->findOrFail($id);
+        $this->authorize('update', $photo);
 
         return $photo;
     }

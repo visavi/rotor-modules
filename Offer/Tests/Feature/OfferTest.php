@@ -152,7 +152,7 @@ class OfferTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->get('/offers/' . $offer->id . '/edit')
-            ->assertNotFound();
+            ->assertForbidden();
     }
 
     public function testAdminEditsOfferAndClosesComments(): void

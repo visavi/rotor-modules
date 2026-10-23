@@ -127,7 +127,8 @@ class AdminChatSmokeTest extends ModuleTestCase
 
         $this->actingAs($this->admin)
             ->get('/admin/chats/edit/' . $post->id)
-            ->assertSee(__('main.message_deleted'));
+            ->assertForbidden()
+            ->assertSee(__('ajax.record_not_author'));
     }
 
     public function testOnlyBossClearsChat(): void

@@ -146,7 +146,7 @@ class BoardController extends Controller
      */
     public function create(Request $request): View
     {
-        $this->checkCreationOpen();
+        $this->authorize('create', Item::class);
 
         $boards = (new Board())->getChildren();
 
@@ -169,8 +169,6 @@ class BoardController extends Controller
      */
     public function store(ItemStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
     {
-        $this->checkCreationOpen();
-
         $item = Item::query()->create($request->itemFields() + [
             'user_id'    => auth()->id(),
             'created_at' => now(),
@@ -193,14 +191,14 @@ class BoardController extends Controller
      */
     public function edit(int $id): View|RedirectResponse
     {
-        $item = $this->findItem($id);
+        $item = Item::query()->findOrFail($id);
 
         // Форма только для автора: админ правит чужое объявление в админке
         if ($item->user_id !== auth()->id() && isAdmin()) {
             return redirect()->route('admin.items.edit', ['id' => $item->id]);
         }
 
-        $this->checkAuthor($item);
+        $this->authorize('update', $item);
 
         $boards = $item->category->getChildren();
 
@@ -212,8 +210,8 @@ class BoardController extends Controller
      */
     public function update(int $id, ItemRequest $request): RedirectResponse
     {
-        $item = $this->findItem($id);
-        $this->checkAuthor($item);
+        $item = Item::query()->findOrFail($id);
+        $this->authorize('update', $item);
 
         $item->moveTo($request->category());
         $item->update($request->itemFields());
@@ -227,12 +225,8 @@ class BoardController extends Controller
      */
     public function close(int $id): RedirectResponse
     {
-        $item = $this->findItem($id);
-
-        if ($item->user_id !== auth()->id()) {
-            return redirect()->route('items.view', ['id' => $item->id])
-                ->withErrors(__('board::boards.item_not_author'));
-        }
+        $item = Item::query()->findOrFail($id);
+        $this->authorize('update', $item);
 
         if ($item->expires_at->gt(now())) {
             $item->unpublish();
@@ -251,12 +245,8 @@ class BoardController extends Controller
      */
     public function delete(int $id): RedirectResponse
     {
-        $item = $this->findItem($id);
-
-        if ($item->user_id !== auth()->id()) {
-            return redirect()->route('boards.index', ['id' => $item->board_id])
-                ->withErrors(__('board::boards.item_not_author'));
-        }
+        $item = Item::query()->findOrFail($id);
+        $this->authorize('update', $item);
 
         $item->delete();
 
@@ -295,35 +285,5 @@ class BoardController extends Controller
             ->appends(compact('type', 'sort', 'order'));
 
         return view('board::boards/active', compact('items', 'sort', 'order', 'sorting', 'type', 'otherCount'));
-    }
-
-    /**
-     * Объявление по id
-     */
-    private function findItem(int $id): Item
-    {
-        $item = Item::query()->findOrFail($id);
-
-        return $item;
-    }
-
-    /**
-     * Править объявление может только автор
-     */
-    private function checkAuthor(Item $item): void
-    {
-        if ($item->user_id !== auth()->id()) {
-            abort(403, __('board::boards.item_not_author'));
-        }
-    }
-
-    /**
-     * Подача объявлений может быть закрыта настройкой — кроме администрации
-     */
-    private function checkCreationOpen(): void
-    {
-        if (! isAdmin() && ! setting('boards_create')) {
-            abort(403, __('board::boards.boards_closed'));
-        }
     }
 }

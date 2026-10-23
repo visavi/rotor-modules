@@ -89,14 +89,8 @@ class GuestbookApiController extends Controller
      */
     public function update(int $id, GuestbookTextRequest $request): JsonResponse
     {
-        $post = Guestbook::query()
-            ->where('user_id', auth()->id())
-            ->findOrFail($id);
-
-        // Правка открыта первые десять минут, как и на сайте
-        if ($post->created_at->lt(now()->subMinutes(10))) {
-            abort(422, __('main.editing_impossible'));
-        }
+        $post = Guestbook::query()->findOrFail($id);
+        $this->authorize('update', $post);
 
         $post->update([
             'text'         => $request->string('text')->value(),

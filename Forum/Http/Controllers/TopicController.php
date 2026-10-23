@@ -18,6 +18,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Forum\Http\Requests\PostEditRequest;
@@ -73,6 +74,9 @@ class TopicController extends Controller
             ->orderBy('created_at')
             ->paginate(setting('forumpost'));
 
+        // Права на правку сообщения смотрят на его тему: без связи — запрос на каждое
+        $posts->getCollection()->each->setRelation('topic', $topic);
+
         if ($posts->onFirstPage()) {
             $firstPost = $posts->first();
         } else {
@@ -89,7 +93,6 @@ class TopicController extends Controller
         // Curators
         if ($topic->moderators) {
             $topic->curators = User::query()->whereIn('login', explode(',', (string) $topic->moderators))->get();
-            $topic->isModer = $user ? $topic->curators->where('id', $user->id)->isNotEmpty() : false;
         }
 
         // Visits
@@ -172,16 +175,16 @@ class TopicController extends Controller
     /**
      * Delete messages
      */
-    public function delete(int $id, Request $request, #[CurrentUser] User $user): RedirectResponse
+    public function delete(int $id, Request $request): RedirectResponse
     {
         $del = intar($request->input('del'));
-        $topic = $this->findTopic($id);
+        $topic = Topic::query()->findOrFail($id);
+        $access = Gate::inspect('moderate', $topic);
 
         $error = match (true) {
-            ! $del                       => __('validator.deletion'),
-            (bool) $topic->closed        => __('forum::forums.topic_closed'),
-            ! $topic->isModerator($user) => __('forum::forums.posts_deleted_curators'),
-            default                      => null,
+            ! $del            => __('validator.deletion'),
+            $access->denied() => $access->message(),
+            default           => null,
         };
 
         $redirect = redirect()->route('topics.topic', ['id' => $topic->id, 'page' => int($request->input('page'))]);
@@ -204,19 +207,13 @@ class TopicController extends Controller
      */
     public function close(int $id, #[CurrentUser] User $user): RedirectResponse
     {
-        $topic = $this->findTopic($id);
-
-        $error = match (true) {
-            $user->point < setting('editforumpoint') => __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]),
-            $topic->user_id !== $user->id            => __('forum::forums.topic_not_author'),
-            (bool) $topic->closed                    => __('forum::forums.topic_closed'),
-            default                                  => null,
-        };
-
+        $topic = Topic::query()->findOrFail($id);
+        $access = Gate::inspect('update', $topic);
         $redirect = redirect()->route('topics.topic', ['id' => $topic->id]);
 
-        if ($error) {
-            return $redirect->withErrors($error);
+        // Кнопка на странице темы: устаревшая страница получает ошибку, а не 403
+        if ($access->denied()) {
+            return $redirect->withErrors((string) $access->message());
         }
 
         $topic->update([
@@ -230,21 +227,14 @@ class TopicController extends Controller
     /**
      * Open topic
      */
-    public function open(int $id, #[CurrentUser] User $user): RedirectResponse
+    public function open(int $id): RedirectResponse
     {
-        $topic = $this->findTopic($id);
-
-        $error = match (true) {
-            $topic->user_id !== $user->id       => __('forum::forums.topic_not_author'),
-            $topic->close_user_id !== $user->id => __('forum::forums.topic_opened_author'),
-            ! $topic->closed                    => __('forum::forums.topic_already_open'),
-            default                             => null,
-        };
-
+        $topic = Topic::query()->findOrFail($id);
+        $access = Gate::inspect('open', $topic);
         $redirect = redirect()->route('topics.topic', ['id' => $topic->id]);
 
-        if ($error) {
-            return $redirect->withErrors($error);
+        if ($access->denied()) {
+            return $redirect->withErrors((string) $access->message());
         }
 
         $topic->update([
@@ -260,7 +250,8 @@ class TopicController extends Controller
      */
     public function edit(int $id): View
     {
-        $topic = $this->editableTopic($id);
+        $topic = Topic::query()->findOrFail($id);
+        $this->authorize('update', $topic);
 
         $post = Post::query()->where('topic_id', $topic->id)->orderBy('id')->first();
         $vote = Vote::query()->where('topic_id', $topic->id)->first();
@@ -277,7 +268,8 @@ class TopicController extends Controller
      */
     public function update(int $id, TopicEditRequest $request): RedirectResponse
     {
-        $topic = $this->editableTopic($id);
+        $topic = Topic::query()->findOrFail($id);
+        $this->authorize('update', $topic);
         $vote = $request->vote();
 
         $topic->update(['title' => $request->string('title')->value()]);
@@ -323,10 +315,11 @@ class TopicController extends Controller
     /**
      * Post editing
      */
-    public function editPost(int $id, Request $request, #[CurrentUser] User $user): View
+    public function editPost(int $id, Request $request): View
     {
         $page = int($request->input('page'));
-        $post = $this->editablePost($id, $user);
+        $post = Post::query()->with('topic')->findOrFail($id);
+        $this->authorize('update', $post);
 
         return view('forum::forums/topic_edit_post', compact('post', 'page'));
     }
@@ -336,7 +329,8 @@ class TopicController extends Controller
      */
     public function updatePost(int $id, PostEditRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
-        $post = $this->editablePost($id, $user);
+        $post = Post::query()->with('topic')->findOrFail($id);
+        $this->authorize('update', $post);
 
         $post->update([
             'text'         => $request->string('text')->value(),
@@ -408,61 +402,5 @@ class TopicController extends Controller
 
         return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
             ->with('success', __('forum::forums.vote_success'));
-    }
-
-    /**
-     * Тема по id
-     */
-    private function findTopic(int $id): Topic
-    {
-        $topic = Topic::query()->findOrFail($id);
-
-        return $topic;
-    }
-
-    /**
-     * Своя открытая тема, если хватает баллов на правку
-     */
-    private function editableTopic(int $id): Topic
-    {
-        if (auth()->user()?->point < setting('editforumpoint')) {
-            abort(403, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
-        }
-
-        $topic = $this->findTopic($id);
-
-        if ($topic->user_id !== auth()->id()) {
-            abort(403, __('forum::forums.topic_not_author'));
-        }
-
-        if ($topic->closed) {
-            abort(403, __('forum::forums.topic_closed'));
-        }
-
-        return $topic;
-    }
-
-    /**
-     * Сообщение, которое можно править: своё первые 10 минут, куратору — любое
-     */
-    private function editablePost(int $id, User $user): Post
-    {
-        $post = Post::query()->with('topic')->findOrFail($id);
-
-        if ($post->topic->closed) {
-            abort(403, __('forum::forums.topic_closed'));
-        }
-
-        $isModer = $post->topic->isModerator($user);
-
-        if (! $isModer && $post->user_id !== $user->id) {
-            abort(403, __('forum::forums.posts_edited_curators'));
-        }
-
-        if (! $isModer && $post->created_at->lt(now()->subMinutes(10))) {
-            abort(403, __('main.editing_impossible'));
-        }
-
-        return $post;
     }
 }

@@ -5,9 +5,9 @@
 @section('header')
     <div class="float-end">
         @if (auth()->check())
-            @if (in_array($offer->status, ['wait', 'process']) && auth()->id() === $offer->user_id)
+            @can('update', $offer)
                 <a class="btn btn-success" title="{{ __('main.edit') }}" href="{{ route('offers.edit', ['id' => $offer->id]) }}">{{ __('main.change') }}</a>
-            @endif
+            @endcan
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.offers.view', ['id' => $offer->id]) }}"><i class="fas fa-wrench"></i></a>

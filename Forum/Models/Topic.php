@@ -38,7 +38,6 @@ use Illuminate\Support\HtmlString;
  * @property int                  $last_post_id
  * @property int                  $close_user_id
  * @property int|null             $bookmark_posts
- * @property bool                 $isModer
  * @property-read User                      $user
  * @property-read Post                      $lastPost
  * @property-read Forum                     $forum

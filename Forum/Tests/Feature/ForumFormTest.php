@@ -270,6 +270,35 @@ class ForumFormTest extends ModuleTestCase
         $this->assertSame('Первое сообщение темы', $post->fresh()->text);
     }
 
+    public function testCuratorEditsPostsOnlyInOpenTopic(): void
+    {
+        $curator = User::factory()->create();
+        $topic = $this->createTopic();
+        $post = Post::query()->where('topic_id', $topic->id)->firstOrFail();
+        $editUrl = route('posts.edit', ['id' => $post->id, 'page' => 1]);
+
+        // Второе сообщение: ленивую загрузку темы у сообщений ловит только список из нескольких
+        Post::factory()->create(['topic_id' => $topic->id, 'user_id' => $this->user->id, 'text' => 'Второе сообщение темы', 'ip' => '127.0.0.1', 'brow' => 'test']);
+        $topic->update(['moderators' => $curator->login]);
+
+        $this->actingAs($curator)
+            ->get('/topics/' . $topic->id)
+            ->assertOk()
+            ->assertSee($editUrl, false)
+            ->assertSee('name="del[]"', false);
+
+        $topic->update(['closed' => 1, 'close_user_id' => $this->user->id]);
+
+        // Раньше ссылка на правку оставалась, а сама правка отвечала 403
+        $this->actingAs($curator)
+            ->get('/topics/' . $topic->id)
+            ->assertOk()
+            ->assertDontSee($editUrl, false)
+            ->assertDontSee('name="del[]"', false);
+
+        $this->actingAs($curator)->get($editUrl)->assertForbidden();
+    }
+
     public function testAuthorClosesAndOpensTopic(): void
     {
         $topic = $this->createTopic();

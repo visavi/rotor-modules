@@ -6,6 +6,8 @@ namespace Modules\Board\Http\Requests;
 
 use App\Http\Requests\CommentRequest;
 use App\Services\FileService;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Modules\Board\Models\Item;
 
 /**
@@ -13,6 +15,14 @@ use Modules\Board\Models\Item;
  */
 class ItemStoreRequest extends ItemRequest
 {
+    /**
+     * Отказ до проверки полей: исправлять форму, которую всё равно не примут, незачем
+     */
+    public function authorize(): Response
+    {
+        return Gate::inspect('create', Item::class);
+    }
+
     public function rules(): array
     {
         $rules = parent::rules();

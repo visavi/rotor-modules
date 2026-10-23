@@ -142,10 +142,7 @@ class ArticleApiController extends Controller
     public function update(int $id, ArticleRequest $request): JsonResponse
     {
         $article = Article::query()->findOrFail($id);
-
-        if ($article->user_id !== auth()->id()) {
-            abort(403, __('main.article_not_author'));
-        }
+        $this->authorize('update', $article);
 
         // publish переводит черновик в публикацию, иначе статья остаётся в прежнем состоянии
         $isPublish = $request->boolean('publish');

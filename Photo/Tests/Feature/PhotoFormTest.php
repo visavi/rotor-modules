@@ -109,7 +109,9 @@ class PhotoFormTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->post('/photos/' . $photo->id . '/edit', ['title' => 'Новое название'])
-            ->assertNotFound();
+            ->assertForbidden();
+
+        $this->assertNotSame('Новое название', $photo->fresh()->title);
     }
 
     public function testDiscussedPhotoIsNotDeleted(): void

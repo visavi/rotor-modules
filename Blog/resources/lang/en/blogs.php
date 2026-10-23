@@ -42,6 +42,7 @@ return [
 
     'categories_not_created'      => 'Blog sections not yet created!',
     'articles_closed'             => 'Publication of articles is prohibited by the site administration!',
+    'article_not_author'          => 'You are not the author of this article!',
     'category_not_exist'          => 'This section does not exist!',
     'article_not_exist'           => 'This article does not exist!',
     'category_success_created'    => 'New section successfully created!',

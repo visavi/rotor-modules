@@ -122,7 +122,7 @@ class ArticleController extends Controller
      */
     public function create(Request $request): View
     {
-        $this->checkCreationOpen();
+        $this->authorize('create', Article::class);
 
         $categories = (new Blog())->getChildren();
 
@@ -180,7 +180,9 @@ class ArticleController extends Controller
      */
     public function edit(int $id): View
     {
-        $article = $this->ownArticle($id);
+        $article = Article::query()->findOrFail($id);
+        $this->authorize('update', $article);
+
         $categories = $article->category->getChildren();
 
         return view('blog::articles/edit', compact('article', 'categories'));
@@ -191,7 +193,8 @@ class ArticleController extends Controller
      */
     public function update(int $id, ArticleRequest $request): RedirectResponse
     {
-        $article = $this->ownArticle($id);
+        $article = Article::query()->findOrFail($id);
+        $this->authorize('update', $article);
 
         $isPublish = $request->boolean('publish');
         $publishedAt = $request->publishedAt();
@@ -429,29 +432,5 @@ class ArticleController extends Controller
             ->paginate(setting('blogpost'));
 
         return view('blog::articles/main', compact('articles'));
-    }
-
-    /**
-     * Своя статья по id
-     */
-    private function ownArticle(int $id): Article
-    {
-        $article = Article::query()->findOrFail($id);
-
-        if ($article->user_id !== auth()->id()) {
-            abort(403, __('main.article_not_author'));
-        }
-
-        return $article;
-    }
-
-    /**
-     * Публикация статей может быть закрыта настройкой — кроме администрации
-     */
-    private function checkCreationOpen(): void
-    {
-        if (! isAdmin() && ! setting('blog_create')) {
-            abort(403, __('blog::blogs.articles_closed'));
-        }
     }
 }

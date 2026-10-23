@@ -48,10 +48,7 @@ class DownController extends Controller
             ->with('category.parent', 'poll')
             ->firstOrFail();
 
-        // Непроверенная загрузка доступна только автору и администрации, как и в API
-        if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
-            abort(403, __('load::loads.down_not_verified'));
-        }
+        $this->authorize('view', $down);
 
         $allowDownload = auth()->check() || setting('down_guest_download');
 
@@ -65,7 +62,7 @@ class DownController extends Controller
      */
     public function create(Request $request): View
     {
-        $this->checkUploadOpen();
+        $this->authorize('create', Down::class);
 
         $categories = (new Load())->getChildren();
 
@@ -103,7 +100,8 @@ class DownController extends Controller
     public function edit(int $id, Request $request): View
     {
         $cid = int($request->input('category'));
-        $down = $this->ownDown($id);
+        $down = Down::query()->findOrFail($id);
+        $this->authorize('update', $down);
 
         $files = File::query()
             ->where('relate_type', Down::$morphName)
@@ -121,7 +119,7 @@ class DownController extends Controller
      */
     public function update(int $id, OwnDownRequest $request): RedirectResponse
     {
-        $down = $this->ownDown($id);
+        $down = $request->down();
 
         $down->update([
             'category_id' => $request->category()->id,
@@ -150,9 +148,7 @@ class DownController extends Controller
             abort(403, __('load::loads.download_authorized'));
         }
 
-        if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(403, __('load::loads.down_not_verified'));
-        }
+        $this->authorize('view', $down);
 
         if (! file_exists(public_path($file->path))) {
             return redirect()->route('downs.view', ['id' => $down->id])
@@ -175,9 +171,7 @@ class DownController extends Controller
             abort(403, __('load::loads.download_authorized'));
         }
 
-        if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(403, __('load::loads.down_not_verified'));
-        }
+        $this->authorize('view', $down);
 
         if (! isset($down->links[$linkId])) {
             return redirect()->route('downs.view', ['id' => $down->id])
@@ -304,9 +298,7 @@ class DownController extends Controller
     {
         $down = Down::query()->findOrFail($id);
 
-        if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(403, __('load::loads.down_not_verified'));
-        }
+        $this->authorize('view', $down);
 
         $file = $down->files->firstWhere('id', $fid);
         if (! $file) {
@@ -332,29 +324,5 @@ class DownController extends Controller
         }
 
         return $archive;
-    }
-
-    /**
-     * Своя загрузка, ещё не проверенная модератором
-     */
-    private function ownDown(int $id): Down
-    {
-        $down = Down::query()->where('user_id', auth()->id())->findOrFail($id);
-
-        if ($down->active) {
-            abort(403, __('load::loads.down_verified'));
-        }
-
-        return $down;
-    }
-
-    /**
-     * Загрузка файлов может быть закрыта настройкой — кроме администрации
-     */
-    private function checkUploadOpen(): void
-    {
-        if (! isAdmin() && ! setting('downupload')) {
-            abort(403, __('load::loads.down_closed'));
-        }
     }
 }

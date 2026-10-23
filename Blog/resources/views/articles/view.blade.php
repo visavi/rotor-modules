@@ -10,9 +10,9 @@
 @section('header')
     @if (auth()->check())
         <div class="float-end">
-            @if (auth()->id() === $article->user->id)
+            @can('update', $article)
                 <a class="btn btn-success" href="{{ route('articles.edit', ['id' => $article->id]) }}">{{ __('main.change') }}</a>
-            @endif
+            @endcan
 
             @if (isAdmin())
                 <div class="btn-group">

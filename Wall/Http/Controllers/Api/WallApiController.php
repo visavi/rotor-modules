@@ -76,18 +76,10 @@ class WallApiController extends Controller
     {
         $user = $this->findUser($login);
 
-        if (! isAdmin() && auth()->id() !== $user->id) {
-            abort(403, __('main.deleted_only_admins'));
-        }
+        $wall = Wall::query()->where('user_id', $user->id)->findOrFail($id);
+        $this->authorize('delete', $wall);
 
-        $deleted = Wall::query()
-            ->where('id', $id)
-            ->where('user_id', $user->id)
-            ->delete();
-
-        if (! $deleted) {
-            abort(404, __('main.record_not_found'));
-        }
+        $wall->delete();
 
         return response()->json(['message' => __('main.record_deleted_success')]);
     }

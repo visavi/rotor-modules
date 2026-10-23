@@ -188,7 +188,8 @@ class GuestbookApiTest extends ModuleTestCase
         $post = $this->createPost(['created_at' => now()->subHour()]);
 
         $this->patchJson('/api/guestbook/' . $post->id, ['text' => 'Исправленное сообщение'], $this->headers())
-            ->assertStatus(422);
+            ->assertForbidden()
+            ->assertJsonPath('message', __('main.editing_impossible'));
     }
 
     public function testForeignPostIsProtected(): void
@@ -196,7 +197,9 @@ class GuestbookApiTest extends ModuleTestCase
         $post = $this->createPost(['user_id' => User::factory()->create()->id]);
 
         $this->patchJson('/api/guestbook/' . $post->id, ['text' => 'Исправленное сообщение'], $this->headers())
-            ->assertStatus(404);
+            ->assertForbidden();
+
+        $this->assertStringNotContainsString('Исправленное сообщение', (string) $post->fresh()->text);
     }
 
     public function testModulePublishesLimitsAndCounter(): void

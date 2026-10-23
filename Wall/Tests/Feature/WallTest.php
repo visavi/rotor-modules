@@ -112,7 +112,8 @@ class WallTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->postJson('/walls/' . $this->owner->login . '/delete', ['id' => $post->id], $this->ajax())
-            ->assertJsonPath('success', false);
+            ->assertForbidden()
+            ->assertJsonPath('message', __('main.deleted_only_admins'));
 
         $this->assertDatabaseCount('walls', 1);
     }

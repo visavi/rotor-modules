@@ -8,6 +8,7 @@ use App\Http\Requests\CommentRequest;
 use App\Models\File;
 use App\Services\FileService;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Modules\Load\Models\Down;
 
 /**
@@ -16,12 +17,11 @@ use Modules\Load\Models\Down;
 class DownStoreRequest extends DownRequest
 {
     /**
-     * Приём загрузок может быть закрыт настройкой — кроме администрации.
      * Отказ до проверки полей: исправлять форму, которую всё равно не примут, незачем
      */
     public function authorize(): Response
     {
-        return isAdmin() || setting('downupload') ? Response::allow() : Response::deny(__('load::loads.down_closed'));
+        return Gate::inspect('create', Down::class);
     }
 
     public function rules(): array

@@ -7,6 +7,7 @@ namespace Modules\Blog\Http\Requests;
 use App\Http\Requests\CommentRequest;
 use App\Services\FileService;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Modules\Blog\Models\Article;
 
 /**
@@ -15,12 +16,11 @@ use Modules\Blog\Models\Article;
 class ArticleStoreRequest extends ArticleRequest
 {
     /**
-     * Приём статей может быть закрыт настройкой — кроме администрации.
      * Отказ до проверки полей: исправлять форму, которую всё равно не примут, незачем
      */
     public function authorize(): Response
     {
-        return isAdmin() || setting('blog_create') ? Response::allow() : Response::deny(__('blog::blogs.articles_closed'));
+        return Gate::inspect('create', Article::class);
     }
 
     public function rules(): array

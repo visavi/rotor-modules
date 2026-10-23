@@ -4,13 +4,13 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (auth()->check() && setting('boards_create')))
+        @can('create', Modules\Board\Models\Item::class)
             <a class="btn btn-success" href="{{ route('items.create', ['bid' => $board ?? null]) }}">{{ __('main.add') }}</a>
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.boards.index', ['id' => $board ?? null, 'page' => $items->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
             @endif
-        @endif
+        @endcan
     </div>
 
     @if ($board)

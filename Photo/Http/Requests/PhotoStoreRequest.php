@@ -7,6 +7,8 @@ namespace Modules\Photo\Http\Requests;
 use App\Http\Requests\CommentRequest;
 use App\Models\File;
 use App\Services\FileService;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Validator;
 use Modules\Photo\Models\Photo;
 
@@ -15,6 +17,14 @@ use Modules\Photo\Models\Photo;
  */
 class PhotoStoreRequest extends PhotoRequest
 {
+    /**
+     * Отказ до проверки полей: исправлять форму, которую всё равно не примут, незачем
+     */
+    public function authorize(): Response
+    {
+        return Gate::inspect('create', Photo::class);
+    }
+
     public function rules(): array
     {
         $rules = parent::rules();

@@ -92,7 +92,8 @@ class GuestbookController extends Controller
      */
     public function edit(int $id): View
     {
-        $post = $this->ownPost($id);
+        $post = Guestbook::query()->findOrFail($id);
+        $this->authorize('update', $post);
 
         return view('guestbook::guestbook/edit', compact('post'));
     }
@@ -102,7 +103,8 @@ class GuestbookController extends Controller
      */
     public function update(int $id, GuestbookTextRequest $request): RedirectResponse
     {
-        $post = $this->ownPost($id);
+        $post = Guestbook::query()->findOrFail($id);
+        $this->authorize('update', $post);
 
         $post->update([
             'text'         => $request->string('text')->value(),
@@ -113,19 +115,5 @@ class GuestbookController extends Controller
             ->route('guestbook.index')
             ->withFragment('post_' . $post->id)
             ->with('success', __('main.message_edited_success'));
-    }
-
-    /**
-     * Своё сообщение, которое ещё можно править
-     */
-    private function ownPost(int $id): Guestbook
-    {
-        $post = Guestbook::query()->where('user_id', auth()->id())->findOrFail($id);
-
-        if ($post->created_at->lt(now()->subMinutes(10))) {
-            abort(403, __('main.editing_impossible'));
-        }
-
-        return $post;
     }
 }

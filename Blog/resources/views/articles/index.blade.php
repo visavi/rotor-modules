@@ -5,7 +5,9 @@
 @section('header')
     @if (auth()->check())
         <div class="float-end">
-            <a class="btn btn-success" href="{{ route('blogs.create') }}">{{ __('blog::blogs.add') }}</a>
+            @can('create', Modules\Blog\Models\Article::class)
+                <a class="btn btn-success" href="{{ route('blogs.create') }}">{{ __('blog::blogs.add') }}</a>
+            @endcan
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.blogs.index') }}"><i class="fas fa-wrench"></i></a>

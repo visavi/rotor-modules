@@ -54,9 +54,9 @@
                                 <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $data->getMorphClass() }}" data-id="{{ $data->id }}" data-page="{{ $messages->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
-                            @if (isAdmin() || auth()->id() === $user->id)
+                            @can('delete', $data)
                                 <a href="#" data-ajax data-ajax-url="{{ route('walls.delete', ['login' => $data->user->login]) }}" data-ajax-confirm data-ajax-remove=".section" data-id="{{ $data->id }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
-                            @endif
+                            @endcan
                         </div>
                     @endif
                 </div>

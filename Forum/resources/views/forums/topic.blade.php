@@ -70,7 +70,7 @@
 
     <div class="d-flex flex-wrap align-items-center column-gap-3 row-gap-1 mb-2">
     @if (auth()->check())
-        @if (! $topic->closed && auth()->id() === $topic->user_id && auth()->user()?->point >= setting('editforumpoint'))
+        @can('update', $topic)
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-lock"></i>
                 <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
@@ -79,9 +79,9 @@
                 </form>
             </span>
             <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-pencil-alt"></i> <a href="{{ route('topics.edit', ['id' => $topic->id]) }}">{{ __('main.edit') }}</a></span>
-        @endif
+        @endcan
 
-        @if ($topic->closed && auth()->id() === $topic->closeUser->id)
+        @can('open', $topic)
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-unlock"></i>
                 <form action="{{ route('topics.open', ['id' => $topic->id]) }}" method="post" class="d-inline">
@@ -89,7 +89,7 @@
                     <button class="btn btn-link p-0 align-baseline">{{ __('main.open') }}</button>
                 </form>
             </span>
-        @endif
+        @endcan
 
         <?php $bookmark = $topic->bookmark_posts ? __('forum::forums.from_bookmarks') : __('forum::forums.to_bookmarks'); ?>
         <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-bookmark"></i> <a href="#" data-ajax data-ajax-url="{{ route('forums.bookmarks.perform') }}" data-ajax-replace="self" data-tid="{{ $topic->id }}">{{ $bookmark }}</a></span>
@@ -121,10 +121,10 @@
         @include('forum::forums/_vote', ['vote' => $vote, 'page' => $posts->currentPage()])
     @endif
 
-    @if ($topic->isModer)
+    @can('moderate', $topic)
         <form action="{{ route('topics.delete', ['id' => $topic->id, 'page' => $posts->currentPage()]) }}" method="post">
             @csrf
-    @endif
+    @endcan
 
     @if ($posts->isNotEmpty())
         @foreach ($posts as $post)
@@ -160,12 +160,12 @@
                                 <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
-                            @if ($topic->isModer || (auth()->id() === $post->user_id && $post->created_at->gt(now()->subMinutes(10))))
+                            @can('update', $post)
                                 <a href="{{ route('posts.edit', ['id' => $post->id, 'page' => $posts->currentPage()]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
-                                @if ($topic->isModer)
-                                    <input type="checkbox" class="form-check-input" name="del[]" value="{{ $post->id }}">
-                                @endif
-                            @endif
+                            @endcan
+                            @can('moderate', $topic)
+                                <input type="checkbox" class="form-check-input" name="del[]" value="{{ $post->id }}">
+                            @endcan
                             </div>
                         @endif
                     </div>
@@ -194,12 +194,12 @@
         {{ showError(__('forum::forums.empty_posts')) }}
     @endif
 
-    @if ($topic->isModer)
+    @can('moderate', $topic)
             <div class="clearfix mb-3">
                 <button class="btn btn-sm btn-danger float-end">{{ __('main.delete_selected') }}</button>
             </div>
         </form>
-    @endif
+    @endcan
 
     {{ $posts->links() }}
 

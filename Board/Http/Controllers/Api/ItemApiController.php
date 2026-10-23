@@ -82,10 +82,6 @@ class ItemApiController extends Controller
      */
     public function store(ItemStoreRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        if (! isAdmin() && ! setting('boards_create')) {
-            abort(422, __('board::boards.boards_closed'));
-        }
-
         $item = Item::query()->create($request->itemFields() + [
             'user_id'    => auth()->id(),
             'created_at' => now(),
@@ -166,10 +162,7 @@ class ItemApiController extends Controller
     private function findOwnItem(int $id): Item
     {
         $item = Item::query()->findOrFail($id);
-
-        if ($item->user_id !== auth()->id()) {
-            abort(403, __('board::boards.item_not_author'));
-        }
+        $this->authorize('update', $item);
 
         return $item;
     }

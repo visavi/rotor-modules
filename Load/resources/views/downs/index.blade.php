@@ -4,13 +4,13 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (auth()->check() && setting('downupload')))
+        @can('create', Modules\Load\Models\Down::class)
             <a class="btn btn-success" href="{{ route('downs.create') }}">{{ __('main.add') }}</a>
 
             @if (isAdmin('admin'))
                 <a class="btn btn-adaptive" href="{{ route('admin.loads.index') }}"><i class="fas fa-wrench"></i></a>
             @endif
-        @endif
+        @endcan
     </div>
 
     <h1>{{ __('load::loads.loads') }}</h1>

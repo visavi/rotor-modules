@@ -89,15 +89,8 @@ class OfferApiController extends Controller
      */
     public function update(int $id, OfferRequest $request): JsonResponse
     {
-        $offer = Offer::query()
-            ->where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        // Решённую запись не правят — на сайте то же правило
-        if (! in_array($offer->status, [Offer::WAIT, Offer::PROCESS], true)) {
-            abort(422, __('offer::offers.already_resolved'));
-        }
+        $offer = Offer::query()->findOrFail($id);
+        $this->authorize('update', $offer);
 
         $offer->update([
             'type'       => $request->input('type'),

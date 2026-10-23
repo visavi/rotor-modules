@@ -6,7 +6,6 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="/menu">{{ __('main.menu') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('notebooks.index') }}">{{ __('notebook::notebooks.notebook') }}</a></li>
             <li class="breadcrumb-item active">{{ __('notebook::notebooks.title_edit') }}</li>
         </ol>

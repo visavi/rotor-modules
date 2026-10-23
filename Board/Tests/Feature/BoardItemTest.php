@@ -152,10 +152,10 @@ class BoardItemTest extends ModuleTestCase
     public function testAuthorClosesAndDeletesItem(): void
     {
         $item = $this->createItem();
+        $stranger = User::factory()->create();
 
-        $this->actingAs(User::factory()->create())
-            ->post('/items/' . $item->id . '/close')
-            ->assertSessionHasErrors();
+        $this->actingAs($stranger)->post('/items/' . $item->id . '/close')->assertForbidden();
+        $this->actingAs($stranger)->delete('/items/' . $item->id . '/delete')->assertForbidden();
 
         $this->actingAs($this->user)
             ->post('/items/' . $item->id . '/close')

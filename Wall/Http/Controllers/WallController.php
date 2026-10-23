@@ -67,14 +67,6 @@ class WallController extends Controller
             ], 400);
         }
 
-        // Чистит стену её хозяин, чужие записи трогает только администрация
-        if (! isAdmin() && auth()->id() !== $user->id) {
-            return response()->json([
-                'success' => false,
-                'message' => __('main.deleted_only_admins'),
-            ], 403);
-        }
-
         $id = int($request->input('id'));
 
         if (! $id) {
@@ -84,10 +76,10 @@ class WallController extends Controller
             ], 422);
         }
 
-        Wall::query()
-            ->where('id', $id)
-            ->where('user_id', $user->id)
-            ->delete();
+        $wall = Wall::query()->where('user_id', $user->id)->findOrFail($id);
+        $this->authorize('delete', $wall);
+
+        $wall->delete();
 
         return response()->json([
             'success' => true,

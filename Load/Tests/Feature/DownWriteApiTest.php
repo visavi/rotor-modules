@@ -127,7 +127,7 @@ class DownWriteApiTest extends ModuleTestCase
             'category_id' => $this->category->id,
             'title'       => 'Новый архив с обоями',
             'text'        => 'Изменённое описание загрузки',
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertForbidden()->assertJsonPath('message', __('load::loads.down_verified'));
     }
 
     public function testForeignDownIsProtected(): void
@@ -138,7 +138,9 @@ class DownWriteApiTest extends ModuleTestCase
             'category_id' => $this->category->id,
             'title'       => 'Новый архив с обоями',
             'text'        => 'Изменённое описание загрузки',
-        ], $this->headers())->assertStatus(404);
+        ], $this->headers())->assertForbidden();
+
+        $this->assertNotSame('Новый архив с обоями', $down->fresh()->title);
     }
 
     private function payload(): array

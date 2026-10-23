@@ -4,9 +4,9 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (auth()->check() && setting('boards_create')))
+        @can('create', Modules\Board\Models\Item::class)
             <a class="btn btn-success" href="{{ route('items.create') }}">{{ __('main.add') }}</a>
-        @endif
+        @endcan
     </div>
 
     <h1>{{ __('board::boards.my_items') }}</h1>

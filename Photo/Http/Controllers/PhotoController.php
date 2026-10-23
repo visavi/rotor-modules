@@ -68,7 +68,7 @@ class PhotoController extends Controller
      */
     public function create(): View
     {
-        $this->checkCreationOpen();
+        $this->authorize('create', Photo::class);
 
         $files = File::query()
             ->pending(Photo::$morphName, auth()->id())
@@ -83,8 +83,6 @@ class PhotoController extends Controller
      */
     public function store(PhotoStoreRequest $request, Flood $flood, FileService $files): RedirectResponse
     {
-        $this->checkCreationOpen();
-
         $photo = Photo::query()->create($request->photoFields() + [
             'user_id' => auth()->id(),
         ]);
@@ -103,7 +101,9 @@ class PhotoController extends Controller
     public function edit(int $id, Request $request): View
     {
         $page = int($request->input('page', 1));
-        $photo = $this->ownPhoto($id);
+        $photo = Photo::query()->findOrFail($id);
+        $this->authorize('update', $photo);
+
         $checked = $photo->closed ? ' checked' : '';
 
         return view('photo::photos/edit', compact('photo', 'checked', 'page'));
@@ -114,7 +114,10 @@ class PhotoController extends Controller
      */
     public function update(int $id, PhotoRequest $request): RedirectResponse
     {
-        $this->ownPhoto($id)->update($request->photoFields());
+        $photo = Photo::query()->findOrFail($id);
+        $this->authorize('update', $photo);
+
+        $photo->update($request->photoFields());
 
         return redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))])
             ->with('success', __('photo::photos.photo_success_edited'));
@@ -125,7 +128,9 @@ class PhotoController extends Controller
      */
     public function delete(int $id, Request $request): RedirectResponse
     {
-        $photo = $this->ownPhoto($id);
+        $photo = Photo::query()->findOrFail($id);
+        $this->authorize('update', $photo);
+
         $redirect = redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))]);
 
         if ($photo->count_comments) {
@@ -210,29 +215,5 @@ class PhotoController extends Controller
             ->appends(['user' => $user->login]);
 
         return view('photo::photos/user_comments', compact('comments', 'user'));
-    }
-
-    /**
-     * Своё фото по id
-     */
-    private function ownPhoto(int $id): Photo
-    {
-        $photo = Photo::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_author'));
-        }
-
-        return $photo;
-    }
-
-    /**
-     * Загрузка фото может быть закрыта настройкой — кроме администрации
-     */
-    private function checkCreationOpen(): void
-    {
-        if (! isAdmin() && ! setting('photos_create')) {
-            abort(403, __('photo::photos.photos_closed'));
-        }
     }
 }

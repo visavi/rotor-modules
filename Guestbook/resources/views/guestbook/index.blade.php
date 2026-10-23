@@ -68,11 +68,11 @@
                         </div>
                     @endif
 
-                    @if ($post->created_at->gt(now()->subMinutes(10)) && auth()->check() && auth()->id() === $post->user_id)
+                    @can('update', $post)
                         <div class="js-actions">
                             <a href="{{ route('guestbook.edit', ['id' => $post->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                         </div>
-                    @endif
+                    @endcan
                 </div>
 
                 <div class="section-body border-top">

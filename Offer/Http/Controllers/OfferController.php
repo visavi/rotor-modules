@@ -105,7 +105,8 @@ class OfferController extends Controller
      */
     public function edit(int $id): View
     {
-        $offer = $this->ownOffer($id);
+        $offer = Offer::query()->findOrFail($id);
+        $this->authorize('update', $offer);
 
         return view('offer::offers/edit', compact('offer'));
     }
@@ -115,7 +116,8 @@ class OfferController extends Controller
      */
     public function update(int $id, OfferRequest $request): RedirectResponse
     {
-        $offer = $this->ownOffer($id);
+        $offer = Offer::query()->findOrFail($id);
+        $this->authorize('update', $offer);
 
         $offer->update([
             'type'       => $request->input('type'),
@@ -126,22 +128,5 @@ class OfferController extends Controller
 
         return redirect()->route('offers.view', ['id' => $offer->id])
             ->with('success', __('main.record_changed_success'));
-    }
-
-    /**
-     * Своя запись, ещё не решённая
-     */
-    private function ownOffer(int $id): Offer
-    {
-        $offer = Offer::query()
-            ->where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        if (! in_array($offer->status, [Offer::WAIT, Offer::PROCESS], true)) {
-            abort(403, __('offer::offers.already_resolved'));
-        }
-
-        return $offer;
     }
 }

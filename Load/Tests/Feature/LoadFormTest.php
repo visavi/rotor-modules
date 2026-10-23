@@ -194,12 +194,23 @@ class LoadFormTest extends ModuleTestCase
             ->assertSee('Описание архива с обоями');
     }
 
+    public function testAuthorDownloadsOwnUnverifiedDown(): void
+    {
+        $down = $this->createDown(['links' => ['https://example.com/wallpapers.zip']]);
+        $url = route('downs.download-link', ['id' => $down->id, 'lid' => 0]);
+
+        // Страница показывала автору кнопку «Скачать», а ссылка отвечала 403
+        $this->actingAs($this->user)->get($url)->assertRedirect('https://example.com/wallpapers.zip');
+        $this->actingAs(User::factory()->create())->get($url)->assertForbidden();
+    }
+
     public function testVerifiedDownIsNotEdited(): void
     {
         $down = $this->createDown(['active' => 1]);
 
         $this->actingAs($this->user)
             ->post('/downs/' . $down->id . '/edit', ['title' => 'Новые обои'] + $this->payload())
+            ->assertForbidden()
             ->assertSee(__('load::loads.down_verified'));
 
         $this->assertSame('Архив с обоями', $down->fresh()->title);

@@ -42,6 +42,7 @@ return [
 
     'categories_not_created'      => 'Разделы блогов еще не созданы!',
     'articles_closed'             => 'Публикация статей запрещена администрацией сайта!',
+    'article_not_author'          => 'Вы не автор данной статьи!',
     'category_not_exist'          => 'Данного раздела не существует!',
     'article_not_exist'           => 'Данной статьи не существует!',
     'category_success_created'    => 'Новый раздел успешно создан!',

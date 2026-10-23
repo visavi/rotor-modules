@@ -4,13 +4,13 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (auth()->check() && setting('photos_create')))
+        @can('create', Modules\Photo\Models\Photo::class)
             <a class="btn btn-success" href="{{ route('photos.create') }}">{{ __('main.add') }}</a>
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.photos.index', ['page' => $photos->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
             @endif
-        @endif
+        @endcan
     </div>
 
     <h1>{{ __('photo::photos.photos') }}</h1>

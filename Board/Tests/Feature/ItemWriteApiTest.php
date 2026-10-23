@@ -102,7 +102,9 @@ class ItemWriteApiTest extends ModuleTestCase
     {
         $this->overrideSetting('boards_create', 0);
 
-        $this->postJson('/api/items', $this->payload(), $this->headers())->assertStatus(422);
+        $this->postJson('/api/items', $this->payload(), $this->headers())
+            ->assertForbidden()
+            ->assertJsonPath('message', __('board::boards.boards_closed'));
     }
 
     public function testStoreRejectsClosedCategory(): void

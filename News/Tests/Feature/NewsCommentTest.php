@@ -154,10 +154,21 @@ class NewsCommentTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->patchJson('/comments/' . $comment->id, ['msg' => 'Исправленный текст'])
-            ->assertJson([
-                'success' => false,
-                'message' => __('main.closed_comments'),
-            ]);
+            ->assertForbidden()
+            ->assertJsonPath('message', __('main.closed_comments'));
+    }
+
+    public function testEditLinkFollowsCommentPolicy(): void
+    {
+        $news = $this->makeNews();
+        $this->makeComment($news);
+
+        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertSee('openEditModal(this)', false);
+
+        // Раньше в закрытой новости ссылка оставалась, а сохранение отвечало отказом
+        $news->update(['closed' => true]);
+
+        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertDontSee('openEditModal(this)', false);
     }
 
     public function testNotificationNamesPassedAuthorNotSession(): void

@@ -63,7 +63,7 @@ class CalculateRequest extends FormRequest
     {
         return [
             'place'   => __('payment::payments.paid_adverts.place'),
-            'url'     => __('adverts.link'),
+            'url'     => __('payment::payments.paid_adverts.link'),
             'names.*' => __('payment::payments.paid_adverts.name'),
             'color'   => __('payment::payments.paid_adverts.color'),
             'bold'    => __('payment::payments.paid_adverts.bold'),

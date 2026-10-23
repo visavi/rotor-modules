@@ -141,6 +141,17 @@ class ArticleFormTest extends ModuleTestCase
         $this->post('/blogs/create', $this->payload())->assertForbidden();
     }
 
+    public function testClosedCreationHidesAddButton(): void
+    {
+        $this->overrideSetting('blog_create', 0);
+        $admin = User::factory()->create(['level' => User::ADMIN]);
+
+        foreach (['/blogs', '/blogs/' . $this->category->id] as $url) {
+            $this->actingAs($this->user)->get($url)->assertOk()->assertDontSee(route('blogs.create'));
+            $this->actingAs($admin)->get($url)->assertOk()->assertSee(route('blogs.create'));
+        }
+    }
+
     public function testOwnDraftIsPublishedFromEditForm(): void
     {
         $article = $this->createArticle(['draft' => 1, 'active' => 0]);
@@ -167,7 +178,7 @@ class ArticleFormTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->post('/articles/' . $article->id . '/edit', $this->payload())
-            ->assertSee(__('main.article_not_author'));
+            ->assertSee(__('blog::blogs.article_not_author'));
 
         $this->assertSame('Старая статья', $article->fresh()->title);
     }

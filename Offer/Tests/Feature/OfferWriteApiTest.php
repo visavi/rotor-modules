@@ -155,7 +155,9 @@ class OfferWriteApiTest extends ModuleTestCase
             'type'  => Offer::OFFER,
             'title' => 'Изменённый заголовок',
             'text'  => 'Изменённое описание записи',
-        ], $this->headers())->assertStatus(404);
+        ], $this->headers())->assertForbidden();
+
+        $this->assertNotSame('Изменённый заголовок', $offer->fresh()->title);
     }
 
     public function testResolvedOfferIsNotEditable(): void
@@ -167,7 +169,7 @@ class OfferWriteApiTest extends ModuleTestCase
             'type'  => Offer::OFFER,
             'title' => 'Изменённый заголовок',
             'text'  => 'Изменённое описание записи',
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertForbidden()->assertJsonPath('message', __('offer::offers.already_resolved'));
     }
 
     private function headers(): array

@@ -12,6 +12,7 @@ use Closure;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Http\Attributes\RedirectToRoute;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Validator;
 use Modules\Guestbook\Models\Guestbook;
 
@@ -26,12 +27,9 @@ class GuestbookRequest extends FormRequest
 {
     use ChecksCaptcha;
 
-    /**
-     * Гостю писать можно, только если гостевая открыта настройкой
-     */
     public function authorize(): Response
     {
-        return auth()->check() || setting('bookadds') ? Response::allow() : Response::deny(__('main.not_authorized'));
+        return Gate::inspect('create', Guestbook::class);
     }
 
     public function rules(): array

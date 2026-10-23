@@ -72,7 +72,8 @@ class ChatController extends AdminController
      */
     public function edit(int $id, Request $request): View
     {
-        $post = $this->ownPost($id);
+        $post = Chat::query()->findOrFail($id);
+        $this->authorize('update', $post);
         $page = int($request->input('page', 1));
 
         return view('admin_chat::admin/chats/edit', compact('post', 'page'));
@@ -83,7 +84,8 @@ class ChatController extends AdminController
      */
     public function update(int $id, ChatRequest $request): RedirectResponse
     {
-        $post = $this->ownPost($id);
+        $post = Chat::query()->findOrFail($id);
+        $this->authorize('update', $post);
         $page = int($request->input('page', 1));
 
         $post->update([
@@ -106,23 +108,5 @@ class ChatController extends AdminController
 
         return redirect()->route('admin.chats.index')
             ->with('success', __('admin_chat::admin_chat.success_cleared'));
-    }
-
-    /**
-     * Своё сообщение, которое ещё можно править
-     */
-    private function ownPost(int $id): Chat
-    {
-        $post = Chat::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $post) {
-            abort(404, __('main.message_deleted'));
-        }
-
-        if ($post->created_at->lt(now()->subMinutes(10))) {
-            abort(403, __('main.editing_impossible'));
-        }
-
-        return $post;
     }
 }

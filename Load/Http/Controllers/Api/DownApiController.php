@@ -72,10 +72,7 @@ class DownApiController extends Controller
             ->with('user', 'category.parent', 'files')
             ->firstOrFail();
 
-        // Непроверенная загрузка доступна только автору и администрации
-        if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
-            abort(403, __('load::loads.down_not_verified'));
-        }
+        $this->authorize('view', $down);
 
         // Запись — в data, её комментарии страницей — в comments
         return DownResource::make($down)
@@ -104,12 +101,7 @@ class DownApiController extends Controller
      */
     public function update(int $id, OwnDownRequest $request): JsonResponse
     {
-        $down = Down::query()->where('user_id', auth()->id())->findOrFail($id);
-
-        // Проверенную загрузку правит только администрация
-        if ($down->active) {
-            abort(422, __('load::loads.down_verified'));
-        }
+        $down = $request->down();
 
         $down->update([
             'category_id' => $request->category()->id,

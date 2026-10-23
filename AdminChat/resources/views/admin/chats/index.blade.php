@@ -48,11 +48,11 @@
                         </div>
                     @endif
 
-                    @if ($post->created_at->gt(now()->subMinutes(10)) && auth()->id() === $post->user_id)
+                    @can('update', $post)
                         <div class="text-end section-action">
                             <a href="/admin/chats/edit/{{ $post->id }}?page={{ $posts->currentPage() }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>
                         </div>
-                    @endif
+                    @endcan
                 </div>
 
                 <div class="section-body border-top">

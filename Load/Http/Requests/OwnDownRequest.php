@@ -4,24 +4,29 @@ declare(strict_types=1);
 
 namespace Modules\Load\Http\Requests;
 
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Modules\Load\Models\Down;
 
 /**
  * Правка своей загрузки на сайте и в API
  *
- * Владелец и статус проверяются до полей: чужая загрузка — 404, а не ошибки формы
+ * Права проверяются до полей: чужая или проверенная загрузка — отказ, а не ошибки формы
  */
 class OwnDownRequest extends DownRequest
 {
-    protected function prepareForValidation(): void
+    private ?Down $down = null;
+
+    public function authorize(): Response
     {
-        $down = Down::query()->where('user_id', auth()->id())->findOrFail(int($this->route('id')));
+        return Gate::inspect('update', $this->down());
+    }
 
-        // Проверенную загрузку правит только администрация
-        if ($down->active) {
-            abort($this->expectsJson() ? 422 : 200, __('load::loads.down_verified'));
-        }
-
-        parent::prepareForValidation();
+    /**
+     * Правимая загрузка из маршрута
+     */
+    public function down(): Down
+    {
+        return $this->down ??= Down::query()->findOrFail(int($this->route('id')));
     }
 }

@@ -36,9 +36,9 @@
     @if (! $down->active)
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i> {{ __('load::loads.pending_down1') }}<br>
-            @if (auth()->id() === $down->user_id)
+            @can('update', $down)
                 <i class="fa fa-pencil-alt"></i> <a href="{{ route('downs.edit', ['id' => $down->id]) }}">{{ __('main.edit') }}</a>
-            @endif
+            @endcan
         </div>
     @endif
 

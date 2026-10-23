@@ -5,9 +5,11 @@
 @section('header')
     @if (auth()->check())
         <div class="float-end">
-            @if (! $category->closed)
-                <a class="btn btn-success" href="{{ route('blogs.create', ['cid' => $category->id]) }}">{{ __('blog::blogs.add') }}</a>
-            @endif
+            @can('create', Modules\Blog\Models\Article::class)
+                @if (! $category->closed)
+                    <a class="btn btn-success" href="{{ route('blogs.create', ['cid' => $category->id]) }}">{{ __('blog::blogs.add') }}</a>
+                @endif
+            @endcan
 
             @if (isAdmin())
                 <a class="btn btn-adaptive" href="{{ route('admin.blogs.blog', ['id' => $category->id, 'page' => $articles->currentPage()]) }}"><i class="fas fa-wrench"></i></a>
