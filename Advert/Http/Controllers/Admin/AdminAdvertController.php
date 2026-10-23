@@ -19,7 +19,7 @@ class AdminAdvertController extends AdminController
     {
         $advert = Advert::query()
             ->where('type', Advert::TYPE_ADMIN)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->firstOrNew();
 
         return view('advert::admin/admin-adverts/index', compact('advert'));
@@ -32,7 +32,7 @@ class AdminAdvertController extends AdminController
     {
         Advert::query()->updateOrCreate([
             'type'    => Advert::TYPE_ADMIN,
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
         ], $request->advertFields() + [
             'deleted_at' => now()->addDays((int) setting('rekadmintime')),
         ]);
@@ -49,7 +49,7 @@ class AdminAdvertController extends AdminController
     {
         $advert = Advert::query()
             ->where('type', Advert::TYPE_ADMIN)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->first();
 
         if (! $advert) {

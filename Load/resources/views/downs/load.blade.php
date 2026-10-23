@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
+        @if (auth()->check())
             @if (! $category->closed)
                     <a class="btn btn-success" href="{{ route('downs.create', ['category' => $category->id]) }}">{{ __('main.add') }}</a>
             @endif

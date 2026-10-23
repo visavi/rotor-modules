@@ -39,7 +39,7 @@ class BoardController extends AdminController
         [$sorting, $orderBy] = Item::getSorting($sort, $order);
 
         $items = Item::query()
-            ->when($board, static function (Builder $query) use ($board) {
+            ->when($board, static function (Builder $query, Board $board) {
                 return $query->where('board_id', $board->id);
             })
             ->where('expires_at', '>', now())

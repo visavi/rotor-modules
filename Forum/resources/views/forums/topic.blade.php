@@ -69,8 +69,8 @@
 
 
     <div class="d-flex flex-wrap align-items-center column-gap-3 row-gap-1 mb-2">
-    @if (getUser())
-        @if (! $topic->closed && getUser('id') === $topic->user_id && getUser('point') >= setting('editforumpoint'))
+    @if (auth()->check())
+        @if (! $topic->closed && auth()->id() === $topic->user_id && auth()->user()?->point >= setting('editforumpoint'))
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-lock"></i>
                 <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
@@ -81,7 +81,7 @@
             <span class="d-inline-flex align-items-center gap-1"><i class="fas fa-pencil-alt"></i> <a href="{{ route('topics.edit', ['id' => $topic->id]) }}">{{ __('main.edit') }}</a></span>
         @endif
 
-        @if ($topic->closed && getUser('id') === $topic->closeUser->id)
+        @if ($topic->closed && auth()->id() === $topic->closeUser->id)
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-unlock"></i>
                 <form action="{{ route('topics.open', ['id' => $topic->id]) }}" method="post" class="d-inline">
@@ -150,9 +150,9 @@
                             @include('app/_rating', ['model' => $post, 'vote' => $post->poll?->vote])
                         </div>
 
-                        @if (getUser())
+                        @if (auth()->check())
                             <div class="js-actions">
-                            @if (getUser('id') !== $post->user_id)
+                            @if (auth()->id() !== $post->user_id)
                                 <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
 
                                 <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
@@ -160,7 +160,7 @@
                                 <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
-                            @if ($topic->isModer || (getUser('id') === $post->user_id && $post->created_at->gt(now()->subMinutes(10))))
+                            @if ($topic->isModer || (auth()->id() === $post->user_id && $post->created_at->gt(now()->subMinutes(10))))
                                 <a href="{{ route('posts.edit', ['id' => $post->id, 'page' => $posts->currentPage()]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                                 @if ($topic->isModer)
                                     <input type="checkbox" class="form-check-input" name="del[]" value="{{ $post->id }}">
@@ -203,7 +203,7 @@
 
     {{ $posts->links() }}
 
-    @if (getUser())
+    @if (auth()->check())
         @if (empty($topic->closed))
             <div class="section-form mb-3 shadow">
                 <form action="{{ route('topics.create', ['id' => $topic->id]) }}" method="post">

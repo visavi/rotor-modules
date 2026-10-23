@@ -12,9 +12,9 @@
 @stop
 
 @section('content')
-    {{ __('transfer::transfers.in_stock') }}: {{ plural(getUser('money'), setting('moneyname')) }}<br><br>
+    {{ __('transfer::transfers.in_stock') }}: {{ plural(auth()->user()?->money, setting('moneyname')) }}<br><br>
 
-    @if (getUser('point') >= setting('sendmoneypoint'))
+    @if (auth()->user()?->point >= setting('sendmoneypoint'))
         <div class="section-form mb-3 shadow">
             <form action="/transfers/send" method="post">
                 @csrf

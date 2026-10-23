@@ -36,7 +36,7 @@ class DocsService
      */
     public function render(string $raw): string
     {
-        $md = preg_replace('/<a\s+name="([\w-]+)"\s*><\/a>/i', self::ANCHOR_TOKEN . '$1@@', $raw);
+        $md = preg_replace('/<a\s+name="([\w-]+)"\s*><\/a>/i', self::ANCHOR_TOKEN . '$1@@', $raw) ?? $raw;
 
         $html = Str::of($md)->markdown(['html_input' => 'strip'])->toString();
 
@@ -44,7 +44,7 @@ class DocsService
             '/(?:<p>)?' . preg_quote(self::ANCHOR_TOKEN, '/') . '([\w-]+)@@(?:<\/p>)?/',
             '<a id="$1"></a>',
             $html,
-        );
+        ) ?? $html;
 
         return $this->linkHeadings($html);
     }
@@ -74,7 +74,7 @@ class DocsService
                     . " <a class=\"docs-anchor\" href=\"#{$id}\" aria-hidden=\"true\">#</a></h{$m[2]}>";
             },
             $html,
-        );
+        ) ?? $html;
     }
 
     /**
@@ -184,7 +184,7 @@ class DocsService
                 continue;
             }
 
-            $raw = preg_replace('/^---.*?---\s*/s', '', (string) file_get_contents($file));
+            $raw = preg_replace('/^---.*?---\s*/s', '', (string) file_get_contents($file)) ?? '';
 
             if (mb_stripos($raw, $query) === false) {
                 continue;
@@ -205,7 +205,7 @@ class DocsService
      */
     private function buildExcerpt(string $raw, string $query): string
     {
-        $text = preg_replace('/```[\w]*\n[\s\S]*?```/u', '', $raw);
+        $text = preg_replace('/```[\w]*\n[\s\S]*?```/u', '', $raw) ?? $raw;
 
         $pos = mb_stripos($text, $query) ?: 0;
         $start = max(0, $pos - 100);
@@ -216,9 +216,9 @@ class DocsService
         }
 
         $excerpt = mb_substr($text, $start, 500);
-        $excerpt = preg_replace('/^#\s+.+$/mu', '', $excerpt);
-        $excerpt = preg_replace('/^#{2,6}\s+(.+)$/mu', '**$1**', $excerpt);
-        $excerpt = trim(preg_replace('/\n{3,}/', "\n\n", $excerpt));
+        $excerpt = preg_replace('/^#\s+.+$/mu', '', $excerpt) ?? $excerpt;
+        $excerpt = preg_replace('/^#{2,6}\s+(.+)$/mu', '**$1**', $excerpt) ?? $excerpt;
+        $excerpt = trim(preg_replace('/\n{3,}/', "\n\n", $excerpt) ?? $excerpt);
 
         if (mb_strlen($excerpt) > 400) {
             // Без пробела в первых 400 символах false обрезал выдержку до пустой строки

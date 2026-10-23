@@ -56,7 +56,7 @@ class PaymentController extends Controller
                 // Блокировка строки: ЮКасса шлёт уведомление повторно, и два одновременных
                 // запроса иначе оба увидят неоплаченный заказ и выполнят его дважды
                 DB::transaction(function () use ($order, $status) {
-                    $order = Order::query()->lockForUpdate()->find($order->id);
+                    $order = Order::query()->lockForUpdate()->findOrFail($order->id);
 
                     if ($order->status === YooKassaService::SUCCEEDED) {
                         return;

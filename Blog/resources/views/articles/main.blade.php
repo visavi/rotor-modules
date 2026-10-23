@@ -4,7 +4,7 @@
 
 @section('header')
 
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
             <a class="btn btn-success" href="{{ route('blogs.create') }}">{{ __('blog::blogs.add') }}</a>
         </div>
@@ -56,7 +56,7 @@
     @endif
 
     <a href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>
-    @if (getUser())
+    @if (auth()->check())
         / <a href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>
     @endif
 @stop

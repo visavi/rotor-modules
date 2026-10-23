@@ -25,7 +25,7 @@ class FeedbackRequest extends FormRequest
 
     public function rules(): array
     {
-        $user = getUser();
+        $user = auth()->user();
 
         $rules = [
             'message' => ['required', 'string', new TextLengthRule(5, 50000), CommentRequest::floodRule()],

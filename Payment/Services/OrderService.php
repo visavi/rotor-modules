@@ -27,7 +27,7 @@ class OrderService
     public function createOrder(array $data): Order
     {
         return Order::query()->create([
-            'user_id'     => getUser('id'),
+            'user_id'     => auth()->id(),
             'type'        => $data['type'],
             'amount'      => $data['prices']['total'],
             'currency'    => config('payment.yookassa_currency'),

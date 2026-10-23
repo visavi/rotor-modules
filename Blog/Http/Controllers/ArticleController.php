@@ -137,7 +137,7 @@ class ArticleController extends Controller
         $article = new Article();
 
         $files = File::query()
-            ->pending(Article::$morphName, getUser('id'))
+            ->pending(Article::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -156,7 +156,7 @@ class ArticleController extends Controller
 
         $article = Article::query()->create([
             'category_id'  => $request->category()->id,
-            'user_id'      => getUser('id'),
+            'user_id'      => auth()->id(),
             'title'        => $title,
             'slug'         => $title,
             'text'         => $request->string('text')->value(),
@@ -376,7 +376,7 @@ class ArticleController extends Controller
     public function userArticles(Request $request): View
     {
         $active = (bool) $request->input('active', true);
-        $login = $request->input('user', getUser('login'));
+        $login = $request->input('user', auth()->user()?->login);
         $user = getUserByLogin($login);
 
         if (! $user) {
@@ -403,7 +403,7 @@ class ArticleController extends Controller
      */
     public function userComments(Request $request): View
     {
-        $login = $request->input('user', getUser('login'));
+        $login = $request->input('user', auth()->user()?->login);
         $user = getUserByLogin($login);
 
         if (! $user) {
@@ -448,7 +448,7 @@ class ArticleController extends Controller
             abort(404, __('blog::blogs.article_not_exist'));
         }
 
-        if ($article->user_id !== getUser('id')) {
+        if ($article->user_id !== auth()->id()) {
             abort(200, __('main.article_not_author'));
         }
 

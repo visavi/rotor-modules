@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Transfer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,10 +34,10 @@ class TransferController extends Controller
     /**
      * Перевод денег
      */
-    public function send(TransferRequest $request, TransferService $transfers): RedirectResponse
+    public function send(TransferRequest $request, TransferService $transfers, #[CurrentUser] User $user): RedirectResponse
     {
         $transfers->send(
-            getUser(),
+            $user,
             $request->recipient(),
             $request->integer('money'),
             $request->string('text')->value() ?: __('main.not_specified'),

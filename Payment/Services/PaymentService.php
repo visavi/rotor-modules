@@ -475,7 +475,7 @@ class PaymentService
      */
     public function validateCardOrder(array $data): ?string
     {
-        if (! getUser()) {
+        if (auth()->guest()) {
             return __('payment::payments.cards.login_required');
         }
 

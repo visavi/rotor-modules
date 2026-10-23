@@ -31,12 +31,12 @@ class GuestbookRequest extends FormRequest
      */
     public function authorize(): Response
     {
-        return getUser() || setting('bookadds') ? Response::allow() : Response::deny(__('main.not_authorized'));
+        return auth()->user() || setting('bookadds') ? Response::allow() : Response::deny(__('main.not_authorized'));
     }
 
     public function rules(): array
     {
-        if (getUser()) {
+        if (auth()->check()) {
             // Вложения — только от пользователей: файл гостя открыт
             // по ссылке ещё до модерации и обходит запрет ссылок в тексте
             return [
@@ -73,7 +73,7 @@ class GuestbookRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
-                if (! getUser()) {
+                if (auth()->guest()) {
                     $this->checkCaptcha($validator);
                 }
             },

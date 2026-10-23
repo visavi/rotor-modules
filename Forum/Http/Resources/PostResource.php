@@ -33,7 +33,7 @@ class PostResource extends JsonResource
                 'type'  => Post::$morphName,
                 'id'    => $this->id,
                 'value' => $this->getAttribute('vote'),
-                'own'   => $this->user_id === getUser('id'),
+                'own'   => $this->user_id === auth()->id(),
             ],
             'files'      => FileResource::collection($this->files),
             'updated_at' => dateFixed($this->updated_at, 'c', true),

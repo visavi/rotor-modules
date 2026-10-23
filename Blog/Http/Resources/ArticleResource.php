@@ -34,7 +34,7 @@ class ArticleResource extends JsonResource
                 'type'  => Article::$morphName,
                 'id'    => $this->id,
                 'value' => $this->getAttribute('vote'),
-                'own'   => $this->user_id === getUser('id'),
+                'own'   => $this->user_id === auth()->id(),
             ],
             'visits'         => $this->visits,
             'comments_count' => $this->count_comments,

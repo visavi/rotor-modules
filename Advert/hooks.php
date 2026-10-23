@@ -33,7 +33,7 @@ Hook::add('advertTop', static function (): string {
         $result = implode('<br>', $links);
     }
 
-    if ($result || getUser()) {
+    if ($result || auth()->check()) {
         $html .= view('advert::adverts/_links', compact('result'));
     }
 

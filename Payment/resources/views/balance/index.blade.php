@@ -14,7 +14,7 @@
 @section('content')
     <div class="section mb-3 shadow">
         <div class="section-body">
-            <div>{{ __('payment::payments.balance.current') }}: <b>{{ plural(getUser('money'), setting('moneyname')) }}</b></div>
+            <div>{{ __('payment::payments.balance.current') }}: <b>{{ plural(auth()->user()?->money, setting('moneyname')) }}</b></div>
             <div class="text-muted">{{ __('payment::payments.balance.rate', ['money' => plural($rate, setting('moneyname')), 'currency' => setting('currency')]) }}</div>
         </div>
     </div>
@@ -31,7 +31,7 @@
 
             <div class="mb-3">
                 <label for="email" class="form-label">Email:</label>
-                <input class="form-control{{ hasError('email') }}" id="email" name="email" type="text" value="{{ old('email', getUser('email')) }}" maxlength="100" required>
+                <input class="form-control{{ hasError('email') }}" id="email" name="email" type="text" value="{{ old('email', auth()->user()?->email) }}" maxlength="100" required>
                 <div class="invalid-feedback">{{ textError('email') }}</div>
             </div>
 

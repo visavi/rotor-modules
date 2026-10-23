@@ -86,6 +86,7 @@ class LotteryService
         $winners = $lottery->lotteryUsers()
             ->where('number', $number)
             ->whereHas('user')
+            ->with('user')
             ->get();
 
         if ($winners->isEmpty()) {

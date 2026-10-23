@@ -27,7 +27,7 @@ class OfferStoreRequest extends OfferRequest
         return [
             // Писать в раздел можно, только набрав порог баллов
             static function (Validator $validator): void {
-                if (getUser('point') < setting('addofferspoint')) {
+                if (auth()->user()?->point < setting('addofferspoint')) {
                     $validator->errors()->add('point', __('offer::offers.condition_add', [
                         'point' => plural(setting('addofferspoint'), setting('scorename')),
                     ]));

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Gift\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -54,9 +56,9 @@ class IndexController extends Controller
     /**
      * Sends a gift
      */
-    public function store(GiftSendRequest $request, GiftService $service): RedirectResponse
+    public function store(GiftSendRequest $request, GiftService $service, #[CurrentUser] User $user): RedirectResponse
     {
-        $service->send(getUser(), $request->gift(), $request->recipients(), $request->string('text')->value());
+        $service->send($user, $request->gift(), $request->recipients(), $request->string('text')->value());
 
         return redirect('gifts')
             ->with('success', __('gift::gifts.gift_sent'));

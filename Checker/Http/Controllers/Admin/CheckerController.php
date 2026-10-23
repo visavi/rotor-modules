@@ -23,7 +23,7 @@ class CheckerController extends AdminController
         if (Storage::disk('local')->exists($this->filename)) {
             $files = $this->scanFiles(base_path());
 
-            $filesScan = json_decode(Storage::disk('local')->get($this->filename));
+            $filesScan = json_decode((string) Storage::disk('local')->get($this->filename));
 
             $diff['left'] = array_diff($files, $filesScan);
             $diff['right'] = array_diff($filesScan, $files);

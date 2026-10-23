@@ -122,7 +122,7 @@ class Block extends Model
     protected function visible(Builder $query): void
     {
         $query->where('active', true)
-            ->whereIn('visibility', [self::VISIBLE_ALL, getUser() ? self::VISIBLE_USERS : self::VISIBLE_GUESTS])
+            ->whereIn('visibility', [self::VISIBLE_ALL, auth()->user() ? self::VISIBLE_USERS : self::VISIBLE_GUESTS])
             ->where(static fn (Builder $q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
             ->where(static fn (Builder $q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()));
     }

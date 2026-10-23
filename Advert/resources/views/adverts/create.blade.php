@@ -13,7 +13,7 @@
 @stop
 
 @section('content')
-    {{ __('main.cash_money') }}: <b>{{ plural(getUser('money'), setting('moneyname')) }}</b><br><br>
+    {{ __('main.cash_money') }}: <b>{{ plural(auth()->user()?->money, setting('moneyname')) }}</b><br><br>
 
     <div class="section-form mb-3 shadow">
         <form method="post" action="/adverts/create">

@@ -98,7 +98,7 @@ class OfferController extends Controller
 
         $offer->update([
             'reply'         => $request->string('reply')->value(),
-            'reply_user_id' => getUser('id'),
+            'reply_user_id' => auth()->id(),
             'status'        => $request->input('status'),
             'closed'        => $request->boolean('closed'),
             'updated_at'    => now(),

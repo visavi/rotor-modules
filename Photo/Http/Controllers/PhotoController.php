@@ -74,7 +74,7 @@ class PhotoController extends Controller
         $this->checkCreationOpen();
 
         $files = File::query()
-            ->pending(Photo::$morphName, getUser('id'))
+            ->pending(Photo::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -89,7 +89,7 @@ class PhotoController extends Controller
         $this->checkCreationOpen();
 
         $photo = Photo::query()->create($request->photoFields() + [
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
         ]);
 
         $files->attach($photo, $request->file('files', []));
@@ -120,7 +120,7 @@ class PhotoController extends Controller
     {
         $this->ownPhoto($id)->update($request->photoFields());
 
-        return redirect()->route('photos.user-albums', ['user' => getUser('login'), 'page' => int($request->input('page', 1))])
+        return redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))])
             ->with('success', __('photo::photos.photo_success_edited'));
     }
 
@@ -130,7 +130,7 @@ class PhotoController extends Controller
     public function delete(int $id, Request $request): RedirectResponse
     {
         $photo = $this->ownPhoto($id);
-        $redirect = redirect()->route('photos.user-albums', ['user' => getUser('login'), 'page' => int($request->input('page', 1))]);
+        $redirect = redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))]);
 
         if ($photo->count_comments) {
             return $redirect->withErrors(__('photo::photos.photo_has_comments'));
@@ -163,7 +163,7 @@ class PhotoController extends Controller
      */
     public function album(Request $request): View
     {
-        $login = $request->input('user', getUser('login'));
+        $login = $request->input('user', auth()->user()?->login);
         $user = getUserByLogin($login);
 
         if (! $user) {
@@ -177,7 +177,7 @@ class PhotoController extends Controller
             ->paginate(setting('fotolist'))
             ->appends(['user' => $user->login]);
 
-        $moder = getUser() && getUser('id') === $user->id ? 1 : 0;
+        $moder = auth()->id() === $user->id ? 1 : 0;
 
         return view('photo::photos/user_albums', compact('photos', 'moder', 'user'));
     }
@@ -204,7 +204,7 @@ class PhotoController extends Controller
      */
     public function userComments(Request $request): View
     {
-        $login = $request->input('user', getUser('login'));
+        $login = $request->input('user', auth()->user()?->login);
         $user = getUserByLogin($login);
 
         if (! $user) {
@@ -229,7 +229,7 @@ class PhotoController extends Controller
      */
     private function ownPhoto(int $id): Photo
     {
-        $photo = Photo::query()->where('user_id', getUser('id'))->find($id);
+        $photo = Photo::query()->where('user_id', auth()->id())->find($id);
 
         if (! $photo) {
             abort(404, __('photo::photos.photo_not_author'));

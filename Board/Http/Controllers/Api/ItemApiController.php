@@ -6,6 +6,7 @@ namespace Modules\Board\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Models\User;
 use App\Services\FileService;
 use App\Traits\HandlesApiPagination;
 use Illuminate\Http\JsonResponse;
@@ -51,7 +52,7 @@ class ItemApiController extends Controller
         $items = Item::query()
             ->when($categoryId, static fn ($query) => $query->where('board_id', $categoryId))
             ->when($city !== '', static fn ($query) => $query->where('city', $city))
-            ->when($user, static fn ($query) => $query->where('user_id', $user->id))
+            ->when($user, static fn ($query, User $user) => $query->where('user_id', $user->id))
             // Истёкшие объявления в списках не показываются
             ->where('expires_at', '>', now())
             ->orderBy(...$orderBy)
@@ -90,7 +91,7 @@ class ItemApiController extends Controller
         }
 
         $item = Item::query()->create($request->itemFields() + [
-            'user_id'    => getUser('id'),
+            'user_id'    => auth()->id(),
             'created_at' => now(),
             'updated_at' => now(),
             // Объявление живёт ограниченный срок и потом пропадает из списков
@@ -179,7 +180,7 @@ class ItemApiController extends Controller
             abort(404, __('board::boards.item_not_exist'));
         }
 
-        if ($item->user_id !== getUser('id')) {
+        if ($item->user_id !== auth()->id()) {
             abort(403, __('board::boards.item_not_author'));
         }
 

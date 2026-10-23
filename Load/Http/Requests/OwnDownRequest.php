@@ -15,7 +15,7 @@ class OwnDownRequest extends DownRequest
 {
     protected function prepareForValidation(): void
     {
-        $down = Down::query()->where('user_id', getUser('id'))->find(int($this->route('id')));
+        $down = Down::query()->where('user_id', auth()->id())->find(int($this->route('id')));
 
         if (! $down) {
             abort(404, __('load::loads.down_not_exist'));

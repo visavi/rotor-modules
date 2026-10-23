@@ -13,7 +13,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{{ route('photos.index') }}">{{ __('photo::photos.photos') }}</a></li>
             {{-- Альбом пользователя закрыт для гостей --}}
-            @if (getUser())
+            @if (auth()->check())
                 <li class="breadcrumb-item"><a href="{{ route('photos.user-albums', ['user' => $photo->user->login]) }}">{{ __('photo::photos.album') }} {{ $photo->user->getName() }}</a></li>
             @endif
             <li class="breadcrumb-item active">{{ $photo->title }}</li>
@@ -22,7 +22,7 @@
 @stop
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         @if (isAdmin())
             <div class="btn-group float-end">
                 <button type="button" class="btn btn-adaptive dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -37,7 +37,7 @@
                     </form>
                 </div>
             </div>
-        @elseif (getUser('id') === $photo->user->id)
+        @elseif (auth()->id() === $photo->user->id)
             <div class="btn-group float-end">
                 <button type="button" class="btn btn-adaptive dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-wrench"></i>

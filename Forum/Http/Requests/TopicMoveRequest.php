@@ -6,6 +6,7 @@ namespace Modules\Forum\Http\Requests;
 
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
+use LogicException;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Topic;
 
@@ -48,6 +49,6 @@ class TopicMoveRequest extends FormRequest
 
     public function forum(): Forum
     {
-        return $this->forum;
+        return $this->forum ?? throw new LogicException('Доступно после проверки запроса');
     }
 }

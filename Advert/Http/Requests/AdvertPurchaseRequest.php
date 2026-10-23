@@ -20,7 +20,7 @@ class AdvertPurchaseRequest extends AdvertRequest
             function (Validator $validator): void {
                 $this->checkCaptcha($validator);
 
-                if (getUser('money') < $this->price()) {
+                if (auth()->user()?->money < $this->price()) {
                     $validator->errors()->add('money', __('advert::adverts.advert_not_money'));
                 }
             },

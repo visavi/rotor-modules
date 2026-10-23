@@ -55,7 +55,7 @@ class Vote extends Model
     /**
      * Запомненный ответ isVoted(): [id пользователя, проголосовал ли]
      *
-     * @var array{0: int, 1: bool}|null
+     * @var array{0: int|string, 1: bool}|null
      */
     private ?array $votedMemo = null;
 
@@ -133,7 +133,7 @@ class Vote extends Model
      */
     public function isVoted(): bool
     {
-        $userId = getUser('id');
+        $userId = auth()->id();
 
         if (! $userId) {
             return true;

@@ -1,7 +1,7 @@
 <div class="text-center">
     {!! $result !!}
 
-    @if (getUser())
+    @if (auth()->check())
         @if ($result)
             <small><a href="/adverts" rel="nofollow">[+]</a></small>
         @else

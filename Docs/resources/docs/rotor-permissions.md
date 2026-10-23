@@ -32,11 +32,12 @@ isAdmin('admin');   // только админ и босс
 isAdmin('boss');    // только владелец
 
 // Получить текущего пользователя
-$user = getUser();       // объект User или null
-$level = getUser('level'); // значение поля
+$user = auth()->user();          // объект User или null
+$id = auth()->id();              // id или null
+$level = auth()->user()?->level; // значение поля
 
 // Проверить авторизацию
-if (getUser()) { ... }
+if (auth()->check()) { ... }
 ```
 
 ## Проверка в Blade-шаблонах
@@ -50,9 +51,9 @@ if (getUser()) { ... }
     <!-- Только владелец -->
 @endif
 
-@if (getUser())
+@auth
     <!-- Авторизованные пользователи -->
-@endif
+@endauth
 ```
 
 ## Проверка в контроллерах

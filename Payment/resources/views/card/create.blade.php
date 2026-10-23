@@ -3,7 +3,7 @@
 @section('title', __('payment::payments.cards.title'))
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
             <a class="btn btn-adaptive" href="/payments/my">{{ __('payment::payments.paid_adverts.my_title') }}</a>
         </div>
@@ -24,7 +24,7 @@
 @section('content')
     @include('payment::advert/_tabs')
 
-    @if (! getUser())
+    @if (auth()->guest())
         <div class="alert alert-info">
             {{ __('payment::payments.cards.login_required') }}.
             <a href="{{ route('login') }}">{{ __('payment::payments.cards.login_link') }}</a>

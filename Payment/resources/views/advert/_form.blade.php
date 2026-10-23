@@ -71,7 +71,7 @@
 
     <div class="mb-3">
         <label for="email" class="form-label">Email:</label>
-        <input class="form-control{{ hasError('email') }}" id="email" name="email" type="text" value="{{ old('email', $advert->email ?? getUser('email')) }}" maxlength="100" required>
+        <input class="form-control{{ hasError('email') }}" id="email" name="email" type="text" value="{{ old('email', $advert->email ?? auth()->user()?->email) }}" maxlength="100" required>
         <div class="invalid-feedback">{{ textError('email') }}</div>
     </div>
 

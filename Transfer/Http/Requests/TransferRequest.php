@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Rules\TextLengthRule;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
+use LogicException;
 
 /**
  * Перевод денег — общий для сайта и API
@@ -18,7 +19,7 @@ class TransferRequest extends FormRequest
 
     public function rules(): array
     {
-        $user = getUser();
+        $user = auth()->user() ?? abort(403);
 
         return [
             'user' => [
@@ -68,6 +69,6 @@ class TransferRequest extends FormRequest
      */
     public function recipient(): User
     {
-        return $this->recipient;
+        return $this->recipient ?? throw new LogicException('Доступно после проверки запроса');
     }
 }

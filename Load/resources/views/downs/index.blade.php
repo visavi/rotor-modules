@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (getUser() && setting('downupload')))
+        @if (isAdmin() || (auth()->check() && setting('downupload')))
             <a class="btn btn-success" href="{{ route('downs.create') }}">{{ __('main.add') }}</a>
 
             @if (isAdmin('admin'))
@@ -26,7 +26,7 @@
 @stop
 
 @section('content')
-    @if (getUser())
+    @if (auth()->check())
         {{ __('main.my') }}:
         <a href="{{ route('downs.active-files') }}" class="badge bg-adaptive">{{ __('load::loads.downs') }}</a>
         <a href="{{ route('downs.active-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>

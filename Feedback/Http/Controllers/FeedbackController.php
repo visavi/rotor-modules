@@ -21,7 +21,7 @@ class FeedbackController extends Controller
      */
     public function index(): View
     {
-        $user = getUser();
+        $user = auth()->user();
 
         return view('feedback::index', [
             'asksName'  => ! $user,
@@ -34,7 +34,7 @@ class FeedbackController extends Controller
      */
     public function send(FeedbackRequest $request, Flood $flood, MailService $mail): RedirectResponse
     {
-        $user = getUser();
+        $user = auth()->user();
         $message = $request->string('message')->value();
         $name = $user ? $user->login : $request->string('name')->trim()->value();
         $email = Feedback::asksEmail($user) ? $request->string('email')->trim()->value() : (string) $user?->email;

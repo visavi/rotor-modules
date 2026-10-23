@@ -10,6 +10,7 @@ use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use LogicException;
 use Modules\Load\Models\Down;
 use Modules\Load\Models\Load;
 
@@ -91,7 +92,7 @@ class DownRequest extends FormRequest
 
     public function category(): Load
     {
-        return $this->category;
+        return $this->category ?? throw new LogicException('Доступно после проверки запроса');
     }
 
     /**

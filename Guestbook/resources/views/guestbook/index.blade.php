@@ -59,7 +59,7 @@
                         @endif
                     </div>
 
-                    @if (getUser() && getUser('id') !== $post->user_id)
+                    @if (auth()->check() && auth()->id() !== $post->user_id)
                         <div class="js-actions">
                             <a href="#" onclick="return postReply(this)" data-bs-toggle="tooltip" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
                             <a href="#" onclick="return postQuote(this)" data-bs-toggle="tooltip" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
@@ -68,7 +68,7 @@
                         </div>
                     @endif
 
-                    @if ($post->created_at->gt(now()->subMinutes(10)) && getUser() && getUser('id') === $post->user_id)
+                    @if ($post->created_at->gt(now()->subMinutes(10)) && auth()->check() && auth()->id() === $post->user_id)
                         <div class="js-actions">
                             <a href="{{ route('guestbook.edit', ['id' => $post->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
                         </div>

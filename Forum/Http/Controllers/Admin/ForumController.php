@@ -167,7 +167,7 @@ class ForumController extends AdminController
             ->where('forum_id', $forum->id)
             ->leftJoin('bookmarks', static function (JoinClause $join) {
                 $join->on('topics.id', 'bookmarks.topic_id')
-                    ->where('bookmarks.user_id', getUser('id'));
+                    ->where('bookmarks.user_id', auth()->id());
             })
             ->orderByDesc('locked')
             ->orderByDesc('updated_at')
@@ -201,7 +201,7 @@ class ForumController extends AdminController
             'moderators'    => $request->curators(),
             'locked'        => $request->boolean('locked'),
             'closed'        => $closed,
-            'close_user_id' => $closed ? getUser('id') : null,
+            'close_user_id' => $closed ? auth()->id() : null,
         ]);
 
         clearCache(['statForums', 'recentTopics']);
@@ -258,7 +258,7 @@ class ForumController extends AdminController
             case 'closed':
                 $topic->update([
                     'closed'        => 1,
-                    'close_user_id' => getUser('id'),
+                    'close_user_id' => auth()->id(),
                 ]);
 
                 return $redirect->with('success', __('forum::forums.topic_success_closed'));
@@ -338,7 +338,7 @@ class ForumController extends AdminController
         }
 
         $files = File::query()
-            ->pending(Post::$morphName, getUser('id'))
+            ->pending(Post::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -365,7 +365,7 @@ class ForumController extends AdminController
 
         $post->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page', 1))])

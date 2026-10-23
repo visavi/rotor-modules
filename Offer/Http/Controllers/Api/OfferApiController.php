@@ -70,7 +70,7 @@ class OfferApiController extends Controller
             'type'    => $request->input('type'),
             'title'   => $request->string('title')->value(),
             'text'    => $request->string('text')->value(),
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
             'rating'  => 1,
             'status'  => Offer::WAIT,
         ]);
@@ -95,7 +95,7 @@ class OfferApiController extends Controller
     {
         $offer = Offer::query()
             ->where('id', $id)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->first();
 
         if (! $offer) {

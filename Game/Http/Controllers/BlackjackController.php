@@ -34,7 +34,7 @@ class BlackjackController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $this->user = getUser();
+            $this->user = auth()->user() ?? abort(403);
 
             return $next($request);
         });

@@ -49,13 +49,13 @@
 
         <div class="mb-3{{ hasError('phone') }}">
             <label for="inputPhone" class="form-label">{{ __('board::boards.phone') }}:</label>
-            <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ old('phone', getUser('phone')) }}">
+            <input class="phone form-control" id="inputPhone" name="phone" placeholder="+7 ___ ___-__-__" maxlength="18" value="{{ old('phone', auth()->user()?->phone) }}">
             <div class="invalid-feedback">{{ textError('phone') }}</div>
         </div>
 
         @include('board::boards/_messengers', ['selected' => old('messengers', [])])
 
-        @include('board::boards/_city', ['city' => old('city', getUser('city'))])
+        @include('board::boards/_city', ['city' => old('city', auth()->user()?->city)])
 
         @include('app/_upload_media', [
             'model' => Modules\Board\Models\Item::getModel(),

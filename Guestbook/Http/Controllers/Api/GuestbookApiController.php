@@ -39,7 +39,7 @@ class GuestbookApiController extends Controller
      */
     public function store(GuestbookRequest $request, Flood $flood, FileService $files): JsonResponse
     {
-        $user = getUser();
+        $user = auth()->user();
         $text = $request->string('text')->value();
         $active = true;
         $guestName = null;
@@ -91,7 +91,7 @@ class GuestbookApiController extends Controller
     public function update(int $id, GuestbookTextRequest $request): JsonResponse
     {
         $post = Guestbook::query()
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->find($id);
 
         if (! $post) {
@@ -105,7 +105,7 @@ class GuestbookApiController extends Controller
 
         $post->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         $post->load('user', 'editUser', 'files');

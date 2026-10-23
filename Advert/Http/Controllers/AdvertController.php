@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Advert\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -47,11 +49,10 @@ class AdvertController extends Controller
      * Баланс проверяется ещё раз при списании: два одновременных запроса
      * проходят проверку оба, и без условия баланс ушёл бы в минус
      */
-    public function store(AdvertPurchaseRequest $request): RedirectResponse
+    public function store(AdvertPurchaseRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
         $this->checkCanBuy();
 
-        $user = getUser();
         $price = $request->price();
 
         DB::transaction(static function () use ($request, $user, $price) {
@@ -89,7 +90,7 @@ class AdvertController extends Controller
     {
         $this->checkOpen();
 
-        if (getUser('point') < setting('rekuserpoint')) {
+        if (auth()->user()?->point < setting('rekuserpoint')) {
             abort(200, __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]));
         }
 
@@ -97,7 +98,7 @@ class AdvertController extends Controller
 
         $posted = Advert::query()
             ->where('type', Advert::TYPE_USER)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->exists();
 
         if ($posted) {

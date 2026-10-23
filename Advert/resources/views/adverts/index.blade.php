@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
+        @if (auth()->check())
             <a class="btn btn-success" href="/adverts/create">{{ __('advert::adverts.create_advert') }}</a>
         @endif
 

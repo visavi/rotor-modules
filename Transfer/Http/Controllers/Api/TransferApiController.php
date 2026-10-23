@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Modules\Transfer\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\HandlesApiPagination;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Transfer\Http\Requests\TransferRequest;
@@ -22,7 +24,7 @@ class TransferApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $userId = getUser('id');
+        $userId = auth()->id();
 
         $transfers = Transfer::query()
             ->where('user_id', $userId)
@@ -45,10 +47,8 @@ class TransferApiController extends Controller
     /**
      * Перевод денег другому пользователю
      */
-    public function store(TransferRequest $request, TransferService $transfers): JsonResponse
+    public function store(TransferRequest $request, TransferService $transfers, #[CurrentUser] User $user): JsonResponse
     {
-        $user = getUser();
-
         $transfers->send(
             $user,
             $request->recipient(),
@@ -58,7 +58,7 @@ class TransferApiController extends Controller
 
         return response()->json([
             'message' => __('transfer::transfers.transfer_success_completed'),
-            'money'   => $user->fresh()->money,
+            'money'   => $user->refresh()->money,
         ], 201);
     }
 }

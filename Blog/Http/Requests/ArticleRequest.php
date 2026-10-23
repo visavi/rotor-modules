@@ -8,6 +8,7 @@ use App\Rules\TextLengthRule;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use LogicException;
 use Modules\Blog\Models\Blog;
 
 /**
@@ -67,7 +68,7 @@ class ArticleRequest extends FormRequest
      */
     public function category(): Blog
     {
-        return $this->category;
+        return $this->category ?? throw new LogicException('Доступно после проверки запроса');
     }
 
     /**

@@ -41,7 +41,7 @@ class NotebookApiController extends Controller
      */
     private function note(): Notebook
     {
-        $userId = getUser('id');
+        $userId = auth()->id();
 
         return Notebook::query()
             ->where('user_id', $userId)

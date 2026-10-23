@@ -3,7 +3,7 @@
 @section('title', 'Покупка рекламы')
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
             <a class="btn btn-adaptive" href="/payments/my">{{ __('payment::payments.paid_adverts.my_title') }}</a>
         </div>

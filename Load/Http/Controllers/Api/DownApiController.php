@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Flood;
 use App\Models\User;
 use App\Traits\HandlesApiComments;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -51,7 +52,7 @@ class DownApiController extends Controller
         $downs = Down::query()
             ->active()
             ->when($categoryId, static fn ($query) => $query->where('category_id', $categoryId))
-            ->when($user, static fn ($query) => $query->where('downs.user_id', $user->id))
+            ->when($user, static fn ($query, User $user) => $query->where('downs.user_id', $user->id))
             ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'category.parent', 'files')
@@ -76,7 +77,7 @@ class DownApiController extends Controller
         }
 
         // Непроверенная загрузка доступна только автору и администрации
-        if (! $down->active && ! isAdmin(User::ADMIN) && getUser('id') !== $down->user_id) {
+        if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
             abort(403, __('load::loads.down_not_verified'));
         }
 
@@ -88,9 +89,9 @@ class DownApiController extends Controller
     /**
      * Создание загрузки
      */
-    public function store(DownStoreRequest $request, Flood $flood, DownService $service): JsonResponse
+    public function store(DownStoreRequest $request, Flood $flood, DownService $service, #[CurrentUser] User $user): JsonResponse
     {
-        $down = $service->create(getUser(), $request, $request->file('files', []));
+        $down = $service->create($user, $request, $request->file('files', []));
 
         $flood->saveState();
 
@@ -107,7 +108,7 @@ class DownApiController extends Controller
      */
     public function update(int $id, OwnDownRequest $request): JsonResponse
     {
-        $down = Down::query()->where('user_id', getUser('id'))->find($id);
+        $down = Down::query()->where('user_id', auth()->id())->find($id);
 
         if (! $down) {
             abort(404, __('load::loads.down_not_exist'));

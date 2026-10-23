@@ -181,6 +181,6 @@ class BlockRequest extends FormRequest
         // Админ вводит своё время, как видит его в списке блоков (dateFixed сдвигает на пояс из анкеты)
         $date = CarbonImmutable::createFromFormat('Y-m-d\TH:i', $value, config('app.timezone')) ?: null;
 
-        return $date?->subHours((int) getUser('timezone'));
+        return $date?->subHours((int) auth()->user()?->timezone);
     }
 }

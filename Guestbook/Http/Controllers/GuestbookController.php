@@ -31,7 +31,7 @@ class GuestbookController extends Controller
         $unpublished = Guestbook::query()->active(false)->count();
 
         $files = collect();
-        if ($user = getUser()) {
+        if ($user = auth()->user()) {
             $files = File::query()
                 ->pending(Guestbook::$morphName, $user->id)
                 ->ordered()
@@ -47,7 +47,7 @@ class GuestbookController extends Controller
     public function add(GuestbookRequest $request, Flood $flood, FileService $files): RedirectResponse
     {
         $msg = $request->string('text')->value();
-        $user = getUser();
+        $user = auth()->user();
         $active = ! setting('guest_moderation');
         $guestName = $request->input('guest_name');
 
@@ -107,7 +107,7 @@ class GuestbookController extends Controller
 
         $post->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         return redirect()
@@ -121,7 +121,7 @@ class GuestbookController extends Controller
      */
     private function ownPost(int $id): Guestbook
     {
-        $post = Guestbook::query()->where('user_id', getUser('id'))->find($id);
+        $post = Guestbook::query()->where('user_id', auth()->id())->find($id);
 
         if (! $post) {
             abort(404, __('main.message_not_found'));

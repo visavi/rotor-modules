@@ -31,7 +31,7 @@ class ItemResource extends JsonResource
             // Валюта общая для сайта, отдельного поля у объявления нет
             'currency' => setting('currency'),
             // Гостю номер не отдаём: без токена его собрал бы любой парсер
-            'phone' => getUser() ? $this->phone : null,
+            'phone' => auth()->check() ? $this->phone : null,
             'city'  => $this->city,
             // Ключи мессенджеров, включённых на сайте; ссылки клиент строит по номеру
             'messengers' => array_keys($this->getMessengers()),

@@ -8,9 +8,9 @@
 @section('image', $item->getOgImage())
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
-            @if (getUser('id') === $item->user->id)
+            @if (auth()->id() === $item->user->id)
                 <a class="btn btn-success" href="{{ route('items.edit', ['id' => $item->id]) }}">{{ __('main.change') }}</a>
             @endif
 
@@ -68,7 +68,7 @@
             <div class="fs-5 fw-bold text-info mt-3">{{ $item->getPrice() }}</div>
         @endif
 
-        @php($canContact = $item->user->id && getUser('id') !== $item->user->id)
+        @php($canContact = $item->user->id && auth()->id() !== $item->user->id)
         @if ($item->phone || $canContact)
             <div class="d-flex flex-wrap align-items-center gap-3 my-3">
                 @if ($canContact)
@@ -98,7 +98,7 @@
             <span title="{{ __('main.views') }}"><i class="far fa-eye"></i> {{ $item->visits }}</span>
 
             {{-- Срок нужен только тому, кто может продлить --}}
-            @if ($item->expires_at->gt(now()) && (getUser('id') === $item->user_id || isAdmin()))
+            @if ($item->expires_at->gt(now()) && (auth()->id() === $item->user_id || isAdmin()))
                 <span><i class="fas fa-clock"></i> {{ __('board::boards.expires_in') }} {{ formatTime($item->expires_at->getTimestamp() - now()->timestamp) }}</span>
             @endif
         </div>

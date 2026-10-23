@@ -109,9 +109,9 @@
                         </div>
 
                         <div class="text-end">
-                            @if (getUser())
+                            @if (auth()->check())
                                 <div class="section-action">
-                                @if (getUser('id') !== $data->user_id)
+                                @if (auth()->id() !== $data->user_id)
                                     <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
 
                                     <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>

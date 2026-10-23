@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Lottery\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -40,16 +42,17 @@ class IndexController extends Controller
         if ($yesterday) {
             $yesterday->winners = $yesterday->lotteryUsers()
                 ->where('number', $yesterday->number)
+                ->with('user')
                 ->get();
         }
+
+        $today->load('lotteryUsers.user');
 
         $ticketPrice = (int) setting('lottery_ticket_price');
         $min = (int) setting('lottery_min');
         $max = (int) setting('lottery_max');
 
-        $ticket = $today->lotteryUsers()
-            ->where('user_id', getUser('id'))
-            ->first();
+        $ticket = $today->lotteryUsers->firstWhere('user_id', auth()->id());
 
         return view('lottery::index', compact('today', 'yesterday', 'ticket', 'ticketPrice', 'min', 'max'));
     }
@@ -62,12 +65,11 @@ class IndexController extends Controller
      *
      * @throws Throwable
      */
-    public function buy(TicketRequest $request, LotteryService $service): RedirectResponse
+    public function buy(TicketRequest $request, LotteryService $service, #[CurrentUser] User $user): RedirectResponse
     {
         // Без планировщика тираж мог не смениться с прошлых суток
         $service->draw();
 
-        $user = getUser();
         $number = $request->integer('number');
         $ticketPrice = (int) setting('lottery_ticket_price');
 

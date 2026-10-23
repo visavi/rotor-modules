@@ -6,8 +6,10 @@ namespace Modules\Forum\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Models\User;
 use App\Services\FileService;
 use App\Traits\HandlesApiPagination;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -82,7 +84,7 @@ class ForumApiController extends Controller
 
         // Общая лента — первые 1000, как на сайте; темы автора листаются целиком
         $topics = Topic::query()
-            ->when($user, static fn (Builder $query) => $query->where('user_id', $user->id))
+            ->when($user, static fn (Builder $query, User $user) => $query->where('user_id', $user->id))
             ->with(self::LIST_RELATIONS)
             ->orderBy(...$orderBy)
             ->when(! $user, static fn (Builder $query) => $query->capped())
@@ -104,7 +106,7 @@ class ForumApiController extends Controller
         // Общая лента — первые 1000, как на сайте; сообщения автора листаются целиком
         $posts = Post::query()
             ->withUserVote()
-            ->when($user, static fn (Builder $query) => $query->where('posts.user_id', $user->id))
+            ->when($user, static fn (Builder $query, User $user) => $query->where('posts.user_id', $user->id))
             ->when($period > 0, static fn (Builder $query) => $query->where('posts.created_at', '>', now()->subDays($period)))
             ->with('user', 'files', 'topic')
             ->orderBy(...$orderBy)
@@ -122,7 +124,7 @@ class ForumApiController extends Controller
         $topics = Topic::query()
             ->select('topics.*', 'bookmarks.count_posts as bookmark_posts')
             ->join('bookmarks', 'topics.id', 'bookmarks.topic_id')
-            ->where('bookmarks.user_id', getUser('id'))
+            ->where('bookmarks.user_id', auth()->id())
             ->with(self::LIST_RELATIONS)
             ->orderBy('topics.updated_at', $this->apiOrder($request, 'desc'))
             ->paginate($this->apiPerPage($request));
@@ -165,7 +167,7 @@ class ForumApiController extends Controller
 
         $post = Post::query()->create([
             'topic_id' => $topic->id,
-            'user_id'  => getUser('id'),
+            'user_id'  => auth()->id(),
             'text'     => $msg,
             'ip'       => getIp(),
             'brow'     => getBrowser(),
@@ -188,10 +190,10 @@ class ForumApiController extends Controller
     /**
      * Создание темы
      */
-    public function createTopic(TopicRequest $request, Flood $flood, TopicService $service): JsonResponse
+    public function createTopic(TopicRequest $request, Flood $flood, TopicService $service, #[CurrentUser] User $user): JsonResponse
     {
         $topic = $service->create(
-            getUser(),
+            $user,
             $request->forum(),
             $request->string('title')->value(),
             $request->string('text')->value(),

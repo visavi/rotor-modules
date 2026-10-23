@@ -3,6 +3,6 @@
     <a @class(['btn btn-sm', 'btn-primary' => request()->is('payments/card'), 'btn-outline-primary' => ! request()->is('payments/card')]) href="/payments/card">{{ __('payment::payments.cards.tab_card') }}</a>
 </div>
 
-@if (! getUser() && request()->is('payments/advert'))
+@if (auth()->guest() && request()->is('payments/advert'))
     <div class="form-text mb-3">{{ __('payment::payments.cards.login_required') }}</div>
 @endif

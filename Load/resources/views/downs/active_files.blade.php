@@ -17,7 +17,7 @@
 @stop
 
 @section('content')
-    @if (getUser() && getUser('id') === $user->id)
+    @if (auth()->id() === $user->id)
         <?php $type = $active ? 'success' : 'adaptive'; ?>
         <a href="{{ route('downs.active-files', ['active' => 1]) }}" class="btn btn-{{ $type }} btn-sm">{{ __('load::loads.verified') }} <span class="badge bg-adaptive">{{ $activeCount }}</span></a>
 

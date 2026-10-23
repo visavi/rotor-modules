@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
+        @if (auth()->check())
             @if (! $forum->closed)
                 <a class="btn btn-success" href="{{ route('forums.create', ['fid' => $forum->id]) }}">{{ __('forum::forums.create_topic') }}</a>
             @endif

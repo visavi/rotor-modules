@@ -75,7 +75,7 @@ class OfferController extends Controller
         $type = $request->input('type');
 
         $files = File::query()
-            ->pending(Offer::$morphName, getUser('id'))
+            ->pending(Offer::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -91,7 +91,7 @@ class OfferController extends Controller
             'type'    => $request->input('type'),
             'title'   => $request->string('title')->value(),
             'text'    => $request->string('text')->value(),
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
             'rating'  => 1,
             'status'  => Offer::WAIT,
         ]);
@@ -139,7 +139,7 @@ class OfferController extends Controller
     {
         $offer = Offer::query()
             ->where('id', $id)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->first();
 
         if (! $offer) {

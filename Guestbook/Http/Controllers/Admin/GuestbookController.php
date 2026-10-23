@@ -49,7 +49,7 @@ class GuestbookController extends AdminController
 
         $post->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         return redirect()

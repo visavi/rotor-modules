@@ -20,7 +20,7 @@ class DownResource extends JsonResource
     public function toArray(Request $request): array
     {
         // Гостю скачивание можно запретить настройкой
-        $allowDownload = getUser() || setting('down_guest_download');
+        $allowDownload = auth()->check() || setting('down_guest_download');
 
         return [
             'id'          => $this->id,
@@ -36,7 +36,7 @@ class DownResource extends JsonResource
                 'type'  => Down::$morphName,
                 'id'    => $this->id,
                 'value' => $this->getAttribute('vote'),
-                'own'   => $this->user_id === getUser('id'),
+                'own'   => $this->user_id === auth()->id(),
             ],
             // Непроверенная загрузка видна только автору и администрации
             'active'         => (bool) $this->active,
@@ -70,7 +70,7 @@ class DownResource extends JsonResource
                     ? route('downs.download', ['id' => $this->id, 'fid' => $file->id])
                     : null,
                 // Содержимое архива можно посмотреть до скачивания, но только авторизованным
-                'archive_url' => $file->extension === 'zip' && getUser()
+                'archive_url' => $file->extension === 'zip' && auth()->user()
                     ? route('downs.zip', ['id' => $this->id, 'fid' => $file->id])
                     : null,
             ])

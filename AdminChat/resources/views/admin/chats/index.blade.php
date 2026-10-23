@@ -41,14 +41,14 @@
                         <small class="fst-italic">{{ $post->user->getStatus() }}</small>
                     </div>
 
-                    @if (getUser() && getUser('id') !== $post->user_id)
+                    @if (auth()->check() && auth()->id() !== $post->user_id)
                         <div class="text-end section-action">
                             <a href="#" onclick="return postReply(this)" data-bs-toggle="tooltip" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
                             <a href="#" onclick="return postQuote(this)" data-bs-toggle="tooltip" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
                         </div>
                     @endif
 
-                    @if ($post->created_at->gt(now()->subMinutes(10)) && getUser() && getUser('id') === $post->user_id)
+                    @if ($post->created_at->gt(now()->subMinutes(10)) && auth()->id() === $post->user_id)
                         <div class="text-end section-action">
                             <a href="/admin/chats/edit/{{ $post->id }}?page={{ $posts->currentPage() }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>
                         </div>

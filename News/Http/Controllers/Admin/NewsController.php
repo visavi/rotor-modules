@@ -66,7 +66,7 @@ class NewsController extends AdminController
     public function create(): View
     {
         $files = File::query()
-            ->pending(News::$morphName, getUser('id'))
+            ->pending(News::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -79,7 +79,7 @@ class NewsController extends AdminController
     public function store(NewsRequest $request, FileService $files): RedirectResponse
     {
         $news = News::query()->create([
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
             'title'   => $request->string('title')->value(),
             'text'    => $request->string('text')->value(),
             'closed'  => $request->boolean('closed'),

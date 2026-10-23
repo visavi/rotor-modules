@@ -36,7 +36,7 @@
     @if (! $down->active)
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i> {{ __('load::loads.pending_down1') }}<br>
-            @if (getUser() && getUser('id') === $down->user_id)
+            @if (auth()->id() === $down->user_id)
                 <i class="fa fa-pencil-alt"></i> <a href="{{ route('downs.edit', ['id' => $down->id]) }}">{{ __('main.edit') }}</a>
             @endif
         </div>
@@ -80,7 +80,7 @@
                             @endif
 
                             {{-- Гостям просмотр архива закрыт, кнопку не показываем --}}
-                            @if ($file->extension === 'zip' && getUser())
+                            @if ($file->extension === 'zip' && auth()->check())
                                 <a class="btn btn-outline-primary" href="{{ route('downs.zip', ['id' => $down->id, 'fid' => $file->id]) }}"><i class="fa fa-folder-open"></i> {{ __('load::loads.view_archive') }}</a>
                             @endif
                         </div>

@@ -3,7 +3,7 @@
 use App\Support\Hook;
 
 Hook::add('navbarStart', static function () {
-    $user = getUser();
+    $user = auth()->user();
 
     if (! $user || ! $user->isActive()) {
         return null;

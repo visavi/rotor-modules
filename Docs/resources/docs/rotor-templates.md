@@ -193,7 +193,7 @@ resources/views/themes/my-theme/views/
 
 ```blade
 {{ setting('title') }}          {{-- настройка сайта --}}
-{{ getUser() }}                 {{-- текущий пользователь или null --}}
+{{ auth()->user()?->login }}    {{-- поле текущего пользователя или null --}}
 {{ isAdmin() }}                 {{-- true если администратор --}}
 {{ showOnline() }}              {{-- количество онлайн --}}
 @hook('hookName')               {{-- точка вставки хука --}}

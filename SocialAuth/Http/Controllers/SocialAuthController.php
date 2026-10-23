@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Rules\EmailRule;
 use App\Services\MailService;
 use App\Services\UserService;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,8 +94,10 @@ class SocialAuthController extends Controller
         $providerId = $oauthUser['id'];
 
         // Текущий пользователь хочет привязать аккаунт
-        if (Auth::check()) {
-            return $this->linkAccount($provider, $providerId, $token);
+        $current = Auth::user();
+
+        if ($current) {
+            return $this->linkAccount($current, $provider, $providerId, $token);
         }
 
         // Ищем существующую привязку
@@ -148,7 +151,7 @@ class SocialAuthController extends Controller
     public function unlink(string $provider): RedirectResponse
     {
         Social::query()
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->where('provider', $provider)
             ->delete();
 
@@ -159,10 +162,8 @@ class SocialAuthController extends Controller
     /**
      * Страница управления привязанными аккаунтами
      */
-    public function accounts(): View
+    public function accounts(#[CurrentUser] User $user): View
     {
-        $user = getUser();
-
         $socials = Social::query()
             ->where('user_id', $user->id)
             ->pluck('provider_id', 'provider');
@@ -215,10 +216,8 @@ class SocialAuthController extends Controller
         );
     }
 
-    private function linkAccount(string $provider, string $providerId, string $token): RedirectResponse
+    private function linkAccount(User $user, string $provider, string $providerId, string $token): RedirectResponse
     {
-        $user = Auth::user();
-
         $existing = Social::query()
             ->where('provider', $provider)
             ->where('provider_id', $providerId)
@@ -414,8 +413,8 @@ class SocialAuthController extends Controller
     private function generateLogin(string $name): string
     {
         $login = Str::ascii(mb_strtolower(trim($name)));
-        $login = preg_replace('/[^a-z0-9\-]/', '-', $login);
-        $login = preg_replace('/-+/', '-', $login);
+        $login = preg_replace('/[^a-z0-9\-]/', '-', $login) ?? '';
+        $login = preg_replace('/-+/', '-', $login) ?? '';
         $login = trim($login, '-');
         $login = Str::substr($login, 0, 20);
 

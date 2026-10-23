@@ -14,7 +14,7 @@ Hook::add('adminBlockEditor', static function () {
 
 // Индикатор новых сообщений в навбаре
 Hook::add('navbarStart', static function () {
-    $user = getUser();
+    $user = auth()->user();
 
     if (! $user || ! isAdmin() || $user->newchat >= statsNewChat()) {
         return '';

@@ -6,6 +6,7 @@ namespace Modules\Blog\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Models\User;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
 use Illuminate\Http\JsonResponse;
@@ -70,7 +71,7 @@ class ArticleApiController extends Controller
         $articles = Article::query()
             ->active()
             ->when($categoryId, static fn ($query) => $query->where('category_id', $categoryId))
-            ->when($user, static fn ($query) => $query->where('articles.user_id', $user->id))
+            ->when($user, static fn ($query, User $user) => $query->where('articles.user_id', $user->id))
             ->when($tag !== '', static fn ($query) => $query->whereHas('tags', static fn ($query) => $query->where('name', $tag)))
             ->withUserVote()
             ->orderBy(...$orderBy)
@@ -116,7 +117,7 @@ class ArticleApiController extends Controller
 
         $article = Article::query()->create([
             'category_id'  => $request->category()->id,
-            'user_id'      => getUser('id'),
+            'user_id'      => auth()->id(),
             'title'        => $title,
             'slug'         => $title,
             'text'         => $request->string('text')->value(),
@@ -150,7 +151,7 @@ class ArticleApiController extends Controller
             abort(404, __('blog::blogs.article_not_exist'));
         }
 
-        if ($article->user_id !== getUser('id')) {
+        if ($article->user_id !== auth()->id()) {
             abort(403, __('main.article_not_author'));
         }
 

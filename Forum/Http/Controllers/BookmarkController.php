@@ -21,7 +21,7 @@ class BookmarkController extends Controller
     {
         $topics = Bookmark::query()
             ->select('bookmarks.count_posts as bookmark_posts', 'bookmarks.topic_id', 'topics.*')
-            ->where('bookmarks.user_id', getUser('id'))
+            ->where('bookmarks.user_id', auth()->id())
             ->leftJoin('topics', 'bookmarks.topic_id', 'topics.id')
             ->with([
                 // Иконке в списке нужен только факт наличия опроса, сам он не грузится
@@ -55,7 +55,7 @@ class BookmarkController extends Controller
 
         $bookmark = Bookmark::query()
             ->where('topic_id', $topic->id)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->first();
 
         if ($bookmark) {
@@ -71,7 +71,7 @@ class BookmarkController extends Controller
         }
 
         Bookmark::query()->create([
-            'user_id'     => getUser('id'),
+            'user_id'     => auth()->id(),
             'topic_id'    => $topic->id,
             'count_posts' => $topic->count_posts,
         ]);
@@ -98,7 +98,7 @@ class BookmarkController extends Controller
 
         Bookmark::query()
             ->whereIn('topic_id', $topicIds)
-            ->where('user_id', getUser('id'))
+            ->where('user_id', auth()->id())
             ->delete();
 
         return $redirect->with('success', __('forum::forums.bookmarks_selected_deleted'));

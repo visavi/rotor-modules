@@ -38,7 +38,7 @@ class DownStoreRequest extends DownRequest
     protected function attachedFiles(): int
     {
         return File::query()
-            ->pending(Down::$morphName, getUser('id'))
+            ->pending(Down::$morphName, auth()->id())
             ->count();
     }
 }

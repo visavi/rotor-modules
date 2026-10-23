@@ -7,7 +7,9 @@ namespace Modules\Forum\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Flood;
+use App\Models\User;
 use App\Support\CategoryTree;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\RedirectResponse;
@@ -72,11 +74,11 @@ class ForumController extends Controller
             abort(404, __('forum::forums.forum_not_exist'));
         }
 
-        $user = getUser();
+        $user = auth()->user();
 
         $topics = Topic::query()
             ->where('forum_id', $forum->id)
-            ->when($user, static function (Builder $query) use ($user) {
+            ->when($user, static function (Builder $query, User $user) {
                 $query->select('topics.*', 'bookmarks.count_posts as bookmark_posts')
                     ->leftJoin('bookmarks', static function (JoinClause $join) use ($user) {
                         $join->on('topics.id', 'bookmarks.topic_id')
@@ -107,7 +109,7 @@ class ForumController extends Controller
         $fid = int($request->input('fid'));
 
         $files = File::query()
-            ->pending(Post::$morphName, getUser('id'))
+            ->pending(Post::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -117,10 +119,10 @@ class ForumController extends Controller
     /**
      * Сохранение темы
      */
-    public function store(TopicRequest $request, Flood $flood, TopicService $service): RedirectResponse
+    public function store(TopicRequest $request, Flood $flood, TopicService $service, #[CurrentUser] User $user): RedirectResponse
     {
         $topic = $service->create(
-            getUser(),
+            $user,
             $request->forum(),
             $request->string('title')->value(),
             $request->string('text')->value(),

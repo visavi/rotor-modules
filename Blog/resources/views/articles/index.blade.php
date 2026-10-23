@@ -3,7 +3,7 @@
 @section('title', __('blog::blogs.blogs') . ' - ' . __('blog::blogs.blogs_list'))
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
             <a class="btn btn-success" href="{{ route('blogs.create') }}">{{ __('blog::blogs.add') }}</a>
 
@@ -27,7 +27,7 @@
 
 @section('content')
     <div class="border-bottom pb-3 mb-3">
-        @if (getUser())
+        @if (auth()->check())
             {{ __('main.my') }}:
             <a href="{{ route('articles.user-articles') }}" class="badge bg-adaptive">{{ __('blog::blogs.articles') }}</a>
             <a href="{{ route('articles.user-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
@@ -38,7 +38,7 @@
         <a href="{{ route('articles.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
 
         <div class="mt-2">
-            <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>@if (getUser())<i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>@endif
+            <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>@if (auth()->check())<i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>@endif
         </div>
     </div>
 

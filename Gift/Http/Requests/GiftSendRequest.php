@@ -62,7 +62,7 @@ class GiftSendRequest extends FormRequest
                 }
 
                 // Стоимость списывается за каждого получателя
-                if (getUser('money') < $this->total()) {
+                if (auth()->user()?->money < $this->total()) {
                     $validator->errors()->add('money', __('gift::gifts.money_not_enough'));
                 }
             },

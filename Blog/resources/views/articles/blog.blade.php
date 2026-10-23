@@ -3,7 +3,7 @@
 @section('title', sprintf('%s (%s)', $category->name, __('main.page_num', ['page' => $articles->currentPage()])))
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
             @if (! $category->closed)
                 <a class="btn btn-success" href="{{ route('blogs.create', ['cid' => $category->id]) }}">{{ __('blog::blogs.add') }}</a>
@@ -37,7 +37,7 @@
 
 @section('content')
     <div class="border-bottom pb-3 mb-3">
-        <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>@if (getUser())<i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>@endif
+        <i class="fa fa-rss"></i> <a class="me-3" href="{{ route('blogs.rss') }}">{{ __('main.rss') }}</a><i class="fa fa-tags"></i> <a class="me-3" href="{{ route('blogs.tags') }}">{{ __('blog::blogs.tag_cloud') }}</a>@if (auth()->check())<i class="fa fa-users"></i> <a class="me-3" href="{{ route('blogs.authors') }}">{{ __('blog::blogs.authors') }}</a>@endif
     </div>
 
     <div class="sort-links border-bottom pb-3 mb-3">

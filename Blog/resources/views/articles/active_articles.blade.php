@@ -17,7 +17,7 @@
 @stop
 
 @section('content')
-    @if (getUser() && getUser('id') === $user->id)
+    @if (auth()->id() === $user->id)
             <?php $type = $active ? 'success' : 'adaptive'; ?>
         <a href="{{ route('articles.user-articles', ['active' => 1]) }}" class="btn btn-{{ $type }} btn-sm">{{ __('blog::blogs.verified_articles') }} <span class="badge bg-adaptive">{{ $activeCount }}</span></a>
 

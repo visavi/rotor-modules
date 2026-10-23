@@ -30,7 +30,7 @@ class PhotoStoreRequest extends PhotoRequest
             function (Validator $validator): void {
                 // Снимок обязателен: приложенный к запросу или загруженный заранее
                 $pending = File::query()
-                    ->pending(Photo::$morphName, getUser('id'))
+                    ->pending(Photo::$morphName, auth()->id())
                     ->exists();
 
                 if (! $this->file('files') && ! $pending) {

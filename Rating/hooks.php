@@ -28,7 +28,7 @@ Hook::add('userCardStats', static fn (User $user) => '<span data-bs-toggle="tool
 
 // Блок репутации: итог, доля плюсов и голосование
 Hook::add('userSections', static function (User $user) {
-    $canVote = getUser() && getUser('login') !== $user->login;
+    $canVote = auth()->check() && auth()->id() !== $user->id;
 
     $rating = view('components.profile.rating', [
         'rating'   => $user->rating,

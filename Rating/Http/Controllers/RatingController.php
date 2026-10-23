@@ -15,7 +15,7 @@ use Modules\Rating\Models\Rating;
 
 class RatingController extends Controller
 {
-    public ?User $user;
+    public User $user;
 
     /**
      * Конструктор
@@ -25,7 +25,7 @@ class RatingController extends Controller
         $this->middleware('check.user');
 
         $this->middleware(function ($request, $next) {
-            $this->user = getUser();
+            $this->user = auth()->user() ?? abort(403);
 
             return $next($request);
         });

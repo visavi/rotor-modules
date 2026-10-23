@@ -42,7 +42,7 @@
         @endif
     </div>
 
-    @if ($user = getUser())
+    @if ($user = auth()->user())
         <div class="section-form mb-3 shadow">
 
             @if (! $ticket)
@@ -63,7 +63,7 @@
             @endif
 
             <div class="mb-3">
-                {{ __('lottery::lottery.participate') }}: {{ $today->lotteryUsers()->count() }}<br>
+                {{ __('lottery::lottery.participate') }}: {{ $today->lotteryUsers->count() }}<br>
                 {{ __('lottery::lottery.ticket_price') }}: {{ plural($ticketPrice, setting('moneyname')) }}<br>
                 {{ __('lottery::lottery.in_stock') }}: {{ plural($user->money, setting('moneyname')) }}
             </div>

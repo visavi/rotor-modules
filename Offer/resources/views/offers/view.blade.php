@@ -4,8 +4,8 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
-            @if (in_array($offer->status, ['wait', 'process']) && getUser('id') === $offer->user_id)
+        @if (auth()->check())
+            @if (in_array($offer->status, ['wait', 'process']) && auth()->id() === $offer->user_id)
                 <a class="btn btn-success" title="{{ __('main.edit') }}" href="{{ route('offers.edit', ['id' => $offer->id]) }}">{{ __('main.change') }}</a>
             @endif
 

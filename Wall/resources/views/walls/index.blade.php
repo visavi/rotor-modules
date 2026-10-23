@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-    @if (getUser())
+    @if (auth()->check())
         <div class="section-form mb-3 shadow">
             {{-- Свёрнута в одно поле; после ошибки открыта --}}
             <form action="/walls/{{ $user->login }}/create" method="post"@unless ($errors->any() || old('text')) data-compact @endunless>
@@ -45,16 +45,16 @@
                         <small class="fst-italic">{{ $data->author->getStatus() }}</small>
                     </div>
 
-                    @if (getUser())
+                    @if (auth()->check())
                         <div class="js-actions">
-                            @if (getUser('id') !== $data->author_id)
+                            @if (auth()->id() !== $data->author_id)
                                 <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
                                 <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
 
                                 <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $data->getMorphClass() }}" data-id="{{ $data->id }}" data-page="{{ $messages->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif
 
-                            @if (isAdmin() || getUser('id') === $user->id)
+                            @if (isAdmin() || auth()->id() === $user->id)
                                 <a href="#" data-ajax data-ajax-url="{{ route('walls.delete', ['login' => $data->user->login]) }}" data-ajax-confirm data-ajax-remove=".section" data-id="{{ $data->id }}" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></a>
                             @endif
                         </div>

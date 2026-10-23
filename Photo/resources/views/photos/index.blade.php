@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (getUser() && setting('photos_create')))
+        @if (isAdmin() || (auth()->check() && setting('photos_create')))
             <a class="btn btn-success" href="{{ route('photos.create') }}">{{ __('main.add') }}</a>
 
             @if (isAdmin())
@@ -26,14 +26,14 @@
 @stop
 
 @section('content')
-    @if (getUser())
+    @if (auth()->check())
         {{ __('main.my') }}:
         <a href="{{ route('photos.user-albums') }}" class="badge bg-adaptive">{{ __('photo::photos.photos') }}</a>
         <a href="{{ route('photos.user-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>
     @endif
 
     {{ __('main.all') }}:
-    @if (getUser())
+    @if (auth()->check())
         <a href="{{ route('photos.albums') }}" class="badge bg-adaptive">{{ __('photo::photos.albums') }}</a>
     @endif
     <a href="{{ route('photos.new-comments') }}" class="badge bg-adaptive">{{ __('main.comments') }}</a>

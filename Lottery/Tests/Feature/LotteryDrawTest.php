@@ -77,7 +77,7 @@ class LotteryDrawTest extends ModuleTestCase
         $this->service->draw();
 
         $drawn = $yesterday->fresh();
-        $winners = $drawn->lotteryUsers()->where('number', $drawn->number)->get();
+        $winners = $drawn->lotteryUsers()->where('number', $drawn->number)->with('user')->get();
         $money = intdiv(5000, $winners->count());
 
         $this->assertNotNull($drawn->number);

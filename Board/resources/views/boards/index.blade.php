@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (isAdmin() || (getUser() && setting('boards_create')))
+        @if (isAdmin() || (auth()->check() && setting('boards_create')))
             <a class="btn btn-success" href="{{ route('items.create', ['bid' => $board ?? null]) }}">{{ __('main.add') }}</a>
 
             @if (isAdmin())
@@ -70,7 +70,7 @@
         </div>
     @endif
 
-    @if (getUser())
+    @if (auth()->check())
         <div class="border-bottom pb-3 mb-3">
             <i class="far fa-list-alt"></i> <a class="me-3" href="{{ route('boards.active') }}">{{ __('board::boards.my_items') }}</a>
         </div>

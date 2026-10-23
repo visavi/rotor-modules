@@ -5,7 +5,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
+        @if (auth()->check())
             <a class="btn btn-success" href="{{ route('forums.create') }}">{{ __('forum::forums.create_topic') }}</a>
 
             @if (isAdmin())
@@ -30,7 +30,7 @@
     @hook('advertForum')
 
     <div class="my-3 py-2 border-bottom">
-        @if (getUser())
+        @if (auth()->check())
             {{ __('main.my') }}:
             <a href="{{ route('forums.active-topics') }}" class="badge bg-adaptive">{{ __('forum::forums.topics') }}</a>
             <a href="{{ route('forums.active-posts') }}" class="badge bg-adaptive">{{ __('forum::forums.posts') }}</a>

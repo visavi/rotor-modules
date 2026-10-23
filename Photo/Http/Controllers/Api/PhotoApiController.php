@@ -6,6 +6,7 @@ namespace Modules\Photo\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Flood;
+use App\Models\User;
 use App\Services\FileService;
 use App\Traits\HandlesApiComments;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +31,7 @@ class PhotoApiController extends Controller
         $user = $this->apiUser($request);
 
         $photos = Photo::query()
-            ->when($user, static fn ($query) => $query->where('photos.user_id', $user->id))
+            ->when($user, static fn ($query, User $user) => $query->where('photos.user_id', $user->id))
             ->withUserVote()
             ->orderBy(...$orderBy)
             ->with('user', 'files')
@@ -69,7 +70,7 @@ class PhotoApiController extends Controller
         }
 
         $photo = Photo::query()->create($request->photoFields() + [
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
         ]);
 
         // Снимок можно приложить к запросу или загрузить заранее через POST /api/files
@@ -127,7 +128,7 @@ class PhotoApiController extends Controller
      */
     private function findOwnPhoto(int $id): Photo
     {
-        $photo = Photo::query()->where('user_id', getUser('id'))->find($id);
+        $photo = Photo::query()->where('user_id', auth()->id())->find($id);
 
         if (! $photo) {
             abort(404, __('photo::photos.photo_not_author'));

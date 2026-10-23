@@ -11,6 +11,7 @@ use App\Models\Reader;
 use App\Models\User;
 use App\Services\FileService;
 use App\Support\CategoryTree;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -52,7 +53,7 @@ class BoardController extends Controller
         [$sorting, $orderBy] = Item::getSorting($sort, $order);
 
         $items = Item::query()
-            ->when($board, static function (Builder $query) use ($board) {
+            ->when($board, static function (Builder $query, Board $board) {
                 return $query->where('board_id', $board->id);
             })
             ->when($city !== '', static fn (Builder $query) => $query->where('city', $city))
@@ -160,7 +161,7 @@ class BoardController extends Controller
         $bid = int($request->input('bid'));
 
         $files = File::query()
-            ->pending(Item::$morphName, getUser('id'))
+            ->pending(Item::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -175,7 +176,7 @@ class BoardController extends Controller
         $this->checkCreationOpen();
 
         $item = Item::query()->create($request->itemFields() + [
-            'user_id'    => getUser('id'),
+            'user_id'    => auth()->id(),
             'created_at' => now(),
             'updated_at' => now(),
             'expires_at' => now()->addDays((int) setting('boards_period')),
@@ -200,7 +201,7 @@ class BoardController extends Controller
         $item = $this->findItem($id);
 
         // Форма только для автора: админ правит чужое объявление в админке
-        if ($item->user_id !== getUser('id') && isAdmin()) {
+        if ($item->user_id !== auth()->id() && isAdmin()) {
             return redirect()->route('admin.items.edit', ['id' => $item->id]);
         }
 
@@ -235,7 +236,7 @@ class BoardController extends Controller
     {
         $item = $this->findItem($id);
 
-        if ($item->user_id !== getUser('id')) {
+        if ($item->user_id !== auth()->id()) {
             return redirect()->route('items.view', ['id' => $item->id])
                 ->withErrors(__('board::boards.item_not_author'));
         }
@@ -259,7 +260,7 @@ class BoardController extends Controller
     {
         $item = $this->findItem($id);
 
-        if ($item->user_id !== getUser('id')) {
+        if ($item->user_id !== auth()->id()) {
             return redirect()->route('boards.index', ['id' => $item->board_id])
                 ->withErrors(__('board::boards.item_not_author'));
         }
@@ -275,10 +276,8 @@ class BoardController extends Controller
     /**
      * Мои объявления
      */
-    public function active(Request $request): View
+    public function active(Request $request, #[CurrentUser] User $user): View
     {
-        $user = getUser();
-
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
 
@@ -326,7 +325,7 @@ class BoardController extends Controller
      */
     private function checkAuthor(Item $item): void
     {
-        if ($item->user_id !== getUser('id')) {
+        if ($item->user_id !== auth()->id()) {
             abort(403, __('board::boards.item_not_author'));
         }
     }

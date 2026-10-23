@@ -77,7 +77,7 @@ class PaidAdvertController extends AdminController
         $validated = $request->validated();
 
         PaidAdvert::query()->create([
-            'user_id' => getUser('id'),
+            'user_id' => auth()->id(),
             ...$this->advertData($request),
         ]);
 
@@ -178,7 +178,7 @@ class PaidAdvertController extends AdminController
         $validated = $request->validated();
 
         PaidAdvert::query()->create([
-            'user_id'    => getUser('id'),
+            'user_id'    => auth()->id(),
             'place'      => $validated['place'],
             'url'        => $validated['url'],
             'names'      => [$validated['title']],

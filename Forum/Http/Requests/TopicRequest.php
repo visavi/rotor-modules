@@ -9,6 +9,7 @@ use App\Services\FileService;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use LogicException;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
 
@@ -92,7 +93,7 @@ class TopicRequest extends FormRequest
      */
     public function forum(): Forum
     {
-        return $this->forum;
+        return $this->forum ?? throw new LogicException('Доступно после проверки запроса');
     }
 
     /**

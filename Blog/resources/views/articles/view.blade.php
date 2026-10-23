@@ -8,9 +8,9 @@
 @section('image', $article->getOgImage())
 
 @section('header')
-    @if (getUser())
+    @if (auth()->check())
         <div class="float-end">
-            @if (getUser('id') === $article->user->id)
+            @if (auth()->id() === $article->user->id)
                 <a class="btn btn-success" href="{{ route('articles.edit', ['id' => $article->id]) }}">{{ __('main.change') }}</a>
             @endif
 

@@ -14,7 +14,7 @@ class TransferResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $outgoing = $this->user_id === getUser('id');
+        $outgoing = $this->user_id === auth()->id();
 
         return [
             'id'   => $this->id,

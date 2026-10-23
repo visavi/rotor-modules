@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="float-end">
-        @if (getUser())
+        @if (auth()->check())
             <a class="btn btn-success" href="{{ route('offers.create', ['type' => $type]) }}">{{ __('main.add') }}</a>
 
             @if (isAdmin())

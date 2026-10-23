@@ -96,4 +96,14 @@ class LoadSmokeTest extends ModuleTestCase
             $this->get(route($route, ['user' => $this->user->login]))->assertOk();
         }
     }
+
+    public function testArrayUserFallsBackToOwnPages(): void
+    {
+        // ?user[]= давал TypeError в getUserByLogin — 500 вместо своих страниц
+        $this->actingAs($this->user);
+
+        foreach (['downs.active-files', 'downs.active-comments'] as $route) {
+            $this->get(route($route) . '?user[]=1')->assertOk()->assertSee($this->user->getName());
+        }
+    }
 }

@@ -8,7 +8,7 @@
             <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="/users/{{ $user->login }}">{{ $user->getName() }}</a></li>
 
-            @if (getUser() && getUser('id') !== $user->id)
+            @if (auth()->check() && auth()->id() !== $user->id)
                 <li class="breadcrumb-item"><a href="/users/{{ $user->login }}/rating">{{ __('rating::ratings.reputation_edit') }}</a></li>
             @endif
 

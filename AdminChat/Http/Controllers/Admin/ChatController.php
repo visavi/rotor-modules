@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\AdminChat\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -17,10 +19,8 @@ class ChatController extends AdminController
     /**
      * Главная страница
      */
-    public function index(): View
+    public function index(#[CurrentUser] User $user): View
     {
-        $user = getUser();
-
         if ($user->newchat !== statsNewChat()) {
             $user->update([
                 'newchat' => statsNewChat(),
@@ -38,9 +38,8 @@ class ChatController extends AdminController
     /**
      * Добавление сообщения
      */
-    public function store(ChatRequest $request): RedirectResponse
+    public function store(ChatRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
-        $user = getUser();
         $msg = $request->string('msg')->value();
         $post = Chat::query()->orderByDesc('created_at')->first();
 
@@ -90,7 +89,7 @@ class ChatController extends AdminController
 
         $post->update([
             'text'         => $request->string('msg')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         return redirect('admin/chats?page=' . $page)
@@ -113,7 +112,7 @@ class ChatController extends AdminController
      */
     private function ownPost(int $id): Chat
     {
-        $post = Chat::query()->where('user_id', getUser('id'))->find($id);
+        $post = Chat::query()->where('user_id', auth()->id())->find($id);
 
         if (! $post) {
             abort(200, __('main.message_deleted'));

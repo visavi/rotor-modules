@@ -2,10 +2,10 @@
 
 @php
     // Свёрнута, пока нечего показывать: после ошибки или с прикреплёнными файлами форма открыта
-    $compact = ! $errors->any() && ! old('text') && (! getUser() || $files->isEmpty());
+    $compact = ! $errors->any() && ! old('text') && (auth()->guest() || $files->isEmpty());
 @endphp
 
-@if (getUser())
+@if (auth()->check())
     <div class="section-form mb-3 shadow">
         <form action="{{ route('guestbook.create') }}" method="post"@if ($compact) data-compact @endif>
             @csrf

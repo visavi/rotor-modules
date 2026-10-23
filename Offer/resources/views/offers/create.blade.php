@@ -13,7 +13,7 @@
 @stop
 
 @section('content')
-    @if (getUser('point') >= setting('addofferspoint'))
+    @if (auth()->user()?->point >= setting('addofferspoint'))
         <div class="section-form mb-3 shadow">
             <form action="{{ route('offers.create') }}" method="post">
                 @csrf

@@ -9,7 +9,7 @@ Hook::add('footer', static function (): ?string {
         return null;
     }
 
-    $user = getUser();
+    $user = auth()->user();
 
     if (! $user || ! $user->isActive()) {
         return null;

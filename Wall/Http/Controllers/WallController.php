@@ -42,7 +42,7 @@ class WallController extends Controller
 
         Wall::query()->create([
             'user_id'   => $user->id,
-            'author_id' => getUser('id'),
+            'author_id' => auth()->id(),
             'text'      => $text,
         ]);
 
@@ -68,7 +68,7 @@ class WallController extends Controller
         }
 
         // Чистит стену её хозяин, чужие записи трогает только администрация
-        if (! isAdmin() && getUser('id') !== $user->id) {
+        if (! isAdmin() && auth()->id() !== $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => __('main.deleted_only_admins'),

@@ -39,7 +39,7 @@ class RatingRequest extends FormRequest
         return [
             // Минусовать может только тот, у кого своя репутация положительная
             function (Validator $validator): void {
-                if ($this->input('vote') === 'minus' && getUser('rating') < 1) {
+                if ($this->input('vote') === 'minus' && auth()->user()?->rating < 1) {
                     $validator->errors()->add('vote', __('rating::ratings.reputation_positive'));
                 }
             },

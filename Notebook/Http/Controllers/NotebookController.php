@@ -22,7 +22,7 @@ class NotebookController extends Controller
         $this->middleware('check.user');
 
         $this->middleware(function ($request, $next) {
-            $user = getUser();
+            $user = auth()->user() ?? abort(403);
 
             $this->note = Notebook::query()
                 ->where('user_id', $user->id)

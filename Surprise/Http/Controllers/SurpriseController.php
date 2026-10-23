@@ -20,7 +20,7 @@ class SurpriseController extends Controller
         $rating = mt_rand(3, 10);
         $year = now()->addDays(3)->format('Y');
 
-        if (! $user = getUser()) {
+        if (! $user = auth()->user()) {
             abort(403, __('main.not_authorized'));
         }
 

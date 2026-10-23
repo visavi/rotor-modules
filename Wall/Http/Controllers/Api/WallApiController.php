@@ -47,7 +47,7 @@ class WallApiController extends Controller
 
         $message = Wall::query()->create([
             'user_id'   => $user->id,
-            'author_id' => getUser('id'),
+            'author_id' => auth()->id(),
             'text'      => $text,
         ]);
 
@@ -76,7 +76,7 @@ class WallApiController extends Controller
     {
         $user = $this->findUser($login);
 
-        if (! isAdmin() && getUser('id') !== $user->id) {
+        if (! isAdmin() && auth()->id() !== $user->id) {
             abort(403, __('main.deleted_only_admins'));
         }
 

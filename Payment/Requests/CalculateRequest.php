@@ -84,7 +84,7 @@ class CalculateRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             if ($validator->errors()->has('names')) {
                 $error = collect($validator->errors()->get('names'))->flatten()->first();
-                $validator->errors()->add('names.0', $error);
+                $validator->errors()->add('names.0', (string) $error);
             }
         });
     }

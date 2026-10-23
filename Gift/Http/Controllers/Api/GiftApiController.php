@@ -6,7 +6,9 @@ namespace Modules\Gift\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthorResource;
+use App\Models\User;
 use App\Traits\HandlesApiPagination;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Gift\Http\Requests\GiftSendRequest;
@@ -70,15 +72,13 @@ class GiftApiController extends Controller
     /**
      * Отправка подарка
      */
-    public function send(GiftSendRequest $request, GiftService $service): JsonResponse
+    public function send(GiftSendRequest $request, GiftService $service, #[CurrentUser] User $user): JsonResponse
     {
-        $user = getUser();
-
         $service->send($user, $request->gift(), $request->recipients(), $request->string('text')->value());
 
         return response()->json([
             'message' => __('gift::gifts.gift_sent'),
-            'money'   => $user->fresh()->money,
+            'money'   => $user->refresh()->money,
         ], 201);
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Flood;
 use App\Models\Reader;
 use App\Models\User;
 use App\Traits\HandlesComments;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -52,11 +53,11 @@ class DownController extends Controller
         }
 
         // Непроверенная загрузка доступна только автору и администрации, как и в API
-        if (! $down->active && ! isAdmin(User::ADMIN) && getUser('id') !== $down->user_id) {
+        if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
             abort(200, __('load::loads.down_not_verified'));
         }
 
-        $allowDownload = getUser() || setting('down_guest_download');
+        $allowDownload = auth()->check() || setting('down_guest_download');
 
         ['comments' => $comments, 'files' => $files] = $this->getCommentsData($down);
 
@@ -80,7 +81,7 @@ class DownController extends Controller
         $down = new Down();
 
         $files = File::query()
-            ->pending(Down::$morphName, getUser('id'))
+            ->pending(Down::$morphName, auth()->id())
             ->ordered()
             ->get();
 
@@ -90,9 +91,9 @@ class DownController extends Controller
     /**
      * Публикация загрузки
      */
-    public function store(DownStoreRequest $request, Flood $flood, DownService $service): RedirectResponse
+    public function store(DownStoreRequest $request, Flood $flood, DownService $service, #[CurrentUser] User $user): RedirectResponse
     {
-        $down = $service->create(getUser(), $request, $request->file('files', []));
+        $down = $service->create($user, $request, $request->file('files', []));
 
         $flood->saveState();
 
@@ -151,7 +152,7 @@ class DownController extends Controller
             abort(404, __('load::loads.down_not_exist'));
         }
 
-        if (! (getUser() || setting('down_guest_download'))) {
+        if (! (auth()->user() || setting('down_guest_download'))) {
             abort(403, __('load::loads.download_authorized'));
         }
 
@@ -180,7 +181,7 @@ class DownController extends Controller
             abort(404, __('load::loads.down_not_exist'));
         }
 
-        if (! (getUser() || setting('down_guest_download'))) {
+        if (! (auth()->user() || setting('down_guest_download'))) {
             abort(403, __('load::loads.download_authorized'));
         }
 
@@ -351,7 +352,7 @@ class DownController extends Controller
      */
     private function ownDown(int $id): Down
     {
-        $down = Down::query()->where('user_id', getUser('id'))->find($id);
+        $down = Down::query()->where('user_id', auth()->id())->find($id);
 
         if (! $down) {
             abort(404, __('load::loads.down_not_exist'));

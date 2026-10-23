@@ -17,7 +17,7 @@ class ActiveController extends Controller
     /**
      * Текущий пользователь
      */
-    public ?User $user;
+    public User $user;
 
     /**
      * Конструктор
@@ -25,12 +25,14 @@ class ActiveController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $login = $request->input('user', getUser('login'));
-            $this->user = getUserByLogin($login);
+            $login = $request->input('user');
+            $user = getUserByLogin(is_string($login) ? $login : auth()->user()?->login);
 
-            if (! $this->user) {
+            if (! $user) {
                 abort(404, __('validator.user'));
             }
+
+            $this->user = $user;
 
             return $next($request);
         });

@@ -27,7 +27,7 @@ class DeliveryController extends AdminController
     public function send(DeliveryRequest $request): RedirectResponse
     {
         $users = $this->recipients($request->integer('type'))
-            ->where('id', '<>', getUser('id'))
+            ->where('id', '<>', auth()->id())
             ->get();
 
         if ($users->isEmpty()) {

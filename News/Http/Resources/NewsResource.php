@@ -29,7 +29,7 @@ class NewsResource extends JsonResource
                 'type'  => News::$morphName,
                 'id'    => $this->id,
                 'value' => $this->getAttribute('vote'),
-                'own'   => $this->user_id === getUser('id'),
+                'own'   => $this->user_id === auth()->id(),
             ],
             // Закрытая новость не принимает новые комментарии
             'closed'         => (bool) $this->closed,

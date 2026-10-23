@@ -3,7 +3,9 @@
 namespace Modules\News\Tests\Feature;
 
 use App\Models\Comment;
+use App\Models\Message;
 use App\Models\User;
+use App\Services\CommentService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\News\Models\News;
 use Tests\ModuleTestCase;
@@ -156,5 +158,17 @@ class NewsCommentTest extends ModuleTestCase
                 'success' => false,
                 'message' => __('main.closed_comments'),
             ]);
+    }
+
+    public function testNotificationNamesPassedAuthorNotSession(): void
+    {
+        // Сервис зовут и без входа (команды, очереди): автор — переданный пользователь, а не сессия
+        $this->user->update(['notify_comment' => 1]);
+        $author = User::factory()->create();
+
+        app(CommentService::class)->create($this->makeNews(), $author, 'Комментарий без сессии');
+
+        $this->assertSame(1, $this->user->fresh()->getCountNewMessages());
+        $this->assertTrue(Message::query()->where('text', 'like', '%' . $author->login . '%')->exists());
     }
 }

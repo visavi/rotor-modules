@@ -12,6 +12,7 @@ use App\Models\Poll;
 use App\Models\Reader;
 use App\Models\User;
 use App\Services\FileService;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
@@ -48,11 +49,11 @@ class TopicController extends Controller
                 ->withFragment('post_' . $pid);
         }
 
-        $user = getUser();
+        $user = auth()->user();
 
         $topic = Topic::query()
             ->where('topics.id', $id)
-            ->when($user, static function (Builder $query) use ($user) {
+            ->when($user, static function (Builder $query, User $user) {
                 $query->select('topics.*', 'bookmarks.count_posts as bookmark_posts')
                     ->leftJoin('bookmarks', static function (JoinClause $join) use ($user) {
                         $join->on('topics.id', 'bookmarks.topic_id')
@@ -117,9 +118,8 @@ class TopicController extends Controller
     /**
      * Message creation
      */
-    public function create(PostRequest $request, Flood $flood, FileService $files): RedirectResponse
+    public function create(PostRequest $request, Flood $flood, FileService $files, #[CurrentUser] User $user): RedirectResponse
     {
-        $user = getUser();
         $topic = $request->topic();
         $post = $request->lastPost();
         $msg = $request->string('text')->value();
@@ -172,16 +172,16 @@ class TopicController extends Controller
     /**
      * Delete messages
      */
-    public function delete(int $id, Request $request): RedirectResponse
+    public function delete(int $id, Request $request, #[CurrentUser] User $user): RedirectResponse
     {
         $del = intar($request->input('del'));
         $topic = $this->findTopic($id);
 
         $error = match (true) {
-            ! $del                           => __('validator.deletion'),
-            (bool) $topic->closed            => __('forum::forums.topic_closed'),
-            ! $topic->isModerator(getUser()) => __('forum::forums.posts_deleted_curators'),
-            default                          => null,
+            ! $del                       => __('validator.deletion'),
+            (bool) $topic->closed        => __('forum::forums.topic_closed'),
+            ! $topic->isModerator($user) => __('forum::forums.posts_deleted_curators'),
+            default                      => null,
         };
 
         $redirect = redirect()->route('topics.topic', ['id' => $topic->id, 'page' => int($request->input('page'))]);
@@ -202,9 +202,8 @@ class TopicController extends Controller
     /**
      * Close topic
      */
-    public function close(int $id): RedirectResponse
+    public function close(int $id, #[CurrentUser] User $user): RedirectResponse
     {
-        $user = getUser();
         $topic = $this->findTopic($id);
 
         $error = match (true) {
@@ -231,9 +230,8 @@ class TopicController extends Controller
     /**
      * Open topic
      */
-    public function open(int $id): RedirectResponse
+    public function open(int $id, #[CurrentUser] User $user): RedirectResponse
     {
-        $user = getUser();
         $topic = $this->findTopic($id);
 
         $error = match (true) {
@@ -286,7 +284,7 @@ class TopicController extends Controller
 
         $request->firstPost()?->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => auth()->id(),
         ]);
 
         if ($vote) {
@@ -325,10 +323,10 @@ class TopicController extends Controller
     /**
      * Post editing
      */
-    public function editPost(int $id, Request $request): View
+    public function editPost(int $id, Request $request, #[CurrentUser] User $user): View
     {
         $page = int($request->input('page'));
-        $post = $this->editablePost($id);
+        $post = $this->editablePost($id, $user);
 
         return view('forum::forums/topic_edit_post', compact('post', 'page'));
     }
@@ -336,13 +334,13 @@ class TopicController extends Controller
     /**
      * Post saving
      */
-    public function updatePost(int $id, PostEditRequest $request): RedirectResponse
+    public function updatePost(int $id, PostEditRequest $request, #[CurrentUser] User $user): RedirectResponse
     {
-        $post = $this->editablePost($id);
+        $post = $this->editablePost($id, $user);
 
         $post->update([
             'text'         => $request->string('text')->value(),
-            'edit_user_id' => getUser('id'),
+            'edit_user_id' => $user->id,
         ]);
 
         return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page'))])
@@ -353,9 +351,8 @@ class TopicController extends Controller
     /**
      * Voting
      */
-    public function vote(int $id, Request $request): RedirectResponse|JsonResponse
+    public function vote(int $id, Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
-        $user = getUser();
         $topic = Topic::query()->find($id);
         $vote = $topic ? Vote::query()->where('topic_id', $id)->first() : null;
         $page = int($request->input('page'));
@@ -379,7 +376,7 @@ class TopicController extends Controller
             default                 => null,
         };
 
-        if ($error) {
+        if ($error || ! $answer) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'message' => $error]);
             }
@@ -432,13 +429,13 @@ class TopicController extends Controller
      */
     private function editableTopic(int $id): Topic
     {
-        if (getUser('point') < setting('editforumpoint')) {
+        if (auth()->user()?->point < setting('editforumpoint')) {
             abort(200, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
         }
 
         $topic = $this->findTopic($id);
 
-        if ($topic->user_id !== getUser('id')) {
+        if ($topic->user_id !== auth()->id()) {
             abort(200, __('forum::forums.topic_not_author'));
         }
 
@@ -452,7 +449,7 @@ class TopicController extends Controller
     /**
      * Сообщение, которое можно править: своё первые 10 минут, куратору — любое
      */
-    private function editablePost(int $id): Post
+    private function editablePost(int $id, User $user): Post
     {
         $post = Post::query()->with('topic')->find($id);
 
@@ -464,9 +461,9 @@ class TopicController extends Controller
             abort(200, __('forum::forums.topic_closed'));
         }
 
-        $isModer = $post->topic->isModerator(getUser());
+        $isModer = $post->topic->isModerator($user);
 
-        if (! $isModer && $post->user_id !== getUser('id')) {
+        if (! $isModer && $post->user_id !== $user->id) {
             abort(200, __('forum::forums.posts_edited_curators'));
         }
 

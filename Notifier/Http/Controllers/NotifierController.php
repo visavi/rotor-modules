@@ -17,7 +17,7 @@ class NotifierController extends Controller
      */
     public function check(): JsonResponse
     {
-        $user = getUser();
+        $user = auth()->user();
 
         if (! $user || ! $user->isActive() || ! setting('notifier_active')) {
             return $this->json(['auth' => false, 'count' => 0]);

@@ -9,6 +9,7 @@ use App\Rules\TextLengthRule;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use LogicException;
 use Modules\Board\Models\Board;
 use Modules\Board\Models\Item;
 
@@ -64,7 +65,7 @@ class ItemRequest extends FormRequest
      */
     public function category(): Board
     {
-        return $this->category;
+        return $this->category ?? throw new LogicException('Доступно после проверки запроса');
     }
 
     /**
@@ -73,7 +74,7 @@ class ItemRequest extends FormRequest
     public function itemFields(): array
     {
         return [
-            'board_id'   => $this->category->id,
+            'board_id'   => $this->category()->id,
             'title'      => $this->string('title')->value(),
             'text'       => $this->string('text')->value(),
             'price'      => $this->integer('price'),
