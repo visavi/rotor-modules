@@ -8,7 +8,7 @@ if (! function_exists('statsLoad')) {
     function statsLoad(): string
     {
         return Cache::remember('statLoads', 900, static function () {
-            $totalLoads = Load::query()->sum('count_downs');
+            $totalLoads = (int) Load::query()->sum('count_downs');
 
             $totalNew = Down::query()
                 ->active()

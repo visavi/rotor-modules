@@ -143,8 +143,8 @@ class LoadController extends AdminController
             abort(404, __('load::loads.load_not_exist'));
         }
 
-        $sort = check($request->input('sort', 'date'));
-        $order = check($request->input('order', 'desc'));
+        $sort = $request->input('sort', 'date');
+        $order = $request->input('order', 'desc');
 
         [$sorting, $orderBy] = Down::getSorting($sort, $order);
 

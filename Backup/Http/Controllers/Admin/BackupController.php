@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Modules\Backup\Http\Requests\BackupRequest;
+use RuntimeException;
 
 class BackupController extends AdminController
 {
@@ -104,7 +105,7 @@ class BackupController extends AdminController
             return redirect('admin/backups')->withErrors($error);
         }
 
-        unlink($fullPath);
+        unlink((string) $fullPath);
 
         return redirect('admin/backups')
             ->with('success', __('backup::backup.backup_success_deleted'));
@@ -113,7 +114,8 @@ class BackupController extends AdminController
     /**
      * Пишет в дамп структуру таблицы и её строки
      *
-     * @param resource $fp
+     * @param resource                              $fp
+     * @param object{Name: string, Engine: ?string} $table Строка SHOW TABLE STATUS
      */
     private function dumpTable($fp, object $table, string $method): void
     {
@@ -180,6 +182,7 @@ class BackupController extends AdminController
      */
     private function orderColumns(string $table): array
     {
+        /** @var list<object{Seq_in_index: int, Column_name: string}> $keys */
         $keys = DB::select("SHOW KEYS FROM `{$table}` WHERE Key_name = 'PRIMARY'");
 
         usort($keys, static fn (object $a, object $b) => $a->Seq_in_index <=> $b->Seq_in_index);
@@ -190,19 +193,23 @@ class BackupController extends AdminController
     /**
      * Открывает поток
      *
-     * @return bool|resource
+     * Без проверки false уходил в запись дампа и падал посреди транзакции
+     *
+     * @return resource
      */
     private function fopen(string $name, string $mode, string $method, int $level)
     {
-        if ($method === 'bzip') {
-            return bzopen($name . '.bz2', $mode);
+        $fp = match ($method) {
+            'bzip'  => bzopen($name . '.bz2', $mode),
+            'gzip'  => gzopen($name . '.gz', "{$mode}b{$level}"),
+            default => fopen($name, $mode . 'b'),
+        };
+
+        if ($fp === false) {
+            throw new RuntimeException('Не удалось открыть файл бэкапа: ' . $name);
         }
 
-        if ($method === 'gzip') {
-            return gzopen($name . '.gz', "{$mode}b{$level}");
-        }
-
-        return fopen($name, $mode . 'b');
+        return $fp;
     }
 
     /**

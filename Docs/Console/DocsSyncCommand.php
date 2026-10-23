@@ -34,12 +34,12 @@ class DocsSyncCommand extends Command
             return self::FAILURE;
         }
 
-        $files = collect($response->json())
+        $files = collect((array) $response->json())
             ->filter(fn ($f) => isset($f['type']) && $f['type'] === 'file' && str_ends_with($f['name'], '.md'));
 
         $remoteNames = $files->pluck('name')->all();
 
-        foreach (glob("{$dir}/*.md") as $existing) {
+        foreach (glob("{$dir}/*.md") ?: [] as $existing) {
             if (! in_array(basename($existing), $remoteNames, true)) {
                 unlink($existing);
                 $this->line('Удалён: ' . basename($existing));

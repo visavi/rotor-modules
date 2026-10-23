@@ -83,7 +83,7 @@ class FileController extends Controller
         $entries = [];
         $maxSize = (int) config('page_editor.max_edit_size', 1048576);
 
-        $names = is_dir($directory) ? preg_grep('/^([^.])/', scandir($directory, SCANDIR_SORT_ASCENDING)) : [];
+        $names = is_dir($directory) ? (preg_grep('/^([^.])/', scandir($directory, SCANDIR_SORT_ASCENDING) ?: []) ?: []) : [];
 
         // В корне modules каталог верхнего уровня — это модуль: помечаем выключенные,
         // чтобы правка файлов без эффекта не выглядела поломкой

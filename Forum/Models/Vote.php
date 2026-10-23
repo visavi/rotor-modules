@@ -104,8 +104,8 @@ class Vote extends Model
         }
 
         $results = Arr::pluck($this->answers, 'result', 'answer');
-        $max = max($results);
-        $max = $max > 0 ? $max : 1;
+        // Голосов может не быть ни у одного ответа: делитель не меньше единицы
+        $max = max(1, ...array_values($results));
         $sum = $this->count > 0 ? $this->count : 1;
 
         arsort($results);

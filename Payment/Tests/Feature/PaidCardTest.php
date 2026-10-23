@@ -257,12 +257,13 @@ class PaidCardTest extends ModuleTestCase
         $response->assertOk()->assertSee('150');
 
         $pattern = '#' . preg_quote(CardImageService::path(), '#') . '/[\w.-]+\.webp#';
-        $this->assertMatchesRegularExpression($pattern, $response->getContent());
-        preg_match($pattern, $response->getContent(), $match);
+        $html = (string) $response->getContent();
+        $this->assertMatchesRegularExpression($pattern, $html);
+        preg_match($pattern, $html, $match);
 
         $file = public_path($match[0]);
         $this->assertFileExists($file);
-        $this->assertSame([600, 600], array_slice(getimagesize($file), 0, 2));
+        $this->assertSame([600, 600], array_slice(getimagesize($file) ?: [], 0, 2));
 
         unlink($file);
     }
@@ -728,8 +729,8 @@ class PaidCardTest extends ModuleTestCase
         $fresh = $this->makeImageFile('fresh');
         $this->createCard(attributes: ['image' => $used]);
 
-        touch(public_path($used), now()->subDays(2)->timestamp);
-        touch(public_path($orphan), now()->subDays(2)->timestamp);
+        touch(public_path($used), now()->subDays(2)->getTimestamp());
+        touch(public_path($orphan), now()->subDays(2)->getTimestamp());
 
         $this->app->make(Kernel::class)->registerCommand(new CleanCardImages());
         $this->artisan('payment:clean-card-images')->assertSuccessful();

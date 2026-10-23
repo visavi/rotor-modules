@@ -28,7 +28,7 @@ class DownRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail): void {
-                    $this->category = Load::query()->find($value);
+                    $this->category = Load::query()->find(int($value));
 
                     if (! $this->category) {
                         $fail(__('load::loads.load_not_exist'));
@@ -115,7 +115,7 @@ class DownRequest extends FormRequest
      */
     protected function attachedFiles(): int
     {
-        $down = Down::query()->find($this->route('id'));
+        $down = Down::query()->find(int($this->route('id')));
 
         if (! $down) {
             return 0;

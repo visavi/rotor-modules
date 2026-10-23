@@ -17,7 +17,9 @@ class ShareSettingController extends ModuleSettingController
      */
     protected function rules(): array
     {
-        $keys = [...array_keys(config('share.networks')), 'copy'];
+        /** @var array<string, mixed> $networks */
+        $networks = config('share.networks');
+        $keys = [...array_keys($networks), 'copy'];
 
         return array_fill_keys(
             array_map(static fn (string $key): string => 'sets.share_' . $key, $keys),

@@ -4,6 +4,7 @@ namespace Modules\Payment\Requests;
 
 use App\Rules\EmailRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 use Modules\Payment\Models\PaidAdvert;
 
 class CalculateRequest extends FormRequest
@@ -78,12 +79,11 @@ class CalculateRequest extends FormRequest
     /**
      * Configure the validator instance.
      */
-    public function withValidator($validator)
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function ($validator) {
+        $validator->after(function (Validator $validator) {
             if ($validator->errors()->has('names')) {
-                $errors = $validator->errors()->get('names');
-                $error = collect($errors)->flatten()->first();
+                $error = collect($validator->errors()->get('names'))->flatten()->first();
                 $validator->errors()->add('names.0', $error);
             }
         });

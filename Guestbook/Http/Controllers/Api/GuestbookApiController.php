@@ -49,7 +49,7 @@ class GuestbookApiController extends Controller
             $user->increment('money', setting('guestbook_money'));
         } else {
             // Гостевой текст приходит без разметки, её ставит сам сайт
-            $text = '<p>' . nl2br(check($text), false) . '</p>';
+            $text = '<p>' . nl2br(e($text), false) . '</p>';
             $active = ! setting('guest_moderation');
             $guestName = $request->input('guest_name');
         }

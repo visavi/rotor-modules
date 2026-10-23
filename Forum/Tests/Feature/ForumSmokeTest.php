@@ -296,7 +296,7 @@ class ForumSmokeTest extends ModuleTestCase
             ->assertStatus(201)
             ->json('post.id');
 
-        $files = Post::query()->find($id)->files()->ordered()->get();
+        $files = Post::query()->findOrFail((int) $id)->files()->ordered()->get();
 
         try {
             $this->assertSame(['first.pdf', 'second.pdf', 'third.txt'], $files->pluck('name')->all());

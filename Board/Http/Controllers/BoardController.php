@@ -284,7 +284,7 @@ class BoardController extends Controller
 
         [$sorting, $orderBy] = Item::getSorting($sort, $order);
 
-        $type = check($request->input('type', 'active'));
+        $type = $request->input('type') === 'archive' ? 'archive' : 'active';
         $whereType = match ($type) {
             'active' => '>',
             default  => '<=',

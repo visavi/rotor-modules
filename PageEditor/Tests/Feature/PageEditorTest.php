@@ -139,7 +139,7 @@ class PageEditorTest extends ModuleTestCase
 
         $response->assertOk();
 
-        $entries = collect($response->viewData('entries'))->keyBy('name');
+        $entries = collect((array) $response->viewData('entries'))->keyBy('name');
 
         $this->assertTrue($entries['module.php']['editable']);
         $this->assertFalse($entries['module.php']['dir']);

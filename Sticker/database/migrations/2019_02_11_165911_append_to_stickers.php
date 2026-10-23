@@ -12,7 +12,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR));
+        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR) ?: []);
 
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->create([
@@ -20,7 +20,7 @@ return new class extends Migration {
                 'created_at' => now(),
             ]);
 
-            $stickers = array_map('basename', glob(base_path('modules/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}'), GLOB_BRACE));
+            $stickers = array_map('basename', glob(base_path('modules/Sticker/resources/assets/' . $categoryName . '/*.{gif,png,jpg,jpeg}'), GLOB_BRACE) ?: []);
 
             foreach ($stickers as $stickerName) {
                 Sticker::query()->create([
@@ -39,7 +39,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR));
+        $categories = array_map('basename', glob(base_path('modules/Sticker/resources/assets/*'), GLOB_ONLYDIR) ?: []);
 
         foreach ($categories as $categoryName) {
             $category = StickersCategory::query()->where('name', $categoryName)->first();

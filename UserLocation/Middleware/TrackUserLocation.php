@@ -9,13 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Modules\UserLocation\Models\UserLocation;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class TrackUserLocation
 {
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): SymfonyResponse
     {
         $response = $next($request);
 
@@ -25,7 +26,7 @@ class TrackUserLocation
             && ! $request->is('admin*')
         ) {
             if (auth()->check()) {
-                $content = $response->getContent();
+                $content = (string) $response->getContent();
 
                 $pageTitle = __('main.undefined');
                 if (preg_match('/<title>(.*?)<\/title>/i', $content, $matches)) {

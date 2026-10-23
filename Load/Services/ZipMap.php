@@ -33,6 +33,11 @@ class ZipMap
 
             for ($i = 0; $i < $archive->count(); $i++) {
                 $stat = $archive->statIndex($i);
+
+                if ($stat === false) {
+                    continue;
+                }
+
                 $isDir = str_ends_with($stat['name'], '/');
 
                 $entries[] = [

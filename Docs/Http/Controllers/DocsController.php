@@ -22,7 +22,7 @@ class DocsController extends Controller
         $laravelPath = base_path("modules/Docs/resources/laravel-docs/{$page}.md");
 
         if (file_exists($rotorPath)) {
-            $raw = file_get_contents($rotorPath);
+            $raw = (string) file_get_contents($rotorPath);
             $content = $this->docs->render($raw);
             $title = $this->docs->extractTitle($raw) ?? $page;
             $section = 'rotor';
@@ -33,7 +33,7 @@ class DocsController extends Controller
 
         if (file_exists($laravelPath)) {
             $synced = true;
-            $raw = file_get_contents($laravelPath);
+            $raw = (string) file_get_contents($laravelPath);
             $content = $this->docs->render(
                 Str::of($raw)
                     ->replace('{{version}}', DocsService::LARAVEL_VERSION)

@@ -41,7 +41,7 @@ class CodeSearchTest extends ModuleTestCase
         $files = array_column($found['results'], 'file');
 
         $this->assertContains('page_editor_search/a.blade.php', $files);
-        $this->assertSame(2, $found['results'][array_search('page_editor_search/a.blade.php', $files, true)]['line']);
+        $this->assertSame(2, $found['results'][(int) array_search('page_editor_search/a.blade.php', $files, true)]['line']);
     }
 
     public function testMaskFiltersFiles(): void

@@ -254,13 +254,13 @@ class DownController extends Controller
         $content = $archive->getFromIndex($zid);
         $document = $archive->statIndex($zid);
 
-        if ($content === false) {
+        if ($content === false || $document === false) {
             abort(200, __('load::loads.file_not_read'));
         }
 
         $archive->close();
 
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
+        $mime = (string) (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
 
         $isImage = str_starts_with($mime, 'image/');
         $isText = str_starts_with($mime, 'text/') || in_array($mime, [

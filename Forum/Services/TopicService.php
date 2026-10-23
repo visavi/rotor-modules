@@ -25,8 +25,8 @@ class TopicService
     /**
      * Создаёт тему с первым сообщением, вложениями и опросом
      *
-     * @param list<string>       $answers  варианты опроса, пусто — без опроса
-     * @param list<UploadedFile> $uploaded файлы из запроса
+     * @param list<string>             $answers  варианты опроса, пусто — без опроса
+     * @param array<int, UploadedFile> $uploaded файлы из запроса
      */
     public function create(User $user, Forum $forum, string $title, string $text, ?string $question, array $answers, array $uploaded = []): Topic
     {

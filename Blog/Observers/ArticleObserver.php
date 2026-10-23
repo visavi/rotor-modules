@@ -26,7 +26,7 @@ class ArticleObserver
             $newCategoryId = $article->category_id;
 
             if ($oldCategoryId !== $newCategoryId) {
-                $oldCategory = Blog::query()->find($oldCategoryId);
+                $oldCategory = Blog::query()->find((int) $oldCategoryId);
                 $oldCategory?->restatement();
             }
 

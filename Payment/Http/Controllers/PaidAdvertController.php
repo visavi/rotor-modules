@@ -29,7 +29,7 @@ class PaidAdvertController extends AdminController
      */
     public function index(Request $request): View
     {
-        $place = check($request->input('place', 'top_all'));
+        $place = $request->input('place', 'top_all');
 
         $places = [...PaidAdvert::PLACES, ...PaidAdvert::CARD_PLACES];
 

@@ -80,6 +80,14 @@ class BlogSmokeTest extends ModuleTestCase
         $this->get(route('blogs.blog', ['id' => $blog->id]))->assertOk();
     }
 
+    public function testCategoryWithArraySorting(): void
+    {
+        // ?sort[]= приходит массивом: он уходил в ссылки сортировки и ронял шаблон
+        $blog = Blog::factory()->create(['name' => 'Test category']);
+
+        $this->get(route('blogs.blog', ['id' => $blog->id]) . '?sort[]=x&order[]=y')->assertOk();
+    }
+
     public function testArticle(): void
     {
         $blog = Blog::factory()->create(['name' => 'Test category']);
@@ -178,7 +186,7 @@ class BlogSmokeTest extends ModuleTestCase
             $article->tags()->attach(Tag::factory()->create(['name' => 'tag' . $i])->id, ['sort' => $i]);
         }
 
-        $order = fn () => preg_match_all('~/blogs/tags/(tag\d+)~', $this->get(route('blogs.tags'))->assertOk()->getContent(), $m) ? $m[1] : [];
+        $order = fn () => preg_match_all('~/blogs/tags/(tag\d+)~', (string) $this->get(route('blogs.tags'))->assertOk()->getContent(), $m) ? $m[1] : [];
 
         $first = $order();
 

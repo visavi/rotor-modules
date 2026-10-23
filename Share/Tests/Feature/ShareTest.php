@@ -78,8 +78,10 @@ class ShareTest extends ModuleTestCase
 
     public function testSettingsSaveOnlyOwnKeys(): void
     {
+        /** @var array<string, mixed> $networks */
+        $networks = config('share.networks');
         $sets = array_fill_keys(
-            array_map(static fn (string $key): string => 'share_' . $key, [...array_keys(config('share.networks')), 'copy']),
+            array_map(static fn (string $key): string => 'share_' . $key, [...array_keys($networks), 'copy']),
             0,
         );
 

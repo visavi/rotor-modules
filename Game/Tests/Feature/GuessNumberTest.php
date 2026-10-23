@@ -164,7 +164,7 @@ class GuessNumberTest extends ModuleTestCase
         $this->startGame();
         $this->guess(1);
 
-        $html = $this->actingAs($this->user)->get('/games/guess')->getContent();
+        $html = (string) $this->actingAs($this->user)->get('/games/guess')->getContent();
 
         // Подсказка «между» может совпасть с числом, поэтому ищем его как значение поля
         $this->assertStringNotContainsString('value="50"', $html);

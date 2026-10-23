@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Classic\Classes;
 
 use App\Models\Module;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\News\Models\News;
@@ -54,7 +53,8 @@ class Calendar
         // Именительный падеж месяца из локали Carbon (ua → uk), без отдельных переводов
         $locale = app()->getLocale();
         $monthLabel = Str::ucfirst(
-            Date::create($year, $month, 1)->locale($locale === 'ua' ? 'uk' : $locale)->isoFormat('MMMM YYYY')
+            // locale() с аргументом возвращает дату, без него — строку: phpstan видит оба
+            now()->setDate($year, $month, 1)->locale($locale === 'ua' ? 'uk' : $locale)->isoFormat('MMMM YYYY') // @phpstan-ignore method.nonObject
         );
 
         return view('classic::_calendar', compact('calendar', 'monthLabel', 'currentDay', 'newsIds', 'prev', 'next'));
@@ -65,7 +65,7 @@ class Calendar
      */
     protected function makeCalendar(int $month, int $year): array
     {
-        $date = date('w', mktime(0, 0, 0, $month, 1, $year));
+        $date = date('w', (int) mktime(0, 0, 0, $month, 1, $year));
 
         if ($date === '0') {
             $date = 7;

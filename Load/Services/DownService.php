@@ -23,7 +23,7 @@ class DownService
      * Создаёт загрузку: от администрации она публикуется сразу,
      * от пользователя ждёт проверки, и администрация получает уведомление
      *
-     * @param list<UploadedFile> $uploaded файлы из запроса
+     * @param array<int, UploadedFile> $uploaded файлы из запроса
      */
     public function create(User $user, DownRequest $request, array $uploaded = []): Down
     {

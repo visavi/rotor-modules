@@ -30,17 +30,17 @@ class GuestbookControllerTest extends ModuleTestCase
             'created_at' => now()->timestamp,
         ]);
 
-        $getGuest = Guestbook::query()->find($guest->id);
+        $getGuest = $guest->fresh();
         self::assertSame('Test text message', $getGuest->text);
 
         $guest->update(['text' => 'Test simple message']);
 
-        $getGuest = Guestbook::query()->find($guest->id);
+        $getGuest = $guest->fresh();
         self::assertSame('Test simple message', $getGuest->text);
 
         $guest->delete();
 
-        $getGuest = Guestbook::query()->find($guest->id);
+        $getGuest = $guest->fresh();
         self::assertNull($getGuest);
     }
 }

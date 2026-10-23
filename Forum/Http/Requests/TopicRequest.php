@@ -30,7 +30,7 @@ class TopicRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail): void {
-                    $this->forum = Forum::query()->find($value);
+                    $this->forum = Forum::query()->find(int($value));
 
                     if (! $this->forum) {
                         $fail(__('forum::forums.forum_not_exist'));

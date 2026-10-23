@@ -97,7 +97,7 @@ class GiftSendRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $gift = Gift::query()->find($this->route('id'));
+        $gift = Gift::query()->find(int($this->route('id')));
 
         if (! $gift) {
             abort(404, __('gift::gifts.gift_not_found'));

@@ -59,7 +59,7 @@ class GuestbookController extends Controller
             $user->increment('money', setting('guestbook_money'));
         } else {
             // Гостевой текст приходит без разметки, её ставит сам сайт
-            $msg = '<p>' . nl2br(check($msg), false) . '</p>';
+            $msg = '<p>' . nl2br(e($msg), false) . '</p>';
         }
 
         $guestbook = Guestbook::query()->create([

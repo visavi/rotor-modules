@@ -25,7 +25,7 @@ class CounterStatistic
             return;
         }
 
-        $counterDay = date('Y-m-d 00:00:00', strtotime($counter->period));
+        $counterDay = date('Y-m-d 00:00:00', (int) strtotime($counter->period));
 
         if ($counterDay !== $day) {
             // В архив уходят итоги закрытого дня, под его же датой
@@ -65,9 +65,9 @@ class CounterStatistic
         }
 
         $hitsUpdate = [
-            'allhits' => DB::raw('allhits + ' . $hits),
-            'dayhits' => DB::raw('dayhits + ' . $hits),
-            'hits24'  => DB::raw('hits24 + ' . $hits),
+            'allhits' => DB::raw('allhits + ' . $hits), // @phpstan-ignore argument.type (число хитов, не ввод)
+            'dayhits' => DB::raw('dayhits + ' . $hits), // @phpstan-ignore argument.type (число хитов, не ввод)
+            'hits24'  => DB::raw('hits24 + ' . $hits), // @phpstan-ignore argument.type (число хитов, не ввод)
         ];
 
         $counter->update(array_merge($hostsUpdate, $hitsUpdate));

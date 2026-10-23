@@ -105,7 +105,7 @@ class DocsService
         $path = base_path('modules/Docs/resources/docs/navigation.md');
 
         return file_exists($path)
-            ? $this->parseMenuMarkdown(file_get_contents($path))
+            ? $this->parseMenuMarkdown((string) file_get_contents($path))
             : [];
     }
 
@@ -117,7 +117,7 @@ class DocsService
             return [];
         }
 
-        $md = Str::of(file_get_contents($path))
+        $md = Str::of((string) file_get_contents($path))
             ->after('---')
             ->after('---')
             ->replace('{{version}}', self::LARAVEL_VERSION)
@@ -177,14 +177,14 @@ class DocsService
             return $results;
         }
 
-        foreach (glob("{$dir}/*.md") as $file) {
+        foreach (glob("{$dir}/*.md") ?: [] as $file) {
             $base = basename($file, '.md');
 
             if (in_array($base, self::SKIP_FILES, true)) {
                 continue;
             }
 
-            $raw = preg_replace('/^---.*?---\s*/s', '', file_get_contents($file));
+            $raw = preg_replace('/^---.*?---\s*/s', '', (string) file_get_contents($file));
 
             if (mb_stripos($raw, $query) === false) {
                 continue;
@@ -221,7 +221,8 @@ class DocsService
         $excerpt = trim(preg_replace('/\n{3,}/', "\n\n", $excerpt));
 
         if (mb_strlen($excerpt) > 400) {
-            $excerpt = mb_substr($excerpt, 0, mb_strrpos(mb_substr($excerpt, 0, 400), ' '));
+            // Без пробела в первых 400 символах false обрезал выдержку до пустой строки
+            $excerpt = mb_substr($excerpt, 0, mb_strrpos(mb_substr($excerpt, 0, 400), ' ') ?: 400);
         }
 
         return $excerpt;

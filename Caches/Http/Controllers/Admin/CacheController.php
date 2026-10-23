@@ -22,7 +22,7 @@ class CacheController extends AdminController
         $files = match ($type) {
             'views' => glob(storage_path('framework/views/*.php'), GLOB_BRACE),
             default => glob(storage_path('framework/cache/data/*/*/*')),
-        };
+        } ?: [];
 
         $files = paginate($files, 20, compact('type'));
 

@@ -39,7 +39,7 @@ class CheckerController extends AdminController
     {
         $files = $this->scanFiles(base_path());
 
-        Storage::disk('local')->put($this->filename, json_encode($files));
+        Storage::disk('local')->put($this->filename, json_encode($files, JSON_THROW_ON_ERROR));
 
         return redirect('admin/checkers')
             ->with('success', __('checker::checker.success_crawled'));

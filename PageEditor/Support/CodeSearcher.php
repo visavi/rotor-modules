@@ -94,7 +94,7 @@ class CodeSearcher
                 continue;
             }
 
-            $contents = file_get_contents($file->getPathname());
+            $contents = (string) file_get_contents($file->getPathname());
 
             // бинарные файлы отсеиваются по нулевому байту в первых 8 КБ
             if (str_contains(substr($contents, 0, 8192), "\0")) {

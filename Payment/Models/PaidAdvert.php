@@ -219,7 +219,7 @@ class PaidAdvert extends Model
      */
     public static function cardTextHtml(?string $text, ?int $limit = null): string
     {
-        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/u', (string) $text))));
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\R/u', (string) $text) ?: [])));
 
         if (count($lines) > 3) {
             $lines = [$lines[0], $lines[1], implode(' ', array_slice($lines, 2))];
@@ -288,15 +288,15 @@ class PaidAdvert extends Model
             $links = [];
             if ($data->isNotEmpty()) {
                 foreach ($data as $val) {
-                    $names = check($val->names);
-
                     $sites = [];
-                    foreach ($names as $name) {
+                    foreach ($val->names as $name) {
+                        $name = e($name);
+
                         if ($val->color) {
-                            $name = '<span style="color:' . $val->color . '">' . $name . '</span>';
+                            $name = '<span style="color:' . e($val->color) . '">' . $name . '</span>';
                         }
 
-                        $link = '<a href="' . $val->url . '" target="_blank">' . $name . '</a>';
+                        $link = '<a href="' . e($val->url) . '" target="_blank">' . $name . '</a>';
 
                         if ($val->bold) {
                             $link = '<b>' . $link . '</b>';

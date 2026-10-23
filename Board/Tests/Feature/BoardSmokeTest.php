@@ -28,6 +28,18 @@ class BoardSmokeTest extends ModuleTestCase
         $this->get(route('boards.index'))->assertOk();
     }
 
+    public function testStatsOverThousandItems(): void
+    {
+        // Число сокращалось дважды: «1K» уходило в formatShortNum(int) и счётчик падал
+        $board = Board::factory()->create();
+        $row = ['board_id' => $board->id, 'title' => 'Объявление', 'text' => 'Текст объявления', 'user_id' => $this->user->id,
+            'created_at'   => now()->subWeek(), 'updated_at' => now()->subWeek(), 'expires_at' => now()->addMonth()];
+
+        Item::query()->insert(array_fill(0, 1001, $row));
+
+        $this->assertSame('1K', statsBoard());
+    }
+
     public function testCategory(): void
     {
         $board = Board::factory()->create(['name' => 'Test board']);

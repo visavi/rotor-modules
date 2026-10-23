@@ -29,6 +29,7 @@ use RuntimeException;
 
 class SocialAuthController extends Controller
 {
+    /** @var array<string, class-string<AbstractOAuthProvider>> */
     private array $providers = [
         'google' => GoogleProvider::class,
         'github' => GithubProvider::class,

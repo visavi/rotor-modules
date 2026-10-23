@@ -90,7 +90,7 @@ class ZipViewTest extends ModuleTestCase
     public function testFoldersOpenWithoutScripts(): void
     {
         // Папка — <details>: содержимое внутри, раскрывает браузер
-        $html = $this->get($this->zipUrl())->assertOk()->getContent();
+        $html = (string) $this->get($this->zipUrl())->assertOk()->getContent();
 
         $this->assertMatchesRegularExpression(
             '~<details class="zip-dir[^"]*">\s*<summary[^>]*>.*?<b>docs</b>.*?</summary>\s*<div class="ms-3">.*?guide\.txt.*?</details>~s',

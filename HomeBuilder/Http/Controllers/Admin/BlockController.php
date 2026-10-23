@@ -198,7 +198,7 @@ class BlockController extends AdminController
             $cases .= ' WHEN ' . $id . ' THEN ' . $index;
         }
 
-        Block::query()->whereKey($ids)->update(['sort' => DB::raw('CASE id' . $cases . ' END')]);
+        Block::query()->whereKey($ids)->update(['sort' => DB::raw('CASE id' . $cases . ' END')]); // @phpstan-ignore argument.type (в SQL только целые, собранные выше)
 
         return response()->json(['success' => true]);
     }

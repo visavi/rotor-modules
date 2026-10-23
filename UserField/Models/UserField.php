@@ -172,12 +172,22 @@ class UserField extends Model
      */
     public function validateValue(mixed $value, bool $required): ?string
     {
+        $key = $this->errorKey($value, $required);
+
+        return $key === null ? null : (string) __($key);
+    }
+
+    /**
+     * Ключ перевода ошибки или null, если значение подходит
+     */
+    private function errorKey(mixed $value, bool $required): ?string
+    {
         if (blank($value)) {
-            return $required ? __('user_field::user_fields.required_value') : null;
+            return $required ? 'user_field::user_fields.required_value' : null;
         }
 
         if (! is_scalar($value)) {
-            return __('validator.text');
+            return 'validator.text';
         }
 
         $value = (string) $value;
@@ -187,22 +197,22 @@ class UserField extends Model
             $length = mb_strlen(strip_tags($value));
 
             if ($length < $this->min || $length > $this->max) {
-                return __('validator.text');
+                return 'validator.text';
             }
         }
 
         return match ($this->type) {
-            self::URL    => $this->passes($value, 'url:http,https') ? null : __('validator.url'),
-            self::EMAIL  => $this->passes($value, new EmailRule()) ? null : __('validator.email'),
-            self::TEL    => preg_match('#^\+?[\d\s()\-]{5,20}$#', $value) ? null : __('validator.phone'),
+            self::URL    => $this->passes($value, 'url:http,https') ? null : 'validator.url',
+            self::EMAIL  => $this->passes($value, new EmailRule()) ? null : 'validator.email',
+            self::TEL    => preg_match('#^\+?[\d\s()\-]{5,20}$#', $value) ? null : 'validator.phone',
             self::NUMBER => is_numeric($value) && $value >= $this->min && $value <= $this->max
                 ? null
-                : __('user_field::user_fields.invalid_number'),
-            self::DATE => $this->isDate($value) ? null : __('user_field::user_fields.invalid_date'),
+                : 'user_field::user_fields.invalid_number',
+            self::DATE => $this->isDate($value) ? null : 'user_field::user_fields.invalid_date',
             self::SELECT,
-            self::RADIO => in_array($value, $this->optionList(), true) ? null : __('user_field::user_fields.invalid_option'),
+            self::RADIO => in_array($value, $this->optionList(), true) ? null : 'user_field::user_fields.invalid_option',
             // Включённый переключатель приходит единицей, выключенный не приходит вовсе
-            self::CHECKBOX => $value === '1' ? null : __('user_field::user_fields.invalid_option'),
+            self::CHECKBOX => $value === '1' ? null : 'user_field::user_fields.invalid_option',
             default        => null,
         };
     }

@@ -94,7 +94,7 @@ class Advert extends Model
 
         $links = [];
         foreach ($adverts as $advert) {
-            $name = check($advert->name);
+            $name = e($advert->name);
 
             if ($advert->color) {
                 $name = '<span style="color:' . e($advert->color) . '">' . $name . '</span>';

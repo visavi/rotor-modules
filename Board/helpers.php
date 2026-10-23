@@ -8,7 +8,7 @@ if (! function_exists('statsBoard')) {
     function statsBoard(): string
     {
         return Cache::remember('statBoards', 900, static function () {
-            $stat = formatShortNum(Item::query()->where('expires_at', '>', now())->count());
+            $stat = Item::query()->where('expires_at', '>', now())->count();
             $totalNew = Item::query()->where('updated_at', '>', now()->subDay())->count();
 
             return formatShortNum($stat) . ($totalNew ? '/+' . $totalNew : '');

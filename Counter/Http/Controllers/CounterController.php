@@ -38,7 +38,7 @@ class CounterController extends Controller
             // Текущие сутки в архив ещё не ушли, данные берутся из активного счётчика
             $counts31['hits'][] = $curDate === $today ? (int) ($count['dayhits'] ?? 0) : (int) ($cnt->hits ?? 0);
             $counts31['hosts'][] = $curDate === $today ? (int) ($count['dayhosts'] ?? 0) : (int) ($cnt->hosts ?? 0);
-            $counts31['labels'][] = date('M j', strtotime($curDate));
+            $counts31['labels'][] = date('M j', (int) strtotime($curDate));
         }
 
         $counts24 = [];
@@ -56,7 +56,7 @@ class CounterController extends Controller
             // Текущий час в архив ещё не ушёл, данные берутся из активного счётчика
             $counts24['hits'][] = $curHour === $hour ? (int) ($count['hits24'] ?? 0) : (int) ($cnt->hits ?? 0);
             $counts24['hosts'][] = $curHour === $hour ? (int) ($count['hosts24'] ?? 0) : (int) ($cnt->hosts ?? 0);
-            $counts24['labels'][] = date('H', strtotime($curHour));
+            $counts24['labels'][] = date('H', (int) strtotime($curHour));
         }
 
         return view('counter::index', compact('count', 'online', 'counts24', 'counts31'));

@@ -108,7 +108,7 @@ class NewsSmokeTest extends ModuleTestCase
         $comment($this->user);
 
         // Свои правятся, а окно одно на страницу
-        $html = $this->get($news->getViewUrl())->assertOk()->getContent();
+        $html = (string) $this->get($news->getViewUrl())->assertOk()->getContent();
         $this->assertSame(1, substr_count($html, 'id="editCommentDialog"'));
     }
 

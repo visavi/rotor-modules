@@ -34,6 +34,7 @@
 | `getAvailableLanguages()` | `App\Support\Locale::available()` |
 | `$user->newprivat` | `$user->getCountNewMessages()` |
 | `App\Support\Validator` | FormRequest, в методе — `Validator::make()` из Laravel |
+| `check()` | `e()`; символы направления текста в имени и статусе вырезает модель `User` при сохранении |
 | адрес `/mails`, `route('mails.index')` | `route('feedback.index')` из модуля Feedback |
 | адрес `/admin/modules/module?module=Name` | `/admin/modules/{name}` в kebab-case |
 

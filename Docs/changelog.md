@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Выдержка в поиске по документации не пропадает, если в первых 400 символах нет пробела
 - Хуки `onProfileValidate`, `onSettingsValidate` и `onRegisterValidate` получают валидатор Laravel (`Illuminate\Validation\Validator`) вместо `App\Support\Validator`: примеры переписаны на `$validator->errors()->add()`
 - Версионирование: `App\Support\Validator` помечен устаревшим, в новом коде модулей — FormRequest и `Validator::make()`
 - Страница настроек модуля: проверка через `rules()` в контроллере настроек, сохраняются только объявленные ключи
