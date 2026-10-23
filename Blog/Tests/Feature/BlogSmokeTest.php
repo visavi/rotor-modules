@@ -3,6 +3,7 @@
 namespace Modules\Blog\Tests\Feature;
 
 use App\Models\Comment;
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +30,27 @@ class BlogSmokeTest extends ModuleTestCase
     public function testIndex(): void
     {
         $this->get(route('blogs.index'))->assertOk();
+    }
+
+    public function testFirstImageEscapesTitle(): void
+    {
+        $article = Article::factory()->create([
+            'user_id' => $this->user->id,
+            'title'   => '" onload="alert(1)',
+        ]);
+
+        File::factory()->create([
+            'relate_type' => Article::$morphName,
+            'relate_id'   => $article->id,
+            'path'        => '/uploads/articles/a.jpg',
+            'user_id'     => $this->user->id,
+        ]);
+
+        // Заголовок пишет автор статьи: в атрибуте картинки он не должен закрывать кавычку
+        $this->assertSame(
+            '<img src="/uploads/articles/a.jpg" alt="&quot; onload=&quot;alert(1)" class="card-img-top">',
+            (string) $article->fresh()->getFirstImage(),
+        );
     }
 
     public function testCategory(): void

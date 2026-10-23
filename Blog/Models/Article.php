@@ -200,7 +200,7 @@ class Article extends Model
             return null;
         }
 
-        return new HtmlString('<img src="' . $image->path . '" atl="' . $this->title . '" class="card-img-top">');
+        return new HtmlString('<img src="' . e($image->path) . '" alt="' . e($this->title) . '" class="card-img-top">');
     }
 
     /**
