@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\TextCast;
 use App\Models\User;
 use App\Traits\CappableTrait;
@@ -46,6 +47,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Vote                      $vote
  * @property Collection<int, User> $curators
  */
+#[NotFoundMessage('forum::forums.topic_not_exist')]
 class Topic extends Model
 {
     /** @use HasFactory<\Modules\Forum\Tests\Factories\TopicFactory> */

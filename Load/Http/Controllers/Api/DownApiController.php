@@ -70,11 +70,7 @@ class DownApiController extends Controller
             ->withUserVote()
             ->where('downs.id', $id)
             ->with('user', 'category.parent', 'files')
-            ->first();
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+            ->firstOrFail();
 
         // Непроверенная загрузка доступна только автору и администрации
         if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
@@ -108,11 +104,7 @@ class DownApiController extends Controller
      */
     public function update(int $id, OwnDownRequest $request): JsonResponse
     {
-        $down = Down::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->where('user_id', auth()->id())->findOrFail($id);
 
         // Проверенную загрузку правит только администрация
         if ($down->active) {

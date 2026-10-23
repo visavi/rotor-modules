@@ -150,11 +150,7 @@ class GuestbookController extends AdminController
      */
     private function findPost(int $id): Guestbook
     {
-        $post = Guestbook::with('user')->find($id);
-
-        if (! $post) {
-            abort(404, __('main.message_not_found'));
-        }
+        $post = Guestbook::with('user')->findOrFail($id);
 
         return $post;
     }

@@ -31,7 +31,7 @@ class GuestbookRequest extends FormRequest
      */
     public function authorize(): Response
     {
-        return auth()->user() || setting('bookadds') ? Response::allow() : Response::deny(__('main.not_authorized'));
+        return auth()->check() || setting('bookadds') ? Response::allow() : Response::deny(__('main.not_authorized'));
     }
 
     public function rules(): array

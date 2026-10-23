@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blog\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Traits\CategoryTreeTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Blog                  $parent
  * @property-read Collection<int, Blog> $children
  */
+#[NotFoundMessage('blog::blogs.category_not_exist')]
 class Blog extends Model
 {
     /** @use HasFactory<\Modules\Blog\Tests\Factories\BlogFactory> */

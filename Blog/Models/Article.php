@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Blog\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\TextCast;
 use App\Models\Comment;
@@ -56,6 +57,7 @@ use Illuminate\Support\Str;
  * @property-read Poll                     $poll
  * @property-read Blog                     $category
  */
+#[NotFoundMessage('blog::blogs.article_not_exist')]
 class Article extends Model
 {
     /** @use HasFactory<\Modules\Blog\Tests\Factories\ArticleFactory> */

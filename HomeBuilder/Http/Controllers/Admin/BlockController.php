@@ -188,7 +188,7 @@ class BlockController extends AdminController
         $current = Block::query()->pluck('id')->all();
 
         if (count($ids) !== count($current) || array_diff($current, $ids)) {
-            return response()->json(['success' => false, 'message' => __('home_builder::home_builder.sort_invalid')]);
+            return response()->json(['success' => false, 'message' => __('home_builder::home_builder.sort_invalid')], 422);
         }
 
         // Id — целые из базы, проверенные выше, поэтому подставляются в SQL напрямую

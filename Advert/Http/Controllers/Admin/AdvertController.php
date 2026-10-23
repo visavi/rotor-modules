@@ -73,11 +73,7 @@ class AdvertController extends AdminController
      */
     private function findLink(int $id): Advert
     {
-        $link = Advert::query()->find($id);
-
-        if (! $link) {
-            abort(404, __('main.record_not_found'));
-        }
+        $link = Advert::query()->findOrFail($id);
 
         return $link;
     }

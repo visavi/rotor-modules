@@ -92,11 +92,7 @@ class CardController extends Controller
         $card = PaidAdvert::query()
             ->own()
             ->whereIn('place', PaidAdvert::CARD_PLACES)
-            ->find($id);
-
-        if (! $card) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+            ->findOrFail($id);
 
         $places = $this->paymentService->getCardPlaces($card->id);
 
@@ -111,11 +107,7 @@ class CardController extends Controller
         $card = PaidAdvert::query()
             ->ownActive()
             ->whereIn('place', PaidAdvert::CARD_PLACES)
-            ->find($id);
-
-        if (! $card) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+            ->findOrFail($id);
 
         return view('payment::card/edit', compact('card'));
     }

@@ -71,11 +71,7 @@ class ItemApiController extends Controller
     {
         $item = Item::query()
             ->with('user', 'category.parent', 'files')
-            ->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+            ->findOrFail($id);
 
         // Истёкшее объявление открыто всем, признак — в поле expired
         return ItemResource::make($item);
@@ -174,11 +170,7 @@ class ItemApiController extends Controller
      */
     private function findOwnItem(int $id): Item
     {
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+        $item = Item::query()->findOrFail($id);
 
         if ($item->user_id !== auth()->id()) {
             abort(403, __('board::boards.item_not_author'));

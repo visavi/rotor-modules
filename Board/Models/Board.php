@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Board\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Traits\CategoryTreeTrait;
 use App\Traits\UploadTrait;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Board                  $parent
  * @property-read Collection<int, Board> $children
  */
+#[NotFoundMessage('board::boards.category_not_exist')]
 class Board extends Model
 {
     /** @use HasFactory<\Modules\Board\Tests\Factories\BoardFactory> */

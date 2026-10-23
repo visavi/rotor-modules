@@ -69,11 +69,7 @@ class UserFieldController extends AdminController
     {
         $types = UserField::TYPES;
 
-        $field = UserField::query()->find($id);
-
-        if (! $field) {
-            abort(404, __('user_field::user_fields.not_found'));
-        }
+        $field = UserField::query()->findOrFail($id);
 
         // Форма предупреждает, что при смене типа значения удалятся
         $answersCount = $field->data()->whereNotNull('value')->count();
@@ -83,11 +79,7 @@ class UserFieldController extends AdminController
 
     public function update(int $id, StoreUserFieldRequest $request): RedirectResponse
     {
-        $field = UserField::query()->find($id);
-
-        if (! $field) {
-            abort(404, __('user_field::user_fields.not_found'));
-        }
+        $field = UserField::query()->findOrFail($id);
 
         // Старые значения новому типу не подходят: «Казань» у переключателя вывелась бы как «Да»
         if ($field->type !== $request->validated('type')) {
@@ -110,7 +102,7 @@ class UserFieldController extends AdminController
             return response()->json([
                 'success' => false,
                 'message' => __('user_field::user_fields.not_found'),
-            ]);
+            ], 404);
         }
 
         $field->data()->delete();

@@ -29,11 +29,7 @@ class CardRequest extends FormRequest
             $card = PaidAdvert::query()
                 ->own()
                 ->whereIn('place', PaidAdvert::CARD_PLACES)
-                ->find((int) $this->input('renew_id'));
-
-            if (! $card) {
-                abort(404, __('payment::payments.paid_adverts.not_found'));
-            }
+                ->findOrFail((int) $this->input('renew_id'));
 
             $this->renewed = $card;
         }

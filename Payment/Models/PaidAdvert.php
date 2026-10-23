@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Payment\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +32,7 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $deleted_at
  */
+#[NotFoundMessage('payment::payments.paid_adverts.not_found')]
 class PaidAdvert extends Model
 {
     /** @use HasFactory<\Modules\Payment\Tests\Factories\PaidAdvertFactory> */

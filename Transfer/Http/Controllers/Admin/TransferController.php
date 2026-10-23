@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Transfer\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Transfer\Models\Transfer;
@@ -29,9 +30,7 @@ class TransferController extends AdminController
      */
     public function view(Request $request): View
     {
-        if (! $user = getUserByLogin($request->input('user'))) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($request->input('user'));
 
         $transfers = Transfer::query()
             ->where('user_id', $user->id)

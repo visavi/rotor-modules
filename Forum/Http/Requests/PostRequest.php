@@ -83,11 +83,7 @@ class PostRequest extends FormRequest
         $topic = Topic::query()
             ->where('topics.id', $this->route('id'))
             ->with('forum.parent')
-            ->first();
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+            ->firstOrFail();
 
         $this->topic = $topic;
         $this->lastPost = Post::query()->where('topic_id', $topic->id)->orderByDesc('id')->first();

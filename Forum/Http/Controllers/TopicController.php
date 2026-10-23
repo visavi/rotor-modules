@@ -359,7 +359,7 @@ class TopicController extends Controller
 
         if (! $vote) {
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => __('forum::forums.vote_not_found')]);
+                return response()->json(['success' => false, 'message' => __('forum::forums.vote_not_found')], 404);
             }
 
             abort(404, __('forum::forums.vote_not_found'));
@@ -378,7 +378,7 @@ class TopicController extends Controller
 
         if ($error || ! $answer) {
             if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => $error]);
+                return response()->json(['success' => false, 'message' => $error], 422);
             }
 
             return redirect()->route('topics.topic', ['id' => $vote->topic_id, 'page' => $page])
@@ -415,11 +415,7 @@ class TopicController extends Controller
      */
     private function findTopic(int $id): Topic
     {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $topic = Topic::query()->findOrFail($id);
 
         return $topic;
     }
@@ -430,17 +426,17 @@ class TopicController extends Controller
     private function editableTopic(int $id): Topic
     {
         if (auth()->user()?->point < setting('editforumpoint')) {
-            abort(200, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
+            abort(403, __('forum::forums.topic_edited_points', ['point' => plural(setting('editforumpoint'), setting('scorename'))]));
         }
 
         $topic = $this->findTopic($id);
 
         if ($topic->user_id !== auth()->id()) {
-            abort(200, __('forum::forums.topic_not_author'));
+            abort(403, __('forum::forums.topic_not_author'));
         }
 
         if ($topic->closed) {
-            abort(200, __('forum::forums.topic_closed'));
+            abort(403, __('forum::forums.topic_closed'));
         }
 
         return $topic;
@@ -451,24 +447,20 @@ class TopicController extends Controller
      */
     private function editablePost(int $id, User $user): Post
     {
-        $post = Post::query()->with('topic')->find($id);
-
-        if (! $post) {
-            abort(404, __('forum::forums.post_not_exist'));
-        }
+        $post = Post::query()->with('topic')->findOrFail($id);
 
         if ($post->topic->closed) {
-            abort(200, __('forum::forums.topic_closed'));
+            abort(403, __('forum::forums.topic_closed'));
         }
 
         $isModer = $post->topic->isModerator($user);
 
         if (! $isModer && $post->user_id !== $user->id) {
-            abort(200, __('forum::forums.posts_edited_curators'));
+            abort(403, __('forum::forums.posts_edited_curators'));
         }
 
         if (! $isModer && $post->created_at->lt(now()->subMinutes(10))) {
-            abort(200, __('main.editing_impossible'));
+            abort(403, __('main.editing_impossible'));
         }
 
         return $post;

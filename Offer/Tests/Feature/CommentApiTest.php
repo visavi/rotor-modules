@@ -193,7 +193,7 @@ class CommentApiTest extends ModuleTestCase
 
         $this->patchJson('/api/comments/' . $comment->id, [
             'text' => 'Исправленный текст',
-        ], $this->headers())->assertStatus(422);
+        ], $this->headers())->assertForbidden();
     }
 
     public function testDestroyRequiresAdmin(): void

@@ -49,11 +49,7 @@ class PhotoApiController extends Controller
             ->withUserVote()
             ->where('photos.id', $id)
             ->with('user', 'files')
-            ->first();
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_exist'));
-        }
+            ->firstOrFail();
 
         // Запись — в data, её комментарии страницей — в comments
         return PhotoResource::make($photo)

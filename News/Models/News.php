@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\News\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Models\Comment;
 use App\Models\File;
@@ -41,6 +42,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Collection<int, Poll>    $polls
  * @property-read Poll                     $poll
  */
+#[NotFoundMessage('news::news.news_not_exist')]
 class News extends Model
 {
     /** @use HasFactory<\Modules\News\Tests\Factories\NewsFactory> */

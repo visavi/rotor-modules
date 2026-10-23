@@ -93,11 +93,7 @@ class PaidAdvertController extends AdminController
     public function edit(int $id, Request $request): View
     {
         $places = PaidAdvert::PLACES;
-        $advert = PaidAdvert::query()->whereIn('place', $places)->find($id);
-
-        if (! $advert) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $advert = PaidAdvert::query()->whereIn('place', $places)->findOrFail($id);
 
         $place = $request->input('place');
 
@@ -124,11 +120,7 @@ class PaidAdvertController extends AdminController
      */
     public function stop(int $id): RedirectResponse
     {
-        $advert = PaidAdvert::query()->active()->find($id);
-
-        if (! $advert) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $advert = PaidAdvert::query()->active()->findOrFail($id);
 
         $advert->update(['deleted_at' => now()]);
 
@@ -143,11 +135,7 @@ class PaidAdvertController extends AdminController
      */
     public function delete(int $id): RedirectResponse
     {
-        $advert = PaidAdvert::query()->find($id);
-
-        if (! $advert) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $advert = PaidAdvert::query()->findOrFail($id);
 
         $advert->delete();
         $this->cardImageService->delete($advert->image);
@@ -198,11 +186,7 @@ class PaidAdvertController extends AdminController
      */
     public function editCard(int $id): View
     {
-        $card = PaidAdvert::query()->whereIn('place', PaidAdvert::CARD_PLACES)->find($id);
-
-        if (! $card) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $card = PaidAdvert::query()->whereIn('place', PaidAdvert::CARD_PLACES)->findOrFail($id);
 
         return view('payment::admin/paid-adverts/edit-card', compact('card'));
     }

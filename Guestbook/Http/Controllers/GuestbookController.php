@@ -121,14 +121,10 @@ class GuestbookController extends Controller
      */
     private function ownPost(int $id): Guestbook
     {
-        $post = Guestbook::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $post) {
-            abort(404, __('main.message_not_found'));
-        }
+        $post = Guestbook::query()->where('user_id', auth()->id())->findOrFail($id);
 
         if ($post->created_at->lt(now()->subMinutes(10))) {
-            abort(200, __('main.editing_impossible'));
+            abort(403, __('main.editing_impossible'));
         }
 
         return $post;

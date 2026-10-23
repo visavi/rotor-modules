@@ -192,7 +192,7 @@ class RatingTest extends ModuleTestCase
 
         $this->actingAs($this->user)
             ->postJson('/ratings/delete', ['id' => $rating->id], $this->ajax())
-            ->assertOk()
+            ->assertForbidden()
             ->assertJsonPath('success', false);
 
         $admin = User::factory()->create(['level' => User::ADMIN]);

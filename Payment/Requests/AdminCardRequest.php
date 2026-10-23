@@ -23,11 +23,7 @@ class AdminCardRequest extends FormRequest
         if (! $this->card) {
             $card = PaidAdvert::query()
                 ->whereIn('place', PaidAdvert::CARD_PLACES)
-                ->find((int) $this->route('id'));
-
-            if (! $card) {
-                abort(404, __('payment::payments.paid_adverts.not_found'));
-            }
+                ->findOrFail((int) $this->route('id'));
 
             $this->card = $card;
         }

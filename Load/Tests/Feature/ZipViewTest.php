@@ -134,7 +134,7 @@ class ZipViewTest extends ModuleTestCase
         unlink(public_path($this->file->path));
 
         $this->get($this->zipUrl(500))
-            ->assertOk()
+            ->assertNotFound()
             ->assertSee(__('load::loads.file_not_read'));
     }
 

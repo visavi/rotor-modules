@@ -75,11 +75,7 @@ class BoardController extends Controller
     {
         $item = Item::query()
             ->with('category')
-            ->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+            ->findOrFail($id);
 
         Reader::countingStat($item);
 
@@ -136,7 +132,7 @@ class BoardController extends Controller
         $item = Item::query()->find($id);
 
         if (! $item?->phone) {
-            return response()->json(['success' => false, 'message' => __('board::boards.item_not_exist')]);
+            return response()->json(['success' => false, 'message' => __('board::boards.item_not_exist')], 404);
         }
 
         return response()->json([
@@ -311,11 +307,7 @@ class BoardController extends Controller
      */
     private function findItem(int $id): Item
     {
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+        $item = Item::query()->findOrFail($id);
 
         return $item;
     }
@@ -336,7 +328,7 @@ class BoardController extends Controller
     private function checkCreationOpen(): void
     {
         if (! isAdmin() && ! setting('boards_create')) {
-            abort(200, __('board::boards.boards_closed'));
+            abort(403, __('board::boards.boards_closed'));
         }
     }
 }

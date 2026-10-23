@@ -215,11 +215,7 @@ class LoadController extends AdminController
      */
     public function deleteDown(int $id): RedirectResponse
     {
-        $down = Down::query()->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->findOrFail($id);
 
         if ($down->active) {
             $down->category->decrement('count_downs');
@@ -252,11 +248,7 @@ class LoadController extends AdminController
      */
     public function publish(int $id): RedirectResponse
     {
-        $down = Down::query()->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->findOrFail($id);
 
         $active = $down->active ^ 1;
 
@@ -306,11 +298,7 @@ class LoadController extends AdminController
      */
     private function findLoad(int $id): Load
     {
-        $load = Load::query()->with('children')->find($id);
-
-        if (! $load) {
-            abort(404, __('load::loads.load_not_exist'));
-        }
+        $load = Load::query()->with('children')->findOrFail($id);
 
         return $load;
     }
@@ -320,11 +308,7 @@ class LoadController extends AdminController
      */
     private function findDown(int $id): Down
     {
-        $down = Down::query()->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->findOrFail($id);
 
         return $down;
     }

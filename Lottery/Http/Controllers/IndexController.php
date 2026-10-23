@@ -78,7 +78,7 @@ class IndexController extends Controller
             ->first();
 
         if (! $lottery) {
-            abort(200, __('lottery::lottery.lottery_not_activated'));
+            abort(403, __('lottery::lottery.lottery_not_activated'));
         }
 
         $error = DB::transaction(static function () use ($user, $number, $lottery, $ticketPrice) {

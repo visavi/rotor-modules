@@ -25,11 +25,7 @@ class ActiveController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $login = $request->input('user');
-            $user = getUserByLogin(is_string($login) ? $login : auth()->user()?->login);
-
-            if (! $user) {
-                abort(404, __('validator.user'));
-            }
+            $user = User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
 
             $this->user = $user;
 

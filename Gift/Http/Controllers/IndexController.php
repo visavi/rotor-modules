@@ -41,11 +41,7 @@ class IndexController extends Controller
      */
     public function send(int $id, Request $request): View
     {
-        $gift = Gift::query()->find($id);
-
-        if (! $gift) {
-            abort(404, __('gift::gifts.gift_not_found'));
-        }
+        $gift = Gift::query()->findOrFail($id);
 
         $maxUsers = (int) setting('gift_max_users');
         $user = getUserByLogin($request->input('user'));
@@ -69,11 +65,7 @@ class IndexController extends Controller
      */
     public function gifts(string $login): View
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)

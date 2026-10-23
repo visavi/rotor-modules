@@ -50,11 +50,7 @@ class OfferApiController extends Controller
             ->withUserVote()
             ->where('offers.id', $id)
             ->with('user', 'replyUser', 'files')
-            ->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+            ->firstOrFail();
 
         // Запись — в data, её комментарии страницей — в comments
         return OfferResource::make($offer)
@@ -96,11 +92,7 @@ class OfferApiController extends Controller
         $offer = Offer::query()
             ->where('id', $id)
             ->where('user_id', auth()->id())
-            ->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+            ->firstOrFail();
 
         // Решённую запись не правят — на сайте то же правило
         if (! in_array($offer->status, [Offer::WAIT, Offer::PROCESS], true)) {

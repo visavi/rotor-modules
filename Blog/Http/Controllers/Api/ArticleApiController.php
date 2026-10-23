@@ -93,11 +93,7 @@ class ArticleApiController extends Controller
             ->withUserVote()
             ->where('articles.id', $articleId)
             ->with('user', 'category.parent', 'tags', 'files')
-            ->first();
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+            ->firstOrFail();
 
         // Запись — в data, её комментарии страницей — в comments
         return ArticleResource::make($article)
@@ -145,11 +141,7 @@ class ArticleApiController extends Controller
      */
     public function update(int $id, ArticleRequest $request): JsonResponse
     {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+        $article = Article::query()->findOrFail($id);
 
         if ($article->user_id !== auth()->id()) {
             abort(403, __('main.article_not_author'));

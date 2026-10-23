@@ -49,11 +49,7 @@ class GiftApiController extends Controller
      */
     public function user(string $login): JsonResponse
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $gifts = GiftsUser::query()
             ->where('user_id', $user->id)

@@ -127,11 +127,7 @@ class NewsController extends AdminController
      */
     private function findNews(int $id): News
     {
-        $news = News::query()->find($id);
-
-        if (! $news) {
-            abort(404, __('news::news.news_not_exist'));
-        }
+        $news = News::query()->findOrFail($id);
 
         return $news;
     }

@@ -56,11 +56,7 @@ class OfferController extends Controller
         $offer = Offer::query()
             ->withUserVote()
             ->where('offers.id', $id)
-            ->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+            ->firstOrFail();
 
         ['comments' => $comments, 'files' => $files] = $this->getCommentsData($offer);
 
@@ -140,14 +136,10 @@ class OfferController extends Controller
         $offer = Offer::query()
             ->where('id', $id)
             ->where('user_id', auth()->id())
-            ->first();
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+            ->firstOrFail();
 
         if (! in_array($offer->status, [Offer::WAIT, Offer::PROCESS], true)) {
-            abort(200, __('offer::offers.already_resolved'));
+            abort(403, __('offer::offers.already_resolved'));
         }
 
         return $offer;

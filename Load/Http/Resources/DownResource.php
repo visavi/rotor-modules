@@ -70,7 +70,7 @@ class DownResource extends JsonResource
                     ? route('downs.download', ['id' => $this->id, 'fid' => $file->id])
                     : null,
                 // Содержимое архива можно посмотреть до скачивания, но только авторизованным
-                'archive_url' => $file->extension === 'zip' && auth()->user()
+                'archive_url' => $file->extension === 'zip' && auth()->check()
                     ? route('downs.zip', ['id' => $this->id, 'fid' => $file->id])
                     : null,
             ])

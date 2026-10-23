@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Traits\CategoryTreeTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Forum> $children
  * @property-read Topic                 $lastTopic
  */
+#[NotFoundMessage('forum::forums.forum_not_exist')]
 class Forum extends Model
 {
     /** @use HasFactory<\Modules\Forum\Tests\Factories\ForumFactory> */

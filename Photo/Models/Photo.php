@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Photo\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\TextCast;
 use App\Models\Comment;
@@ -44,6 +45,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Collection<int, Poll>    $polls
  * @property-read Poll                     $poll
  */
+#[NotFoundMessage('photo::photos.photo_not_exist')]
 class Photo extends Model
 {
     /** @use HasFactory<\Modules\Photo\Tests\Factories\PhotoFactory> */

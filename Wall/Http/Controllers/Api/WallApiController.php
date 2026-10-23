@@ -97,11 +97,7 @@ class WallApiController extends Controller
      */
     private function findUser(string $login): User
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         return $user;
     }

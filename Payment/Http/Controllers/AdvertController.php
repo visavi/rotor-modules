@@ -158,11 +158,7 @@ class AdvertController extends Controller
      */
     public function renew(int $id): View
     {
-        $advert = PaidAdvert::query()->own()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find($id);
-
-        if (! $advert) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $advert = PaidAdvert::query()->own()->whereNotIn('place', PaidAdvert::CARD_PLACES)->findOrFail($id);
 
         // В комментарии записи — служебное описание заказа, покупателю его не подставляем
         $advert->comment = null;
@@ -178,11 +174,7 @@ class AdvertController extends Controller
      */
     public function edit(int $id): View
     {
-        $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find($id);
-
-        if (! $advert) {
-            abort(404, __('payment::payments.paid_adverts.not_found'));
-        }
+        $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->findOrFail($id);
 
         return view('payment::advert/edit', compact('advert'));
     }

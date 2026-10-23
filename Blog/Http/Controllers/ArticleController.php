@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
 use App\Models\Reader;
+use App\Models\User;
 use App\Services\FileService;
 use App\Support\CategoryTree;
 use App\Traits\HandlesComments;
@@ -107,11 +108,7 @@ class ArticleController extends Controller
         $article = Article::query()
             ->where('id', $id)
             ->with('category.parent', 'tags', 'poll', 'files')
-            ->first();
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+            ->firstOrFail();
 
         Reader::countingStat($article);
 
@@ -248,12 +245,12 @@ class ArticleController extends Controller
         $articles = Article::query()
             ->active()
             ->orderByDesc('created_at')
-            ->with('user')
+            ->with('user', 'files')
             ->limit(15)
             ->get();
 
         if ($articles->isEmpty()) {
-            abort(200, __('blog::blogs.article_not_exist'));
+            abort(404, __('blog::blogs.article_not_exist'));
         }
 
         return response()
@@ -377,17 +374,18 @@ class ArticleController extends Controller
     {
         $active = (bool) $request->input('active', true);
         $login = $request->input('user', auth()->user()?->login);
-        $user = getUserByLogin($login);
+        $user = User::findByLoginOrFail($login);
 
-        if (! $user) {
-            abort(404, __('validator.user'));
+        // Статьи на проверке и черновики видит только автор
+        if (auth()->id() !== $user->id) {
+            $active = true;
         }
 
         $articles = Article::query()
             ->active($active)
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
-            ->with('user', 'poll')
+            ->with('user', 'poll', 'category')
             ->paginate(setting('blogpost'))
             ->appends(['user' => $user->login]);
 
@@ -404,11 +402,7 @@ class ArticleController extends Controller
     public function userComments(Request $request): View
     {
         $login = $request->input('user', auth()->user()?->login);
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $comments = Comment::query()
             ->select('comments.*', 'title', 'count_comments')
@@ -442,14 +436,10 @@ class ArticleController extends Controller
      */
     private function ownArticle(int $id): Article
     {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+        $article = Article::query()->findOrFail($id);
 
         if ($article->user_id !== auth()->id()) {
-            abort(200, __('main.article_not_author'));
+            abort(403, __('main.article_not_author'));
         }
 
         return $article;
@@ -461,7 +451,7 @@ class ArticleController extends Controller
     private function checkCreationOpen(): void
     {
         if (! isAdmin() && ! setting('blog_create')) {
-            abort(200, __('blog::blogs.articles_closed'));
+            abort(403, __('blog::blogs.articles_closed'));
         }
     }
 }

@@ -41,11 +41,7 @@ class NewsController extends Controller
     {
         $news = News::query()
             ->withUserVote()
-            ->find($id);
-
-        if (! $news) {
-            abort(404, __('news::news.news_not_exist'));
-        }
+            ->findOrFail($id);
 
         ['comments' => $comments, 'files' => $files] = $this->getCommentsData($news);
 

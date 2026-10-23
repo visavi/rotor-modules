@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Guestbook\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Models\File;
 use App\Models\User;
@@ -36,6 +37,7 @@ use Illuminate\Support\HtmlString;
  * @property-read User                  $user
  * @property-read Collection<int, File> $files
  */
+#[NotFoundMessage('main.message_not_found')]
 class Guestbook extends Model
 {
     /** @use HasFactory<\Modules\Guestbook\Tests\Factories\GuestbookFactory> */

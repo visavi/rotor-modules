@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Load\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\TextCast;
 use App\Models\Comment;
@@ -51,6 +52,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Poll                       $poll
  * @property-read Load                       $category
  */
+#[NotFoundMessage('load::loads.down_not_exist')]
 class Down extends Model
 {
     /** @use HasFactory<\Modules\Load\Tests\Factories\DownFactory> */

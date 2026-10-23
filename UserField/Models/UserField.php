@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\UserField\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\TextCast;
 use App\Rules\EmailRule;
 use App\Support\HtmlSanitizer;
@@ -32,6 +33,7 @@ use Illuminate\Support\Facades\Validator;
  * @property bool        $required
  * @property-read Collection<UserData> $data
  */
+#[NotFoundMessage('user_field::user_fields.not_found')]
 class UserField extends Model
 {
     /** @use HasFactory<\Modules\UserField\Tests\Factories\UserFieldFactory> */

@@ -144,7 +144,7 @@ class ForumController extends Controller
     {
         $topics = Topic::query()
             ->where('closed', 0)
-            ->with('lastPost.user')
+            ->with('lastPost.user', 'lastPost.files')
             ->orderByDesc('updated_at')
             ->limit(15)
             ->get();

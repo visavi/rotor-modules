@@ -115,11 +115,11 @@ class ChatController extends AdminController
         $post = Chat::query()->where('user_id', auth()->id())->find($id);
 
         if (! $post) {
-            abort(200, __('main.message_deleted'));
+            abort(404, __('main.message_deleted'));
         }
 
         if ($post->created_at->lt(now()->subMinutes(10))) {
-            abort(200, __('main.editing_impossible'));
+            abort(403, __('main.editing_impossible'));
         }
 
         return $post;

@@ -252,4 +252,44 @@ class BlogSmokeTest extends ModuleTestCase
             $this->get(route($route, ['user' => $this->user->login]))->assertOk();
         }
     }
+
+    public function testPendingArticlesAreHiddenFromOthers(): void
+    {
+        // ?active=0 открывал чужие статьи на проверке и черновики
+        Article::factory()->create([
+            'category_id' => Blog::factory()->create(['name' => 'Test category'])->id,
+            'user_id'     => $this->user->id,
+            'title'       => 'Секретный черновик',
+            'slug'        => 'secret-draft',
+            'text'        => 'Text',
+            'active'      => false,
+            'created_at'  => now(),
+        ]);
+
+        $url = route('articles.user-articles', ['user' => $this->user->login, 'active' => 0]);
+
+        $this->actingAs(User::factory()->create())->get($url)->assertOk()->assertDontSee('Секретный черновик');
+        $this->actingAs($this->user)->get($url)->assertOk()->assertSee('Секретный черновик');
+    }
+
+    public function testRssAndUserArticlesWithSeveralArticles(): void
+    {
+        // Несколько статей: на одной защита от ленивой загрузки не включается
+        $category = Blog::factory()->create(['name' => 'Test category']);
+
+        foreach (['first', 'second'] as $slug) {
+            Article::factory()->create([
+                'category_id' => $category->id,
+                'user_id'     => $this->user->id,
+                'title'       => 'Article ' . $slug,
+                'slug'        => $slug,
+                'text'        => 'Text',
+                'active'      => true,
+                'created_at'  => now(),
+            ]);
+        }
+
+        $this->get(route('blogs.rss'))->assertOk();
+        $this->actingAs($this->user)->get(route('articles.user-articles', ['user' => $this->user->login]))->assertOk();
+    }
 }

@@ -50,7 +50,7 @@ class BookmarkController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('forum::forums.topic_not_exist'),
-            ]);
+            ], 404);
         }
 
         $bookmark = Bookmark::query()

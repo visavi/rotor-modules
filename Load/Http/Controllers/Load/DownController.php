@@ -46,15 +46,11 @@ class DownController extends Controller
         $down = Down::query()
             ->where('id', $id)
             ->with('category.parent', 'poll')
-            ->first();
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+            ->firstOrFail();
 
         // Непроверенная загрузка доступна только автору и администрации, как и в API
         if (! $down->active && ! isAdmin(User::ADMIN) && auth()->id() !== $down->user_id) {
-            abort(200, __('load::loads.down_not_verified'));
+            abort(403, __('load::loads.down_not_verified'));
         }
 
         $allowDownload = auth()->check() || setting('down_guest_download');
@@ -152,12 +148,12 @@ class DownController extends Controller
             abort(404, __('load::loads.down_not_exist'));
         }
 
-        if (! (auth()->user() || setting('down_guest_download'))) {
+        if (! (auth()->check() || setting('down_guest_download'))) {
             abort(403, __('load::loads.download_authorized'));
         }
 
         if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(200, __('load::loads.down_not_verified'));
+            abort(403, __('load::loads.down_not_verified'));
         }
 
         if (! file_exists(public_path($file->path))) {
@@ -175,18 +171,14 @@ class DownController extends Controller
      */
     public function downloadLink(int $id, int $linkId): Response
     {
-        $down = Down::query()->find($id);
+        $down = Down::query()->findOrFail($id);
 
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
-
-        if (! (auth()->user() || setting('down_guest_download'))) {
+        if (! (auth()->check() || setting('down_guest_download'))) {
             abort(403, __('load::loads.download_authorized'));
         }
 
         if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(200, __('load::loads.down_not_verified'));
+            abort(403, __('load::loads.down_not_verified'));
         }
 
         if (! isset($down->links[$linkId])) {
@@ -247,7 +239,7 @@ class DownController extends Controller
 
         // Индексы перебирают боты — известный по карте промах архив не открывает
         if (ZipMap::has($file, $zid) === false) {
-            abort(200, __('load::loads.file_not_read'));
+            abort(404, __('load::loads.file_not_read'));
         }
 
         $archive = $this->openArchive($file);
@@ -256,7 +248,7 @@ class DownController extends Controller
         $document = $archive->statIndex($zid);
 
         if ($content === false || $document === false) {
-            abort(200, __('load::loads.file_not_read'));
+            abort(404, __('load::loads.file_not_read'));
         }
 
         $archive->close();
@@ -273,7 +265,7 @@ class DownController extends Controller
         ], true);
 
         if (! $isImage && ! $isText) {
-            abort(200, __('load::loads.file_not_read'));
+            abort(404, __('load::loads.file_not_read'));
         }
 
         if ($isImage) {
@@ -312,13 +304,10 @@ class DownController extends Controller
      */
     private function findZipFile(int $id, int $fid): array
     {
-        $down = Down::query()->find($id);
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->findOrFail($id);
 
         if (! $down->active && ! isAdmin(User::ADMIN)) {
-            abort(200, __('load::loads.down_not_verified'));
+            abort(403, __('load::loads.down_not_verified'));
         }
 
         $file = $down->files->firstWhere('id', $fid);
@@ -327,7 +316,7 @@ class DownController extends Controller
         }
 
         if ($file->extension !== 'zip') {
-            abort(200, __('load::loads.archive_only_zip'));
+            abort(404, __('load::loads.archive_only_zip'));
         }
 
         return [$down, $file];
@@ -341,7 +330,7 @@ class DownController extends Controller
         $archive = new ZipArchive();
 
         if ($archive->open(public_path($file->path), ZipArchive::RDONLY) !== true) {
-            abort(200, __('load::loads.archive_not_open'));
+            abort(500, __('load::loads.archive_not_open'));
         }
 
         return $archive;
@@ -352,14 +341,10 @@ class DownController extends Controller
      */
     private function ownDown(int $id): Down
     {
-        $down = Down::query()->where('user_id', auth()->id())->find($id);
-
-        if (! $down) {
-            abort(404, __('load::loads.down_not_exist'));
-        }
+        $down = Down::query()->where('user_id', auth()->id())->findOrFail($id);
 
         if ($down->active) {
-            abort(200, __('load::loads.down_verified'));
+            abort(403, __('load::loads.down_verified'));
         }
 
         return $down;
@@ -371,7 +356,7 @@ class DownController extends Controller
     private function checkUploadOpen(): void
     {
         if (! isAdmin() && ! setting('downupload')) {
-            abort(200, __('load::loads.down_closed'));
+            abort(403, __('load::loads.down_closed'));
         }
     }
 }

@@ -436,7 +436,7 @@ class FileController extends Controller
         }
 
         if (! is_dir($directory) || ! is_writable($directory)) {
-            abort(200, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
+            abort(500, __('page_editor::files.directory_not_writable', ['dir' => $this->path ?: $this->root]));
         }
 
         return $directory;

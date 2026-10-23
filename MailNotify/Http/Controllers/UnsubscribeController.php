@@ -16,16 +16,17 @@ class UnsubscribeController extends Controller
      */
     public function __invoke(Request $request): RedirectResponse
     {
-        $key = $request->string('key')->value();
+        // ?key[]= приходит массивом: string() на нём падал с 500
+        $key = $request->input('key');
 
-        if ($key === '') {
-            abort(200, __('mail_notify::mail_notify.token_missing'));
+        if (! is_string($key) || $key === '') {
+            abort(404, __('mail_notify::mail_notify.token_missing'));
         }
 
         $user = User::query()->where('subscribe', $key)->first();
 
         if (! $user) {
-            abort(200, __('mail_notify::mail_notify.token_expired'));
+            abort(404, __('mail_notify::mail_notify.token_expired'));
         }
 
         $user->update(['subscribe' => null]);

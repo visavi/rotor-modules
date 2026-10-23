@@ -79,7 +79,7 @@ class AdvertController extends Controller
     private function checkOpen(): void
     {
         if (! setting('rekuseractive')) {
-            abort(200, __('advert::adverts.advert_closed'));
+            abort(403, __('advert::adverts.advert_closed'));
         }
     }
 
@@ -91,7 +91,7 @@ class AdvertController extends Controller
         $this->checkOpen();
 
         if (auth()->user()?->point < setting('rekuserpoint')) {
-            abort(200, __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]));
+            abort(403, __('advert::adverts.advert_point', ['point' => plural((int) setting('rekuserpoint'), setting('scorename'))]));
         }
 
         Advert::query()->where('type', Advert::TYPE_USER)->where('deleted_at', '<', now())->delete();
@@ -102,7 +102,7 @@ class AdvertController extends Controller
             ->exists();
 
         if ($posted) {
-            abort(200, __('advert::adverts.advert_already_posted'));
+            abort(403, __('advert::adverts.advert_already_posted'));
         }
     }
 }

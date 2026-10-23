@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\HomeBuilder\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\TextCast;
 use App\Models\User;
@@ -44,6 +45,7 @@ use Throwable;
  * @property CarbonImmutable      $created_at
  * @property CarbonImmutable      $updated_at
  */
+#[NotFoundMessage('home_builder::home_builder.block_not_found')]
 class Block extends Model
 {
     /** @use HasFactory<\Modules\HomeBuilder\Tests\Factories\BlockFactory> */
@@ -122,7 +124,7 @@ class Block extends Model
     protected function visible(Builder $query): void
     {
         $query->where('active', true)
-            ->whereIn('visibility', [self::VISIBLE_ALL, auth()->user() ? self::VISIBLE_USERS : self::VISIBLE_GUESTS])
+            ->whereIn('visibility', [self::VISIBLE_ALL, auth()->check() ? self::VISIBLE_USERS : self::VISIBLE_GUESTS])
             ->where(static fn (Builder $q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', now()))
             ->where(static fn (Builder $q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()));
     }
@@ -213,11 +215,7 @@ class Block extends Model
      */
     public static function findManageable(int $id): self
     {
-        $block = self::query()->find($id);
-
-        if (! $block) {
-            abort(404, __('home_builder::home_builder.block_not_found'));
-        }
+        $block = self::query()->findOrFail($id);
 
         if (! $block->isManageable()) {
             abort(403, __('home_builder::home_builder.boss_only'));

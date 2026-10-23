@@ -64,7 +64,7 @@ class WallController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('validator.not_ajax'),
-            ]);
+            ], 400);
         }
 
         // Чистит стену её хозяин, чужие записи трогает только администрация
@@ -72,7 +72,7 @@ class WallController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('main.deleted_only_admins'),
-            ]);
+            ], 403);
         }
 
         $id = int($request->input('id'));
@@ -81,7 +81,7 @@ class WallController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('validator.deletion'),
-            ]);
+            ], 422);
         }
 
         Wall::query()
@@ -100,11 +100,7 @@ class WallController extends Controller
      */
     private function findUser(string $login): User
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         return $user;
     }

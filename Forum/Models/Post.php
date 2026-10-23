@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Forum\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Models\File;
 use App\Models\Poll;
@@ -43,6 +44,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Topic                 $topic
  * @property-read User                  $editUser
  */
+#[NotFoundMessage('forum::forums.post_not_exist')]
 class Post extends Model
 {
     /** @use HasFactory<\Modules\Forum\Tests\Factories\PostFactory> */

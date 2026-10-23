@@ -26,11 +26,7 @@ class ActiveController extends Controller
     {
         $this->middleware(function ($request, $next) {
             $login = $request->input('user');
-            $user = getUserByLogin(is_string($login) ? $login : auth()->user()?->login);
-
-            if (! $user) {
-                abort(404, __('validator.user'));
-            }
+            $user = User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
 
             $this->user = $user;
 
@@ -93,7 +89,7 @@ class ActiveController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('forum::forums.posts_deleted_moderators'),
-            ]);
+            ], 403);
         }
 
         $post = Post::query()
@@ -105,7 +101,7 @@ class ActiveController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('forum::forums.post_not_exist'),
-            ]);
+            ], 404);
         }
 
         $post->delete();

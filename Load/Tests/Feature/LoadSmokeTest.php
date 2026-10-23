@@ -36,6 +36,17 @@ class LoadSmokeTest extends ModuleTestCase
         $this->get(route('loads.load', ['id' => $load->id]))->assertOk();
     }
 
+    public function testNestedCategoryBreadcrumbs(): void
+    {
+        // Одна категория защиту от ленивой загрузки не включает: нужен набор, как в живом дереве
+        $root = Load::factory()->create(['name' => 'Корневой раздел']);
+        $child = Load::factory()->create(['name' => 'Подраздел', 'parent_id' => $root->id]);
+
+        $this->get(route('loads.load', ['id' => $child->id]))
+            ->assertOk()
+            ->assertSee('Корневой раздел');
+    }
+
     public function testDown(): void
     {
         $load = Load::factory()->create(['name' => 'Test category']);
@@ -105,5 +116,27 @@ class LoadSmokeTest extends ModuleTestCase
         foreach (['downs.active-files', 'downs.active-comments'] as $route) {
             $this->get(route($route) . '?user[]=1')->assertOk()->assertSee($this->user->getName());
         }
+    }
+
+    public function testRssSkipsUnverifiedDowns(): void
+    {
+        $load = Load::factory()->create(['name' => 'Test category']);
+
+        // Два проверенных: с одной записью защита от ленивой загрузки не включается
+        foreach (['Проверенный файл' => true, 'Второй файл' => true, 'Ждёт проверки' => false] as $title => $active) {
+            Down::factory()->create([
+                'category_id' => $load->id,
+                'title'       => $title,
+                'text'        => 'Текст',
+                'user_id'     => $this->user->id,
+                'active'      => $active,
+                'created_at'  => now(),
+            ]);
+        }
+
+        $this->get(route('loads.rss'))
+            ->assertOk()
+            ->assertSee('Проверенный файл')
+            ->assertDontSee('Ждёт проверки');
     }
 }

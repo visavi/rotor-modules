@@ -50,11 +50,7 @@ class AdminAdvertController extends AdminController
         $advert = Advert::query()
             ->where('type', Advert::TYPE_ADMIN)
             ->where('user_id', auth()->id())
-            ->first();
-
-        if (! $advert) {
-            abort(404, __('main.record_not_found'));
-        }
+            ->firstOrFail();
 
         $advert->delete();
 

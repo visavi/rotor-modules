@@ -15,11 +15,7 @@ class MyAdvertRequest extends FormRequest
     public function advert(): PaidAdvert
     {
         if (! $this->advert) {
-            $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->find((int) $this->route('id'));
-
-            if (! $advert) {
-                abort(404, __('payment::payments.paid_adverts.not_found'));
-            }
+            $advert = PaidAdvert::query()->ownActive()->whereNotIn('place', PaidAdvert::CARD_PLACES)->findOrFail((int) $this->route('id'));
 
             $this->advert = $advert;
         }

@@ -129,7 +129,7 @@ class BanditController extends Controller
         $before = $this->user->money;
 
         if (! $this->user->chargeMoney(self::BET)) {
-            abort(200, __('game::games.cannot_play'));
+            abort(403, __('game::games.cannot_play'));
         }
 
         $cells = $this->roll();

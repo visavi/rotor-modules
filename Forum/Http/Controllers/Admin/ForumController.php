@@ -246,11 +246,7 @@ class ForumController extends AdminController
     {
         $page = int($request->input('page', 1));
 
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $topic = Topic::query()->findOrFail($id);
 
         $redirect = redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $page]);
 
@@ -293,11 +289,7 @@ class ForumController extends AdminController
     {
         $page = int($request->input('page', 1));
 
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $topic = Topic::query()->findOrFail($id);
 
         $topic->delete();
         $topic->forum->restatement();
@@ -313,11 +305,7 @@ class ForumController extends AdminController
      */
     public function topic(int $id): View
     {
-        $topic = Topic::query()->where('id', $id)->with('forum.parent')->first();
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $topic = Topic::query()->where('id', $id)->with('forum.parent')->firstOrFail();
 
         $posts = Post::query()
             ->where('topic_id', $topic->id)
@@ -397,11 +385,7 @@ class ForumController extends AdminController
      */
     private function findForum(int $id): Forum
     {
-        $forum = Forum::query()->with('children')->find($id);
-
-        if (! $forum) {
-            abort(404, __('forum::forums.forum_not_exist'));
-        }
+        $forum = Forum::query()->with('children')->findOrFail($id);
 
         return $forum;
     }
@@ -411,11 +395,7 @@ class ForumController extends AdminController
      */
     private function findTopic(int $id): Topic
     {
-        $topic = Topic::query()->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+        $topic = Topic::query()->findOrFail($id);
 
         return $topic;
     }
@@ -425,11 +405,7 @@ class ForumController extends AdminController
      */
     private function findPost(int $id): Post
     {
-        $post = Post::query()->find($id);
-
-        if (! $post) {
-            abort(404, __('forum::forums.post_not_exist'));
-        }
+        $post = Post::query()->findOrFail($id);
 
         return $post;
     }

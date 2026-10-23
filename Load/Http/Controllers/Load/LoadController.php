@@ -75,13 +75,16 @@ class LoadController extends Controller
      */
     public function rss(): Response
     {
+        // Непроверенные файлы видны только автору и администрации, в ленту они не идут
         $downs = Down::query()
+            ->active()
             ->orderByDesc('created_at')
+            ->with('user', 'files')
             ->limit(15)
             ->get();
 
         if ($downs->isEmpty()) {
-            abort(200, __('load::loads.downs_not_found'));
+            abort(404, __('load::loads.downs_not_found'));
         }
 
         return response()

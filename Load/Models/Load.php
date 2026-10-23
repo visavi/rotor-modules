@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Load\Models;
 
+use App\Attributes\NotFoundMessage;
 use App\Traits\CategoryTreeTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Load                  $parent
  * @property-read Collection<int, Load> $children
  */
+#[NotFoundMessage('load::loads.load_not_exist')]
 class Load extends Model
 {
     /** @use HasFactory<\Modules\Load\Tests\Factories\LoadFactory> */

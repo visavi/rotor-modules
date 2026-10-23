@@ -27,11 +27,7 @@ class CalculateRequest extends FormRequest
             $advert = PaidAdvert::query()
                 ->own()
                 ->whereNotIn('place', PaidAdvert::CARD_PLACES)
-                ->find((int) $this->input('renew_id'));
-
-            if (! $advert) {
-                abort(404, __('payment::payments.paid_adverts.not_found'));
-            }
+                ->findOrFail((int) $this->input('renew_id'));
 
             $this->renewed = $advert;
         }

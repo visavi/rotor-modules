@@ -265,11 +265,7 @@ class ArticleController extends AdminController
      */
     private function findCategory(int $id): Blog
     {
-        $category = Blog::query()->with('children')->find($id);
-
-        if (! $category) {
-            abort(404, __('blog::blogs.category_not_exist'));
-        }
+        $category = Blog::query()->with('children')->findOrFail($id);
 
         return $category;
     }
@@ -279,11 +275,7 @@ class ArticleController extends AdminController
      */
     private function findArticle(int $id): Article
     {
-        $article = Article::query()->find($id);
-
-        if (! $article) {
-            abort(404, __('blog::blogs.article_not_exist'));
-        }
+        $article = Article::query()->findOrFail($id);
 
         return $article;
     }

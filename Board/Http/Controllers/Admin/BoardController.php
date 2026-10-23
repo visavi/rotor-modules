@@ -26,11 +26,7 @@ class BoardController extends AdminController
         $board = null;
 
         if ($id) {
-            $board = Board::query()->find($id);
-
-            if (! $board) {
-                abort(404, __('board::boards.category_not_exist'));
-            }
+            $board = Board::query()->findOrFail($id);
         }
 
         $sort = $request->input('sort', 'date');
@@ -204,11 +200,7 @@ class BoardController extends AdminController
      */
     private function findCategory(int $id): Board
     {
-        $board = Board::query()->with('children')->find($id);
-
-        if (! $board) {
-            abort(404, __('board::boards.category_not_exist'));
-        }
+        $board = Board::query()->with('children')->findOrFail($id);
 
         return $board;
     }
@@ -218,11 +210,7 @@ class BoardController extends AdminController
      */
     private function findItem(int $id): Item
     {
-        $item = Item::query()->find($id);
-
-        if (! $item) {
-            abort(404, __('board::boards.item_not_exist'));
-        }
+        $item = Item::query()->findOrFail($id);
 
         return $item;
     }

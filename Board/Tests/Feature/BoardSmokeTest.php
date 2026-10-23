@@ -126,7 +126,7 @@ class BoardSmokeTest extends ModuleTestCase
         $item = $this->createItem('');
 
         $this->postJson(route('items.phone', ['id' => $item->id]))
-            ->assertOk()
+            ->assertNotFound()
             ->assertJson(['success' => false]);
     }
 

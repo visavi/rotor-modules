@@ -366,4 +366,13 @@ class ForumSmokeTest extends ModuleTestCase
             $this->get(route($route) . '?user[]=1')->assertOk()->assertSee($this->user->getName());
         }
     }
+
+    public function testRssWithSeveralTopics(): void
+    {
+        // Несколько тем: на одной защита от ленивой загрузки не включается
+        $this->createTopicWithPosts(2);
+        $this->createTopicWithPosts(2);
+
+        $this->get(route('forums.rss'))->assertOk();
+    }
 }

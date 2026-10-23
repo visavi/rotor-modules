@@ -150,11 +150,7 @@ class OfferController extends Controller
      */
     private function findOffer(int $id): Offer
     {
-        $offer = Offer::query()->find($id);
-
-        if (! $offer) {
-            abort(404, __('main.record_not_found'));
-        }
+        $offer = Offer::query()->findOrFail($id);
 
         return $offer;
     }

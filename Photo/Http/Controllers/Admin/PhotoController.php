@@ -57,7 +57,7 @@ class PhotoController extends AdminController
     public function delete(int $id, Request $request): RedirectResponse
     {
         if (! is_writable(public_path('uploads/photos'))) {
-            abort(200, __('main.directory_not_writable'));
+            abort(500, __('main.directory_not_writable'));
         }
 
         $page = int($request->input('page', 1));
@@ -87,11 +87,7 @@ class PhotoController extends AdminController
      */
     private function findPhoto(int $id): Photo
     {
-        $photo = Photo::query()->find($id);
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_exist'));
-        }
+        $photo = Photo::query()->findOrFail($id);
 
         return $photo;
     }

@@ -73,11 +73,7 @@ class RatingController extends Controller
      */
     public function received(string $login): View
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $ratings = Rating::query()
             ->where('recipient_id', $user->id)
@@ -93,11 +89,7 @@ class RatingController extends Controller
      */
     public function gave(string $login): View
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $ratings = Rating::query()
             ->where('user_id', $user->id)
@@ -117,14 +109,14 @@ class RatingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('validator.not_ajax'),
-            ]);
+            ], 400);
         }
 
         if (! isAdmin(User::ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => __('main.page_only_admins'),
-            ]);
+            ], 403);
         }
 
         $id = int($request->input('id'));
@@ -133,7 +125,7 @@ class RatingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => __('validator.deletion'),
-            ]);
+            ], 422);
         }
 
         Rating::query()->find($id)?->delete();
@@ -149,18 +141,14 @@ class RatingController extends Controller
      */
     private function recipient(string $login): User
     {
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         if ($this->user->id === $user->id) {
-            abort(200, __('rating::ratings.reputation_yourself'));
+            abort(403, __('rating::ratings.reputation_yourself'));
         }
 
         if ($this->user->point < setting('editratingpoint')) {
-            abort(200, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
+            abort(403, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
         }
 
         // Голосовать за того же пользователя можно через 90 дней
@@ -171,7 +159,7 @@ class RatingController extends Controller
             ->exists();
 
         if ($voted) {
-            abort(200, __('rating::ratings.reputation_already_changed'));
+            abort(403, __('rating::ratings.reputation_already_changed'));
         }
 
         return $user;

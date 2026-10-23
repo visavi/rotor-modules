@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Gift\Models;
 
+use App\Attributes\NotFoundMessage;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int             $price
  * @property CarbonImmutable $created_at
  */
+#[NotFoundMessage('gift::gifts.gift_not_found')]
 class Gift extends Model
 {
     /** @use HasFactory<\Modules\Gift\Tests\Factories\GiftFactory> */

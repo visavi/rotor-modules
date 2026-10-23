@@ -26,7 +26,7 @@ class SurpriseController extends Controller
 
         // Подарок открыт по третье января включительно, дальше сезон закрыт
         if (now()->gt(now()->setDate((int) $year, 1, 3)->endOfDay())) {
-            abort(200, __('surprise::surprise.date_receipt'));
+            abort(403, __('surprise::surprise.date_receipt'));
         }
 
         $existSurprise = Surprise::query()
@@ -35,7 +35,7 @@ class SurpriseController extends Controller
             ->first();
 
         if ($existSurprise) {
-            abort(200, __('surprise::surprise.already_received'));
+            abort(403, __('surprise::surprise.already_received'));
         }
 
         if ($user->point >= 50) {

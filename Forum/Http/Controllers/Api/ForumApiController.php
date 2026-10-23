@@ -44,10 +44,7 @@ class ForumApiController extends Controller
             ->orderBy('sort')
             ->get();
 
-        if ($forums->isEmpty()) {
-            abort(200, __('forum::forums.empty_forums'));
-        }
-
+        // Пустой форум — пустой список, как у остальных ресурсов API
         return ForumResource::collection($forums);
     }
 
@@ -56,11 +53,7 @@ class ForumApiController extends Controller
      */
     public function forums(int $id, Request $request): JsonResource
     {
-        $forum = Forum::query()->find($id);
-
-        if (! $forum) {
-            abort(404, __('forum::forums.forum_not_exist'));
-        }
+        $forum = Forum::query()->findOrFail($id);
 
         $topics = Topic::query()
             ->where('forum_id', $id)
@@ -140,11 +133,7 @@ class ForumApiController extends Controller
         // Раздел нужен клиенту для хлебных крошек, lastTopic — для полей ForumResource
         $topic = Topic::query()
             ->with('forum.parent', 'forum.lastTopic.lastPost.user')
-            ->find($id);
-
-        if (! $topic) {
-            abort(404, __('forum::forums.topic_not_exist'));
-        }
+            ->findOrFail($id);
 
         $posts = Post::query()
             ->withUserVote()

@@ -120,8 +120,12 @@ class MailNotifyTest extends ModuleTestCase
     public function testUnsubscribeWithUnknownKeyIsRejected(): void
     {
         $this->get('/unsubscribe?key=nonexistent')
-            ->assertOk()
+            ->assertNotFound()
             ->assertSee(__('mail_notify::mail_notify.token_expired'));
+
+        $this->get('/unsubscribe?key[]=x')
+            ->assertNotFound()
+            ->assertSee(__('mail_notify::mail_notify.token_missing'));
     }
 
     public function testSettingsShowSubscription(): void

@@ -21,11 +21,7 @@ class AdminAdvertRequest extends FormRequest
         if (! $this->advert) {
             $advert = PaidAdvert::query()
                 ->whereIn('place', PaidAdvert::PLACES)
-                ->find((int) $this->route('id'));
-
-            if (! $advert) {
-                abort(404, __('payment::payments.paid_adverts.not_found'));
-            }
+                ->findOrFail((int) $this->route('id'));
 
             $this->advert = $advert;
         }

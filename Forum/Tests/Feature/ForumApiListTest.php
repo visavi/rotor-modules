@@ -239,4 +239,12 @@ class ForumApiListTest extends ModuleTestCase
             'brow'     => 'test',
         ]);
     }
+
+    public function testEmptyForumIsEmptyList(): void
+    {
+        // Без разделов — пустой data, а не 200 с одним сообщением
+        Forum::query()->delete();
+
+        $this->getJson('/api/forums')->assertOk()->assertExactJson(['data' => []]);
+    }
 }

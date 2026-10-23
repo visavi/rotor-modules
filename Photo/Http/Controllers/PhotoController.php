@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\File;
 use App\Models\Flood;
+use App\Models\User;
 use App\Services\FileService;
 use App\Traits\HandlesComments;
 use Illuminate\Http\RedirectResponse;
@@ -55,11 +56,7 @@ class PhotoController extends Controller
             ->withUserVote()
             ->where('photos.id', $id)
             ->with('user')
-            ->first();
-
-        if (! $photo) {
-            abort(404, __('photo::photos.photo_not_exist'));
-        }
+            ->firstOrFail();
 
         ['comments' => $comments, 'files' => $files] = $this->getCommentsData($photo);
 
@@ -164,11 +161,7 @@ class PhotoController extends Controller
     public function album(Request $request): View
     {
         $login = $request->input('user', auth()->user()?->login);
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $photos = Photo::query()
             ->where('user_id', $user->id)
@@ -205,11 +198,7 @@ class PhotoController extends Controller
     public function userComments(Request $request): View
     {
         $login = $request->input('user', auth()->user()?->login);
-        $user = getUserByLogin($login);
-
-        if (! $user) {
-            abort(404, __('validator.user'));
-        }
+        $user = User::findByLoginOrFail($login);
 
         $comments = Comment::query()
             ->select('comments.*', 'title')
@@ -244,7 +233,7 @@ class PhotoController extends Controller
     private function checkCreationOpen(): void
     {
         if (! isAdmin() && ! setting('photos_create')) {
-            abort(200, __('photo::photos.photos_closed'));
+            abort(403, __('photo::photos.photos_closed'));
         }
     }
 }

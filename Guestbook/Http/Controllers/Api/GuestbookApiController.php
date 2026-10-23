@@ -92,11 +92,7 @@ class GuestbookApiController extends Controller
     {
         $post = Guestbook::query()
             ->where('user_id', auth()->id())
-            ->find($id);
-
-        if (! $post) {
-            abort(404, __('main.message_not_found'));
-        }
+            ->findOrFail($id);
 
         // Правка открыта первые десять минут, как и на сайте
         if ($post->created_at->lt(now()->subMinutes(10))) {
