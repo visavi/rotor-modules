@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,29 +37,12 @@ class BaccaratController extends Controller
     private const NATURAL = 8;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Баккара
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
         return view('game::baccarat/index', [
-            'user' => $this->user,
+            'user' => $user,
             'bets' => self::BETS,
             // Незаконченная партия ждёт решения игрока, доигранная приходит флешем
             'game' => $this->current($request),
@@ -68,10 +52,10 @@ class BaccaratController extends Controller
     /**
      * Раздача
      */
-    public function deal(Request $request): RedirectResponse|JsonResponse
+    public function deal(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $request->validate([
-            'bet'  => $this->betRules(),
+            'bet'  => $this->betRules($user),
             'type' => ['required', Rule::in(array_keys(self::BETS))],
         ], $this->betMessages() + [
             'type.*' => __('game::games.baccarat_bet_invalid'),
@@ -80,9 +64,9 @@ class BaccaratController extends Controller
         $bet = $request->integer('bet');
         $type = $request->string('type')->value();
 
-        $before = $this->user->money;
+        $before = $user->money;
 
-        if (! $this->user->chargeMoney($bet)) {
+        if (! $user->chargeMoney($bet)) {
             throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
@@ -97,10 +81,10 @@ class BaccaratController extends Controller
         if ($this->needsDecision($player, $banker)) {
             $request->session()->put('baccarat', $game);
 
-            return $this->back($request, url('games/baccarat'), $game + ['player_total' => $this->total($player)]);
+            return $this->back($user, $request, url('games/baccarat'), $game + ['player_total' => $this->total($player)]);
         }
 
-        return $this->finish($request, $game, $this->total($player) <= 5);
+        return $this->finish($user, $request, $game, $this->total($player) <= 5);
     }
 
     /**
@@ -120,16 +104,16 @@ class BaccaratController extends Controller
     /**
      * Решение игрока на пяти очках: взять третью карту или остановиться
      */
-    public function decide(Request $request): RedirectResponse|JsonResponse
+    public function decide(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $game = $request->session()->get('baccarat');
 
         if (! $game || ! $this->needsDecision($game['player'], $game['banker'])) {
-            return $this->back($request, url('games/baccarat'));
+            return $this->back($user, $request, url('games/baccarat'));
         }
 
         // Карты, которые игрок уже видел, вьюха не анимирует заново
-        return $this->finish($request, $game, $request->input('draw') === '1', [
+        return $this->finish($user, $request, $game, $request->input('draw') === '1', [
             'player' => count($game['player']),
             'banker' => count($game['banker']),
         ]);
@@ -147,19 +131,19 @@ class BaccaratController extends Controller
     /**
      * Дораздает партию и рассчитывает ставку
      */
-    private function finish(Request $request, array $game, bool $playerDraws, ?array $shown = null): RedirectResponse|JsonResponse
+    private function finish(User $user, Request $request, array $game, bool $playerDraws, ?array $shown = null): RedirectResponse|JsonResponse
     {
         $hands = $this->play($game['deck'], $game['player'], $game['banker'], $playerDraws);
         $result = $this->result($hands['player_total'], $hands['banker_total']);
         $win = $this->payout($game['type'], $result, $game['bet']);
 
         if ($win) {
-            $this->user->increment('money', $win);
+            $user->increment('money', $win);
         }
 
         $request->session()->forget('baccarat');
 
-        return $this->back($request, url('games/baccarat'), $hands + [
+        return $this->back($user, $request, url('games/baccarat'), $hands + [
             'shown'  => $shown ?? ['player' => 0, 'banker' => 0],
             'before' => $game['before'],
             'bet'    => $game['bet'],
@@ -172,13 +156,13 @@ class BaccaratController extends Controller
     /**
      * Возврат на страницу игры: ajax получает готовый стол, обычный запрос — редирект
      */
-    private function back(Request $request, string $url, ?array $game = null): RedirectResponse|JsonResponse
+    private function back(User $user, Request $request, string $url, ?array $game = null): RedirectResponse|JsonResponse
     {
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'html'    => view('game::baccarat/_table', [
-                    'user' => $this->user,
+                    'user' => $user,
                     'game' => $game,
                 ])->render(),
             ]);

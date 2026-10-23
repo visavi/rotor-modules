@@ -3,6 +3,7 @@
 namespace Modules\AdminChat\Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Modules\AdminChat\Models\Chat;
 use Tests\ModuleTestCase;
 
@@ -137,9 +138,12 @@ class AdminChatSmokeTest extends ModuleTestCase
         $this->assertDatabaseCount('chats', 1);
 
         $boss = User::factory()->create(['level' => User::BOSS]);
+        Cache::put('statChat', 1, 3600);
 
         $this->actingAs($boss)->post('/admin/chats/clear')->assertRedirect();
         $this->assertDatabaseCount('chats', 0);
+        // Массовое удаление событий не вызывает: счётчик в меню сбрасывается вручную
+        $this->assertFalse(Cache::has('statChat'));
     }
 
     private function message(array $attributes = []): Chat

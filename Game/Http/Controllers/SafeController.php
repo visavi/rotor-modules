@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,34 +34,17 @@ class SafeController extends Controller
     public const MOVED = '*';
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Взлом сейфа
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
-        return view('game::safe/index', $this->data($request));
+        return view('game::safe/index', $this->data($user, $request));
     }
 
     /**
      * Попытка взлома
      */
-    public function go(Request $request): View|RedirectResponse|JsonResponse
+    public function go(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $codes = $this->codes($request);
         $fresh = $request->session()->missing('safe.cipher');
@@ -69,10 +53,10 @@ class SafeController extends Controller
             throw ValidationException::withMessages(['code' => __('game::games.safe_code_invalid')]);
         }
 
-        $before = $this->user->money;
+        $before = $user->money;
 
         // Новая партия оплачивается до начала: без денег она не должна начаться
-        if ($fresh && ! $this->user->chargeMoney(self::PRICE)) {
+        if ($fresh && ! $user->chargeMoney(self::PRICE)) {
             throw ValidationException::withMessages(['code' => __('game::games.not_enough_money')]);
         }
 
@@ -94,7 +78,7 @@ class SafeController extends Controller
         $opened = $codes === $cipher;
 
         if ($opened) {
-            $this->user->increment('money', self::PRIZE);
+            $user->increment('money', self::PRIZE);
         }
 
         // Партия заканчивается вскрытием или последней попыткой
@@ -113,7 +97,7 @@ class SafeController extends Controller
             'result'  => $opened ? 'opened' : ($safe['try'] < 1 ? 'failed' : null),
         ];
 
-        $data = $this->data($request, $game);
+        $data = $this->data($user, $request, $game);
 
         // Попытка уходит ajax-ом: страница не перезагружается, анимация не рвётся
         if ($request->ajax()) {
@@ -129,13 +113,13 @@ class SafeController extends Controller
     /**
      * Данные для шаблона
      */
-    private function data(Request $request, ?array $game = null): array
+    private function data(User $user, Request $request, ?array $game = null): array
     {
         $safe = $request->session()->get('safe');
 
         // Шифр незаконченной партии в шаблон не уходит: подсмотреть его нельзя
         $game ??= $safe ? [
-            'before'  => $this->user->money,
+            'before'  => $user->money,
             'cipher'  => null,
             'try'     => $safe['try'],
             'history' => $safe['history'],
@@ -144,7 +128,7 @@ class SafeController extends Controller
         ] : null;
 
         return [
-            'user'  => $this->user,
+            'user'  => $user,
             'game'  => $game,
             'price' => self::PRICE,
             'prize' => self::PRIZE,

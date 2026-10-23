@@ -6,6 +6,7 @@ namespace Modules\Rating\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,28 +16,12 @@ use Modules\Rating\Models\Rating;
 
 class RatingController extends Controller
 {
-    public User $user;
-
-    /**
-     * Конструктор
-     */
-    public function __construct()
-    {
-        $this->middleware('check.user');
-
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
     /**
      * Изменение рейтинга
      */
-    public function index(string $login, Request $request): View
+    public function index(string $login, Request $request, #[CurrentUser] User $me): View
     {
-        $user = $this->recipient($login);
+        $user = $this->recipient($me, $login);
         $vote = $request->input('vote');
 
         return view('rating::index', compact('user', 'vote'));
@@ -45,14 +30,14 @@ class RatingController extends Controller
     /**
      * Сохранение голоса
      */
-    public function store(string $login, RatingRequest $request): RedirectResponse
+    public function store(string $login, RatingRequest $request, #[CurrentUser] User $me): RedirectResponse
     {
-        $user = $this->recipient($login);
+        $user = $this->recipient($me, $login);
         $vote = $request->input('vote');
         $text = $request->string('text')->value();
 
         Rating::query()->create([
-            'user_id'      => $this->user->id,
+            'user_id'      => $me->id,
             'recipient_id' => $user->id,
             'text'         => $text,
             'vote'         => $vote === 'plus' ? '+' : '-',
@@ -61,7 +46,7 @@ class RatingController extends Controller
         $user->increment($vote === 'plus' ? 'posrating' : 'negrating');
         $user->update(['rating' => $user->posrating - $user->negrating]);
 
-        $message = textNotice('rating', ['login' => $this->user->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
+        $message = textNotice('rating', ['login' => $me->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
         $user->sendMessage(null, $message);
 
         return redirect('users/' . $user->login)
@@ -139,21 +124,21 @@ class RatingController extends Controller
     /**
      * Пользователь, за которого голосуют, если голос сейчас возможен
      */
-    private function recipient(string $login): User
+    private function recipient(User $me, string $login): User
     {
         $user = User::findByLoginOrFail($login);
 
-        if ($this->user->id === $user->id) {
+        if ($me->id === $user->id) {
             abort(403, __('rating::ratings.reputation_yourself'));
         }
 
-        if ($this->user->point < setting('editratingpoint')) {
+        if ($me->point < setting('editratingpoint')) {
             abort(403, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
         }
 
         // Голосовать за того же пользователя можно через 90 дней
         $voted = Rating::query()
-            ->where('user_id', $this->user->id)
+            ->where('user_id', $me->id)
             ->where('recipient_id', $user->id)
             ->where('created_at', '>', now()->subMonths(3))
             ->exists();

@@ -37,8 +37,6 @@ class AdminAdvertController extends AdminController
             'deleted_at' => now()->addDays((int) setting('rekadmintime')),
         ]);
 
-        clearCache('adminAdverts');
-
         return redirect('admin/admin-adverts')->with('success', __('main.record_saved_success'));
     }
 

@@ -15,31 +15,11 @@ use Modules\Forum\Models\Topic;
 class ActiveController extends Controller
 {
     /**
-     * Текущий пользователь
-     */
-    public User $user;
-
-    /**
-     * Конструктор
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $login = $request->input('user');
-            $user = User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
-
-            $this->user = $user;
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Вывод тем
      */
     public function topics(Request $request): View
     {
-        $user = $this->user;
+        $user = $this->owner($request);
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
@@ -63,7 +43,7 @@ class ActiveController extends Controller
      */
     public function posts(Request $request): View
     {
-        $user = $this->user;
+        $user = $this->owner($request);
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
@@ -112,5 +92,15 @@ class ActiveController extends Controller
             'success' => true,
             'message' => __('main.record_deleted_success'),
         ]);
+    }
+
+    /**
+     * Владелец страницы: из ?user= или сам вошедший; массив в адресе — свои страницы
+     */
+    private function owner(Request $request): User
+    {
+        $login = $request->input('user');
+
+        return User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
     }
 }

@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,29 +95,12 @@ class BanditController extends Controller
     ];
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Бандит
      */
-    public function index(): View
+    public function index(#[CurrentUser] User $user): View
     {
         return view('game::bandit/index', [
-            'user' => $this->user,
+            'user' => $user,
             'spin' => null,
         ]);
     }
@@ -124,11 +108,11 @@ class BanditController extends Controller
     /**
      * Вращение
      */
-    public function spin(Request $request): View|RedirectResponse|JsonResponse
+    public function spin(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
-        $before = $this->user->money;
+        $before = $user->money;
 
-        if (! $this->user->chargeMoney(self::BET)) {
+        if (! $user->chargeMoney(self::BET)) {
             abort(403, __('game::games.cannot_play'));
         }
 
@@ -136,7 +120,7 @@ class BanditController extends Controller
         [$results, $sum] = $this->score($cells);
 
         if ($sum > 0) {
-            $this->user->increment('money', $sum);
+            $user->increment('money', $sum);
         }
 
         $spin = [
@@ -146,7 +130,7 @@ class BanditController extends Controller
             'sum'     => $sum,
         ];
 
-        $data = ['user' => $this->user, 'spin' => $spin];
+        $data = ['user' => $user, 'spin' => $spin];
 
         // Вращение приходит ajax-ом: отдаём только автомат, чтобы страница не перезагружалась
         if ($request->ajax()) {

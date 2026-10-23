@@ -5,7 +5,7 @@ use Modules\Notebook\Http\Controllers\Api\NotebookApiController;
 use Modules\Notebook\Http\Controllers\NotebookController;
 
 /* Блокнот */
-Route::middleware('web')
+Route::middleware(['web', 'check.user'])
     ->controller(NotebookController::class)
     ->prefix('notebooks')
     ->name('notebooks.')

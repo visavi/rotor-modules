@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,34 +37,17 @@ class ThimbleController extends Controller
     public const WIN_CHANCE = 475;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Напёрстки
      */
-    public function index(): View
+    public function index(#[CurrentUser] User $user): View
     {
-        return view('game::thimbles/index', $this->data());
+        return view('game::thimbles/index', $this->data($user));
     }
 
     /**
      * Игра в напёрстки
      */
-    public function go(Request $request): View|RedirectResponse|JsonResponse
+    public function go(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $request->validate([
             'thimble' => ['required', 'integer', 'between:1,' . self::THIMBLES],
@@ -73,9 +57,9 @@ class ThimbleController extends Controller
 
         $thimble = $request->integer('thimble');
 
-        $before = $this->user->money;
+        $before = $user->money;
 
-        if (! $this->user->chargeMoney(self::BET)) {
+        if (! $user->chargeMoney(self::BET)) {
             throw ValidationException::withMessages(['thimble' => __('game::games.not_enough_money')]);
         }
 
@@ -83,7 +67,7 @@ class ThimbleController extends Controller
         $won = $thimble === $ball;
 
         if ($won) {
-            $this->user->increment('money', self::WIN);
+            $user->increment('money', self::WIN);
         }
 
         $game = [
@@ -93,7 +77,7 @@ class ThimbleController extends Controller
             'result'  => $won ? 'won' : 'lost',
         ];
 
-        $data = $this->data($game);
+        $data = $this->data($user, $game);
 
         // Ход уходит ajax-ом: страница не перезагружается, анимация не рвётся
         if ($request->ajax()) {
@@ -128,10 +112,10 @@ class ThimbleController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function data(?array $game = null): array
+    private function data(User $user, ?array $game = null): array
     {
         return [
-            'user' => $this->user,
+            'user' => $user,
             'game' => $game,
             'bet'  => self::BET,
             'win'  => self::WIN,

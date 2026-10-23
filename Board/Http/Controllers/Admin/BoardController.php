@@ -162,8 +162,6 @@ class BoardController extends AdminController
         $item->moveTo($request->category());
         $item->update($request->itemFields());
 
-        clearCache(['statBoards', 'recentBoards']);
-
         return redirect()->route('admin.items.edit', ['id' => $item->id])
             ->with('success', __('board::boards.item_success_edited'));
     }
@@ -176,8 +174,6 @@ class BoardController extends AdminController
         $item = $this->findItem($id);
 
         $item->delete();
-
-        clearCache(['statBoards', 'recentBoards']);
 
         return redirect()->route('admin.boards.index', ['id' => $item->board_id])
             ->with('success', __('board::boards.item_success_deleted'));

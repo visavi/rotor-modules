@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,28 +58,11 @@ class KenoController extends Controller
     ];
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Кено
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
-        return view('game::keno/index', $this->data($request->session()->get('keno')));
+        return view('game::keno/index', $this->data($user, $request->session()->get('keno')));
     }
 
     /**
@@ -86,10 +70,10 @@ class KenoController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function data(?array $game): array
+    private function data(User $user, ?array $game): array
     {
         return [
-            'user'   => $this->user,
+            'user'   => $user,
             'game'   => $game,
             'limits' => $this->limits(),
         ];
@@ -123,11 +107,11 @@ class KenoController extends Controller
     /**
      * Тираж
      */
-    public function play(Request $request): View|RedirectResponse|JsonResponse
+    public function play(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $picks = $this->picks($request);
 
-        $validator = Validator::make($request->all(), ['bet' => $this->betRules()], $this->betMessages());
+        $validator = Validator::make($request->all(), ['bet' => $this->betRules($user)], $this->betMessages());
 
         $validator->after(static function ($validator) use ($picks) {
             if (count($picks) !== self::PICKS) {
@@ -139,17 +123,17 @@ class KenoController extends Controller
 
         $bet = $request->integer('bet');
 
-        $before = $this->user->money;
+        $before = $user->money;
         $drawn = $this->draw();
         $matched = array_values(array_intersect($picks, $drawn));
         $win = $this->payout($bet, count($matched));
 
-        if (! $this->user->chargeMoney($bet)) {
+        if (! $user->chargeMoney($bet)) {
             throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
         if ($win) {
-            $this->user->increment('money', $win);
+            $user->increment('money', $win);
         }
 
         $game = [
@@ -165,7 +149,7 @@ class KenoController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'html'    => view('game::keno/_board', $this->data($game))->render(),
+                'html'    => view('game::keno/_board', $this->data($user, $game))->render(),
             ]);
         }
 

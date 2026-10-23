@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\AdminChat\Models;
 
+use App\Attributes\ClearsCache;
 use App\Casts\HtmlCast;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -24,6 +25,7 @@ use Illuminate\Support\HtmlString;
  * @property int                  $edit_user_id
  * @property CarbonImmutable|null $updated_at
  */
+#[ClearsCache('statChat')]
 class Chat extends Model
 {
     /** @use HasFactory<\Modules\AdminChat\Tests\Factories\ChatFactory> */

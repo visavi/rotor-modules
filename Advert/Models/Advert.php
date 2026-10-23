@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Advert\Models;
 
+use App\Attributes\ClearsCache;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Cache;
  * @property CarbonImmutable $created_at
  * @property CarbonImmutable $deleted_at
  */
+#[ClearsCache('adverts', 'adminAdverts')]
 class Advert extends Model
 {
     /** @use HasFactory<\Modules\Advert\Tests\Factories\AdvertFactory> */

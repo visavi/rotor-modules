@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -24,44 +25,27 @@ class BlackjackController extends Controller
     private const BANKER_STANDS = 17;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Очко
      */
-    public function index(): View
+    public function index(#[CurrentUser] User $user): View
     {
-        return view('game::blackjack/index', ['user' => $this->user]);
+        return view('game::blackjack/index', ['user' => $user]);
     }
 
     /**
      * Ставка
      */
-    public function bet(Request $request): RedirectResponse|JsonResponse
+    public function bet(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         if ($request->session()->has('blackjack.bet')) {
             return redirect('games/blackjack/game');
         }
 
-        $request->validate(['bet' => $this->betRules()], $this->betMessages());
+        $request->validate(['bet' => $this->betRules($user)], $this->betMessages());
 
         $bet = $request->integer('bet');
 
-        if (! $this->user->chargeMoney($bet)) {
+        if (! $user->chargeMoney($bet)) {
             throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
@@ -74,9 +58,9 @@ class BlackjackController extends Controller
     /**
      * Игра
      */
-    public function game(Request $request): View|RedirectResponse|JsonResponse
+    public function game(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
-        return $this->play($request, null);
+        return $this->play($user, $request, null);
     }
 
     /**
@@ -85,12 +69,12 @@ class BlackjackController extends Controller
      * Ход меняет состояние партии, поэтому приходит только методом post:
      * по ссылке его мог бы сделать чужой сайт или ускоритель браузера
      */
-    public function move(Request $request): View|RedirectResponse|JsonResponse
+    public function move(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $input = $request->input('case');
         $case = in_array($input, ['take', 'end'], true) ? $input : null;
 
-        return $this->play($request, $case);
+        return $this->play($user, $request, $case);
     }
 
     /**
@@ -104,7 +88,7 @@ class BlackjackController extends Controller
     /**
      * Раздача и расчёт партии
      */
-    private function play(Request $request, ?string $case): View|RedirectResponse|JsonResponse
+    private function play(User $user, Request $request, ?string $case): View|RedirectResponse|JsonResponse
     {
         if ($request->session()->missing('blackjack.bet')) {
             // Ajax сам уводит на страницу ставки, редирект в ответе он не поймёт
@@ -178,16 +162,16 @@ class BlackjackController extends Controller
         $amount = null;
 
         // Баланс до расчета: вьюха показывает его, пока карты не открыты
-        $before = $this->user->money;
+        $before = $user->money;
 
         if ($result !== null) {
             $amount = $blackjack['bet'];
 
             if ($result === 'victory') {
                 $amount = $this->payout($blackjack['bet'], $scores);
-                $this->user->increment('money', $amount);
+                $user->increment('money', $amount);
             } elseif ($result === 'draw') {
-                $this->user->increment('money', $amount);
+                $user->increment('money', $amount);
             }
 
             $request->session()->forget('blackjack');
@@ -197,8 +181,6 @@ class BlackjackController extends Controller
         if ($result !== null) {
             $shown['banker'] = 0;
         }
-
-        $user = $this->user;
 
         $data = compact('user', 'blackjack', 'scores', 'result', 'text', 'amount', 'shown', 'before');
 

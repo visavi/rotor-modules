@@ -100,8 +100,6 @@ class GuestbookController extends AdminController
 
         Guestbook::query()->whereIn('id', $del)->get()->each->delete();
 
-        clearCache('statGuestbook');
-
         return redirect()
             ->route('admin.guestbook.index', ['page' => $page])
             ->with('success', __('main.messages_deleted_success'));
@@ -123,8 +121,6 @@ class GuestbookController extends AdminController
 
         Guestbook::query()->whereIn('id', $active)->get()->each->update(['active' => true]);
 
-        clearCache('statGuestbook');
-
         return redirect()
             ->route('admin.guestbook.index', ['page' => $page])
             ->with('success', __('main.messages_published_success'));
@@ -137,8 +133,6 @@ class GuestbookController extends AdminController
     {
         // По одной: вместе с сообщением удаляются его файлы
         Guestbook::query()->with('files')->lazyById()->each->delete();
-
-        clearCache('statGuestbook');
 
         return redirect()
             ->route('admin.guestbook.index')

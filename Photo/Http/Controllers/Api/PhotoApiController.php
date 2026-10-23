@@ -72,7 +72,6 @@ class PhotoApiController extends Controller
         // Снимок можно приложить к запросу или загрузить заранее через POST /api/files
         $files->attach($photo, $request->file('files', []));
 
-        clearCache(['statPhotos', 'recentPhotos']);
         $flood->saveState();
 
         $photo->load('user', 'files');
@@ -113,8 +112,6 @@ class PhotoApiController extends Controller
         }
 
         $photo->delete();
-
-        clearCache(['statPhotos', 'recentPhotos']);
 
         return response()->json(['message' => __('photo::photos.photo_success_deleted')]);
     }

@@ -14,32 +14,12 @@ use Modules\Load\Models\Down;
 class ActiveController extends Controller
 {
     /**
-     * Текущий пользователь
-     */
-    public User $user;
-
-    /**
-     * Конструктор
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $login = $request->input('user');
-            $user = User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
-
-            $this->user = $user;
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Мои файлы
      */
     public function files(Request $request): View
     {
         $active = (bool) $request->input('active', true);
-        $user = $this->user;
+        $user = $this->owner($request);
 
         if (auth()->check() && auth()->id() !== $user->id) {
             $active = true;
@@ -72,9 +52,9 @@ class ActiveController extends Controller
     /**
      * Мои комментарии
      */
-    public function comments(): View
+    public function comments(Request $request): View
     {
-        $user = $this->user;
+        $user = $this->owner($request);
 
         $comments = Comment::query()
             ->select('comments.*', 'title', 'count_comments')
@@ -87,5 +67,15 @@ class ActiveController extends Controller
             ->appends(['user' => $user->login]);
 
         return view('load::downs/active_comments', compact('comments', 'user'));
+    }
+
+    /**
+     * Владелец страницы: из ?user= или сам вошедший; массив в адресе — свои страницы
+     */
+    private function owner(Request $request): User
+    {
+        $login = $request->input('user');
+
+        return User::findByLoginOrFail(is_string($login) ? $login : auth()->user()?->login);
     }
 }

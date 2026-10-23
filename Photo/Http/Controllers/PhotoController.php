@@ -91,7 +91,6 @@ class PhotoController extends Controller
 
         $files->attach($photo, $request->file('files', []));
 
-        clearCache(['statPhotos', 'recentPhotos']);
         $flood->saveState();
 
         return redirect()->route('photos.view', ['id' => $photo->id])

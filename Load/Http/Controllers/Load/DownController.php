@@ -130,8 +130,6 @@ class DownController extends Controller
             'links'       => $request->links(),
         ]);
 
-        clearCache(['statLoads', 'recentDowns']);
-
         return redirect()->route('downs.view', ['id' => $down->id])
             ->with('success', __('load::loads.down_edited_success'));
     }

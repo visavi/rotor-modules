@@ -197,14 +197,15 @@ class LoadController extends AdminController
         if ($down->active && $down->category_id !== $oldCategory->id) {
             $request->category()->increment('count_downs');
             $oldCategory->decrement('count_downs');
+
+            // statLoads складывает count_downs разделов: событие модели сработало до счётчика
+            clearCache('statLoads');
         }
 
         if (! $down->active && $down->user->exists) {
             $text = textNotice('down_change', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
             $down->user->sendMessage(null, $text);
         }
-
-        clearCache(['statLoads', 'recentDowns']);
 
         return redirect()->route('admin.downs.edit', ['id' => $down->id])
             ->with('success', __('load::loads.down_edited_success'));
@@ -222,8 +223,6 @@ class LoadController extends AdminController
         }
 
         $down->delete();
-
-        clearCache(['statLoads', 'recentDowns']);
 
         return redirect()->route('admin.loads.load', ['id' => $down->category_id])
             ->with('success', __('load::loads.down_success_deleted'));
@@ -273,6 +272,9 @@ class LoadController extends AdminController
             $text = textNotice('down_unpublish', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
         }
 
+        // statLoads складывает count_downs разделов: событие модели сработало до счётчика
+        clearCache('statLoads');
+
         // Автора могли удалить: withDefault отдаёт пустую модель, и increment на ней
         // обновил бы всех пользователей. Снятие забирает награду, но не больше остатка
         if ($user->exists) {
@@ -286,8 +288,6 @@ class LoadController extends AdminController
 
             $user->sendMessage(null, $text);
         }
-
-        clearCache(['statLoads', 'recentDowns']);
 
         return redirect()->route('admin.downs.edit', ['id' => $down->id])
             ->with('success', $status);

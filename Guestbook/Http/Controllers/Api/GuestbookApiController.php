@@ -68,7 +68,6 @@ class GuestbookApiController extends Controller
             $files->attach($post, $request->file('files', []));
         }
 
-        clearCache('statGuestbook');
         $flood->saveState();
 
         sendNotify(

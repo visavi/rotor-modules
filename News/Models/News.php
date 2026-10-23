@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\News\Models;
 
+use App\Attributes\ClearsCache;
 use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Models\Comment;
@@ -43,6 +44,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Poll                     $poll
  */
 #[NotFoundMessage('news::news.news_not_exist')]
+#[ClearsCache('statNews', 'pinnedNews', 'statNewsDate')]
 class News extends Model
 {
     /** @use HasFactory<\Modules\News\Tests\Factories\NewsFactory> */

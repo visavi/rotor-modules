@@ -49,8 +49,6 @@ class AdvertController extends AdminController
 
         $link->update($request->advertFields());
 
-        clearCache('adverts');
-
         return redirect('admin/adverts?page=' . int($request->input('page', 1)))
             ->with('success', __('main.record_changed_success'));
     }

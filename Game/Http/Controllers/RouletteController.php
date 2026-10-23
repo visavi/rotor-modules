@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,28 +55,11 @@ class RouletteController extends Controller
     ];
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Рулетка
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
-        return view('game::roulette/index', $this->data($request->session()->get('roulette')));
+        return view('game::roulette/index', $this->data($user, $request->session()->get('roulette')));
     }
 
     /**
@@ -83,7 +67,7 @@ class RouletteController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function data(?array $spin): array
+    private function data(User $user, ?array $spin): array
     {
         $wheel = array_map(
             fn (int $number) => ['number' => $number, 'color' => $this->color($number)],
@@ -91,7 +75,7 @@ class RouletteController extends Controller
         );
 
         return [
-            'user'  => $this->user,
+            'user'  => $user,
             'bets'  => self::BETS,
             'wheel' => $wheel,
             'spin'  => $spin,
@@ -101,10 +85,10 @@ class RouletteController extends Controller
     /**
      * Спин
      */
-    public function spin(Request $request): View|RedirectResponse|JsonResponse
+    public function spin(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $request->validate([
-            'bet'    => $this->betRules(),
+            'bet'    => $this->betRules($user),
             'type'   => ['required', Rule::in(array_keys(self::BETS))],
             'number' => ['exclude_unless:type,number', 'required', 'integer', 'between:0,36'],
         ], $this->betMessages() + [
@@ -116,16 +100,16 @@ class RouletteController extends Controller
         $type = $request->string('type')->value();
         $guess = $request->integer('number');
 
-        $before = $this->user->money;
+        $before = $user->money;
         $number = random_int(0, 36);
         $win = $this->isWin($type, $number, $guess) ? $bet * self::BETS[$type] : 0;
 
-        if (! $this->user->chargeMoney($bet)) {
+        if (! $user->chargeMoney($bet)) {
             throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
         if ($win) {
-            $this->user->increment('money', $win);
+            $user->increment('money', $win);
         }
 
         $spin = [
@@ -142,7 +126,7 @@ class RouletteController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'html'    => view('game::roulette/_wheel', $this->data($spin))->render(),
+                'html'    => view('game::roulette/_wheel', $this->data($user, $spin))->render(),
             ]);
         }
 

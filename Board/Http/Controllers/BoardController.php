@@ -182,7 +182,6 @@ class BoardController extends Controller
 
         $files->attach($item, $request->file('files', []));
 
-        clearCache(['statBoards', 'recentBoards']);
         $flood->saveState();
 
         return redirect()->route('items.view', ['id' => $item->id])
@@ -218,8 +217,6 @@ class BoardController extends Controller
 
         $item->moveTo($request->category());
         $item->update($request->itemFields());
-
-        clearCache(['statBoards', 'recentBoards']);
 
         return redirect()->route('items.view', ['id' => $item->id])
             ->with('success', __('board::boards.item_success_edited'));
@@ -262,8 +259,6 @@ class BoardController extends Controller
         }
 
         $item->delete();
-
-        clearCache(['statBoards', 'recentBoards']);
 
         return redirect()->route('boards.index', ['id' => $item->board_id])
             ->with('success', __('board::boards.item_success_deleted'));

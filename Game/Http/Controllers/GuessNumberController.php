@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,34 +39,17 @@ class GuessNumberController extends Controller
     public const TRIES = 5;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Угадай число
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
-        return view('game::guess/index', $this->data($request));
+        return view('game::guess/index', $this->data($user, $request));
     }
 
     /**
      * Попытка
      */
-    public function go(Request $request): View|RedirectResponse|JsonResponse
+    public function go(Request $request, #[CurrentUser] User $user): View|RedirectResponse|JsonResponse
     {
         $request->validate([
             'guess' => ['required', 'integer', 'between:' . self::MIN . ',' . self::MAX],
@@ -75,10 +59,10 @@ class GuessNumberController extends Controller
 
         $number = $request->integer('guess');
 
-        $before = $this->user->money;
+        $before = $user->money;
 
         // Списание до новой партии: без денег она не должна начаться
-        if (! $this->user->chargeMoney(self::PRICE)) {
+        if (! $user->chargeMoney(self::PRICE)) {
             throw ValidationException::withMessages(['guess' => __('game::games.not_enough_money')]);
         }
 
@@ -105,7 +89,7 @@ class GuessNumberController extends Controller
         $prize = $won ? self::PRIZE : 0;
 
         if ($prize) {
-            $this->user->increment('money', $prize);
+            $user->increment('money', $prize);
         }
 
         // Партия заканчивается угадыванием или последней попыткой
@@ -124,7 +108,7 @@ class GuessNumberController extends Controller
             'result'  => $won ? 'won' : ($guess['try'] < 1 ? 'lost' : null),
         ];
 
-        $data = $this->data($request, $game);
+        $data = $this->data($user, $request, $game);
 
         // Попытка уходит ajax-ом: страница не перезагружается, анимация не рвётся
         if ($request->ajax()) {
@@ -140,14 +124,14 @@ class GuessNumberController extends Controller
     /**
      * Сброс незаконченной партии
      */
-    public function reset(Request $request): RedirectResponse|JsonResponse
+    public function reset(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $request->session()->forget('guess');
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'html'    => view('game::guess/_game', $this->data($request))->render(),
+                'html'    => view('game::guess/_game', $this->data($user, $request))->render(),
             ]);
         }
 
@@ -159,13 +143,13 @@ class GuessNumberController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function data(Request $request, ?array $game = null): array
+    private function data(User $user, Request $request, ?array $game = null): array
     {
         $guess = $request->session()->get('guess');
 
         // Загаданное число незаконченной партии в шаблон не уходит
         $game ??= $guess ? [
-            'before'  => $this->user->money,
+            'before'  => $user->money,
             'number'  => null,
             'try'     => $guess['try'],
             'history' => $guess['history'],
@@ -174,7 +158,7 @@ class GuessNumberController extends Controller
         ] : null;
 
         return [
-            'user'   => $this->user,
+            'user'   => $user,
             'game'   => $game,
             'price'  => self::PRICE,
             'reward' => self::PRIZE,

@@ -61,7 +61,6 @@ class ChatController extends AdminController
             ]);
         }
 
-        clearCache('statChat');
         sendNotify($msg, route('admin.chats.index', absolute: false), __('admin_chat::admin_chat.admin_chat', locale: setting('language')));
 
         return redirect('admin/chats')
@@ -101,7 +100,9 @@ class ChatController extends AdminController
      */
     public function clear(): RedirectResponse
     {
+        // Массовое удаление событий модели не вызывает
         Chat::query()->delete();
+        clearCache('statChat');
 
         return redirect()->route('admin.chats.index')
             ->with('success', __('admin_chat::admin_chat.success_cleared'));

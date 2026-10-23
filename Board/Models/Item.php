@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Board\Models;
 
+use App\Attributes\ClearsCache;
 use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\PlaceCast;
@@ -49,6 +50,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Collection<int, File> $files
  */
 #[NotFoundMessage('board::boards.item_not_exist')]
+#[ClearsCache('statBoards', 'recentBoards')]
 class Item extends Model
 {
     /** @use HasFactory<\Modules\Board\Tests\Factories\ItemFactory> */

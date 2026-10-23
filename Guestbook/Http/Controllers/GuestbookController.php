@@ -77,7 +77,6 @@ class GuestbookController extends Controller
             Cookie::queue('guest_name', $guestName, 525600);
         }
 
-        clearCache('statGuestbook');
         $flood->saveState();
 
         sendNotify($msg, route('guestbook.index', absolute: false), __('guestbook::guestbook.guestbook', locale: setting('language')));

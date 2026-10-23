@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Modules\Game\Http\Controllers\Concerns;
 
+use App\Models\User;
+
 /**
  * Ставки в играх: правила и сообщения проверки ставки
- *
- * Класс, который использует трейт, держит игрока в свойстве $user
  */
 trait HandlesBets
 {
     /**
      * Правила ставки: целое число от единицы до суммы на счёте
      */
-    protected function betRules(): array
+    protected function betRules(User $user): array
     {
-        return ['required', 'integer', 'min:1', 'max:' . $this->user->money];
+        return ['required', 'integer', 'min:1', 'max:' . $user->money];
     }
 
     /**

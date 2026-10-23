@@ -7,7 +7,7 @@ use Modules\Transfer\Http\Controllers\Api\TransferApiController;
 use Modules\Transfer\Http\Controllers\TransferController;
 
 /* Перевод денег */
-Route::middleware('web')
+Route::middleware(['web', 'check.user'])
     ->controller(TransferController::class)
     ->prefix('transfers')
     ->name('transfers.')

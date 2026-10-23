@@ -41,7 +41,9 @@ class DownService
 
         if ($down->active) {
             $down->category->increment('count_downs');
-            clearCache(['statLoads', 'recentDowns']);
+
+            // statLoads складывает count_downs разделов: событие модели сработало до счётчика
+            clearCache('statLoads');
 
             return $down;
         }

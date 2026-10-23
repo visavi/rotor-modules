@@ -99,7 +99,6 @@ class ItemApiController extends Controller
         // Медиа можно приложить к запросу или загрузить заранее — с relate_id = 0
         $files->attach($item, $request->file('files', []));
 
-        clearCache(['statBoards', 'recentBoards']);
         $flood->saveState();
 
         $item->load('user', 'category', 'files');
@@ -119,8 +118,6 @@ class ItemApiController extends Controller
 
         $item->moveTo($request->category());
         $item->update($request->itemFields());
-
-        clearCache(['statBoards', 'recentBoards']);
 
         $item->load('user', 'category', 'files');
 
@@ -159,8 +156,6 @@ class ItemApiController extends Controller
     public function destroy(int $id): JsonResponse
     {
         $this->findOwnItem($id)->delete();
-
-        clearCache(['statBoards', 'recentBoards']);
 
         return response()->json(['message' => __('board::boards.item_success_deleted')]);
     }

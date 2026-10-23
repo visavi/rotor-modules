@@ -54,8 +54,6 @@ class NewsController extends AdminController
             'pinned' => $request->boolean('pinned'),
         ]);
 
-        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
-
         return redirect()->route('news.view', ['id' => $news->id])
             ->with('success', __('news::news.news_success_edited'));
     }
@@ -89,8 +87,6 @@ class NewsController extends AdminController
         // Файлы загружаются в редактор до публикации
         $files->attach($news, []);
 
-        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
-
         return redirect()->route('news.view', ['id' => $news->id])
             ->with('success', __('news::news.news_success_added'));
     }
@@ -115,8 +111,6 @@ class NewsController extends AdminController
         $page = int($request->input('page', 1));
 
         $this->findNews($id)->delete();
-
-        clearCache(['statNews', 'pinnedNews', 'statNewsDate']);
 
         return redirect()->route('admin.news.index', ['page' => $page])
             ->with('success', __('news::news.news_success_deleted'));

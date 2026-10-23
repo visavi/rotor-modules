@@ -67,8 +67,6 @@ class AdvertController extends Controller
             ]);
         });
 
-        clearCache('adverts');
-
         return redirect('adverts')
             ->with('success', __('advert::adverts.advert_success_posted'));
     }

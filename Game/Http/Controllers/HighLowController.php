@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,28 +29,11 @@ class HighLowController extends Controller
     public const DECK = 52;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Больше-меньше
      */
-    public function index(Request $request): View
+    public function index(Request $request, #[CurrentUser] User $user): View
     {
-        return view('game::highlow/index', $this->data($request));
+        return view('game::highlow/index', $this->data($user, $request));
     }
 
     /**
@@ -63,19 +47,19 @@ class HighLowController extends Controller
     /**
      * Ставка
      */
-    public function bet(Request $request): RedirectResponse|JsonResponse
+    public function bet(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         if ($request->session()->has('highlow')) {
             return redirect('games/highlow');
         }
 
-        $request->validate(['bet' => $this->betRules()], $this->betMessages());
+        $request->validate(['bet' => $this->betRules($user)], $this->betMessages());
 
         $bet = $request->integer('bet');
 
-        $before = $this->user->money;
+        $before = $user->money;
 
-        if (! $this->user->chargeMoney($bet)) {
+        if (! $user->chargeMoney($bet)) {
             throw ValidationException::withMessages(['bet' => __('game::games.not_enough_money')]);
         }
 
@@ -97,13 +81,13 @@ class HighLowController extends Controller
     /**
      * Ход: ставка на старшую или младшую карту
      */
-    public function move(Request $request): RedirectResponse|JsonResponse
+    public function move(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $game = $request->session()->get('highlow');
         $guess = $request->input('guess');
 
         if (! $game || ! in_array($guess, ['higher', 'lower'], true)) {
-            return $this->back($request);
+            return $this->back($user, $request);
         }
 
         $current = $this->rank(end($game['cards']));
@@ -111,7 +95,7 @@ class HighLowController extends Controller
 
         // Ставку без шансов не принимаем: на тузе некуда идти выше
         if (! $chances[$guess]) {
-            return $this->back($request);
+            return $this->back($user, $request);
         }
 
         $game['shown'] = count($game['cards']);
@@ -125,7 +109,7 @@ class HighLowController extends Controller
             $game['draw'] = true;
             $request->session()->put('highlow', $game);
 
-            return $this->back($request);
+            return $this->back($user, $request);
         }
 
         $won = $guess === 'higher' ? $rank > $current : $rank < $current;
@@ -134,7 +118,7 @@ class HighLowController extends Controller
             $game['result'] = 'lost';
             $game['win'] = 0;
 
-            return $this->finish($request, $game);
+            return $this->finish($user, $request, $game);
         }
 
         unset($game['draw']);
@@ -142,65 +126,65 @@ class HighLowController extends Controller
 
         // Колода кончилась — забираем выигрыш, ходить больше нечем
         if (! $game['deck']) {
-            return $this->cashOut($request, $game);
+            return $this->cashOut($user, $request, $game);
         }
 
         $request->session()->put('highlow', $game);
 
-        return $this->back($request);
+        return $this->back($user, $request);
     }
 
     /**
      * Забрать выигрыш
      */
-    public function cash(Request $request): RedirectResponse|JsonResponse
+    public function cash(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $game = $request->session()->get('highlow');
 
         // Забирать нечего, пока не угадана хотя бы одна карта: иначе это
         // просто возврат ставки, названный выигрышем
         if (! $game || $game['multiplier'] <= 1.0) {
-            return $this->back($request);
+            return $this->back($user, $request);
         }
 
-        return $this->cashOut($request, $game);
+        return $this->cashOut($user, $request, $game);
     }
 
     /**
      * Начисляет выигрыш и заканчивает партию
      */
-    private function cashOut(Request $request, array $game): RedirectResponse|JsonResponse
+    private function cashOut(User $user, Request $request, array $game): RedirectResponse|JsonResponse
     {
         $win = (int) ($game['bet'] * $game['multiplier']);
 
-        $this->user->increment('money', $win);
+        $user->increment('money', $win);
 
         $game['result'] = 'victory';
         $game['win'] = $win;
 
-        return $this->finish($request, $game);
+        return $this->finish($user, $request, $game);
     }
 
     /**
      * Убирает партию из сессии и показывает итог
      */
-    private function finish(Request $request, array $game): RedirectResponse|JsonResponse
+    private function finish(User $user, Request $request, array $game): RedirectResponse|JsonResponse
     {
         $request->session()->forget('highlow');
         $request->session()->flash('highlow_result', $game);
 
-        return $this->back($request, $game);
+        return $this->back($user, $request, $game);
     }
 
     /**
      * Ответ на ход: ajax получает только стол, обычный переход — редирект
      */
-    private function back(Request $request, ?array $game = null): RedirectResponse|JsonResponse
+    private function back(User $user, Request $request, ?array $game = null): RedirectResponse|JsonResponse
     {
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'html'    => view('game::highlow/_table', $this->data($request, $game))->render(),
+                'html'    => view('game::highlow/_table', $this->data($user, $request, $game))->render(),
             ]);
         }
 
@@ -210,7 +194,7 @@ class HighLowController extends Controller
     /**
      * Данные стола
      */
-    private function data(Request $request, ?array $game = null): array
+    private function data(User $user, Request $request, ?array $game = null): array
     {
         $game ??= $request->session()->get('highlow') ?? $request->session()->get('highlow_result');
 
@@ -223,7 +207,7 @@ class HighLowController extends Controller
         }
 
         return [
-            'user'    => $this->user,
+            'user'    => $user,
             'game'    => $game,
             'chances' => $chances,
         ];

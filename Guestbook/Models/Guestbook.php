@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Guestbook\Models;
 
+use App\Attributes\ClearsCache;
 use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Models\File;
@@ -38,6 +39,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Collection<int, File> $files
  */
 #[NotFoundMessage('main.message_not_found')]
+#[ClearsCache('statGuestbook')]
 class Guestbook extends Model
 {
     /** @use HasFactory<\Modules\Guestbook\Tests\Factories\GuestbookFactory> */

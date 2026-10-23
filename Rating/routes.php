@@ -5,7 +5,7 @@ use Modules\Rating\Http\Controllers\Admin\RatingSettingController;
 use Modules\Rating\Http\Controllers\RatingController;
 
 /* Репутация пользователя */
-Route::middleware('web')
+Route::middleware(['web', 'check.user'])
     ->controller(RatingController::class)
     ->group(function () {
         Route::prefix('ratings')

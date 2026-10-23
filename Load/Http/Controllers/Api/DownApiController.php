@@ -118,8 +118,6 @@ class DownApiController extends Controller
             'links'       => $request->links(),
         ]);
 
-        clearCache(['statLoads', 'recentDowns']);
-
         $down->load('user', 'category', 'files');
 
         return response()->json([

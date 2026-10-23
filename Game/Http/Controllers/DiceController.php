@@ -6,6 +6,7 @@ namespace Modules\Game\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -34,29 +35,12 @@ class DiceController extends Controller
     public const FACES = 6;
 
     /**
-     * Текущий пользователь
-     */
-    private User $user;
-
-    /**
-     * Controller constructor.
-     */
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            $this->user = auth()->user() ?? abort(403);
-
-            return $next($request);
-        });
-    }
-
-    /**
      * Кости
      */
-    public function index(): View
+    public function index(#[CurrentUser] User $user): View
     {
         return view('game::dices/index', [
-            'user' => $this->user,
+            'user' => $user,
             'game' => null,
         ]);
     }
@@ -64,11 +48,11 @@ class DiceController extends Controller
     /**
      * Бросок
      */
-    public function roll(Request $request): View|JsonResponse
+    public function roll(Request $request, #[CurrentUser] User $user): View|JsonResponse
     {
-        $before = $this->user->money;
+        $before = $user->money;
 
-        if (! $this->user->chargeMoney(self::BET)) {
+        if (! $user->chargeMoney(self::BET)) {
             abort(403, __('game::games.cannot_play'));
         }
 
@@ -90,11 +74,11 @@ class DiceController extends Controller
 
         // Победа возвращает ставку с выигрышем, ничья — одну ставку
         if ($result === 'victory') {
-            $this->user->increment('money', self::WIN);
+            $user->increment('money', self::WIN);
         }
 
         if ($result === 'draw') {
-            $this->user->increment('money', self::BET);
+            $user->increment('money', self::BET);
         }
 
         $game = [
@@ -104,7 +88,7 @@ class DiceController extends Controller
             'result' => $result,
         ];
 
-        $data = ['user' => $this->user, 'game' => $game];
+        $data = ['user' => $user, 'game' => $game];
 
         // Бросок приходит ajax-ом: отдаём только стол, страница не перезагружается
         if ($request->ajax()) {

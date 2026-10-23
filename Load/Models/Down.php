@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Load\Models;
 
+use App\Attributes\ClearsCache;
 use App\Attributes\NotFoundMessage;
 use App\Casts\HtmlCast;
 use App\Casts\TextCast;
@@ -53,6 +54,7 @@ use Illuminate\Support\HtmlString;
  * @property-read Load                       $category
  */
 #[NotFoundMessage('load::loads.down_not_exist')]
+#[ClearsCache('statLoads', 'recentDowns')]
 class Down extends Model
 {
     /** @use HasFactory<\Modules\Load\Tests\Factories\DownFactory> */

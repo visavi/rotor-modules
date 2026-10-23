@@ -8,8 +8,7 @@ use Modules\Advert\Models\Advert;
 
 Registry::onDeleteUser(function (User $user): void {
     Advert::query()->where('user_id', $user->id)->delete();
-    clearCache('adverts');
-    clearCache('adminAdverts');
+    clearCache(['adverts', 'adminAdverts']);
 });
 
 Hook::add('advertTop', static function (): string {

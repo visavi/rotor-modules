@@ -31,7 +31,7 @@ return new class extends Migration {
             }
         }
 
-        clearCache(['stickers']);
+        clearCache('stickers_map');
     }
 
     /**
@@ -50,6 +50,6 @@ return new class extends Migration {
             }
         }
 
-        clearCache(['stickers']);
+        clearCache('stickers_map');
     }
 };

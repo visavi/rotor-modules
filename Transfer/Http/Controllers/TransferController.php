@@ -16,14 +16,6 @@ use Modules\Transfer\Services\TransferService;
 class TransferController extends Controller
 {
     /**
-     * Конструктор
-     */
-    public function __construct()
-    {
-        $this->middleware('check.user');
-    }
-
-    /**
      * Главная страница
      */
     public function index(Request $request): View

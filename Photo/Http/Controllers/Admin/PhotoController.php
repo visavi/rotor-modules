@@ -45,8 +45,6 @@ class PhotoController extends AdminController
     {
         $this->findPhoto($id)->update($request->photoFields());
 
-        clearCache(['statPhotos', 'recentPhotos']);
-
         return redirect()->route('admin.photos.index', ['page' => int($request->input('page', 1))])
             ->with('success', __('photo::photos.photo_success_edited'));
     }
@@ -63,8 +61,6 @@ class PhotoController extends AdminController
         $page = int($request->input('page', 1));
 
         $this->findPhoto($id)->delete();
-
-        clearCache(['statPhotos', 'recentPhotos']);
 
         return redirect()->route('admin.photos.index', ['page' => $page])
             ->with('success', __('photo::photos.photo_success_deleted'));
