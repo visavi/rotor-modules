@@ -221,6 +221,44 @@ class LoadFormTest extends ModuleTestCase
         $this->assertSame(1, $other->fresh()->count_downs);
     }
 
+    public function testPublishWithoutAuthorRewardsNobody(): void
+    {
+        // Автора удалили, загрузка осталась: withDefault отдаёт пустую модель,
+        // и increment на ней начислял награду всем пользователям сайта
+        $this->overrideSetting('down_point', 5);
+        $this->overrideSetting('down_money', 500);
+
+        $down = $this->createDown();
+        $bystander = User::factory()->create(['point' => 10, 'money' => 100]);
+        User::query()->whereKey($this->user->id)->delete();
+
+        $this->actingAs(User::factory()->create(['level' => User::ADMIN]))
+            ->post('/admin/downs/' . $down->id . '/publish')
+            ->assertRedirect(route('admin.downs.edit', ['id' => $down->id]));
+
+        $this->assertTrue($down->fresh()->active);
+        $this->assertSame(10, $bystander->fresh()->point);
+        $this->assertSame(100, $bystander->fresh()->money);
+    }
+
+    public function testUnpublishTakesNoMoreThanAuthorHas(): void
+    {
+        // Награду автор мог уже потратить: снятие не уводит счёт в минус
+        $this->overrideSetting('down_point', 5);
+        $this->overrideSetting('down_money', 500);
+        $this->user->update(['point' => 3, 'money' => 100]);
+
+        $down = $this->createDown(['active' => 1]);
+        $this->category->increment('count_downs');
+
+        $this->actingAs(User::factory()->create(['level' => User::ADMIN]))
+            ->post('/admin/downs/' . $down->id . '/publish');
+
+        $this->assertFalse($down->fresh()->active);
+        $this->assertSame(0, $this->user->fresh()->point);
+        $this->assertSame(0, $this->user->fresh()->money);
+    }
+
     public function testAdminMovesDownToClosedCategory(): void
     {
         $down = $this->createDown(['active' => 1]);

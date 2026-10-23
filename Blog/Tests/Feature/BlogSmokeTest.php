@@ -32,6 +32,26 @@ class BlogSmokeTest extends ModuleTestCase
         $this->get(route('blogs.index'))->assertOk();
     }
 
+    public function testPublishWithoutAuthorRewardsNobody(): void
+    {
+        // Автора удалили, статья осталась: withDefault отдаёт пустую модель,
+        // и increment на ней начислял награду всем пользователям сайта
+        $this->overrideSetting('blog_point', 5);
+        $this->overrideSetting('blog_money', 500);
+
+        $article = Article::factory()->create(['user_id' => $this->user->id, 'active' => 0]);
+        $bystander = User::factory()->create(['point' => 10, 'money' => 100]);
+        User::query()->whereKey($this->user->id)->delete();
+
+        $this->actingAs(User::factory()->create(['level' => User::ADMIN]))
+            ->post('/admin/articles/' . $article->id . '/publish')
+            ->assertRedirect(route('admin.articles.edit', ['id' => $article->id]));
+
+        $this->assertTrue((bool) $article->fresh()->active);
+        $this->assertSame(10, $bystander->fresh()->point);
+        $this->assertSame(100, $bystander->fresh()->money);
+    }
+
     public function testFirstImageEscapesTitle(): void
     {
         $article = Article::factory()->create([

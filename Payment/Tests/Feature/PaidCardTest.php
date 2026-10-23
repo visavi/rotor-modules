@@ -283,6 +283,17 @@ class PaidCardTest extends ModuleTestCase
             ->assertSessionHasErrors(['title', 'text', 'url', 'image']);
     }
 
+    public function testCardUrlOnlyHttp(): void
+    {
+        // Правило url без схем пропускает ftp://, file:// и десятки других — ссылка на сайт только http(s)
+        $this->actingAs(User::factory()->create())
+            ->post('/payments/card/calculate', [
+                'place' => PaidAdvert::CARD_FEED_MIDDLE,
+                'url'   => 'ftp://example.com/file',
+            ])
+            ->assertSessionHasErrors('url');
+    }
+
     public function testCardCalculatePlaceFull(): void
     {
         $this->createCard();

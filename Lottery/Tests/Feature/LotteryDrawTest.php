@@ -112,6 +112,30 @@ class LotteryDrawTest extends ModuleTestCase
         $this->assertSame(500, $second->fresh()->money);
     }
 
+    public function testDeletedWinnerTakesNothing(): void
+    {
+        // Билеты удалённого пользователя остаются: выигрыш на пустой модели из withDefault
+        // доставался всем пользователям, банк должен перейти в новый тираж
+        $yesterday = $this->yesterday(5000);
+        [$min, $max] = [(int) setting('lottery_min'), (int) setting('lottery_max')];
+        $gone = [];
+
+        for ($number = $min; $number <= $max; $number++) {
+            $gone[] = $user = User::factory()->create();
+            $yesterday->lotteryUsers()->create(['user_id' => $user->id, 'number' => $number]);
+        }
+
+        $bystander = User::factory()->create(['money' => 100]);
+        User::query()->whereKey(array_column($gone, 'id'))->delete();
+
+        $this->service->draw();
+
+        $today = Lottery::query()->where('day', now()->format('Y-m-d'))->first();
+
+        $this->assertSame(100, $bystander->fresh()->money);
+        $this->assertSame(5000, $today->amount);
+    }
+
     public function testJackpotRollsOverWithoutWinners(): void
     {
         // Без билетов победителя нет, банк переходит в новый тираж целиком

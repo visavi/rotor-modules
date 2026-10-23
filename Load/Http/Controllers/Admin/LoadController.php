@@ -199,7 +199,7 @@ class LoadController extends AdminController
             $oldCategory->decrement('count_downs');
         }
 
-        if (! $down->active) {
+        if (! $down->active && $down->user->exists) {
             $text = textNotice('down_change', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
             $down->user->sendMessage(null, $text);
         }
@@ -267,23 +267,33 @@ class LoadController extends AdminController
             'created_at' => now(),
         ]);
 
+        $user = $down->user;
+        $point = (int) setting('down_point');
+        $money = (int) setting('down_money');
+
         if ($active) {
             $status = __('load::loads.down_success_published');
             $down->category->increment('count_downs');
             $text = textNotice('down_publish', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
-
-            $down->user->increment('point', setting('down_point'));
-            $down->user->increment('money', setting('down_money'));
         } else {
             $status = __('load::loads.down_success_unpublished');
             $down->category->decrement('count_downs');
             $text = textNotice('down_unpublish', ['url' => route('downs.view', ['id' => $down->id], false), 'title' => $down->title]);
-
-            $down->user->decrement('point', setting('down_point'));
-            $down->user->decrement('money', setting('down_money'));
         }
 
-        $down->user->sendMessage(null, $text);
+        // Автора могли удалить: withDefault отдаёт пустую модель, и increment на ней
+        // обновил бы всех пользователей. Снятие забирает награду, но не больше остатка
+        if ($user->exists) {
+            if ($active) {
+                $user->increment('point', $point);
+                $user->increment('money', $money);
+            } else {
+                $user->decrement('point', min($point, $user->point));
+                $user->decrement('money', min($money, $user->money));
+            }
+
+            $user->sendMessage(null, $text);
+        }
 
         clearCache(['statLoads', 'recentDowns']);
 

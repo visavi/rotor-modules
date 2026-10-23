@@ -38,7 +38,7 @@ class MyAdvertRequest extends FormRequest
         $advert = $this->advert();
 
         $rules = [
-            'url'     => ['required', 'url', 'max:100'],
+            'url'     => ['required', 'url:http,https', 'max:100'],
             'names'   => ['required', 'array', 'size:' . count($advert->names)],
             'names.*' => ['required', 'string', 'min:5', 'max:35', 'distinct'],
         ];

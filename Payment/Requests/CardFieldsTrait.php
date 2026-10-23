@@ -15,7 +15,7 @@ trait CardFieldsTrait
         return [
             'title' => ['required', 'string', 'min:5', 'max:60'],
             'text'  => ['nullable', 'string', 'max:200'],
-            'url'   => ['required', 'url', 'max:100'],
+            'url'   => ['required', 'url:http,https', 'max:100'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:500', 'dimensions:min_width=250,min_height=250,max_width=4000,max_height=4000'],
         ];
     }

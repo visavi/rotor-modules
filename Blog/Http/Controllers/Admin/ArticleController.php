@@ -235,7 +235,10 @@ class ArticleController extends AdminController
             $text = textNotice('article_unpublish', ['url' => route('articles.view', ['slug' => $article->slug], false), 'title' => $article->title]);
         }
 
-        $article->user->sendMessage(null, $text);
+        // Автора могли удалить: писать некому
+        if ($article->user->exists) {
+            $article->user->sendMessage(null, $text);
+        }
 
         return redirect()
             ->route('admin.articles.edit', ['id' => $article->id])

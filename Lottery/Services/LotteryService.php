@@ -81,8 +81,11 @@ class LotteryService
 
         $lottery->update(['number' => $number]);
 
+        // Билет удалённого пользователя не выигрывает: банк делится между живыми,
+        // а increment на пустой модели из withDefault обновил бы всех пользователей
         $winners = $lottery->lotteryUsers()
             ->where('number', $number)
+            ->whereHas('user')
             ->get();
 
         if ($winners->isEmpty()) {

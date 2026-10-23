@@ -47,7 +47,7 @@ class CalculateRequest extends FormRequest
 
         return [
             'place'    => ['required', 'in:' . implode(',', PaidAdvert::PLACES)],
-            'url'      => ['required', 'url', 'max:100'],
+            'url'      => ['required', 'url:http,https', 'max:100'],
             'names'    => ['required', 'array', 'min:1'],
             'names.*'  => ['string', 'min:5', 'max:35', 'distinct'],
             'color'    => ['nullable', 'regex:/^#[A-Fa-f0-9]{6}$/'],

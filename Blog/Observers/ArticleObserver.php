@@ -42,12 +42,16 @@ class ArticleObserver
             $pointAmount = (int) setting('blog_point');
             $moneyAmount = (int) setting('blog_money');
 
-            if ($article->active) {
-                $user->increment('point', $pointAmount);
-                $user->increment('money', $moneyAmount);
-            } else {
-                $user->decrement('point', min($pointAmount, $user->point));
-                $user->decrement('money', min($moneyAmount, $user->money));
+            // Автора могли удалить: withDefault отдаёт пустую модель, и increment на ней
+            // обновил бы всех пользователей
+            if ($user->exists) {
+                if ($article->active) {
+                    $user->increment('point', $pointAmount);
+                    $user->increment('money', $moneyAmount);
+                } else {
+                    $user->decrement('point', min($pointAmount, $user->point));
+                    $user->decrement('money', min($moneyAmount, $user->money));
+                }
             }
         }
 
