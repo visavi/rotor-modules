@@ -148,6 +148,18 @@ class NewsAdminTest extends ModuleTestCase
             ->assertSessionHas('success');
     }
 
+    public function testIndexListsSeveralNews(): void
+    {
+        // Вложения у списка новостей грузились по одной: ленивую загрузку ловит только список из нескольких
+        $this->createNews();
+        $this->createNews();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.news.index'))
+            ->assertOk()
+            ->assertSee('Заголовок новости');
+    }
+
     private function createNews(): News
     {
         return News::factory()->create([

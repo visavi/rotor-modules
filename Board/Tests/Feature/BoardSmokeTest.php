@@ -47,6 +47,16 @@ class BoardSmokeTest extends ModuleTestCase
         $this->get(route('boards.index', ['id' => $board->id]))->assertOk();
     }
 
+    public function testAdminListsSeveralBoards(): void
+    {
+        // Подразделы у списка разделов грузились по одному: ленивую загрузку ловит только список из нескольких
+        Board::factory()->count(2)->create(['parent_id' => 0]);
+
+        $this->actingAs(User::factory()->create(['level' => User::ADMIN]))
+            ->get(route('admin.boards.index'))
+            ->assertOk();
+    }
+
     public function testSettingsUpdate(): void
     {
         $admin = User::factory()->boss()->create();

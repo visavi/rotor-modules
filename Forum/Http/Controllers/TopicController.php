@@ -183,7 +183,7 @@ class TopicController extends Controller
 
         $error = match (true) {
             ! $del            => __('validator.deletion'),
-            $access->denied() => $access->message(),
+            $access->denied() => $access->message() ?? __('forum::forums.posts_deleted_curators'),
             default           => null,
         };
 

@@ -17,6 +17,7 @@ class OrderController extends Controller
     {
         $orders = Order::query()
             ->orderByDesc('created_at')
+            ->with('user')
             ->paginate(10);
 
         return view('payment::admin/orders', compact('orders'));

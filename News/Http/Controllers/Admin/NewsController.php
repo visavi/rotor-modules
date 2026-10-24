@@ -23,7 +23,7 @@ class NewsController extends AdminController
     {
         $news = News::query()
             ->orderByDesc('created_at')
-            ->with('user')
+            ->with('user', 'files')
             ->paginate(setting('postnews'));
 
         return view('news::admin/news/index', compact('news'));

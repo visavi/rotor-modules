@@ -31,6 +31,18 @@ class PaymentSmokeTest extends ModuleTestCase
         $this->seedSettings();
     }
 
+    public function testAdminListsSeveralOrders(): void
+    {
+        // Покупатель у списка заказов грузился по одному: ленивую загрузку ловит только список из нескольких
+        $buyer = User::factory()->create();
+        Order::factory()->count(2)->create(['user_id' => $buyer->id]);
+
+        $this->actingAs(User::factory()->boss()->create())
+            ->get('/admin/orders')
+            ->assertOk()
+            ->assertSee($buyer->login);
+    }
+
     /**
      * Сеет настройки модуля (SettingSeeder в тестах очищает таблицу settings)
      */

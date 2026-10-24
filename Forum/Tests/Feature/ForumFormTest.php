@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Registry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
@@ -297,6 +298,23 @@ class ForumFormTest extends ModuleTestCase
             ->assertDontSee('name="del[]"', false);
 
         $this->actingAs($curator)->get($editUrl)->assertForbidden();
+    }
+
+    public function testDeniedWithoutMessageKeepsPosts(): void
+    {
+        // Отказ без текста, например из Gate::before, раньше пропускал удаление
+        $curator = User::factory()->create();
+        $topic = $this->createTopic();
+        $topic->update(['moderators' => $curator->login]);
+        $post = Post::query()->where('topic_id', $topic->id)->firstOrFail();
+
+        Gate::before(static fn (User $user, string $ability): ?bool => $ability === 'moderate' ? false : null);
+
+        $this->actingAs($curator)
+            ->post('/topics/' . $topic->id . '/delete', ['del' => [$post->id]])
+            ->assertSessionHasErrors();
+
+        $this->assertNotNull($post->fresh());
     }
 
     public function testAuthorClosesAndOpensTopic(): void
