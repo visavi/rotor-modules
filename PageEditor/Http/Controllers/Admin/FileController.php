@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Module;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 use Modules\PageEditor\Http\Requests\FileCreateRequest;
 use Modules\PageEditor\Http\Requests\FileUploadRequest;
@@ -354,7 +355,7 @@ class FileController extends Controller
 
             $status = __('page_editor::files.file_success_deleted');
         } else {
-            deleteDir($directory . '/' . $dirname);
+            File::deleteDirectory($directory . '/' . $dirname);
             $status = __('page_editor::files.directory_success_deleted');
         }
 

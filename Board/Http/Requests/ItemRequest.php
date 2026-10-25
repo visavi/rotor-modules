@@ -28,7 +28,7 @@ class ItemRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail): void {
-                    $this->category = Board::query()->find(int($value));
+                    $this->category = Board::query()->find((int) $value);
 
                     if (! $this->category) {
                         $fail(__('board::boards.category_not_exist'));

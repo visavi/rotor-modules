@@ -89,7 +89,7 @@ class BookmarkController extends Controller
      */
     public function delete(Request $request): RedirectResponse
     {
-        $topicIds = intar($request->input('del'));
+        $topicIds = array_map(intval(...), $request->array('del'));
         $redirect = redirect()->route('forums.bookmarks', ['page' => $request->integer('page')]);
 
         if (! $topicIds) {

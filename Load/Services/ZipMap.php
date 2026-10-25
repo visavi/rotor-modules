@@ -45,7 +45,7 @@ class ZipMap
                     'name'  => $stat['name'],
                     'size'  => $stat['size'],
                     'isDir' => $isDir,
-                    'ext'   => $isDir ? '' : getExtension($stat['name']),
+                    'ext'   => $isDir ? '' : pathinfo($stat['name'], PATHINFO_EXTENSION),
                 ];
             }
 

@@ -66,6 +66,6 @@ class CardImageService
             return;
         }
 
-        deleteFile(public_path($path));
+        File::delete(public_path($path));
     }
 }

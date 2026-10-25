@@ -27,6 +27,6 @@ class OwnDownRequest extends DownRequest
      */
     public function down(): Down
     {
-        return $this->down ??= Down::query()->findOrFail(int($this->route('id')));
+        return $this->down ??= Down::query()->findOrFail((int) $this->route('id'));
     }
 }

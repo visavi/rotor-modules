@@ -177,7 +177,7 @@ class TopicController extends Controller
      */
     public function delete(int $id, Request $request): RedirectResponse
     {
-        $del = intar($request->input('del'));
+        $del = array_map(intval(...), $request->array('del'));
         $topic = Topic::query()->findOrFail($id);
         $access = Gate::inspect('moderate', $topic);
 

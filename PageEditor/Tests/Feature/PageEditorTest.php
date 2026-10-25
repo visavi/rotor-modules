@@ -201,6 +201,28 @@ class PageEditorTest extends ModuleTestCase
         $this->assertFileDoesNotExist($path);
     }
 
+    public function testDeleteDirectoryKeepsSymlinkTarget(): void
+    {
+        // Удаляется сама ссылка: обход по ней стёр бы файлы в каталоге, на который она указывает
+        $outside = storage_path('framework/testing/page-editor/outside');
+        File::ensureDirectoryExists($outside);
+        file_put_contents($outside . '/keep.txt', 'keep');
+
+        $dir = resource_path('views/page_editor_dir');
+        File::ensureDirectoryExists($dir);
+        symlink($outside, $dir . '/link');
+
+        $this->actingAs($this->boss)->delete(route('admin.files.delete'), [
+            'root'    => 'views',
+            'dirname' => 'page_editor_dir',
+        ])->assertRedirect()->assertSessionHas('success', $this->flashed(__('page_editor::files.directory_success_deleted')));
+
+        $this->assertDirectoryDoesNotExist($dir);
+        $this->assertFileExists($outside . '/keep.txt');
+
+        File::deleteDirectory($outside);
+    }
+
     public function testArrayFieldsKeepFileUntouched(): void
     {
         $path = resource_path('views/page_editor_array.blade.php');

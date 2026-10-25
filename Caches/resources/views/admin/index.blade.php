@@ -32,7 +32,7 @@
         <div class="mb-3">
             @foreach ($files as $file)
                 <div class="mb-1">
-                    <i class="fa fa-file-alt"></i> <b>{{ basename($file) }}</b> ({{ formatFileSize($file) }} / {{ dateFixed(\Illuminate\Support\Facades\Date::createFromTimestamp(filemtime($file))) }})
+                    <i class="fa fa-file-alt"></i> <b>{{ basename($file) }}</b> ({{ formatSize(filesize($file)) }} / {{ dateFixed(\Illuminate\Support\Facades\Date::createFromTimestamp(filemtime($file))) }})
                 </div>
             @endforeach
         </div>

@@ -29,7 +29,7 @@ class ArticleRequest extends FormRequest
                 'required',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail): void {
-                    $this->category = Blog::query()->find(int($value));
+                    $this->category = Blog::query()->find((int) $value);
 
                     if (! $this->category) {
                         $fail(__('blog::blogs.category_not_exist'));

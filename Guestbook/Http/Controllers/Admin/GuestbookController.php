@@ -90,7 +90,7 @@ class GuestbookController extends AdminController
     public function delete(Request $request): RedirectResponse
     {
         $page = $request->integer('page', 1);
-        $del = intar($request->input('chosen'));
+        $del = array_map(intval(...), $request->array('chosen'));
 
         if (! $del) {
             return redirect()
@@ -111,7 +111,7 @@ class GuestbookController extends AdminController
     public function publish(Request $request): RedirectResponse
     {
         $page = $request->integer('page', 1);
-        $active = intar($request->input('chosen'));
+        $active = array_map(intval(...), $request->array('chosen'));
 
         if (! $active) {
             return redirect()

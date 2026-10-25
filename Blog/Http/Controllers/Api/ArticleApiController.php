@@ -89,7 +89,7 @@ class ArticleApiController extends Controller
     public function view(string $id, Request $request): JsonResource
     {
         // Ссылка статьи содержит id в начале слага, принимаем и слаг, и голый id
-        $articleId = int(Str::before($id, '-'));
+        $articleId = (int) Str::before($id, '-');
 
         $article = Article::query()
             ->withUserVote()

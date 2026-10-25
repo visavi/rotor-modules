@@ -187,7 +187,7 @@ class BlockController extends AdminController
     public function sort(Request $request): JsonResponse
     {
         $sort = $request->input('sort');
-        $ids = array_map(int(...), explode(',', is_string($sort) ? $sort : ''));
+        $ids = array_map(intval(...), explode(',', is_string($sort) ? $sort : ''));
         $current = Block::query()->pluck('id')->all();
 
         if (count($ids) !== count($current) || array_diff($current, $ids)) {

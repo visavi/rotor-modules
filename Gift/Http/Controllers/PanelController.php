@@ -31,7 +31,7 @@ class PanelController extends AdminController
      */
     public function update(GiftPricesRequest $request): RedirectResponse
     {
-        foreach (intar($request->validated('gifts')) ?? [] as $id => $price) {
+        foreach (array_map(intval(...), $request->safe()->array('gifts')) as $id => $price) {
             Gift::query()->where('id', $id)->update(['price' => $price]);
         }
 
