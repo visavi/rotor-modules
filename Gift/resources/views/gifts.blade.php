@@ -29,7 +29,7 @@
                     <div class="col-md-4 col-sm-6">
                         @if (isAdmin())
                             <div class="float-end">
-                                <form action="/admin/gifts/{{ $gift->id }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('gift::gifts.confirm_delete_gift') }}">
+                                <form action="/admin/gifts/{{ $gift->id }}" method="post" class="d-inline" data-confirm="{{ __('gift::gifts.confirm_delete_gift') }}">
                                     @csrf
                                     @method('DELETE')
                                     <input type="hidden" name="user" value="{{ $gift->user->login }}">

@@ -41,7 +41,7 @@
         @if ($showCopy)
             <a class="fs-4 lh-1 text-decoration-none link-opacity-75-hover text-body-secondary"
                href="{{ $shareUrl }}"
-               onclick="copyToClipboard(this); return false"
+              
                data-copy="{{ $shareUrl }}"
                title="{{ __('main.copy_link') }}"
                aria-label="{{ __('main.copy_link') }}">

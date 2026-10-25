@@ -112,7 +112,7 @@
                         @if ($block->isManageable())
                             <a href="{{ route('admin.home-builder.edit', ['id' => $block->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>
 
-                            <form action="{{ route('admin.home-builder.delete', ['id' => $block->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('home_builder::home_builder.confirm_delete') }}">
+                            <form action="{{ route('admin.home-builder.delete', ['id' => $block->id]) }}" method="post" class="d-inline" data-confirm="{{ __('home_builder::home_builder.confirm_delete') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fas fa-times text-muted"></i></button>

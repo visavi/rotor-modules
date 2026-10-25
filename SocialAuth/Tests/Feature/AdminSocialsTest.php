@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\SocialAuth\Tests\Feature;
 
 use App\Models\User;
+use App\Support\Registry;
 use Modules\SocialAuth\Models\Social;
 use Tests\ModuleTestCase;
 
@@ -44,6 +45,14 @@ class AdminSocialsTest extends ModuleTestCase
             ->assertOk()
             ->assertSee('google_user')
             ->assertSee('Google');
+    }
+
+    public function testWidgetLinksToSocials(): void
+    {
+        // Плитка на главной админки вела в никуда, хотя список привязок есть
+        $widget = (Registry::$widgets['socials']['handler'])(7);
+
+        $this->assertSame(route('social_auth.socials'), $widget['url']);
     }
 
     public function testIndexWithArrayProviderOpens(): void

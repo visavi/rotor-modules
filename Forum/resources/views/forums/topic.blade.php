@@ -37,7 +37,7 @@
 
                 <a class="dropdown-item" href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}">{{ __('main.change') }}</a>
                 <a class="dropdown-item" href="{{ route('admin.topics.move', ['id' => $topic->id]) }}">{{ __('main.move') }}</a>
-                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}">
+                <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>
@@ -73,7 +73,7 @@
         @can('update', $topic)
             <span class="d-inline-flex align-items-center gap-1">
                 <i class="fas fa-lock"></i>
-                <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
+                <form action="{{ route('topics.close', ['id' => $topic->id]) }}" method="post" class="d-inline" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
                     @csrf
                     <button class="btn btn-link p-0 align-baseline">{{ __('main.close') }}</button>
                 </form>
@@ -153,9 +153,9 @@
                         @if (auth()->check())
                             <div class="js-actions">
                             @if (auth()->id() !== $post->user_id)
-                                <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
+                                <a href="#" data-reply title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
 
-                                <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
+                                <a href="#" data-quote title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
 
                                 <a href="#" data-ajax data-ajax-url="/ajax/complaint" data-ajax-confirm="{{ __('main.confirm_complaint') }}" data-ajax-icon="fa fa-check text-muted" data-type="{{ $post->getMorphClass() }}" data-id="{{ $post->id }}" data-page="{{ $posts->currentPage() }}" rel="nofollow" title="{{ __('main.complain') }}"><i class="fa fa-bell text-muted"></i></a>
                             @endif

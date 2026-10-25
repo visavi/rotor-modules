@@ -28,7 +28,7 @@
                 <input class="rotor-install__field" type="text" readonly
                        value="composer create-project visavi/rotor .">
                 <button class="rotor-install__copy" type="button"
-                        onclick="return copyToClipboard(this)"
+                        data-copy
                         data-bs-toggle="tooltip" title="{{ __('main.copy') }}">
                     <i class="far fa-clipboard"></i>
                 </button>

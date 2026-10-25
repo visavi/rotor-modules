@@ -27,7 +27,7 @@
             <div class="float-end">
                 <a href="{{ route('admin.offers.reply', ['id' => $offer->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.reply') }}"><i class="fas fa-reply text-muted"></i></a>
                 <a href="{{ route('admin.offers.edit', ['id' => $offer->id]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>
-                <form action="{{ route('admin.offers.delete', ['type' => $offer->type]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('offer::offers.confirm_delete') }}">
+                <form action="{{ route('admin.offers.delete', ['type' => $offer->type]) }}" method="post" class="d-inline" data-confirm="{{ __('offer::offers.confirm_delete') }}">
                     @csrf
                     <input type="hidden" name="del[]" value="{{ $offer->id }}">
                     <button class="btn btn-link p-0" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fas fa-times text-muted"></i></button>

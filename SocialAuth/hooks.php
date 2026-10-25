@@ -68,5 +68,6 @@ Registry::widget('socials', static fn (int $days): array => [
     'icon'  => 'fas fa-share-nodes',
     'color' => '#0dcaf0',
     'type'  => 'bar',
+    'url'   => route('social_auth.socials'),
     ...DashboardService::trend(Social::query(), $days),
 ]);

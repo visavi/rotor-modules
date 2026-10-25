@@ -43,8 +43,8 @@
 
                     @if (auth()->check() && auth()->id() !== $post->user_id)
                         <div class="text-end section-action">
-                            <a href="#" onclick="return postReply(this)" data-bs-toggle="tooltip" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
-                            <a href="#" onclick="return postQuote(this)" data-bs-toggle="tooltip" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
+                            <a href="#" data-reply data-bs-toggle="tooltip" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
+                            <a href="#" data-quote data-bs-toggle="tooltip" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
                         </div>
                     @endif
 
@@ -77,7 +77,7 @@
     {{ $posts->links() }}
 
     @if ($posts->isNotEmpty() && isAdmin('boss'))
-        <form action="/admin/chats/clear" method="post" onsubmit="return confirmAction(this)" data-confirm="{{ __('admin_chat::admin_chat.confirm_clear') }}">
+        <form action="/admin/chats/clear" method="post" data-confirm="{{ __('admin_chat::admin_chat.confirm_clear') }}">
             @csrf
             <button type="submit" class="btn btn-danger"><i class="fa fa-trash-alt"></i> {{ __('admin_chat::admin_chat.clear') }}</button>
         </form><br>

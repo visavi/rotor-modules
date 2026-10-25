@@ -49,7 +49,7 @@
                     @if (isAdmin('boss'))
                         <div class="float-end">
                             <a href="{{ route('admin.blogs.edit', ['id' => $category->id]) }}"><i class="fa fa-pencil-alt"></i></a>
-                            <form action="{{ route('admin.blogs.delete', ['id' => $category->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_delete_blog') }}">
+                            <form action="{{ route('admin.blogs.delete', ['id' => $category->id]) }}" method="post" class="d-inline" data-confirm="{{ __('blog::blogs.confirm_delete_blog') }}">
                                 @csrf
                                 @method('DELETE')
                                 <button class="btn btn-link p-0"><i class="fa fa-times"></i></button>
@@ -95,7 +95,7 @@
 
                     <div class="text-end">
                         <a href="{{ route('admin.articles.edit', ['id' => $article->id]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>
-                        <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_delete_article') }}">
+                        <form action="{{ route('admin.articles.delete', ['id' => $article->id]) }}" method="post" class="d-inline" data-confirm="{{ __('blog::blogs.confirm_delete_article') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link p-0" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></button>

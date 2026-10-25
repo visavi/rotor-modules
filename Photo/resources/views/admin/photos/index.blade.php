@@ -36,7 +36,7 @@
 
                     <div class="text-end">
                         <a href="{{ route('admin.photos.edit', ['id' => $photo->id, 'page' => $photos->currentPage()]) }}" data-bs-toggle="tooltip" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt text-muted"></i></a>
-                        <form action="{{ route('admin.photos.delete', ['id' => $photo->id, 'page' => $photos->currentPage()]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('photo::photos.confirm_delete_photo') }}">
+                        <form action="{{ route('admin.photos.delete', ['id' => $photo->id, 'page' => $photos->currentPage()]) }}" method="post" class="d-inline" data-confirm="{{ __('photo::photos.confirm_delete_photo') }}">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-link p-0 align-baseline" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fas fa-times text-muted"></i></button>

@@ -26,7 +26,7 @@
     @endif
 
     @if ($item->expires_at->gt(now()))
-        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('board::boards.confirm_unpublish_item') }}">
+        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline" data-confirm="{{ __('board::boards.confirm_unpublish_item') }}">
             @csrf
             <button class="btn btn-link p-0">{{ __('main.unpublish') }}</button>
         </form> /
@@ -37,7 +37,7 @@
         </form> /
     @endif
 
-    <form action="{{ route('items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('board::boards.confirm_delete_item') }}">
+    <form action="{{ route('items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" data-confirm="{{ __('board::boards.confirm_delete_item') }}">
         @csrf
         @method('DELETE')
         <button class="btn btn-link p-0">{{ __('main.delete') }}</button>

@@ -14,7 +14,7 @@
                     <button class="btn btn-link dropdown-item">{{ __('main.open') }}</button>
                 </form>
             @else
-                <form action="{{ route('admin.topics.action', ['id' => $topic->id, 'type' => 'closed', 'page' => $posts->currentPage()]) }}" method="post" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
+                <form action="{{ route('admin.topics.action', ['id' => $topic->id, 'type' => 'closed', 'page' => $posts->currentPage()]) }}" method="post" data-confirm="{{ __('forum::forums.confirm_close_topic') }}">
                     @csrf
                     <button class="btn btn-link dropdown-item">{{ __('main.close') }}</button>
                 </form>
@@ -34,7 +34,7 @@
 
             <a class="dropdown-item" href="{{ route('admin.topics.edit', ['id' => $topic->id]) }}">{{ __('main.change') }}</a>
             <a class="dropdown-item" href="{{ route('admin.topics.move', ['id' => $topic->id]) }}">{{ __('main.move') }}</a>
-            <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" onsubmit="return confirmAction(this)" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}">
+            <form action="{{ route('admin.topics.delete', ['id' => $topic->id]) }}" method="post" class="d-inline" data-confirm="{{ __('forum::forums.confirm_delete_topic') }}">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-link dropdown-item">{{ __('main.delete') }}</button>
@@ -112,9 +112,9 @@
                             @if (auth()->check())
                                 <div class="section-action">
                                 @if (auth()->id() !== $data->user_id)
-                                    <a href="#" onclick="return postReply(this)" title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
+                                    <a href="#" data-reply title="{{ __('main.reply') }}"><i class="fa fa-reply text-muted"></i></a>
 
-                                    <a href="#" onclick="return postQuote(this)" title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
+                                    <a href="#" data-quote title="{{ __('main.quote') }}"><i class="fa fa-quote-right text-muted"></i></a>
                                 @endif
 
                                 <a href="{{ route('admin.posts.edit', ['id' => $data->id, 'page' => $posts->currentPage()]) }}" title="{{ __('main.edit') }}"><i class="fa fa-pencil-alt text-muted"></i></a>

@@ -163,12 +163,12 @@ class NewsCommentTest extends ModuleTestCase
         $news = $this->makeNews();
         $this->makeComment($news);
 
-        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertSee('openEditModal(this)', false);
+        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertSee('data-comment-edit', false);
 
         // Раньше в закрытой новости ссылка оставалась, а сохранение отвечало отказом
         $news->update(['closed' => true]);
 
-        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertDontSee('openEditModal(this)', false);
+        $this->actingAs($this->user)->get('/news/' . $news->id)->assertOk()->assertDontSee('data-comment-edit', false);
     }
 
     public function testNotificationNamesPassedAuthorNotSession(): void

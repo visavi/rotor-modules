@@ -46,14 +46,13 @@
                                 <input type="hidden" name="path" value="{{ $path }}">
                                 <input type="hidden" name="filename" value="{{ $entry['name'] }}">
                                 <input type="hidden" name="newname" value="">
-                                <button class="btn btn-link p-0 me-2" type="button" onclick="return promptAction(this)"
+                                <button class="btn btn-link p-0 me-2" type="button"
                                         data-prompt="{{ __('page_editor::files.file_name') }}"
                                         data-value="{{ $entry['name'] }}"
                                         data-field="newname"><i class="fa fa-pen"></i></button>
                             </form>
 
                             <form action="{{ route('admin.files.delete') }}" method="post" class="d-inline"
-                                  onsubmit="return confirmAction(this)"
                                   data-confirm="{{ $entry['dir'] ? __('page_editor::files.confirm_delete_dir') : __('page_editor::files.confirm_delete_file') }}">
                                 @csrf
                                 @method('DELETE')

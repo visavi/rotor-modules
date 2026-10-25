@@ -3,7 +3,7 @@
     невалидна, браузер её выбрасывает. Кнопка связывается с этой формой
     атрибутом form="blog-delete-{id}"
 --}}
-<form id="blog-delete-{{ $blog->id }}" action="{{ route('admin.blogs.delete', ['id' => $blog->id]) }}" method="post" onsubmit="return confirmAction(this)" data-confirm="{{ __('blog::blogs.confirm_delete_blog') }}">
+<form id="blog-delete-{{ $blog->id }}" action="{{ route('admin.blogs.delete', ['id' => $blog->id]) }}" method="post" data-confirm="{{ __('blog::blogs.confirm_delete_blog') }}">
     @csrf
     @method('DELETE')
 </form>
