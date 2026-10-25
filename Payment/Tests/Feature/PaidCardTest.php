@@ -11,6 +11,7 @@ use App\Support\Hook;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -114,6 +115,22 @@ class PaidCardTest extends ModuleTestCase
         $this->assertTrue($first->fresh()->deleted_at->equalTo($place['freeAt']));
         $this->assertFalse($service->isCardPlaceAvailable(PaidAdvert::CARD_SIDEBAR));
         $this->assertTrue($service->isCardPlaceAvailable(PaidAdvert::CARD_FEED_MIDDLE));
+    }
+
+    public function testCardPlacesCountedInOneQuery(): void
+    {
+        $this->createCard();
+        $this->createCard(attributes: ['place' => PaidAdvert::CARD_FEED_MIDDLE]);
+
+        $service = app(PaymentService::class);
+        $service->getCardPrice(PaidAdvert::CARD_SIDEBAR);
+
+        DB::enableQueryLog();
+        $places = $service->getCardPlaces();
+
+        $this->assertCount(1, DB::getQueryLog());
+        $this->assertSame(1, $places[PaidAdvert::CARD_SIDEBAR]['taken']);
+        $this->assertSame(1, $places[PaidAdvert::CARD_FEED_MIDDLE]['taken']);
     }
 
     /**

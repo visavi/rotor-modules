@@ -125,6 +125,16 @@ class ZipViewTest extends ModuleTestCase
         $this->assertNotEmpty($response->headers->get('ETag'));
     }
 
+    public function testSvgIsShownAsSourceNotImage(): void
+    {
+        // SVG со скриптом, отданный картинкой, выполнился бы на домене сайта
+        $response = $this->get($this->zipUrl(3))->assertOk();
+
+        $this->assertStringStartsWith('text/html', (string) $response->headers->get('Content-Type'));
+        $response->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
+    }
+
     public function testUnknownIndexIsRejectedWithoutOpeningArchive(): void
     {
         // Прогреваем карту, дальше перебор отбивается по ней
@@ -178,6 +188,7 @@ class ZipViewTest extends ModuleTestCase
         $archive->addFromString('readme.txt', 'Привет из архива');
         $archive->addFromString('logo.gif', base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'));
         $archive->addFromString('docs/guide.txt', 'Файл в папке');
+        $archive->addFromString('evil.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
         $archive->close();
 
         return File::factory()->create([

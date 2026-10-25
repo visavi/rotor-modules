@@ -2,6 +2,7 @@
 
 namespace Modules\Offer\Tests\Feature;
 
+use App\Models\Comment;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -110,5 +111,20 @@ class OfferSmokeTest extends ModuleTestCase
             'status'     => Offer::WAIT,
             'created_at' => now(),
         ]);
+    }
+
+    public function testSeveralRecordsWithCommentsAreDeleted(): void
+    {
+        $offers = Offer::factory()->count(2)->create();
+        Comment::factory()->count(2)->create([
+            'relate_type' => Offer::$morphName,
+            'relate_id'   => $offers->firstOrFail()->id,
+        ]);
+
+        // Пачка: ленивая загрузка комментариев и файлов в ней запрещена
+        Offer::query()->whereKey($offers->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('offers', ['id' => $offers->firstOrFail()->id]);
+        $this->assertDatabaseMissing('comments', ['relate_type' => Offer::$morphName]);
     }
 }

@@ -139,4 +139,19 @@ class LoadSmokeTest extends ModuleTestCase
             ->assertSee('Проверенный файл')
             ->assertDontSee('Ждёт проверки');
     }
+
+    public function testSeveralRecordsWithCommentsAreDeleted(): void
+    {
+        $downs = Down::factory()->count(2)->create();
+        Comment::factory()->count(2)->create([
+            'relate_type' => Down::$morphName,
+            'relate_id'   => $downs->firstOrFail()->id,
+        ]);
+
+        // Пачка: ленивая загрузка комментариев и файлов в ней запрещена
+        Down::query()->whereKey($downs->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('downs', ['id' => $downs->firstOrFail()->id]);
+        $this->assertDatabaseMissing('comments', ['relate_type' => Down::$morphName]);
+    }
 }

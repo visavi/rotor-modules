@@ -470,4 +470,16 @@ class ForumFormTest extends ModuleTestCase
 
         return $topic->fresh();
     }
+
+    public function testAdminTopicEscapesCloserName(): void
+    {
+        $closer = User::factory()->create(['name' => '<script src=//a.bc>']);
+        $topic = Topic::factory()->create(['closed' => 1, 'close_user_id' => $closer->id]);
+
+        $this->actingAs(User::factory()->create(['level' => User::BOSS]))
+            ->get('/admin/topics/' . $topic->id)
+            ->assertOk()
+            ->assertDontSee('<script src=//a.bc>', false)
+            ->assertSee(e('<script src=//a.bc>'), false);
+    }
 }

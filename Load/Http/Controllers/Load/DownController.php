@@ -247,13 +247,15 @@ class DownController extends Controller
 
         $mime = (string) (new \finfo(FILEINFO_MIME_TYPE))->buffer($content);
 
-        $isImage = str_starts_with($mime, 'image/');
+        // SVG — разметка со скриптами: отданная картинкой, она выполнилась бы на домене сайта
+        $isImage = str_starts_with($mime, 'image/') && $mime !== 'image/svg+xml';
         $isText = str_starts_with($mime, 'text/') || in_array($mime, [
             'application/json',
             'application/xml',
             'application/javascript',
             'application/x-httpd-php',
             'application/sql',
+            'image/svg+xml',
         ], true);
 
         if (! $isImage && ! $isText) {

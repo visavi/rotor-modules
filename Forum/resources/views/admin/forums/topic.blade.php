@@ -179,7 +179,7 @@
         </div>
 
     @else
-        {{ showError(trans_choice('forum::forums.topic_closed_user', $topic->closeUser->id, ['login' => $topic->closeUser->getName()])) }}
+        {{ showError(trans_choice('forum::forums.topic_closed_user', $topic->closeUser->id, ['login' => e($topic->closeUser->getName())])) }}
     @endif
 
 @stop

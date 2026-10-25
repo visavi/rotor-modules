@@ -7,9 +7,12 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Modules\Forum\Models\Bookmark;
 use Modules\Forum\Models\Forum;
 use Modules\Forum\Models\Post;
 use Modules\Forum\Models\Topic;
+use Modules\Forum\Models\Vote;
+use Modules\Forum\Models\VoteAnswer;
 use Tests\ModuleTestCase;
 
 class ForumSmokeTest extends ModuleTestCase
@@ -374,5 +377,23 @@ class ForumSmokeTest extends ModuleTestCase
         $this->createTopicWithPosts(2);
 
         $this->get(route('forums.rss'))->assertOk();
+    }
+
+    public function testSeveralTopicsWithPostsAreDeleted(): void
+    {
+        $topics = Topic::factory()->count(2)->create();
+        $topic = $topics->firstOrFail();
+        Post::factory()->count(2)->create(['topic_id' => $topic->id]);
+        Bookmark::factory()->count(2)->create(['topic_id' => $topic->id]);
+        $vote = Vote::factory()->create(['topic_id' => $topic->id]);
+        VoteAnswer::factory()->count(2)->create(['vote_id' => $vote->id]);
+
+        // Пачка: ленивая загрузка сообщений, закладок и голосования в ней запрещена
+        Topic::query()->whereKey($topics->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('topics', ['id' => $topic->id]);
+        $this->assertDatabaseMissing('posts', ['topic_id' => $topic->id]);
+        $this->assertDatabaseMissing('bookmarks', ['topic_id' => $topic->id]);
+        $this->assertDatabaseMissing('voteanswer', ['vote_id' => $vote->id]);
     }
 }

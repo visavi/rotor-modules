@@ -338,4 +338,14 @@ class BoardItemTest extends ModuleTestCase
 
         return $item;
     }
+
+    public function testSeveralRecordsAreDeleted(): void
+    {
+        $records = Item::factory()->count(2)->create();
+
+        // Пачка: ленивая загрузка файлов в ней запрещена
+        Item::query()->whereKey($records->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('items', ['id' => $records->firstOrFail()->id]);
+    }
 }

@@ -156,4 +156,19 @@ class NewsSmokeTest extends ModuleTestCase
             ->assertJsonPath('data.0.relate.id', $news->id)
             ->assertJsonPath('data.0.relate.title', 'Test news');
     }
+
+    public function testSeveralRecordsWithCommentsAreDeleted(): void
+    {
+        $items = News::factory()->count(2)->create();
+        Comment::factory()->count(2)->create([
+            'relate_type' => News::$morphName,
+            'relate_id'   => $items->firstOrFail()->id,
+        ]);
+
+        // Пачка: ленивая загрузка комментариев и файлов в ней запрещена
+        News::query()->whereKey($items->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('news', ['id' => $items->firstOrFail()->id]);
+        $this->assertDatabaseMissing('comments', ['relate_type' => News::$morphName]);
+    }
 }

@@ -151,6 +151,9 @@ class News extends Model
     public function delete(): ?bool
     {
         return DB::transaction(function () {
+            // Записи удаляются и пачкой, а ленивая загрузка в пачке запрещена
+            $this->loadMissing(['comments.files', 'files']);
+
             $this->polls()->delete();
 
             $this->comments->each(static function (Comment $comment) {

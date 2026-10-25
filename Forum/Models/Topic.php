@@ -231,6 +231,9 @@ class Topic extends Model
     public function delete(): ?bool
     {
         return DB::transaction(function () {
+            // Записи удаляются и пачкой, а ленивая загрузка в пачке запрещена
+            $this->loadMissing(['vote.answers', 'bookmarks', 'posts.files']);
+
             // Удаление голосования
             $this->vote->delete();
 

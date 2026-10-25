@@ -292,4 +292,19 @@ class BlogSmokeTest extends ModuleTestCase
         $this->get(route('blogs.rss'))->assertOk();
         $this->actingAs($this->user)->get(route('articles.user-articles', ['user' => $this->user->login]))->assertOk();
     }
+
+    public function testSeveralRecordsWithCommentsAreDeleted(): void
+    {
+        $articles = Article::factory()->count(2)->create();
+        Comment::factory()->count(2)->create([
+            'relate_type' => Article::$morphName,
+            'relate_id'   => $articles->firstOrFail()->id,
+        ]);
+
+        // Пачка: ленивая загрузка комментариев и файлов в ней запрещена
+        Article::query()->whereKey($articles->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('articles', ['id' => $articles->firstOrFail()->id]);
+        $this->assertDatabaseMissing('comments', ['relate_type' => Article::$morphName]);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Photo\Tests\Feature;
 
+use App\Models\Comment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Photo\Models\Photo;
@@ -42,5 +43,20 @@ class PhotoSmokeTest extends ModuleTestCase
         foreach ($routes as $route) {
             $this->get(route($route, ['user' => $this->user->login]))->assertOk();
         }
+    }
+
+    public function testSeveralRecordsWithCommentsAreDeleted(): void
+    {
+        $photos = Photo::factory()->count(2)->create();
+        Comment::factory()->count(2)->create([
+            'relate_type' => Photo::$morphName,
+            'relate_id'   => $photos->firstOrFail()->id,
+        ]);
+
+        // Пачка: ленивая загрузка комментариев и файлов в ней запрещена
+        Photo::query()->whereKey($photos->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('photos', ['id' => $photos->firstOrFail()->id]);
+        $this->assertDatabaseMissing('comments', ['relate_type' => Photo::$morphName]);
     }
 }

@@ -246,4 +246,14 @@ class GuestbookTest extends ModuleTestCase
             'created_at' => now(),
         ]);
     }
+
+    public function testSeveralRecordsAreDeleted(): void
+    {
+        $records = Guestbook::factory()->count(2)->create();
+
+        // Пачка: ленивая загрузка файлов в ней запрещена
+        Guestbook::query()->whereKey($records->modelKeys())->get()->each->delete();
+
+        $this->assertDatabaseMissing('guestbook', ['id' => $records->firstOrFail()->id]);
+    }
 }

@@ -156,6 +156,9 @@ class Vote extends Model
     public function delete(): ?bool
     {
         return DB::transaction(function () {
+            // Записи удаляются и пачкой, а ленивая загрузка в пачке запрещена
+            $this->loadMissing('answers');
+
             $this->polls()->delete();
 
             $this->answers->each(function (VoteAnswer $answer) {

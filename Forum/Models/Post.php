@@ -151,6 +151,9 @@ class Post extends Model
     public function delete(): ?bool
     {
         return DB::transaction(function () {
+            // Записи удаляются и пачкой, а ленивая загрузка в пачке запрещена
+            $this->loadMissing('files');
+
             $this->polls()->delete();
 
             $this->files->each(static function (File $file) {

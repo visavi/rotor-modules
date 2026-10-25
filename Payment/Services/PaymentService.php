@@ -423,21 +423,27 @@ class PaymentService
     public function getCardPlaces(?int $exceptId = null): array
     {
         $limit = $this->getCardLimit();
+        $prices = array_filter(
+            array_combine(PaidAdvert::CARD_PLACES, array_map($this->getCardPrice(...), PaidAdvert::CARD_PLACES)),
+            static fn (int $price) => $price > 0,
+        );
+
+        if (! $prices) {
+            return [];
+        }
+
+        $cards = PaidAdvert::query()
+            ->active()
+            ->whereIn('place', array_keys($prices))
+            ->when($exceptId, static fn ($query) => $query->whereKeyNot($exceptId))
+            ->orderBy('deleted_at')
+            ->get(['place', 'deleted_at'])
+            ->groupBy('place');
+
         $places = [];
 
-        foreach (PaidAdvert::CARD_PLACES as $place) {
-            $price = $this->getCardPrice($place);
-
-            if ($price <= 0) {
-                continue;
-            }
-
-            $active = PaidAdvert::query()
-                ->active()
-                ->where('place', $place)
-                ->when($exceptId, static fn ($query) => $query->whereKeyNot($exceptId))
-                ->orderBy('deleted_at')
-                ->pluck('deleted_at');
+        foreach ($prices as $place => $price) {
+            $active = $cards->get($place, collect())->pluck('deleted_at');
 
             $places[$place] = [
                 'name'   => __('payment::payments.cards.' . $place),
