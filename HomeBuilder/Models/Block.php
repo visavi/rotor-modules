@@ -186,6 +186,18 @@ class Block extends Model
     }
 
     /**
+     * Карточки записей, как в ленте: каждую рисует шаблон её модуля
+     *
+     * @param Collection<int, Entry> $entries
+     *
+     * @return Collection<int, string>
+     */
+    public function cards(Collection $entries): Collection
+    {
+        return (new FeedService())->render($entries->map(static fn (Entry $entry) => $entry->model));
+    }
+
+    /**
      * Типы, которые правит только владелец: HTML и шаблон выводятся без чистки
      */
     public static function isBossType(string $type): bool

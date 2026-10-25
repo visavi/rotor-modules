@@ -240,6 +240,27 @@ class ForumApiListTest extends ModuleTestCase
         ]);
     }
 
+    public function testCategoryChildrenCarryLastTopic(): void
+    {
+        // Подразделов больше одного: без загрузки связи lastTopic — запрос на каждый
+        foreach (['Первый', 'Второй'] as $sort => $title) {
+            $child = Forum::factory()->create(['parent_id' => $this->forum->id, 'sort' => $sort]);
+            $topic = Topic::factory()->create([
+                'forum_id'    => $child->id,
+                'title'       => $title,
+                'user_id'     => $this->user->id,
+                'count_posts' => 0,
+                'created_at'  => now(),
+            ]);
+            $child->update(['last_topic_id' => $topic->id]);
+        }
+
+        $this->getJson('/api/forums')
+            ->assertOk()
+            ->assertJsonPath('data.0.children.0.last_topic_title', 'Первый')
+            ->assertJsonPath('data.0.children.1.last_topic_title', 'Второй');
+    }
+
     public function testEmptyForumIsEmptyList(): void
     {
         // Без разделов — пустой data, а не 200 с одним сообщением

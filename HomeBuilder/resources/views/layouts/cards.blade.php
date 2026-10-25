@@ -13,17 +13,16 @@
         section    — название раздела, sectionUrl — ссылка на раздел
         comments   — число комментариев, rating — рейтинг
         model      — исходная запись раздела, если нужно что-то своё
+    $block->cards($entries) — готовые карточки записей из шаблонов ленты
 
     Свои стили — @push('styles') ... @endpush, скрипты — @push('scripts') ... @endpush
 --}}
-
-@use('App\Services\FeedService')
 
 @if ($block->title !== '')
     <div class="section-title mb-2">{{ $block->title }}</div>
 @endif
 
-@forelse ((new FeedService())->render($entries->map(static fn ($entry) => $entry->model)) as $card)
+@forelse ($block->cards($entries) as $card)
     {!! $card !!}
 @empty
     <div class="section shadow mb-3 text-muted">{{ __('main.empty_records') }}</div>

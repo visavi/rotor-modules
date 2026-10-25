@@ -40,7 +40,7 @@ class ForumApiController extends Controller
     {
         $forums = Forum::query()
             ->where('parent_id', 0)
-            ->with('children', 'lastTopic.lastPost.user')
+            ->with('lastTopic.lastPost.user', 'children.lastTopic.lastPost.user')
             ->orderBy('sort')
             ->get();
 

@@ -34,7 +34,6 @@
 Оригинал выглядит так:
 
 ```blade
-@use('App\Services\FeedService')
 @extends('layout')
 
 @section('title', setting('logos'))
@@ -46,7 +45,7 @@
         {{ $homepage() }}
     @else
         <div id="feed-container">
-            {{ (new FeedService())->getFeed() }}
+            {{ $feed->getFeed() }}
         </div>
         <div id="feed-sentinel"></div>
     @endif
@@ -57,6 +56,9 @@
 
 - `$homepage` — главная модуля, выбранная в настройках, или `null`. Если главная
   целиком своя, ветку `@if` можно убрать.
+- `$feed` — лента сайта, `$feed->getFeed()` выводит её первую страницу. В копиях,
+  сделанных раньше, лента выводится через `(new FeedService())->getFeed()` — так
+  тоже работает.
 - Хуки `advertIndexTop` и `advertIndexBottom` выводят рекламу и вставки модулей —
   их лучше оставить.
 
