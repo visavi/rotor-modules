@@ -164,7 +164,7 @@ class LoadController extends AdminController
      */
     public function editDown(int $id, Request $request): View
     {
-        $cid = int($request->input('category'));
+        $cid = $request->integer('category');
         $down = $this->findDown($id);
 
         $files = File::query()

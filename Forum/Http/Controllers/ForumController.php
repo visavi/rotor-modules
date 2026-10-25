@@ -106,7 +106,7 @@ class ForumController extends Controller
             abort(200, __('forum::forums.empty_forums'));
         }
 
-        $fid = int($request->input('fid'));
+        $fid = $request->integer('fid');
 
         $files = File::query()
             ->pending(Post::$morphName, auth()->id())

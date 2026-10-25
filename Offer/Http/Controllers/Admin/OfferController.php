@@ -136,7 +136,7 @@ class OfferController extends Controller
      */
     public function delete(DeleteSelectedRequest $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $type = $request->input('type') === Offer::OFFER ? Offer::OFFER : Offer::ISSUE;
 
         Offer::query()->whereIn('id', $request->ids())->get()->each->delete();

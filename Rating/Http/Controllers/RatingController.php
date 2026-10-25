@@ -104,7 +104,7 @@ class RatingController extends Controller
             ], 403);
         }
 
-        $id = int($request->input('id'));
+        $id = $request->integer('id');
 
         if (! $id) {
             return response()->json([

@@ -34,7 +34,7 @@ class AdvertController extends AdminController
      */
     public function edit(int $id, Request $request): View
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $link = $this->findLink($id);
 
         return view('advert::admin/adverts/edit', compact('link', 'page'));
@@ -49,7 +49,7 @@ class AdvertController extends AdminController
 
         $link->update($request->advertFields());
 
-        return redirect('admin/adverts?page=' . int($request->input('page', 1)))
+        return redirect('admin/adverts?page=' . $request->integer('page', 1))
             ->with('success', __('main.record_changed_success'));
     }
 
@@ -62,7 +62,7 @@ class AdvertController extends AdminController
 
         clearCache('adverts');
 
-        return redirect('admin/adverts?page=' . int($request->input('page', 1)))
+        return redirect('admin/adverts?page=' . $request->integer('page', 1))
             ->with('success', __('main.records_deleted_success'));
     }
 

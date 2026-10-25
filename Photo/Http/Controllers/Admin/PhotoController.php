@@ -32,7 +32,7 @@ class PhotoController extends AdminController
      */
     public function edit(int $id, Request $request): View
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $photo = $this->findPhoto($id);
 
         return view('photo::admin/photos/edit', compact('photo', 'page'));
@@ -45,7 +45,7 @@ class PhotoController extends AdminController
     {
         $this->findPhoto($id)->update($request->photoFields());
 
-        return redirect()->route('admin.photos.index', ['page' => int($request->input('page', 1))])
+        return redirect()->route('admin.photos.index', ['page' => $request->integer('page', 1)])
             ->with('success', __('photo::photos.photo_success_edited'));
     }
 
@@ -58,7 +58,7 @@ class PhotoController extends AdminController
             abort(500, __('main.directory_not_writable'));
         }
 
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $this->findPhoto($id)->delete();
 

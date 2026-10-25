@@ -23,6 +23,7 @@ class IndexController extends Controller
     public function index(Request $request): View
     {
         $user = $request->input('user');
+        $user = is_string($user) ? $user : null;
         $perPage = (int) setting('gift_per_page');
 
         $gifts = Gift::query()

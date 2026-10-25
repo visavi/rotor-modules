@@ -43,7 +43,8 @@ class ItemApiController extends Controller
     public function index(Request $request): JsonResource
     {
         $categoryId = $request->integer('category_id');
-        $city = $request->string('city')->trim()->value();
+        $city = $request->input('city');
+        $city = is_string($city) ? trim($city) : '';
         $user = $this->apiUser($request);
 
         // Сортировка та же, что на сайте: date, price, name

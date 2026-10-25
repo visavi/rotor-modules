@@ -28,6 +28,12 @@ class BoardSmokeTest extends ModuleTestCase
         $this->get(route('boards.index'))->assertOk();
     }
 
+    public function testIndexWithArrayCityOpens(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->get('/boards?city[]=Москва')->assertOk();
+    }
+
     public function testStatsOverThousandItems(): void
     {
         // Число сокращалось дважды: «1K» уходило в formatShortNum(int) и счётчик падал
@@ -184,6 +190,12 @@ class BoardSmokeTest extends ModuleTestCase
         $this->getJson(route('boards.cities', ['query' => 'М%']))
             ->assertOk()
             ->assertExactJson([]);
+    }
+
+    public function testCitiesWithArrayQueryIsEmpty(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->getJson('/boards/cities?query[]=Москва')->assertOk();
     }
 
     public function testCreateFormTakesCityFromProfile(): void

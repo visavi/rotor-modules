@@ -66,6 +66,14 @@ class ItemApiTest extends ModuleTestCase
             ->assertJsonPath('data.phone', '79001234567');
     }
 
+    public function testArrayCityIsIgnored(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $reader = User::factory()->create(['apikey' => Str::random(32)]);
+
+        $this->getJson('/api/items?city[]=Москва', ['Authorization' => 'Bearer ' . $reader->apikey])->assertOk();
+    }
+
     public function testViewSplitsMediaAndFiles(): void
     {
         $item = $this->createItem();

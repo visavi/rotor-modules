@@ -38,6 +38,10 @@ class SocialAuthController extends Controller
         'vk'     => VkProvider::class,
     ];
 
+    public function __construct(private readonly MailService $mail)
+    {
+    }
+
     /**
      * Redirect to provider OAuth page
      */
@@ -378,7 +382,7 @@ class SocialAuthController extends Controller
         if ($needsConfirm) {
             // Пароля у аккаунта нет, вход только через провайдера — в письме звёздочки,
             // как это делает повторная отправка в ядре
-            app(MailService::class)->queue('mailer.register', [
+            $this->mail->queue('mailer.register', [
                 'to'         => $email,
                 'subject'    => 'Регистрация на ' . setting('title'),
                 'login'      => $login,

@@ -43,6 +43,14 @@ class PaymentSmokeTest extends ModuleTestCase
             ->assertSee($buyer->login);
     }
 
+    public function testCardFormWithArrayPlaceOpens(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->actingAs(User::factory()->boss()->create())
+            ->get('/admin/paid-adverts/create-card?place[]=top_all')
+            ->assertOk();
+    }
+
     /**
      * Сеет настройки модуля (SettingSeeder в тестах очищает таблицу settings)
      */
@@ -130,6 +138,13 @@ class PaymentSmokeTest extends ModuleTestCase
     public function testStatusNotFound(): void
     {
         $this->get('/payments/status?token=unknown')->assertNotFound();
+    }
+
+    public function testStatusWithoutTokenIsNotFound(): void
+    {
+        // Без ?token= или с массивом страница возврата из оплаты падала с TypeError
+        $this->get('/payments/status')->assertNotFound();
+        $this->get('/payments/status?token[]=x')->assertNotFound();
     }
 
     public function testWebhookSucceeded(): void

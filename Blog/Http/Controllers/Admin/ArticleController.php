@@ -200,7 +200,7 @@ class ArticleController extends AdminController
      */
     public function deleteArticle(int $id, Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $article = $this->findArticle($id);
 

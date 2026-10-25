@@ -41,7 +41,7 @@ class AntimatController extends AdminController
      */
     public function delete(Request $request): RedirectResponse
     {
-        $word = Antimat::query()->find(int($request->input('id')));
+        $word = Antimat::query()->find($request->integer('id'));
 
         if (! $word) {
             return redirect()->route('admin.antimat.index')

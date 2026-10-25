@@ -45,9 +45,11 @@ class BlockController extends AdminController
     /**
      * Добавление блока
      */
-    public function create(Request $request): View
+    public function create(Request $request, FeedService $feed): View
     {
-        return $this->form(Block::draft($request->string('type')->value()));
+        $type = $request->input('type');
+
+        return $this->form(Block::draft(is_string($type) ? $type : ''), $feed);
     }
 
     /**
@@ -70,9 +72,9 @@ class BlockController extends AdminController
     /**
      * Редактирование блока
      */
-    public function edit(int $id): View
+    public function edit(int $id, FeedService $feed): View
     {
-        return $this->form(Block::findManageable($id));
+        return $this->form(Block::findManageable($id), $feed);
     }
 
     /**
@@ -230,9 +232,9 @@ class BlockController extends AdminController
     /**
      * Форма блока
      */
-    private function form(Block $block): View
+    private function form(Block $block, FeedService $feed): View
     {
-        $fields = $block->type === Block::ENTRIES && isAdmin(User::BOSS) ? $this->sampleEntry($block) : null;
+        $fields = $block->type === Block::ENTRIES && isAdmin(User::BOSS) ? $this->sampleEntry($block, $feed) : null;
 
         return view('home_builder::admin/form', compact('block', 'fields'));
     }
@@ -240,10 +242,10 @@ class BlockController extends AdminController
     /**
      * Пример записи для таблицы полей: последняя запись разделов блока, у нового блока — любого раздела
      */
-    private function sampleEntry(Block $block): ?Entry
+    private function sampleEntry(Block $block, FeedService $feed): ?Entry
     {
         $sources = $block->sources ?: array_keys(Block::sourceList());
-        $post = (new FeedService())->getLatest($sources, 1)->first();
+        $post = $feed->getLatest($sources, 1)->first();
 
         return $post ? Entry::from($post) : null;
     }

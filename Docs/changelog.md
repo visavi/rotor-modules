@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Страницы и поиск документации не падают с ошибкой 500, если в адресе передан массив `?query[]=`
 - Выдержка в поиске по документации не пропадает, если в первых 400 символах нет пробела
 - Хуки `onProfileValidate`, `onSettingsValidate` и `onRegisterValidate` получают валидатор Laravel (`Illuminate\Validation\Validator`) вместо `App\Support\Validator`: примеры переписаны на `$validator->errors()->add()`
 - Версионирование: `App\Support\Validator` помечен устаревшим, в новом коде модулей — FormRequest и `Validator::make()`

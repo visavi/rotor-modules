@@ -20,9 +20,11 @@ class TranslationController extends Controller
     {
         $groups = TranslationRepository::groups();
         $locales = TranslationRepository::locales();
-        $query = (string) $request->input('query', '');
+        $query = $request->input('query', '');
+        $query = is_string($query) ? $query : '';
 
-        $label = (string) $request->input('group', $groups[0]['label'] ?? '');
+        $label = $request->input('group', $groups[0]['label'] ?? '');
+        $label = is_string($label) ? $label : '';
         $current = collect($groups)->firstWhere('label', $label) ?: ($groups[0] ?? null);
 
         if ($query !== '') {

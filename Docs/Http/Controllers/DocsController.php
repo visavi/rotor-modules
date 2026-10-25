@@ -63,7 +63,8 @@ class DocsController extends Controller
 
     public function search(Request $request): View
     {
-        $query = $request->string('query')->trim()->value();
+        $query = $request->input('query');
+        $query = is_string($query) ? trim($query) : '';
         $results = mb_strlen($query) >= 3 ? $this->docs->search($query) : [];
         $menu = $this->docs->buildMenu(null, null);
 

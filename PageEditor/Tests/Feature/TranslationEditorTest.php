@@ -58,6 +58,14 @@ class TranslationEditorTest extends ModuleTestCase
         $response->assertSee('page_editor::files');
     }
 
+    public function testTranslationsPageWithArrayParametersOpens(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->actingAs($this->boss)
+            ->get('/admin/files/translations?query[]=x&group[]=y')
+            ->assertOk();
+    }
+
     public function testTranslationsSearchFindsKeyByValue(): void
     {
         $response = $this->actingAs($this->boss)->get(route('admin.files.translations', [

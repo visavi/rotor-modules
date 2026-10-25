@@ -28,9 +28,13 @@ class FileController extends Controller
      */
     public function __construct(Request $request)
     {
-        $this->root = (string) $request->input('root', 'views');
-        $this->path = PathResolver::normalize((string) $request->input('path', ''));
-        $this->file = PathResolver::normalize((string) $request->input('file', ''));
+        $root = $request->input('root', 'views');
+        $path = $request->input('path', '');
+        $file = $request->input('file', '');
+
+        $this->root = is_string($root) ? $root : 'views';
+        $this->path = PathResolver::normalize(is_string($path) ? $path : '');
+        $this->file = PathResolver::normalize(is_string($file) ? $file : '');
 
         // Корень, доступный только поиску, открывается на просмотр: сюда ведут
         // результаты поиска. Всё, что меняет файлы, закрыто ниже
@@ -155,7 +159,7 @@ class FileController extends Controller
         $root = $this->root;
         $path = $this->path;
         $file = $this->file;
-        $line = (int) $request->input('line');
+        $line = $request->integer('line');
 
         // Плашка над редактором: какой слой открыт и где лежит второй
         $override = $this->root === 'custom' ? null : OverrideResolver::override($this->root, $this->path, $this->file);

@@ -39,7 +39,7 @@ class TopicController extends Controller
         // Переход к сообщению: страница считается до загрузки темы — по pid
         // ходят и боты, и тяжёлый запрос с закладками ради редиректа не нужен.
         // Несуществующую тему отдаст 404 страница, куда ведёт редирект
-        $pid = int($request->input('pid'));
+        $pid = $request->integer('pid');
         if ($pid) {
             $position = Post::query()
                 ->where('topic_id', $id)
@@ -187,7 +187,7 @@ class TopicController extends Controller
             default           => null,
         };
 
-        $redirect = redirect()->route('topics.topic', ['id' => $topic->id, 'page' => int($request->input('page'))]);
+        $redirect = redirect()->route('topics.topic', ['id' => $topic->id, 'page' => $request->integer('page')]);
 
         if ($error) {
             return $redirect->withErrors($error);
@@ -317,7 +317,7 @@ class TopicController extends Controller
      */
     public function editPost(int $id, Request $request): View
     {
-        $page = int($request->input('page'));
+        $page = $request->integer('page');
         $post = Post::query()->with('topic')->findOrFail($id);
         $this->authorize('update', $post);
 
@@ -337,7 +337,7 @@ class TopicController extends Controller
             'edit_user_id' => $user->id,
         ]);
 
-        return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page'))])
+        return redirect()->route('topics.topic', ['id' => $post->topic_id, 'page' => $request->integer('page')])
             ->withFragment('post_' . $post->id)
             ->with('success', __('main.message_edited_success'));
     }
@@ -349,7 +349,7 @@ class TopicController extends Controller
     {
         $topic = Topic::query()->find($id);
         $vote = $topic ? Vote::query()->where('topic_id', $id)->first() : null;
-        $page = int($request->input('page'));
+        $page = $request->integer('page');
 
         if (! $vote) {
             if ($request->ajax()) {
@@ -359,7 +359,7 @@ class TopicController extends Controller
             abort(404, __('forum::forums.vote_not_found'));
         }
 
-        $poll = int($request->input('poll'));
+        $poll = $request->integer('poll');
         $answer = $poll ? $vote->answers()->where('id', $poll)->first() : null;
 
         $error = match (true) {

@@ -44,7 +44,8 @@ class ArticleApiController extends Controller
      */
     public function tags(Request $request): JsonResponse
     {
-        $query = $request->string('query')->trim()->value();
+        $query = $request->input('query');
+        $query = is_string($query) ? trim($query) : '';
 
         $tags = $query === ''
             ? Tag::cloud()
@@ -62,7 +63,8 @@ class ArticleApiController extends Controller
     public function index(Request $request): JsonResource
     {
         $categoryId = $request->integer('category_id');
-        $tag = $request->string('tag')->trim()->value();
+        $tag = $request->input('tag');
+        $tag = is_string($tag) ? trim($tag) : '';
         $user = $this->apiUser($request);
 
         // Сортировка та же, что на сайте: date, name, visits, rating, comments

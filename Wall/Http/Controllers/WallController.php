@@ -67,7 +67,7 @@ class WallController extends Controller
             ], 400);
         }
 
-        $id = int($request->input('id'));
+        $id = $request->integer('id');
 
         if (! $id) {
             return response()->json([

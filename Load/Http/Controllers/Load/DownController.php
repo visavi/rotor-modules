@@ -70,7 +70,7 @@ class DownController extends Controller
             abort(200, __('load::loads.empty_loads'));
         }
 
-        $cid = int($request->input('category'));
+        $cid = $request->integer('category');
         $down = new Down();
 
         $files = File::query()
@@ -99,7 +99,7 @@ class DownController extends Controller
      */
     public function edit(int $id, Request $request): View
     {
-        $cid = int($request->input('category'));
+        $cid = $request->integer('category');
         $down = Down::query()->findOrFail($id);
         $this->authorize('update', $down);
 

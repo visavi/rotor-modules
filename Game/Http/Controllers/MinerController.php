@@ -162,7 +162,7 @@ class MinerController extends Controller
     public function go(Request $request, #[CurrentUser] User $user): RedirectResponse|JsonResponse
     {
         $miner = $request->session()->get('miner');
-        $cell = int($request->input('cell'));
+        $cell = $request->integer('cell');
 
         if (! $miner || $miner['status'] !== null) {
             return redirect('games/miner');

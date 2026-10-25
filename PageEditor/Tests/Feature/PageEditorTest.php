@@ -57,6 +57,14 @@ class PageEditorTest extends ModuleTestCase
         $response->assertOk();
     }
 
+    public function testArrayParametersDoNotBreakPages(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->actingAs($this->boss)->get('/admin/files?root[]=views&path[]=x&file[]=y')->assertOk();
+        $this->actingAs($this->boss)->get('/admin/files/search?root[]=views')->assertNotFound();
+        $this->actingAs($this->boss)->get('/admin/files/search?query[]=x&mask[]=y')->assertOk();
+    }
+
     public function testMissingRootStillRejectsNestedPath(): void
     {
         $response = $this->actingAs($this->boss)->get('/admin/files?root=missing&path=sub');

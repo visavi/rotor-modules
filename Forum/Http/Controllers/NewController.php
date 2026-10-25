@@ -40,7 +40,7 @@ class NewController extends Controller
      */
     public function posts(Request $request): View
     {
-        $period = int($request->input('period'));
+        $period = $request->integer('period');
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');

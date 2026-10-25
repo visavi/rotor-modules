@@ -34,7 +34,7 @@ class GuestbookController extends AdminController
      */
     public function edit(int $id, Request $request): View
     {
-        $page = int($request->input('page'));
+        $page = $request->integer('page');
         $post = $this->findPost($id);
 
         return view('guestbook::admin/guestbook/edit', compact('post', 'page'));
@@ -53,7 +53,7 @@ class GuestbookController extends AdminController
         ]);
 
         return redirect()
-            ->route('admin.guestbook.index', ['page' => int($request->input('page'))])
+            ->route('admin.guestbook.index', ['page' => $request->integer('page')])
             ->with('success', __('main.message_edited_success'));
     }
 
@@ -62,7 +62,7 @@ class GuestbookController extends AdminController
      */
     public function reply(int $id, Request $request): View
     {
-        $page = int($request->input('page'));
+        $page = $request->integer('page');
         $post = $this->findPost($id);
 
         return view('guestbook::admin/guestbook/reply', compact('post', 'page'));
@@ -80,7 +80,7 @@ class GuestbookController extends AdminController
         ]);
 
         return redirect()
-            ->route('admin.guestbook.index', ['page' => int($request->input('page'))])
+            ->route('admin.guestbook.index', ['page' => $request->integer('page')])
             ->with('success', __('guestbook::guestbook.answer_success_added'));
     }
 
@@ -89,7 +89,7 @@ class GuestbookController extends AdminController
      */
     public function delete(Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $del = intar($request->input('chosen'));
 
         if (! $del) {
@@ -110,7 +110,7 @@ class GuestbookController extends AdminController
      */
     public function publish(Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $active = intar($request->input('chosen'));
 
         if (! $active) {

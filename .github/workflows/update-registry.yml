@@ -22,6 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Теги релизов нужны целиком: requires вышедшей версии читается с её тега
+          fetch-depth: 0
 
       - name: Release modules and publish registry.json
         env:
@@ -57,6 +60,7 @@ jobs:
             FOUND+=("$MODULE")
             TAG="$MODULE-$VERSION"
             ASSET="$MODULE.zip"
+            REQUIRES=$(get requires || true)
 
             CL_FILE="$MODULE/changelog.md"
             [ -f "$CL_FILE" ] || CL_FILE="$MODULE/CHANGELOG.md"
@@ -84,6 +88,14 @@ jobs:
               CHANGED=1
             else
               echo "[$MODULE] Release $TAG already exists"
+
+              # Вышедшую версию описывает её архив: requires — из module.php на теге релиза.
+              # В master requires поднимают в Unreleased раньше version, и чтение из master
+              # приписывало старому архиву ещё не вышедшее ядро — сайты не видели версию
+              TAG_REQUIRES=$(git show "$TAG:$MODULE/module.php" 2>/dev/null | grep -oP "'requires'\s*=>\s*'\K[^']+" || true)
+              if [ -n "$TAG_REQUIRES" ]; then
+                REQUIRES=$TAG_REQUIRES
+              fi
             fi
 
             # Скриншоты отдаются raw-ссылками на ветку по умолчанию: архив модуля
@@ -97,7 +109,7 @@ jobs:
 
             VERSION_ENTRY=$(jq -n \
               --arg version   "$VERSION" \
-              --arg requires  "$(get requires)" \
+              --arg requires  "$REQUIRES" \
               --arg url       "https://github.com/$REPO/releases/download/$TAG/$ASSET" \
               --arg changelog "$CHANGELOG" \
               '{version:$version,requires:$requires,download_url:$url}

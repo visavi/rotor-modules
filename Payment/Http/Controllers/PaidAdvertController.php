@@ -151,7 +151,8 @@ class PaidAdvertController extends AdminController
      */
     public function createCard(Request $request): View
     {
-        $card = new PaidAdvert(['place' => $request->input('place')]);
+        $place = $request->input('place');
+        $card = new PaidAdvert(['place' => in_array($place, PaidAdvert::CARD_PLACES, true) ? $place : null]);
 
         return view('payment::admin/paid-adverts/edit-card', compact('card'));
     }

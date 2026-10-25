@@ -44,7 +44,7 @@ class BookmarkController extends Controller
             return redirect('/');
         }
 
-        $topic = Topic::query()->find(int($request->input('tid')));
+        $topic = Topic::query()->find($request->integer('tid'));
 
         if (! $topic) {
             return response()->json([
@@ -90,7 +90,7 @@ class BookmarkController extends Controller
     public function delete(Request $request): RedirectResponse
     {
         $topicIds = intar($request->input('del'));
-        $redirect = redirect()->route('forums.bookmarks', ['page' => int($request->input('page'))]);
+        $redirect = redirect()->route('forums.bookmarks', ['page' => $request->integer('page')]);
 
         if (! $topicIds) {
             return $redirect->withErrors(__('forum::forums.bookmarks_missing'));

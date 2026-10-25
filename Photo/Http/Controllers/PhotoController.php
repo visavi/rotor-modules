@@ -100,7 +100,7 @@ class PhotoController extends Controller
      */
     public function edit(int $id, Request $request): View
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $photo = Photo::query()->findOrFail($id);
         $this->authorize('update', $photo);
 
@@ -119,7 +119,7 @@ class PhotoController extends Controller
 
         $photo->update($request->photoFields());
 
-        return redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))])
+        return redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => $request->integer('page', 1)])
             ->with('success', __('photo::photos.photo_success_edited'));
     }
 
@@ -131,7 +131,7 @@ class PhotoController extends Controller
         $photo = Photo::query()->findOrFail($id);
         $this->authorize('update', $photo);
 
-        $redirect = redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => int($request->input('page', 1))]);
+        $redirect = redirect()->route('photos.user-albums', ['user' => auth()->user()?->login, 'page' => $request->integer('page', 1)]);
 
         if ($photo->count_comments) {
             return $redirect->withErrors(__('photo::photos.photo_has_comments'));

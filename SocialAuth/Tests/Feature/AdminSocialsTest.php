@@ -46,6 +46,14 @@ class AdminSocialsTest extends ModuleTestCase
             ->assertSee('Google');
     }
 
+    public function testIndexWithArrayProviderOpens(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->actingAs($this->admin)
+            ->get('/admin/socials?provider[]=vk')
+            ->assertOk();
+    }
+
     public function testIndexFiltersByProvider(): void
     {
         $googleUser = User::factory()->create(['login' => 'google_user']);

@@ -250,4 +250,12 @@ class ArticleApiTest extends ModuleTestCase
             ->assertJsonMissing(['name' => 'draftonly'])
             ->assertJsonPath('data.0', ['name' => 'php', 'count' => 2]);
     }
+
+    public function testArrayTagParametersAreIgnored(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->getJson('/api/articles?tag[]=php')->assertOk();
+        $this->getJson('/blogs/tags-search?query[]=php')->assertOk();
+        $this->getJson('/api/tags?query[]=php', ['Authorization' => 'Bearer ' . User::factory()->create(['apikey' => Str::random(32)])->apikey])->assertOk();
+    }
 }

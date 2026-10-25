@@ -74,7 +74,7 @@ class ChatController extends AdminController
     {
         $post = Chat::query()->findOrFail($id);
         $this->authorize('update', $post);
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         return view('admin_chat::admin/chats/edit', compact('post', 'page'));
     }
@@ -86,7 +86,7 @@ class ChatController extends AdminController
     {
         $post = Chat::query()->findOrFail($id);
         $this->authorize('update', $post);
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $post->update([
             'text'         => $request->string('msg')->value(),

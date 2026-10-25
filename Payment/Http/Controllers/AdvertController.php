@@ -110,7 +110,8 @@ class AdvertController extends Controller
      */
     public function status(Request $request): View
     {
-        $order = $this->orderService->getOrderByField('token', $request->input('token'));
+        $token = $request->input('token');
+        $order = is_string($token) ? $this->orderService->getOrderByField('token', $token) : null;
 
         if (! $order) {
             abort(404, __('payment::payments.payment_not_found'));

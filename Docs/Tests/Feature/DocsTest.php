@@ -113,6 +113,12 @@ class DocsTest extends ModuleTestCase
             ->assertSee('module.php');
     }
 
+    public function testPageWithArrayQueryIsRendered(): void
+    {
+        // Массив вместо строки в адресе раньше ронял меню поиска с 500
+        $this->get('/docs/rotor-modules?query[]=module')->assertOk();
+    }
+
     public function testDefaultPageIsInstallation(): void
     {
         $this->get('/docs')->assertOk()->assertSee('Установка');
@@ -187,6 +193,12 @@ class DocsTest extends ModuleTestCase
         $this->get('/docs/find?query=мо')
             ->assertOk()
             ->assertSee('Минимум 3 символа');
+    }
+
+    public function testArrayQueryIsIgnored(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->get('/docs/find?query[]=module')->assertOk();
     }
 
     public function testSearchPageShowsResults(): void

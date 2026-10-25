@@ -35,7 +35,7 @@ class NewsController extends AdminController
     public function edit(int $id, Request $request): View
     {
         $news = $this->findNews($id);
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         return view('news::admin/news/edit', compact('news', 'page'));
     }
@@ -108,7 +108,7 @@ class NewsController extends AdminController
      */
     public function delete(int $id, Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $this->findNews($id)->delete();
 

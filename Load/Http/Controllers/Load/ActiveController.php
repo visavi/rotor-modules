@@ -18,7 +18,7 @@ class ActiveController extends Controller
      */
     public function files(Request $request): View
     {
-        $active = (bool) $request->input('active', true);
+        $active = $request->boolean('active', true);
         $user = $this->owner($request);
 
         if (auth()->check() && auth()->id() !== $user->id) {

@@ -195,6 +195,12 @@ class HomeBuilderTest extends ModuleTestCase
             ->assertSee($code, false);
     }
 
+    public function testCreateWithArrayTypeIsNotFound(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->actingAs($this->boss)->get('/admin/home-builder/create?type[]=html')->assertNotFound();
+    }
+
     public function testHtmlBlockOfTagsOnlyIsAccepted(): void
     {
         // Длина кода считалась без тегов: виджет из одного iframe отклонялся как пустой

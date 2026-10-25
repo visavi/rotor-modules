@@ -244,7 +244,7 @@ class ForumController extends AdminController
      */
     public function actionTopic(int $id, Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $topic = Topic::query()->findOrFail($id);
 
@@ -287,7 +287,7 @@ class ForumController extends AdminController
      */
     public function deleteTopic(int $id, Request $request): RedirectResponse
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
 
         $topic = Topic::query()->findOrFail($id);
 
@@ -338,7 +338,7 @@ class ForumController extends AdminController
      */
     public function editPost(int $id, Request $request): View
     {
-        $page = int($request->input('page', 1));
+        $page = $request->integer('page', 1);
         $post = $this->findPost($id);
 
         return view('forum::admin/forums/edit_post', compact('post', 'page'));
@@ -356,7 +356,7 @@ class ForumController extends AdminController
             'edit_user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => int($request->input('page', 1))])
+        return redirect()->route('admin.topics.topic', ['id' => $post->topic_id, 'page' => $request->integer('page', 1)])
             ->with('success', __('main.message_edited_success'));
     }
 
@@ -365,7 +365,7 @@ class ForumController extends AdminController
      */
     public function deletePosts(DeleteSelectedRequest $request): RedirectResponse
     {
-        $topic = $this->findTopic(int($request->input('tid')));
+        $topic = $this->findTopic($request->integer('tid'));
 
         // Только сообщения этой темы: счётчики пересчитываются у неё одной
         Post::query()
@@ -376,7 +376,7 @@ class ForumController extends AdminController
 
         $topic->restatement();
 
-        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => int($request->input('page', 1))])
+        return redirect()->route('admin.topics.topic', ['id' => $topic->id, 'page' => $request->integer('page', 1)])
             ->with('success', __('main.messages_deleted_success'));
     }
 

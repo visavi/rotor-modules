@@ -130,7 +130,7 @@ class ArticleController extends Controller
             abort(404, __('blog::blogs.categories_not_created'));
         }
 
-        $cid = int($request->input('cid'));
+        $cid = $request->integer('cid');
         $article = new Article();
 
         $files = File::query()
@@ -317,7 +317,7 @@ class ArticleController extends Controller
     {
         $query = $request->input('query');
 
-        if (Str::length($query) < 2) {
+        if (! is_string($query) || Str::length($query) < 2) {
             return response()->json();
         }
 
@@ -375,7 +375,7 @@ class ArticleController extends Controller
      */
     public function userArticles(Request $request): View
     {
-        $active = (bool) $request->input('active', true);
+        $active = $request->boolean('active', true);
         $login = $request->input('user', auth()->user()?->login);
         $user = User::findByLoginOrFail($login);
 

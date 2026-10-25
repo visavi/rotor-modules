@@ -47,6 +47,12 @@ class GiftTest extends ModuleTestCase
             ->assertSee('value="' . $this->recipient->login . '"', false);
     }
 
+    public function testIndexWithArrayUserOpens(): void
+    {
+        // Массив вместо строки в адресе раньше ронял страницу с 500
+        $this->get('/gifts?user[]=' . $this->recipient->login)->assertOk();
+    }
+
     public function testGuestCannotSend(): void
     {
         $this->get('/gifts/send/' . $this->gift->id)->assertForbidden();

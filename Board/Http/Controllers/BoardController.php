@@ -48,7 +48,8 @@ class BoardController extends Controller
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');
-        $city = $request->string('city')->trim()->value();
+        $city = $request->input('city');
+        $city = is_string($city) ? trim($city) : '';
 
         [$sorting, $orderBy] = Item::getSorting($sort, $order);
 
@@ -89,7 +90,8 @@ class BoardController extends Controller
      */
     public function cities(Request $request): JsonResponse
     {
-        $query = $request->string('query')->trim()->value();
+        $query = $request->input('query');
+        $query = is_string($query) ? trim($query) : '';
 
         if (Str::length($query) < 2) {
             return response()->json([]);
@@ -154,7 +156,7 @@ class BoardController extends Controller
             abort(200, __('board::boards.categories_not_created'));
         }
 
-        $bid = int($request->input('bid'));
+        $bid = $request->integer('bid');
 
         $files = File::query()
             ->pending(Item::$morphName, auth()->id())

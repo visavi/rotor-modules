@@ -18,14 +18,16 @@ class SearchController extends Controller
     public function index(Request $request): View
     {
         $roots = config('page_editor.search_roots', []);
-        $root = (string) $request->input('root', $roots[0] ?? 'views');
+        $root = $request->input('root', $roots[0] ?? 'views');
 
-        if (! in_array($root, $roots, true)) {
+        if (! is_string($root) || ! in_array($root, $roots, true)) {
             abort(404);
         }
 
-        $query = (string) $request->input('query', '');
-        $mask = (string) $request->input('mask', '*');
+        $query = $request->input('query', '');
+        $mask = $request->input('mask', '*');
+        $query = is_string($query) ? $query : '';
+        $mask = is_string($mask) ? $mask : '*';
         $caseSensitive = $request->boolean('case');
         $regex = $request->boolean('regex');
 
