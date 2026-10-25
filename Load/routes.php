@@ -19,8 +19,8 @@ Route::redirect('/downs/comment/{id}/{cid}', '/downs/{id}?cid={cid}', 301);
 Route::redirect('/downs/end/{id}', '/downs/{id}', 301);
 Route::redirect('/downs/rss/{id}', '/downs/{id}', 301);
 Route::redirect('/downs/{id}/rss', '/downs/{id}', 301);
-Route::get('/downs/zip/{id}', [DownController::class, 'redirectZip']);
-Route::get('/downs/zip/{id}/{fid}', [DownController::class, 'redirectZip']);
+Route::get('/downs/zip/{id}', [DownController::class, 'redirectZip'])->name('downs.zip-legacy');
+Route::get('/downs/zip/{id}/{fid}', [DownController::class, 'redirectZip'])->name('downs.zip-legacy-file');
 
 /* Категории загрузок */
 Route::middleware('web')->group(function () {

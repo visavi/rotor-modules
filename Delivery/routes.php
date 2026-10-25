@@ -7,6 +7,6 @@ use Modules\Delivery\Http\Controllers\Admin\DeliveryController;
 Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
-        Route::get('/delivery', [DeliveryController::class, 'index']);
+        Route::get('/delivery', [DeliveryController::class, 'index'])->name('admin.delivery.index');
         Route::post('/delivery', [DeliveryController::class, 'send']);
     });

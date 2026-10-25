@@ -32,7 +32,6 @@
                                 <form action="/admin/gifts/{{ $gift->id }}" method="post" class="d-inline" data-confirm="{{ __('gift::gifts.confirm_delete_gift') }}">
                                     @csrf
                                     @method('DELETE')
-                                    <input type="hidden" name="user" value="{{ $gift->user->login }}">
                                     <button type="submit" class="btn btn-link p-0" data-bs-toggle="tooltip" title="{{ __('main.delete') }}"><i class="fa fa-times text-muted"></i></button>
                                 </form>
                             </div>

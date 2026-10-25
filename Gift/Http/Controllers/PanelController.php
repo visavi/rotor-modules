@@ -6,7 +6,6 @@ namespace Modules\Gift\Http\Controllers;
 
 use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Gift\Http\Requests\GiftPricesRequest;
 use Modules\Gift\Models\Gift;
@@ -42,19 +41,18 @@ class PanelController extends AdminController
     /**
      * Removes gifts
      */
-    public function delete(int $id, Request $request): RedirectResponse
+    public function delete(int $id): RedirectResponse
     {
-        $login = $request->input('user');
-        $gift = GiftsUser::query()->find($id);
+        $gift = GiftsUser::query()->with('user')->find($id);
 
         if (! $gift) {
-            return redirect('gifts/' . $login)
-                ->withErrors(__('gift::gifts.gift_not_found'));
+            return back()->withErrors(__('gift::gifts.gift_not_found'));
         }
 
         $gift->delete();
 
-        return redirect('gifts/' . $login)
+        // Возврат к подаркам владельца, а не к логину из запроса: массив в нём ронял удаление
+        return redirect('gifts/' . $gift->user->login)
             ->with('success', __('gift::gifts.gift_deleted'));
     }
 }

@@ -8,8 +8,8 @@ use Modules\Lottery\Http\Controllers\IndexController;
 Route::middleware('web')
     ->prefix('lottery')
     ->group(function () {
-        Route::get('/', [IndexController::class, 'index']);
-        Route::post('/buy', [IndexController::class, 'buy'])->middleware('check.user');
+        Route::get('/', [IndexController::class, 'index'])->name('lottery.index');
+        Route::post('/buy', [IndexController::class, 'buy'])->middleware('check.user')->name('lottery.buy');
     });
 
 /* Админ — настройки лотереи */

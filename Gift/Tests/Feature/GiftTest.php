@@ -159,14 +159,33 @@ class GiftTest extends ModuleTestCase
         ]);
 
         $this->actingAs($boss)
-            ->delete('/admin/gifts/' . $given->id, ['user' => $this->recipient->login])
+            ->delete('/admin/gifts/' . $given->id)
             ->assertRedirect('gifts/' . $this->recipient->login)
             ->assertSessionHas('success');
 
         $this->assertNull($given->fresh());
 
         $this->actingAs($boss)
-            ->delete('/admin/gifts/' . $given->id, ['user' => $this->recipient->login])
+            ->delete('/admin/gifts/' . $given->id)
             ->assertSessionHasErrors();
+    }
+
+    public function testDeleteRedirectsToOwnerNotRequestLogin(): void
+    {
+        // Логин брался из запроса: массив в user ронял удаление с ошибкой 500
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $given = GiftsUser::factory()->create([
+            'gift_id'      => $this->gift->id,
+            'user_id'      => $this->recipient->id,
+            'send_user_id' => $this->user->id,
+            'text'         => '',
+            'created_at'   => now(),
+            'deleted_at'   => now()->addDays(30),
+        ]);
+
+        $this->actingAs($boss)
+            ->delete('/admin/gifts/' . $given->id, ['user' => ['x']])
+            ->assertRedirect('gifts/' . $this->recipient->login)
+            ->assertSessionHas('success');
     }
 }

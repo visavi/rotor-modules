@@ -10,12 +10,12 @@ Route::middleware(['web', 'check.user'])
     ->group(function () {
         Route::prefix('ratings')
             ->group(function () {
-                Route::get('/{login}/gave', 'gave');
-                Route::get('/{login}/{received?}', 'received');
-                Route::post('/delete', 'delete');
+                Route::get('/{login}/gave', 'gave')->name('ratings.gave');
+                Route::get('/{login}/{received?}', 'received')->name('ratings.received');
+                Route::post('/delete', 'delete')->name('ratings.delete');
             });
 
-        Route::get('/users/{login}/rating', 'index');
+        Route::get('/users/{login}/rating', 'index')->name('users.rating');
         Route::post('/users/{login}/rating', 'store');
     });
 

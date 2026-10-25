@@ -6,7 +6,8 @@ use Modules\Counter\Http\Controllers\CounterController;
 
 /* Статистика посещений */
 Route::middleware('web')
-    ->get('/counters', [CounterController::class, 'index']);
+    ->get('/counters', [CounterController::class, 'index'])
+    ->name('counters.index');
 
 /* Админ — настройки */
 Route::middleware(['web', 'check.admin', 'admin.logger'])

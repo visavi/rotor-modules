@@ -9,7 +9,7 @@ Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
         Route::controller(CheckerController::class)
             ->prefix('checkers')
             ->group(function () {
-                Route::match(['get', 'post'], '/', 'index');
-                Route::post('/scan', 'scan');
+                Route::match(['get', 'post'], '/', 'index')->name('admin.checkers.index');
+                Route::post('/scan', 'scan')->name('admin.checkers.scan');
             });
     });

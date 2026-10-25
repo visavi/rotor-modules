@@ -10,18 +10,18 @@ use Modules\Gift\Http\Controllers\PanelController;
 Route::middleware('web')
     ->prefix('gifts')
     ->group(function () {
-        Route::get('/', [IndexController::class, 'index']);
-        Route::get('/send/{id}', [IndexController::class, 'send'])->middleware('check.user');
+        Route::get('/', [IndexController::class, 'index'])->name('gifts.index');
+        Route::get('/send/{id}', [IndexController::class, 'send'])->middleware('check.user')->name('gifts.send');
         Route::post('/send/{id}', [IndexController::class, 'store'])->middleware('check.user');
-        Route::get('/{login}', [IndexController::class, 'gifts']);
+        Route::get('/{login}', [IndexController::class, 'gifts'])->name('gifts.user');
     });
 
 Route::middleware(['web', 'check.admin:boss', 'admin.logger'])
     ->prefix('admin')
     ->group(function () {
-        Route::get('/gifts', [PanelController::class, 'index']);
+        Route::get('/gifts', [PanelController::class, 'index'])->name('admin.gifts.index');
         Route::post('/gifts', [PanelController::class, 'update']);
-        Route::delete('/gifts/{id}', [PanelController::class, 'delete']);
+        Route::delete('/gifts/{id}', [PanelController::class, 'delete'])->name('admin.gifts.delete');
 
         Route::controller(GiftSettingController::class)
             ->name('gift.')
