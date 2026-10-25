@@ -119,7 +119,9 @@ class ForumController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        CategoryTree::reorder(Forum::class, $request->string('order')->toString());
+        $order = $request->input('order');
+
+        CategoryTree::reorder(Forum::class, is_string($order) ? $order : '');
 
         return redirect()
             ->route('admin.forums.index')

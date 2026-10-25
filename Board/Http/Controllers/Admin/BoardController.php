@@ -73,7 +73,9 @@ class BoardController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        CategoryTree::reorder(Board::class, $request->string('order')->toString());
+        $order = $request->input('order');
+
+        CategoryTree::reorder(Board::class, is_string($order) ? $order : '');
 
         return redirect()
             ->route('admin.boards.categories')

@@ -189,6 +189,17 @@ class UserFieldTest extends ModuleTestCase
         $this->assertSame(2, $this->field->fresh()->sort);
     }
 
+    public function testArraySortOrderIsIgnored(): void
+    {
+        $sort = $this->field->fresh()->sort;
+
+        $this->actingAs(User::factory()->boss()->create())
+            ->post('/admin/user-fields/sort', ['order' => [(string) $this->field->id]])
+            ->assertRedirect('admin/user-fields');
+
+        $this->assertSame($sort, $this->field->fresh()->sort);
+    }
+
     /**
      * Положения в форме нет: новое поле встаёт последним
      */

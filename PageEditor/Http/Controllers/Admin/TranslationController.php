@@ -78,8 +78,10 @@ class TranslationController extends Controller
     {
         $pattern = '|^[a-z0-9_]+$|';
 
-        $namespace = PathResolver::normalize((string) $request->input('namespace', ''));
-        $group = PathResolver::normalize((string) $request->input('group', ''));
+        $namespace = $request->input('namespace', '');
+        $group = $request->input('group', '');
+        $namespace = PathResolver::normalize(is_string($namespace) ? $namespace : '');
+        $group = PathResolver::normalize(is_string($group) ? $group : '');
 
         if ($namespace !== '' && ! preg_match($pattern, $namespace)) {
             abort(404);
@@ -96,6 +98,11 @@ class TranslationController extends Controller
 
         foreach ($lines as $key => $values) {
             foreach ((array) $values as $locale => $value) {
+                // Перевод — строка; лишний уровень (lines[ключ][локаль][]=) пропускаем
+                if (is_array($value)) {
+                    continue;
+                }
+
                 $byLocale[$locale][$key] = (string) $value;
             }
         }

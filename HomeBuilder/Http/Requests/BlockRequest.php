@@ -156,9 +156,11 @@ class BlockRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $type = $this->input('type');
+
         $this->block = $this->route('id')
             ? Block::findManageable((int) $this->route('id'))
-            : Block::draft($this->string('type')->value());
+            : Block::draft(is_string($type) ? $type : '');
 
         // Имя нового шаблона — без расширения, даже если его вписали
         if (is_string($this->input('template_name'))) {

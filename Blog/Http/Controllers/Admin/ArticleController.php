@@ -46,7 +46,9 @@ class ArticleController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        CategoryTree::reorder(Blog::class, $request->string('order')->toString());
+        $order = $request->input('order');
+
+        CategoryTree::reorder(Blog::class, is_string($order) ? $order : '');
 
         return redirect()
             ->route('admin.blogs.index')

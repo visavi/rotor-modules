@@ -32,6 +32,20 @@ class ForumSortTest extends ModuleTestCase
             ->assertForbidden();
     }
 
+    public function testArrayOrderIsIgnored(): void
+    {
+        $boss = User::factory()->boss()->create();
+
+        $root = Forum::factory()->create(['title' => 'Root', 'sort' => 1]);
+        $child = Forum::factory()->create(['title' => 'Child', 'parent_id' => $root->id, 'sort' => 2]);
+
+        $this->actingAs($boss)
+            ->post(route('admin.forums.sort'), ['order' => ["{$child->id}:0"]])
+            ->assertRedirect(route('admin.forums.index'));
+
+        self::assertSame($root->id, (int) $child->fresh()->parent_id);
+    }
+
     public function testBossMovesBranchWithChildren(): void
     {
         $boss = User::factory()->boss()->create();

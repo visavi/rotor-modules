@@ -53,7 +53,8 @@ class UserFieldController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        $ids = array_filter(array_map('intval', explode(',', $request->string('order')->toString())));
+        $order = $request->input('order');
+        $ids = array_filter(array_map('intval', explode(',', is_string($order) ? $order : '')));
 
         foreach (array_values($ids) as $position => $id) {
             UserField::query()->where('id', $id)->update(['sort' => $position + 1]);

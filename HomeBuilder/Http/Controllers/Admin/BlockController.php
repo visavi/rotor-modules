@@ -140,7 +140,7 @@ class BlockController extends AdminController
      */
     public function preset(Request $request): RedirectResponse
     {
-        $name = $request->string('preset')->value();
+        $name = $request->input('preset');
 
         if (! in_array($name, Presets::NAMES, true)) {
             abort(404, __('home_builder::home_builder.preset_not_found'));
@@ -186,7 +186,8 @@ class BlockController extends AdminController
      */
     public function sort(Request $request): JsonResponse
     {
-        $ids = array_map(int(...), explode(',', $request->string('sort')->value()));
+        $sort = $request->input('sort');
+        $ids = array_map(int(...), explode(',', is_string($sort) ? $sort : ''));
         $current = Block::query()->pluck('id')->all();
 
         if (count($ids) !== count($current) || array_diff($current, $ids)) {

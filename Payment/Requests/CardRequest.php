@@ -51,7 +51,7 @@ class CardRequest extends FormRequest
                 'required',
                 'in:' . implode(',', array_keys($places)),
                 static function (string $attribute, mixed $value, Closure $fail) use ($places) {
-                    $place = $places[$value] ?? null;
+                    $place = is_int($value) || is_string($value) ? ($places[$value] ?? null) : null;
 
                     if ($place && $place['taken'] >= $place['limit']) {
                         $fail(__('payment::payments.cards.place_full', ['date' => dateFixed($place['freeAt'])]));

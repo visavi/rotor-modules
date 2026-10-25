@@ -22,6 +22,20 @@ class LoadSortTest extends ModuleTestCase
             ->assertForbidden();
     }
 
+    public function testArrayOrderIsIgnored(): void
+    {
+        $boss = User::factory()->boss()->create();
+
+        $root = Load::factory()->create(['name' => 'Root', 'sort' => 1]);
+        $child = Load::factory()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 2]);
+
+        $this->actingAs($boss)
+            ->post(route('admin.loads.sort'), ['order' => ["{$child->id}:0"]])
+            ->assertRedirect(route('admin.loads.index'));
+
+        self::assertSame($root->id, (int) $child->fresh()->parent_id);
+    }
+
     public function testBossMovesBranchWithChildren(): void
     {
         $boss = User::factory()->boss()->create();

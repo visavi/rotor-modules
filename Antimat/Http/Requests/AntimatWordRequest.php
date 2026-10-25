@@ -33,6 +33,11 @@ class AntimatWordRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['word' => Str::lower($this->string('word')->value())]);
+        $word = $this->input('word');
+
+        // Не строку (?word[]=) отклонит правило
+        if (is_string($word)) {
+            $this->merge(['word' => Str::lower($word)]);
+        }
     }
 }

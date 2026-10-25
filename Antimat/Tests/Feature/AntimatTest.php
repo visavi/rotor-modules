@@ -184,6 +184,15 @@ class AntimatTest extends ModuleTestCase
         $this->assertDatabaseHas('antimat', ['string' => 'тестослово']);
     }
 
+    public function testAddArrayWordFails(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/antimat', ['word' => ['тестослово']])
+            ->assertSessionHasErrors('word');
+
+        $this->assertDatabaseMissing('antimat', ['string' => 'тестослово']);
+    }
+
     public function testAddWordIsLowercased(): void
     {
         $this->actingAs($this->admin)

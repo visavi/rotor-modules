@@ -22,6 +22,20 @@ class BoardSortTest extends ModuleTestCase
             ->assertForbidden();
     }
 
+    public function testArrayOrderIsIgnored(): void
+    {
+        $boss = User::factory()->boss()->create();
+
+        $root = Board::factory()->create(['name' => 'Root', 'sort' => 1]);
+        $child = Board::factory()->create(['name' => 'Child', 'parent_id' => $root->id, 'sort' => 2]);
+
+        $this->actingAs($boss)
+            ->post(route('admin.boards.sort'), ['order' => ["{$child->id}:0"]])
+            ->assertRedirect(route('admin.boards.categories'));
+
+        self::assertSame($root->id, (int) $child->fresh()->parent_id);
+    }
+
     public function testBossMovesBranchWithChildren(): void
     {
         $boss = User::factory()->boss()->create();

@@ -201,6 +201,33 @@ class PageEditorTest extends ModuleTestCase
         $this->assertFileDoesNotExist($path);
     }
 
+    public function testArrayFieldsKeepFileUntouched(): void
+    {
+        $path = resource_path('views/page_editor_array.blade.php');
+        file_put_contents($path, 'body');
+
+        // Массив в msg не пустая строка: иначе файл молча затирался бы
+        $this->actingAs($this->boss)->post(route('admin.files.edit', [
+            'root' => 'views',
+            'file' => 'page_editor_array.blade.php',
+        ]), ['msg' => ['hello']])->assertRedirect()->assertSessionHasErrors('msg');
+
+        $this->actingAs($this->boss)->delete(route('admin.files.delete'), [
+            'root'     => 'views',
+            'filename' => ['page_editor_array.blade.php'],
+        ])->assertRedirect()->assertSessionHasErrors();
+
+        $this->actingAs($this->boss)->post(route('admin.files.rename'), [
+            'root'     => 'views',
+            'filename' => ['page_editor_array.blade.php'],
+            'newname'  => 'page_editor_renamed.blade.php',
+        ])->assertRedirect()->assertSessionHasErrors();
+
+        $this->assertSame('body', file_get_contents($path));
+
+        unlink($path);
+    }
+
     public function testDeleteRemovesDirectoryWithContents(): void
     {
         $dir = resource_path('views/page_editor_dir');

@@ -199,6 +199,13 @@ class FileController extends Controller
 
         $full = $this->editableFile();
         $params = ['root' => $this->root, 'path' => $this->path, 'file' => $this->file];
+        $content = $request->input('msg', '');
+
+        // Массив (msg[]=) не пустая строка: иначе запись молча стёрла бы файл
+        if (! is_string($content)) {
+            return redirect()->route('admin.files.edit', $params)
+                ->withErrors(['msg' => __('validator.text')]);
+        }
 
         // Вторая кнопка формы: содержимое уходит в custom, оригинал остаётся нетронутым
         $toOverride = $request->input('target') === 'custom'
@@ -221,7 +228,7 @@ class FileController extends Controller
         }
 
         try {
-            FileWriter::put($target, self::normalizeContent($request->string('msg')->value()));
+            FileWriter::put($target, self::normalizeContent($content));
         } catch (RuntimeException) {
             return redirect()->route('admin.files.edit', $params)
                 ->withInput()
@@ -319,8 +326,10 @@ class FileController extends Controller
         $directory = $this->writableDirectory();
         $params = ['root' => $this->root, 'path' => $this->path];
 
-        $filename = PathResolver::normalize($request->string('filename')->value());
-        $dirname = PathResolver::normalize($request->string('dirname')->value());
+        $filename = $request->input('filename');
+        $dirname = $request->input('dirname');
+        $filename = PathResolver::normalize(is_string($filename) ? $filename : '');
+        $dirname = PathResolver::normalize(is_string($dirname) ? $dirname : '');
 
         // Пустое имя обязано отсекаться: is_file/is_dir от "<каталог>/" дают true,
         // и удаление ушло бы на сам текущий каталог
@@ -361,8 +370,10 @@ class FileController extends Controller
         $directory = $this->writableDirectory();
         $params = ['root' => $this->root, 'path' => $this->path];
 
-        $name = PathResolver::normalize($request->string('filename')->value());
-        $newName = PathResolver::normalize($request->string('newname')->value());
+        $name = $request->input('filename');
+        $newName = $request->input('newname');
+        $name = PathResolver::normalize(is_string($name) ? $name : '');
+        $newName = PathResolver::normalize(is_string($newName) ? $newName : '');
 
         // Расширение проверяем той же меркой, что и при создании: иначе файл уезжает
         // в нередактируемые, и открыть его, чтобы вернуть имя, уже нельзя

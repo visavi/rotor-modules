@@ -179,6 +179,23 @@ class TranslationEditorTest extends ModuleTestCase
      * То же самое для group: "../.." в этом поле тоже должно отклоняться, а не только
      * в namespace
      */
+    public function testSaveWithArraysDoesNotCrash(): void
+    {
+        $this->actingAs($this->boss)->post(route('admin.files.translations.save'), [
+            'namespace' => 'page_editor',
+            'group'     => ['files'],
+            'lines'     => ['file_not_exist' => ['ru' => 'Нет такого файла']],
+        ])->assertNotFound();
+
+        $this->actingAs($this->boss)->post(route('admin.files.translations.save'), [
+            'namespace' => 'page_editor',
+            'group'     => 'files',
+            'lines'     => ['file_not_exist' => ['ru' => ['Нет такого файла']]],
+        ])->assertRedirect();
+
+        $this->assertFileDoesNotExist(TranslationRepository::overlayPath('page_editor', 'files', 'ru'));
+    }
+
     public function testSaveRejectsForgedGroup(): void
     {
         $response = $this->actingAs($this->boss)->post(route('admin.files.translations.save'), [

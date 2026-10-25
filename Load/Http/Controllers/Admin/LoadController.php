@@ -46,7 +46,9 @@ class LoadController extends AdminController
      */
     public function sort(Request $request): RedirectResponse
     {
-        CategoryTree::reorder(Load::class, $request->string('order')->toString());
+        $order = $request->input('order');
+
+        CategoryTree::reorder(Load::class, is_string($order) ? $order : '');
 
         return redirect()
             ->route('admin.loads.index')

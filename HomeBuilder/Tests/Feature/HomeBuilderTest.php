@@ -199,6 +199,7 @@ class HomeBuilderTest extends ModuleTestCase
     {
         // Массив вместо строки в адресе раньше ронял страницу с 500
         $this->actingAs($this->boss)->get('/admin/home-builder/create?type[]=html')->assertNotFound();
+        $this->actingAs($this->boss)->post('/admin/home-builder/create?type[]=html', $this->form())->assertNotFound();
     }
 
     public function testHtmlBlockOfTagsOnlyIsAccepted(): void
@@ -558,7 +559,7 @@ class HomeBuilderTest extends ModuleTestCase
         $first = $this->createBlock(['type' => Block::TEXT, 'text' => '<p>Первый</p>', 'sort' => 0]);
         $second = $this->createBlock(['type' => Block::TEXT, 'text' => '<p>Второй</p>', 'sort' => 1]);
 
-        foreach ([(string) $second->id, $second->id . ',' . ($second->id + 100), $second->id . ',' . $second->id, ''] as $sort) {
+        foreach ([(string) $second->id, $second->id . ',' . ($second->id + 100), $second->id . ',' . $second->id, '', [$first->id, $second->id]] as $sort) {
             $this->actingAs($this->admin)
                 ->post('/admin/home-builder/sort', ['sort' => $sort])
                 ->assertJson(['success' => false, 'message' => __('home_builder::home_builder.sort_invalid')]);
@@ -633,6 +634,10 @@ class HomeBuilderTest extends ModuleTestCase
 
         $this->actingAs($this->admin)
             ->post('/admin/home-builder/preset', ['preset' => 'missing'])
+            ->assertNotFound();
+
+        $this->actingAs($this->admin)
+            ->post('/admin/home-builder/preset', ['preset' => ['portal']])
             ->assertNotFound();
     }
 

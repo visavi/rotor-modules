@@ -110,9 +110,11 @@ class AdminAdvertRequest extends FormRequest
      */
     public function getRedirectUrl(): string
     {
+        $place = $this->input('place');
+
         return $this->isEditing()
             ? '/admin/paid-adverts/edit/' . (int) $this->route('id')
-            : '/admin/paid-adverts/create?place=' . urlencode((string) $this->input('place'));
+            : '/admin/paid-adverts/create?place=' . urlencode(is_string($place) ? $place : '');
     }
 
     /**
