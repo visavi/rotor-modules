@@ -7,10 +7,9 @@ if (! function_exists('statsOffers')) {
     function statsOffers(): string
     {
         return Cache::remember('offers', 600, static function () {
-            $offers = Offer::query()->where('type', 'offer')->count();
-            $problems = Offer::query()->where('type', 'issue')->count();
+            $counts = Offer::countByType();
 
-            return sprintf('%d/%d', $offers, $problems);
+            return sprintf('%d/%d', $counts[Offer::OFFER], $counts[Offer::ISSUE]);
         });
     }
 }

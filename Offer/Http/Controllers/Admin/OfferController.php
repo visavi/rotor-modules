@@ -21,8 +21,7 @@ class OfferController extends Controller
      */
     public function index(Request $request, string $type = Offer::OFFER): View
     {
-        $offerCount = Offer::query()->where('type', Offer::OFFER)->count();
-        $issueCount = Offer::query()->where('type', Offer::ISSUE)->count();
+        [Offer::OFFER => $offerCount, Offer::ISSUE => $issueCount] = Offer::countByType();
 
         $sort = $request->input('sort', 'date');
         $order = $request->input('order', 'desc');

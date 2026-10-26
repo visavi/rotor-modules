@@ -5,6 +5,7 @@ namespace Modules\Offer\Tests\Feature;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 use Modules\Offer\Models\Offer;
 use Tests\ModuleTestCase;
 
@@ -294,6 +295,21 @@ class OfferTest extends ModuleTestCase
         $this->get('/faq')
             ->assertOk()
             ->assertSee(__('offer::offers.faq_reward'));
+    }
+
+    public function testCountsByTypeInOneQuery(): void
+    {
+        $this->assertSame([Offer::OFFER => 0, Offer::ISSUE => 0], Offer::countByType());
+
+        $this->createOffer();
+        $this->createOffer();
+        $this->createOffer(['type' => Offer::ISSUE]);
+
+        DB::enableQueryLog();
+        $counts = Offer::countByType();
+
+        $this->assertSame([Offer::OFFER => 2, Offer::ISSUE => 1], $counts);
+        $this->assertCount(1, DB::getQueryLog());
     }
 
     private function admin(): User

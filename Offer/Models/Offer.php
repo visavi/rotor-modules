@@ -146,6 +146,24 @@ class Offer extends Model
     }
 
     /**
+     * Количество записей каждого типа одним запросом
+     *
+     * @return array<string, int> [тип => количество], отсутствующий тип — 0
+     */
+    public static function countByType(): array
+    {
+        $counts = static::query()
+            ->selectRaw('type, count(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        return array_map(
+            static fn (string $type): int => (int) ($counts[$type] ?? 0),
+            array_combine(self::TYPES, self::TYPES),
+        );
+    }
+
+    /**
      * Возвращает связь пользователя
      */
     public function user(): BelongsTo
