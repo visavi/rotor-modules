@@ -26,14 +26,19 @@ return [
     'status_invalid'       => 'Invalid offer or problem status!',
     'answer_success_added' => 'Answer successfully added!',
 
-    'offers_per_page'    => 'Suggestions per page',
-    'offers_points'      => 'Asset to create a proposal or problem',
-    'offer_title_length' => 'Offer title length',
-    'offer_text_length'  => 'Offer text length',
-    'offer_reply_length' => 'Offer reply length',
+    'offers_per_page'      => 'Suggestions per page',
+    'offers_points'        => 'Asset to create a proposal or problem',
+    'settings_offer_point' => 'Points for a completed proposal or fixed problem',
+    'settings_offer_money' => 'Money for a completed proposal or fixed problem',
+    'offer_title_length'   => 'Offer title length',
+    'offer_text_length'    => 'Offer text length',
+    'offer_reply_length'   => 'Offer reply length',
 
     'settings' => 'Offer settings',
 
     'feed_offers_show'   => 'Show offers / issues in feed',
     'feed_offers_rating' => 'Hide offers / issues in feed with rating below',
+
+    'faq_ability' => 'Creating topics in "Suggestions and Problems"',
+    'faq_reward'  => 'Completed proposal or fixed problem',
 ];

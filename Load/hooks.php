@@ -91,3 +91,6 @@ Hook::add('adminBlockEditor', static function () {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('load.settings') . '">' . __('load::loads.settings') . '</a>');
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqReward('load::loads.faq_reward', 'down_point', 'down_money');

@@ -63,6 +63,18 @@
         </div>
     </div>
 
+    <div class="mb-3{{ hasError('sets.photo_point') }}">
+        <label for="photo_point" class="form-label">{{ __('photo::photos.settings_photo_point') }}:</label>
+        <input type="number" class="form-control" id="photo_point" name="sets[photo_point]" maxlength="2" value="{{ old('sets.photo_point', $settings['photo_point']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets.photo_point') }}</div>
+    </div>
+
+    <div class="mb-3{{ hasError('sets.photo_money') }}">
+        <label for="photo_money" class="form-label">{{ __('photo::photos.settings_photo_money') }}:</label>
+        <input type="number" class="form-control" id="photo_money" name="sets[photo_money]" maxlength="2" value="{{ old('sets.photo_money', $settings['photo_money']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets.photo_money') }}</div>
+    </div>
+
     <div class="form-check form-switch mb-3">
         <input type="hidden" value="0" name="sets[feed_photos_show]">
         <input type="checkbox" role="switch" class="form-check-input" value="1" name="sets[feed_photos_show]" id="feed_photos_show"{{ ! empty($settings['feed_photos_show']) ? ' checked' : '' }}>

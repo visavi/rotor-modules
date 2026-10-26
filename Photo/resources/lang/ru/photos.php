@@ -27,6 +27,10 @@ return [
     'settings_photos_create'      => 'Разрешать пользователям загружать фотографии',
     'settings_photo_title_length' => 'Длина названия фотографии',
     'settings_photo_text_length'  => 'Длина текста фотографии',
+    'settings_photo_point'        => 'Очки за фото',
+    'settings_photo_money'        => 'Монеты за фото',
     'feed_photos_show'            => 'Показывать фото в ленте',
     'feed_photos_rating'          => 'Скрывать фото с рейтингом ниже',
+
+    'faq_reward' => 'Добавление фото в галерею',
 ];

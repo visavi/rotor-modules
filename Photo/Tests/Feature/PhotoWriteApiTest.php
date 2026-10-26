@@ -63,6 +63,20 @@ class PhotoWriteApiTest extends ModuleTestCase
         $this->assertSame($response->json('photo.id'), $file->fresh()->relate_id);
     }
 
+    public function testStoreAwardsPoints(): void
+    {
+        $this->overrideSetting('photo_point', 2);
+        $this->overrideSetting('photo_money', 100);
+        $this->user->update(['point' => 0, 'money' => 0]);
+        $this->pendingFile();
+
+        $this->postJson('/api/photos', ['title' => 'Прогулка по лесу'], $this->headers())->assertStatus(201);
+
+        $this->user->refresh();
+        $this->assertSame(2, $this->user->point);
+        $this->assertSame(100, $this->user->money);
+    }
+
     public function testStoreAcceptsPhotoInRequest(): void
     {
         // Снимок в теле запроса заменяет предварительную загрузку

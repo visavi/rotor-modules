@@ -320,6 +320,17 @@ Registry::onProfileSave(function (User $user, Request $request): void {
 Registry::backgroundPath('api/notifier/check');
 ```
 
+### faqAbility и faqReward — строки FAQ
+
+Страница `/faq` перечисляет, что открывает набранный актив и за что начисляют актив и деньги.
+Модуль добавляет туда свои строки: метка — ключ перевода, пороги и суммы — имена настроек.
+Значения читаются при выводе, строка с пустым порогом или без обеих сумм не показывается.
+
+```php
+Registry::faqAbility('forum::forums.faq_ability', 'editforumpoint');            // порог актива
+Registry::faqReward('forum::forums.faq_reward', 'forum_point', 'forum_money'); // актив и деньги за действие
+```
+
 ## Страница настроек модуля
 
 Настройки модуля живут на отдельном маршруте, но выглядят как раздел настроек сайта:

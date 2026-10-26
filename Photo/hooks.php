@@ -73,3 +73,6 @@ Hook::add('adminBlockEditor', static function () {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('photo.settings') . '">' . __('photo::photos.settings') . '</a>');
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqReward('photo::photos.faq_reward', 'photo_point', 'photo_money');

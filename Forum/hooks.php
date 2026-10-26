@@ -128,3 +128,7 @@ Registry::widget('forum', static fn (int $days): array => [
         ['label' => __('forum::forums.posts'), 'color' => '#6610f2', 'query' => Post::query()],
     ], $days),
 ]);
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqAbility('forum::forums.faq_ability', 'editforumpoint');
+Registry::faqReward('forum::forums.faq_reward', 'forum_point', 'forum_money');

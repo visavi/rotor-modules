@@ -55,3 +55,6 @@ Hook::add('adminBlockEditor', static function () {
         </a>
     </div>';
 });
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqAbility('advert::adverts.faq_ability', 'rekuserpoint');

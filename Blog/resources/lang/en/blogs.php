@@ -83,4 +83,6 @@ return [
     'feed_articles_rating'          => 'Hide articles with rating below',
     'new_articles'                  => 'New articles',
     'blogs'                         => 'Blogs',
+
+    'faq_reward' => 'Adding an article to blogs',
 ];

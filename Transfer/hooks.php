@@ -58,3 +58,6 @@ Registry::widget('transfers', static fn (int $days): array => [
     'level' => User::MODER,
     ...DashboardService::trend(Transfer::query(), $days),
 ]);
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqAbility('transfer::transfers.faq_ability', 'sendmoneypoint');

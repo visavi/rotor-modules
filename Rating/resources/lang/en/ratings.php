@@ -14,4 +14,6 @@ return [
     'settings'                   => 'Reputation settings',
     'points_rating_edit'         => 'Asset for changing reputation',
     'ratinglist_per_page'        => 'Votes in ranking history',
+
+    'faq_ability' => 'Changing the reputation of users',
 ];

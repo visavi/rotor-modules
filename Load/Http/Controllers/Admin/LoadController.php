@@ -277,8 +277,7 @@ class LoadController extends AdminController
         // statLoads складывает count_downs разделов: событие модели сработало до счётчика
         clearCache('statLoads');
 
-        // Автора могли удалить: withDefault отдаёт пустую модель, и increment на ней
-        // обновил бы всех пользователей. Снятие забирает награду, но не больше остатка
+        // Автора могли удалить: письмо слать некому. Снятие забирает награду, но не больше остатка
         if ($user->exists) {
             if ($active) {
                 $user->increment('point', $point);

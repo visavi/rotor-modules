@@ -27,6 +27,10 @@ return [
     'settings_photos_create'      => 'Allow users to upload photos',
     'settings_photo_title_length' => 'Photo title length',
     'settings_photo_text_length'  => 'Photo text length',
+    'settings_photo_point'        => 'Points per photo',
+    'settings_photo_money'        => 'Money per photo',
     'feed_photos_show'            => 'Show photos in feed',
     'feed_photos_rating'          => 'Hide photos with rating below',
+
+    'faq_reward' => 'Adding a photo to the gallery',
 ];

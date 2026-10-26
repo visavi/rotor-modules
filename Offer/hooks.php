@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\Hook;
+use App\Support\Registry;
 
 // Ссылка в колонке footer
 Hook::add('footerColumnMiddle', static fn () => '<li>
@@ -24,3 +25,7 @@ Hook::add('adminBlockAdmin', static function () {
 Hook::add('adminSettingsNav', static function () {
     return '<a class="nav-link" href="' . route('offer.settings') . '">' . __('offer::offers.settings') . '</a>';
 });
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqAbility('offer::offers.faq_ability', 'addofferspoint');
+Registry::faqReward('offer::offers.faq_reward', 'offer_point', 'offer_money');

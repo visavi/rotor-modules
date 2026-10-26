@@ -35,3 +35,6 @@ Hook::add('adminBlockEditor', static function () {
 
 // Вкладка в настройках администратора
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('guestbook.settings') . '">' . __('guestbook::guestbook.settings') . '</a>');
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqReward('guestbook::guestbook.faq_reward', 'guestbook_point', 'guestbook_money');

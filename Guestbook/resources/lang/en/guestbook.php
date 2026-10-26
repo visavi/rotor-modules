@@ -20,4 +20,6 @@ return [
 
     'settings'  => 'Guestbook settings',
     'guestbook' => 'Guest book',
+
+    'faq_reward' => 'Adding a message to the guestbook',
 ];

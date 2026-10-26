@@ -39,4 +39,6 @@ return [
     'adverts_term'        => 'Advertising term (hours)',
     'adverts_per_page'    => 'Listing all links',
     'adverts_admin_term'  => 'Admin advertising term (days)',
+
+    'faq_ability' => 'Adding Sponsored Links',
 ];

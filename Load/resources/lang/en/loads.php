@@ -82,4 +82,6 @@ return [
 
     'settings' => 'Load settings',
     'loads'    => 'Downloads',
+
+    'faq_reward' => 'Adding a file to downloads',
 ];

@@ -88,3 +88,6 @@ Hook::add('adminBlockEditor', static function () {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('blog.settings') . '">' . __('blog::blogs.settings') . '</a>');
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqReward('blog::blogs.faq_reward', 'blog_point', 'blog_money');

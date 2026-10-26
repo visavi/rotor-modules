@@ -2,6 +2,7 @@
 
 namespace Modules\Offer\Tests\Feature;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Offer\Models\Offer;
@@ -229,6 +230,70 @@ class OfferTest extends ModuleTestCase
         $this->actingAs(User::factory()->create(['level' => User::BOSS]))
             ->post('/admin/offers/restatement')
             ->assertSessionHas('success');
+    }
+
+    public function testDoneStatusRewardsAuthorAndTakesItBack(): void
+    {
+        $this->overrideSetting('offer_point', 10);
+        $this->overrideSetting('offer_money', 500);
+        $this->user->update(['point' => 100, 'money' => 1000]);
+        $offer = $this->createOffer();
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post('/admin/offers/' . $offer->id . '/reply', ['reply' => 'Уже исправили', 'status' => Offer::DONE])
+            ->assertSessionHas('success');
+
+        $this->user->refresh();
+        $this->assertSame(110, $this->user->point);
+        $this->assertSame(1500, $this->user->money);
+
+        // Повторный ответ с тем же статусом не начисляет второй раз
+        $this->actingAs($admin)
+            ->post('/admin/offers/' . $offer->id . '/reply', ['reply' => 'Уточнили ответ', 'status' => Offer::DONE]);
+
+        $this->assertSame(110, $this->user->fresh()->point);
+
+        $this->actingAs($admin)
+            ->post('/admin/offers/' . $offer->id . '/reply', ['reply' => 'Вернули в работу', 'status' => Offer::PROCESS]);
+
+        $this->user->refresh();
+        $this->assertSame(100, $this->user->point);
+        $this->assertSame(1000, $this->user->money);
+    }
+
+    public function testOtherStatusesDoNotReward(): void
+    {
+        $this->overrideSetting('offer_point', 10);
+        $this->overrideSetting('offer_money', 500);
+        $this->user->update(['point' => 100, 'money' => 1000]);
+        $offer = $this->createOffer();
+
+        $this->actingAs($this->admin())
+            ->post('/admin/offers/' . $offer->id . '/reply', ['reply' => 'Не будем делать', 'status' => Offer::CANCEL]);
+
+        $this->user->refresh();
+        $this->assertSame(100, $this->user->point);
+        $this->assertSame(1000, $this->user->money);
+    }
+
+    public function testRewardSettingsAndFaq(): void
+    {
+        // Миграция настроек на установленном сайте уже прошла — награду добавляет отдельная
+        foreach (glob(__DIR__ . '/../../database/migrations/*_offer_*settings.php') ?: [] as $migration) {
+            (require $migration)->up();
+        }
+        Setting::flush();
+
+        $this->actingAs(User::factory()->create(['level' => User::BOSS]))
+            ->get('/admin/offer-settings')
+            ->assertOk()
+            ->assertSee('name="sets[offer_point]"', false)
+            ->assertSee('name="sets[offer_money]"', false);
+
+        $this->get('/faq')
+            ->assertOk()
+            ->assertSee(__('offer::offers.faq_reward'));
     }
 
     private function admin(): User

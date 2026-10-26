@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\DB;
 use Modules\Photo\Models\Photo;
+use Modules\Photo\Observers\PhotoObserver;
 
 return [
     'name'        => 'Галерея',
@@ -21,6 +22,10 @@ return [
             'rating' => true,
             'stat'   => true,
         ],
+    ],
+
+    'observers' => [
+        Photo::class => PhotoObserver::class,
     ],
 
     'actions' => [

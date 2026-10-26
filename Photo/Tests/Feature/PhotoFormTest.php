@@ -3,6 +3,7 @@
 namespace Modules\Photo\Tests\Feature;
 
 use App\Models\File;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Photo\Models\Photo;
@@ -159,6 +160,107 @@ class PhotoFormTest extends ModuleTestCase
             ->assertRedirect(route('admin.photos.index', ['page' => 2]));
 
         $this->assertNull($photo->fresh());
+    }
+
+    public function testUploadAwardsPointsAndDeleteTakesThemBack(): void
+    {
+        $this->overrideSetting('photo_point', 2);
+        $this->overrideSetting('photo_money', 100);
+        $this->user->update(['point' => 10, 'money' => 1000]);
+
+        $this->pendingFile();
+        $this->actingAs($this->user)
+            ->post('/photos/create', ['title' => 'Закат на море'])
+            ->assertSessionHas('success');
+
+        $this->user->refresh();
+        $this->assertSame(12, $this->user->point);
+        $this->assertSame(1100, $this->user->money);
+
+        // Иначе загрузка и удаление по кругу копили бы баллы
+        $this->actingAs($this->user)
+            ->delete('/photos/' . Photo::query()->firstOrFail()->id . '/delete')
+            ->assertSessionHas('success');
+
+        $this->user->refresh();
+        $this->assertSame(10, $this->user->point);
+        $this->assertSame(1000, $this->user->money);
+    }
+
+    public function testDeleteDoesNotTakeMorePointsThanUserHas(): void
+    {
+        $this->overrideSetting('photo_point', 0);
+        $this->overrideSetting('photo_money', 0);
+        $photo = $this->createPhoto();
+
+        $this->overrideSetting('photo_point', 5);
+        $this->overrideSetting('photo_money', 500);
+        $this->user->update(['point' => 3, 'money' => 200]);
+
+        $this->actingAs($this->user)->delete('/photos/' . $photo->id . '/delete');
+
+        $this->user->refresh();
+        $this->assertSame(0, $this->user->point);
+        $this->assertSame(0, $this->user->money);
+    }
+
+    public function testPhotoOfDeletedAuthorDoesNotRewardOthers(): void
+    {
+        $this->overrideSetting('photo_point', 2);
+        $this->overrideSetting('photo_money', 100);
+        $this->user->update(['point' => 10, 'money' => 1000]);
+
+        // withDefault отдаёт пустую модель — increment на ней не должен задеть всю таблицу
+        $photo = $this->createPhoto(['user_id' => 0]);
+        $photo->delete();
+
+        $this->user->refresh();
+        $this->assertSame(10, $this->user->point);
+        $this->assertSame(1000, $this->user->money);
+    }
+
+    public function testFaqListsPhotoReward(): void
+    {
+        $this->overrideSetting('photo_point', 2);
+        $this->overrideSetting('photo_money', 100);
+
+        $this->get('/faq')
+            ->assertOk()
+            ->assertSee(__('photo::photos.faq_reward'));
+    }
+
+    public function testAdminSettingsSavePoints(): void
+    {
+        // Миграция настроек на установленном сайте уже прошла — баллы добавляет отдельная
+        foreach (glob(__DIR__ . '/../../database/migrations/*_insert_photo_*settings.php') ?: [] as $migration) {
+            (require $migration)->up();
+        }
+        Setting::flush();
+
+        $boss = User::factory()->create(['level' => User::BOSS]);
+
+        $this->actingAs($boss)
+            ->get('/admin/photo-settings')
+            ->assertOk()
+            ->assertSee('name="sets[photo_point]"', false)
+            ->assertSee('name="sets[photo_money]"', false);
+
+        $this->actingAs($boss)
+            ->post('/admin/photo-settings', ['sets' => ['photo_point' => 3, 'photo_money' => 150]])
+            ->assertSessionHas('success');
+
+        $this->assertSame(3, setting('photo_point'));
+        $this->assertSame(150, setting('photo_money'));
+    }
+
+    public function testAdminListLinksToGalleryWithEye(): void
+    {
+        $this->createPhoto();
+
+        $this->actingAs(User::factory()->create(['level' => User::ADMIN]))
+            ->get('/admin/photos')
+            ->assertOk()
+            ->assertSee('href="' . route('photos.index', ['page' => 1]) . '"><i class="fas fa-eye"></i>', false);
     }
 
     private function pendingFile(): File

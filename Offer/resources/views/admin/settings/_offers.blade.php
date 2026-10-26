@@ -31,6 +31,18 @@
         <div class="invalid-feedback">{{ textError('sets.addofferspoint') }}</div>
     </div>
 
+    <div class="mb-3{{ hasError('sets.offer_point') }}">
+        <label for="offer_point" class="form-label">{{ __('offer::offers.settings_offer_point') }}:</label>
+        <input type="number" class="form-control" id="offer_point" name="sets[offer_point]" maxlength="4" value="{{ old('sets.offer_point', $settings['offer_point']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets.offer_point') }}</div>
+    </div>
+
+    <div class="mb-3{{ hasError('sets.offer_money') }}">
+        <label for="offer_money" class="form-label">{{ __('offer::offers.settings_offer_money') }}:</label>
+        <input type="number" class="form-control" id="offer_money" name="sets[offer_money]" maxlength="6" value="{{ old('sets.offer_money', $settings['offer_money']) }}" required>
+        <div class="invalid-feedback">{{ textError('sets.offer_money') }}</div>
+    </div>
+
     <div class="mb-3">
         <label for="offer_title_min" class="form-label">{{ __('offer::offers.offer_title_length') }}:</label>
         <div class="d-flex gap-2">

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\DB;
 use Modules\Offer\Models\Offer;
+use Modules\Offer\Observers\OfferObserver;
 
 return [
     'name'        => 'Предложения и проблемы',
@@ -25,6 +26,10 @@ return [
             'rating' => true,
             'stat'   => true,
         ],
+    ],
+
+    'observers' => [
+        Offer::class => OfferObserver::class,
     ],
 
     'actions' => [

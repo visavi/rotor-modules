@@ -47,3 +47,6 @@ Hook::add('userSections', static function (User $user) {
 
 // Ссылка в навигации настроек админки
 Hook::add('adminSettingsNav', static fn () => '<a class="nav-link" href="' . route('rating.settings') . '">' . __('rating::ratings.settings') . '</a>');
+
+// Строки FAQ: что открывает актив и за что начисляют
+Registry::faqAbility('rating::ratings.faq_ability', 'editratingpoint');

@@ -117,4 +117,7 @@ return [
 
     'settings' => 'Forum settings',
     'forums'   => 'Forum',
+
+    'faq_ability' => 'Modifying and closing your forum topics',
+    'faq_reward'  => 'Adding a message to the forum',
 ];

@@ -25,4 +25,6 @@ return [
     'notice_text' => '<p>User %login% transferred %money% to you</p><p>Comment: %comment%</p>',
 
     'settings' => 'Transfer Settings',
+
+    'faq_ability' => 'Transfer of game money',
 ];
