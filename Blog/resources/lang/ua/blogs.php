@@ -71,7 +71,7 @@ return [
     'settings'                      => 'Налаштування блогів',
     'settings_blogs_per_page'       => 'Статей на сторінку',
     'settings_blogs_groups'         => 'Блогів на сторінку',
-    'settings_blog_point'           => 'Очки за статтю',
+    'settings_blog_point'           => 'Бали за статтю',
     'settings_blog_money'           => 'Монети за статтю',
     'settings_blogs_publish'        => 'Дозволити публікацію блогів',
     'settings_blog_moderation'      => 'Увімкнути модерацію статей',

@@ -98,6 +98,7 @@ class NewsCommentTest extends ModuleTestCase
         $this->actingAs($this->user)
             ->postJson(route('news.add-comment', ['id' => $news->id]), ['msg' => 'Ответ через форму'])
             ->assertOk()
+            ->assertJsonPath('success', true)
             ->assertJsonStructure(['redirect']);
     }
 
