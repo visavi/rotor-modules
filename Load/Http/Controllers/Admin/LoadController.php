@@ -76,8 +76,9 @@ class LoadController extends AdminController
     {
         $load = $this->findLoad($id);
         $loads = $load->getChildren();
+        $branch = CategoryTree::branchIds($loads, $load->id);
 
-        return view('load::admin/downs/edit', compact('loads', 'load'));
+        return view('load::admin/downs/edit', compact('loads', 'load', 'branch'));
     }
 
     /**

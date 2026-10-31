@@ -76,8 +76,9 @@ class ArticleController extends AdminController
     {
         $category = $this->findCategory($id);
         $categories = $category->getChildren();
+        $branch = CategoryTree::branchIds($categories, $category->id);
 
-        return view('blog::admin/articles/edit', compact('categories', 'category'));
+        return view('blog::admin/articles/edit', compact('categories', 'category', 'branch'));
     }
 
     /**

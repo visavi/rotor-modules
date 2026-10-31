@@ -26,7 +26,8 @@
                     <option value="0">–––</option>
 
                     @foreach ($forums as $data)
-                        <option value="{{ $data->id }}"{{ ($inputParent === $data->id && ! $data->closed)  ? ' selected' : '' }}{{ $data->closed || $data->id === $forum->id ? ' disabled' : '' }}>
+                        @php($disabled = in_array($data->id, $branch, true) || ($data->closed && $data->id !== $forum->parent_id))
+                        <option value="{{ $data->id }}"{{ $inputParent === $data->id && ! $disabled ? ' selected' : '' }}{{ $disabled ? ' disabled' : '' }}>
                             {{ str_repeat('–', $data->depth) }} {{ $data->title }}
                         </option>
                     @endforeach

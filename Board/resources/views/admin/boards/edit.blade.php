@@ -32,7 +32,8 @@
                     <option value="0">---</option>
 
                     @foreach ($boards as $data)
-                        <option value="{{ $data->id }}"{{ ($inputParent === $data->id && ! $data->closed) ? ' selected' : '' }}{{ $data->closed || $data->id === $board->id ? ' disabled' : '' }}>
+                        @php($disabled = in_array($data->id, $branch, true) || ($data->closed && $data->id !== $board->parent_id))
+                        <option value="{{ $data->id }}"{{ $inputParent === $data->id && ! $disabled ? ' selected' : '' }}{{ $disabled ? ' disabled' : '' }}>
                             {{ str_repeat('–', $data->depth) }} {{ $data->name }}
                         </option>
                     @endforeach

@@ -103,8 +103,9 @@ class BoardController extends AdminController
     {
         $board = $this->findCategory($id);
         $boards = $board->getChildren();
+        $branch = CategoryTree::branchIds($boards, $board->id);
 
-        return view('board::admin/boards/edit', compact('boards', 'board'));
+        return view('board::admin/boards/edit', compact('boards', 'board', 'branch'));
     }
 
     /**

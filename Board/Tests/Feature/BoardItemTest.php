@@ -339,6 +339,35 @@ class BoardItemTest extends ModuleTestCase
         return $item;
     }
 
+    public function testCategoryCannotMoveIntoOwnBranchOrMissingParent(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $child = Board::factory()->create(['parent_id' => $this->board->id, 'name' => 'Телефоны']);
+
+        foreach ([$child->id, 999999] as $parent) {
+            $this->actingAs($boss)
+                ->post('/admin/boards/' . $this->board->id . '/edit', ['name' => 'Электроника', 'parent' => $parent])
+                ->assertSessionHasErrors('parent');
+        }
+
+        $this->assertSame(0, (int) $this->board->fresh()->parent_id);
+    }
+
+    public function testCategoryEditFormKeepsClosedParentAndBlocksOwnBranch(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $closed = Board::factory()->create(['parent_id' => 0, 'name' => 'Архив', 'closed' => true]);
+        $this->board->update(['parent_id' => $closed->id]);
+        $child = Board::factory()->create(['parent_id' => $this->board->id, 'name' => 'Телефоны']);
+
+        $this->actingAs($boss)
+            ->get('/admin/boards/' . $this->board->id . '/edit')
+            ->assertOk()
+            ->assertSee('<option value="' . $closed->id . '" selected>', false)
+            ->assertSee('<option value="' . $this->board->id . '" disabled>', false)
+            ->assertSee('<option value="' . $child->id . '" disabled>', false);
+    }
+
     public function testSeveralRecordsAreDeleted(): void
     {
         $records = Item::factory()->count(2)->create();

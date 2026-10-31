@@ -316,6 +316,35 @@ class LoadFormTest extends ModuleTestCase
         $this->assertNotNull($this->category->fresh());
     }
 
+    public function testCategoryCannotMoveIntoOwnBranchOrMissingParent(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $child = Load::factory()->create(['parent_id' => $this->category->id, 'name' => 'Утилиты']);
+
+        foreach ([$child->id, 999999] as $parent) {
+            $this->actingAs($boss)
+                ->post('/admin/loads/' . $this->category->id . '/edit', ['name' => 'Программы', 'parent' => $parent])
+                ->assertSessionHasErrors('parent');
+        }
+
+        $this->assertSame(0, (int) $this->category->fresh()->parent_id);
+    }
+
+    public function testCategoryEditFormKeepsClosedParentAndBlocksOwnBranch(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $closed = Load::factory()->create(['parent_id' => 0, 'name' => 'Архив', 'closed' => true]);
+        $this->category->update(['parent_id' => $closed->id]);
+        $child = Load::factory()->create(['parent_id' => $this->category->id, 'name' => 'Утилиты']);
+
+        $this->actingAs($boss)
+            ->get('/admin/loads/' . $this->category->id . '/edit')
+            ->assertOk()
+            ->assertSee('<option value="' . $closed->id . '" selected>', false)
+            ->assertSee('<option value="' . $this->category->id . '" disabled>', false)
+            ->assertSee('<option value="' . $child->id . '" disabled>', false);
+    }
+
     public function testOnlyBossDeletesDown(): void
     {
         $down = $this->createDown();

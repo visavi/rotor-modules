@@ -27,7 +27,8 @@
                     <option value="0">---</option>
 
                     @foreach ($loads as $category)
-                        <option value="{{ $category->id }}"{{ $inputParent === $category->id ? ' selected' : '' }}{{ $category->closed && $category->id !== $load->parent_id ? ' disabled' : '' }}>
+                        @php($disabled = in_array($category->id, $branch, true) || ($category->closed && $category->id !== $load->parent_id))
+                        <option value="{{ $category->id }}"{{ $inputParent === $category->id && ! $disabled ? ' selected' : '' }}{{ $disabled ? ' disabled' : '' }}>
                             {{ str_repeat('–', $category->depth) }} {{ $category->name }}
                         </option>
                     @endforeach

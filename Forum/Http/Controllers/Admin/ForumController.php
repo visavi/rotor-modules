@@ -73,8 +73,9 @@ class ForumController extends AdminController
     {
         $forum = $this->findForum($id);
         $forums = $forum->getChildren();
+        $branch = CategoryTree::branchIds($forums, $forum->id);
 
-        return view('forum::admin/forums/edit', compact('forums', 'forum'));
+        return view('forum::admin/forums/edit', compact('forums', 'forum', 'branch'));
     }
 
     /**

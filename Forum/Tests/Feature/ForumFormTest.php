@@ -364,6 +364,72 @@ class ForumFormTest extends ModuleTestCase
         $this->assertNotNull($this->forum->fresh());
     }
 
+    public function testForumCannotMoveIntoOwnBranch(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $child = Forum::factory()->create(['title' => 'Подфорум', 'parent_id' => $this->forum->id]);
+        $grandchild = Forum::factory()->create(['title' => 'Внук', 'parent_id' => $child->id]);
+
+        foreach ([$child, $grandchild] as $descendant) {
+            $this->actingAs($boss)
+                ->post('/admin/forums/' . $this->forum->id . '/edit', ['title' => 'Общий форум', 'parent' => $descendant->id])
+                ->assertSessionHasErrors('parent');
+        }
+
+        $this->assertSame(0, (int) $this->forum->fresh()->parent_id);
+    }
+
+    public function testRejectedParentIsNotSelectedWhenFormReturns(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $child = Forum::factory()->create(['title' => 'Подфорум', 'parent_id' => $this->forum->id]);
+
+        // Выбранный и заблокированный пункт браузер не отправляет — раздел ушёл бы в корень
+        $this->actingAs($boss)
+            ->from('/admin/forums/' . $this->forum->id . '/edit')
+            ->followingRedirects()
+            ->post('/admin/forums/' . $this->forum->id . '/edit', ['title' => 'Общий форум', 'parent' => $child->id])
+            ->assertOk()
+            ->assertDontSee('<option value="' . $child->id . '" selected', false)
+            ->assertSee('<option value="' . $child->id . '" disabled>', false);
+    }
+
+    public function testRingAlreadyInDatabaseDoesNotHangForumPage(): void
+    {
+        $other = Forum::factory()->create(['title' => 'Другой', 'parent_id' => $this->forum->id]);
+        $this->forum->update(['parent_id' => $other->id]);
+
+        $parents = $this->forum->fresh()->getParents();
+
+        $this->assertSame([$other->id, $this->forum->id], $parents->pluck('id')->all());
+    }
+
+    public function testForumParentMustExist(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+
+        $this->actingAs($boss)
+            ->post('/admin/forums/' . $this->forum->id . '/edit', ['title' => 'Общий форум', 'parent' => 999999])
+            ->assertSessionHasErrors('parent');
+
+        $this->assertSame(0, (int) $this->forum->fresh()->parent_id);
+    }
+
+    public function testForumEditFormKeepsClosedParentAndBlocksOwnBranch(): void
+    {
+        $boss = User::factory()->create(['level' => User::BOSS]);
+        $closed = Forum::factory()->create(['title' => 'Архив', 'closed' => true]);
+        $this->forum->update(['parent_id' => $closed->id]);
+        $child = Forum::factory()->create(['title' => 'Подфорум', 'parent_id' => $this->forum->id]);
+
+        $this->actingAs($boss)
+            ->get('/admin/forums/' . $this->forum->id . '/edit')
+            ->assertOk()
+            ->assertSee('<option value="' . $closed->id . '" selected>', false)
+            ->assertSee('<option value="' . $this->forum->id . '" disabled>', false)
+            ->assertSee('<option value="' . $child->id . '" disabled>', false);
+    }
+
     public function testAdminEditsTopicCurators(): void
     {
         $admin = User::factory()->create(['level' => User::ADMIN]);
