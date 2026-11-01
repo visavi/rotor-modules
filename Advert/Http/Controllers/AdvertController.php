@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Advert\Http\Requests\AdvertPurchaseRequest;
+use Modules\Advert\Http\Requests\AdvertUpdateRequest;
 use Modules\Advert\Models\Advert;
 
 class AdvertController extends Controller
@@ -69,6 +70,45 @@ class AdvertController extends Controller
 
         return redirect('adverts')
             ->with('success', __('advert::adverts.advert_success_posted'));
+    }
+
+    /**
+     * Редактирование своей ссылки
+     */
+    public function edit(int $id): View
+    {
+        $this->checkOpen();
+
+        $link = $this->findOwnLink($id);
+
+        return view('advert::adverts/edit', compact('link'));
+    }
+
+    /**
+     * Сохранение своей ссылки: срок показа не продлевается
+     */
+    public function update(int $id, AdvertUpdateRequest $request): RedirectResponse
+    {
+        $this->checkOpen();
+
+        $link = $this->findOwnLink($id);
+
+        $link->update($request->fieldsFor($link));
+
+        return redirect('adverts')
+            ->with('success', __('main.record_changed_success'));
+    }
+
+    /**
+     * Действующая ссылка текущего пользователя
+     */
+    private function findOwnLink(int $id): Advert
+    {
+        return Advert::query()
+            ->where('type', Advert::TYPE_USER)
+            ->where('user_id', auth()->id())
+            ->where('deleted_at', '>', now())
+            ->findOrFail($id);
     }
 
     /**

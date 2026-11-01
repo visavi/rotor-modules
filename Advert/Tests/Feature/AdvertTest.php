@@ -299,6 +299,109 @@ class AdvertTest extends ModuleTestCase
         $this->assertStringNotContainsString('Просроченная', (string) Hook::call('advertTop'));
     }
 
+    public function testOwnerEditsAdvertWithoutProlonging(): void
+    {
+        $expires = now()->addHours(5)->startOfSecond();
+        $link = $this->advert([
+            'user_id'    => $this->user->id,
+            'color'      => '#ff0000',
+            'bold'       => true,
+            'deleted_at' => $expires,
+        ]);
+
+        // Блок рекламы уже закеширован со старым названием
+        Hook::call('advertTop');
+
+        $this->actingAs($this->user)
+            ->get('/adverts')
+            ->assertSee('/adverts/edit/' . $link->id);
+
+        $this->actingAs($this->user)
+            ->get('/adverts/edit/' . $link->id)
+            ->assertOk()
+            ->assertSee('Реклама');
+
+        // Оплаченный цвет можно сменить на другой, жирность правка не трогает
+        $this->actingAs($this->user)
+            ->post('/adverts/edit/' . $link->id, [
+                'site'  => 'https://rotor.visavi.net',
+                'name'  => 'Новое название',
+                'color' => '#00ff00',
+                'bold'  => 0,
+            ])
+            ->assertRedirect('adverts')
+            ->assertSessionHas('success');
+
+        $link->refresh();
+        $this->assertSame('https://rotor.visavi.net', $link->site);
+        $this->assertSame('Новое название', $link->name);
+        $this->assertSame('#00ff00', $link->color);
+        $this->assertTrue($link->bold);
+        $this->assertTrue($expires->equalTo($link->deleted_at));
+        $this->assertSame(1000, $this->user->fresh()->money);
+
+        $this->assertStringContainsString('Новое название', (string) Hook::call('advertTop'));
+    }
+
+    public function testColorChangesOnlyWhenPaid(): void
+    {
+        $plain = $this->advert(['user_id' => $this->user->id]);
+
+        // Цвет не покупали — бесплатно его не добавить
+        $this->actingAs($this->user)
+            ->post('/adverts/edit/' . $plain->id, ['site' => 'https://visavi.net', 'name' => 'Реклама', 'color' => '#00ff00', 'bold' => 1])
+            ->assertRedirect('adverts');
+
+        $this->assertNull($plain->fresh()->color);
+        $this->assertFalse($plain->fresh()->bold);
+
+        // Пустое поле не стирает оплаченный цвет
+        $paid = $this->advert(['user_id' => $this->user->id, 'color' => '#ff0000']);
+
+        $this->actingAs($this->user)
+            ->post('/adverts/edit/' . $paid->id, ['site' => 'https://visavi.net', 'name' => 'Реклама', 'color' => ''])
+            ->assertRedirect('adverts');
+
+        $this->assertSame('#ff0000', $paid->fresh()->color);
+
+        $this->actingAs($this->user)
+            ->post('/adverts/edit/' . $paid->id, ['site' => 'https://visavi.net', 'name' => 'Реклама', 'color' => 'красный'])
+            ->assertSessionHasErrors('color');
+    }
+
+    public function testOwnerEditIsValidated(): void
+    {
+        $link = $this->advert(['user_id' => $this->user->id]);
+
+        $this->actingAs($this->user)
+            ->post('/adverts/edit/' . $link->id, ['site' => 'не адрес', 'name' => 'Ой'])
+            ->assertSessionHasErrors(['site', 'name']);
+
+        $this->assertSame('https://visavi.net', $link->fresh()->site);
+    }
+
+    public function testOnlyOwnerEditsLiveAdvert(): void
+    {
+        $stranger = $this->advert(['name' => 'Чужая']);
+        $expired = $this->advert(['user_id' => $this->user->id, 'deleted_at' => now()->subHour()]);
+
+        $this->actingAs($this->user)
+            ->get('/adverts')
+            ->assertDontSee('/adverts/edit/' . $stranger->id);
+
+        foreach ([$stranger, $expired] as $link) {
+            $this->actingAs($this->user)
+                ->get('/adverts/edit/' . $link->id)
+                ->assertNotFound();
+
+            $this->actingAs($this->user)
+                ->post('/adverts/edit/' . $link->id, ['site' => 'https://rotor.visavi.net', 'name' => 'Захват'])
+                ->assertNotFound();
+        }
+
+        $this->assertSame('Чужая', $stranger->fresh()->name);
+    }
+
     public function testAdvertsAreRemovedWithUser(): void
     {
         $this->advert(['user_id' => $this->user->id]);

@@ -38,6 +38,10 @@
                     <i class="far fa-user"></i> {{ $data->user->getProfile() }}
                     <small class="section-date text-muted fst-italic">{{ __('advert::adverts.expires') }}: {{ dateFixed($data->deleted_at) }}</small>
 
+                    @if ($data->user_id === auth()->id())
+                        <a class="ms-2" href="/adverts/edit/{{ $data->id }}" title="{{ __('main.edit') }}"><i class="fas fa-pencil-alt"></i></a>
+                    @endif
+
                     <div class="small text-muted fst-italic mt-2">
                         {{ __('advert::adverts.color') }}: {!! $data->color ? '<span style="color:' . $data->color .'">'. $data->color .'</span>' : '<i class="fas fa-times text-danger"></i>' !!},
                         {{ __('advert::adverts.bold') }}: {!! $data->bold ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}

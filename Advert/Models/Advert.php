@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Cache;
  * @property int             $id
  * @property string          $site
  * @property string          $name
- * @property string          $color
+ * @property ?string         $color
  * @property bool            $bold
  * @property string          $type
  * @property int             $user_id

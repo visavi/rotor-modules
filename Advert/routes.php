@@ -13,6 +13,8 @@ Route::middleware(['web', 'check.user'])
         Route::get('/', 'index')->name('adverts.index');
         Route::get('/create', 'create')->name('adverts.create');
         Route::post('/create', 'store');
+        Route::get('/edit/{id}', 'edit')->name('adverts.edit');
+        Route::post('/edit/{id}', 'update');
     });
 
 Route::middleware(['web', 'check.admin', 'admin.logger'])

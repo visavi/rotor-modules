@@ -19,7 +19,8 @@ return [
      Link address should not direct to direct downloading of any content<br>
      Links to sites with alarms and porn are prohibited<br>
      For violation of the rules punishment in the form of a ban is provided<br>',
-    'edit_advert' => 'Link editing',
+    'edit_advert'    => 'Link editing',
+    'options_locked' => 'A paid color can be changed, color or bold text cannot be added',
 
     'advert_closed'         => 'The display and placement of advertising is prohibited by the site administration!',
     'advert_point'          => 'To purchase advertising you need to earn :point!',
