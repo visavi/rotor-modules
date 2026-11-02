@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Rules\EmailRule;
 use App\Services\MailService;
 use App\Services\UserService;
+use App\Support\Registry;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
@@ -375,6 +376,11 @@ class SocialAuthController extends Controller
 
         $textNotice = textNotice('register', ['username' => $login]);
         $user->sendMessage(null, $textNotice);
+
+        // Аккаунт заводится мимо UserService::register(), хуки модулей зовутся здесь
+        foreach (Registry::$onRegisterSave as $handler) {
+            $handler($user, $request);
+        }
 
         Auth::login($user, true);
         $request->session()->regenerate();

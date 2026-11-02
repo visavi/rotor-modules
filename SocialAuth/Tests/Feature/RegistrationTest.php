@@ -7,7 +7,9 @@ namespace Modules\SocialAuth\Tests\Feature;
 use App\Models\BlackList;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Registry;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Modules\SocialAuth\Models\Social;
 use Tests\ModuleTestCase;
@@ -331,6 +333,39 @@ class RegistrationTest extends ModuleTestCase
             'provider'    => 'google',
             'provider_id' => 'G-COMPLETE',
         ]);
+    }
+
+    public function testRegistrationRunsModuleSaveHooks(): void
+    {
+        // Модули сохраняют свои данные нового пользователя через onRegisterSave — вход через соцсеть не исключение
+        $registered = [];
+        Registry::onRegisterSave(static function (User $user, Request $request) use (&$registered): void {
+            $registered[] = $user->email;
+        });
+
+        Http::fake([
+            'oauth2.googleapis.com/token*'           => Http::response(['access_token' => 'tok']),
+            'www.googleapis.com/oauth2/v2/userinfo*' => Http::response([
+                'id'             => 'G-HOOK',
+                'email'          => 'hook@example.com',
+                'verified_email' => true,
+                'name'           => 'Hook User',
+            ]),
+        ]);
+
+        $this->hitCallback('google')->assertRedirect('/');
+
+        $this->withoutMiddleware(PreventRequestForgery::class)
+            ->withSession(['social_pending' => [
+                'provider'    => 'google',
+                'provider_id' => 'G-HOOK-2',
+                'token'       => 'tok',
+                'name'        => 'Manual Hook',
+            ]])
+            ->post(route('social.complete.post'), ['email' => 'manual-hook@example.com'])
+            ->assertRedirect('/');
+
+        $this->assertSame(['hook@example.com', 'manual-hook@example.com'], $registered);
     }
 
     public function testCompleteRequiresConfirmationWhenSiteDoesNotTrustEmail(): void
