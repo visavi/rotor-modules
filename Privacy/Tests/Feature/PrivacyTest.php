@@ -141,11 +141,11 @@ class PrivacyTest extends ModuleTestCase
 
     public function testApiConfigTellsAppToAskConsent(): void
     {
-        // Приложение рисует галочку, если в /config есть раздел privacy
-        $this->getJson('/api/config')
-            ->assertOk()
-            ->assertJsonPath('privacy.required', true)
-            ->assertJsonPath('privacy.url', route('privacy.index'));
+        // Приложение рисует галочку, если в /config есть раздел privacy.
+        // Адрес текста не передаётся: это страница /privacy сайта, чей API вызывает приложение
+        $config = $this->getJson('/api/config')->assertOk();
+
+        $this->assertSame(['required' => true], $config->json('privacy'));
     }
 
     public function testSocialButtonsShowConsentNotice(): void

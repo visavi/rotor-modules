@@ -9,11 +9,10 @@ return [
     'email'       => 'admin@visavi.net',
     'homepage'    => 'https://visavi.net',
 
-    // Приложение по разделу privacy в /api/config рисует галочку согласия со ссылкой на текст
+    // Приложение по разделу privacy в /api/config рисует галочку согласия со ссылкой на страницу /privacy сайта
     'api' => [
         'privacy' => [
             'required' => true,
-            'url'      => static fn (): string => route('privacy.index'),
         ],
     ],
 
