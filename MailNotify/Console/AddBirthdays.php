@@ -28,6 +28,8 @@ class AddBirthdays extends Command
             ->where('point', '>', 0)
             ->whereIn('level', User::USER_GROUPS)
             ->whereRaw('substr(birthday, 1, 5) = ?', now()->format('d.m'))
+            // Давно пропавших не поздравляем: их ящики часто удалены, отказы портят репутацию отправителя
+            ->where('updated_at', '>', now()->subYears((int) setting('birthday_active_years')))
             ->whereNotNull('email')
             ->whereNotNull('subscribe')
             ->get();

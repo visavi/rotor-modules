@@ -15,16 +15,18 @@ class MailNotifySettingController extends ModuleSettingController
     protected function rules(): array
     {
         return [
-            'sets.sendprivatmailday' => ['required', 'integer', 'between:1,99'],
-            'sets.sendmailpacket'    => ['required', 'integer', 'between:1,999'],
+            'sets.sendprivatmailday'     => ['required', 'integer', 'between:1,99'],
+            'sets.sendmailpacket'        => ['required', 'integer', 'between:1,999'],
+            'sets.birthday_active_years' => ['required', 'integer', 'between:1,20'],
         ];
     }
 
     protected function messages(): array
     {
         return [
-            'sets.sendprivatmailday' => __('mail_notify::mail_notify.days_invalid'),
-            'sets.sendmailpacket'    => __('mail_notify::mail_notify.packet_invalid'),
+            'sets.sendprivatmailday'     => __('mail_notify::mail_notify.days_invalid'),
+            'sets.sendmailpacket'        => __('mail_notify::mail_notify.packet_invalid'),
+            'sets.birthday_active_years' => __('mail_notify::mail_notify.birthday_years_invalid'),
         ];
     }
 }

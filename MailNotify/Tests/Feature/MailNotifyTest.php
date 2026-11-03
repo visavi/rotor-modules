@@ -5,6 +5,7 @@ namespace Modules\MailNotify\Tests\Feature;
 use App\Jobs\SendMailJob;
 use App\Models\Setting;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -22,6 +23,7 @@ class MailNotifyTest extends ModuleTestCase
         parent::setUp();
 
         $this->app->make(Kernel::class)->registerCommand(new AddBirthdays());
+        $this->overrideSetting('birthday_active_years', 5);
     }
 
     public function testBirthdaysAreQueued(): void
@@ -38,6 +40,20 @@ class MailNotifyTest extends ModuleTestCase
                 && $job->data['username'] === 'Birthday 1'
                 && $job->data['unsubscribe'] === 'key-1';
         });
+    }
+
+    public function testBirthdaySkipsLongInactiveUser(): void
+    {
+        // Ящики давно пропавших пользователей часто удалены: отказы портят репутацию отправителя
+        Queue::fake();
+
+        $this->makeBirthdayUser(1, now()->subYears(4));
+        $this->makeBirthdayUser(2, now()->subYears(6));
+
+        $this->artisan('add:birthdays')->assertSuccessful();
+
+        Queue::assertPushed(SendMailJob::class, 1);
+        Queue::assertPushed(SendMailJob::class, static fn (SendMailJob $job) => $job->data['to'] === 'birthday1@example.com');
     }
 
     public function testBirthdayMailRenders(): void
@@ -176,20 +192,21 @@ class MailNotifyTest extends ModuleTestCase
     public function testBossSavesSettings(): void
     {
         $this->actingAs(User::factory()->create(['level' => User::BOSS]))
-            ->post('/admin/mail-notify-settings', ['sets' => ['sendprivatmailday' => 5, 'sendmailpacket' => 10, 'logos' => 'чужой ключ']])
+            ->post('/admin/mail-notify-settings', ['sets' => ['sendprivatmailday' => 5, 'sendmailpacket' => 10, 'birthday_active_years' => 10, 'logos' => 'чужой ключ']])
             ->assertRedirect('/admin/mail-notify-settings')
             ->assertSessionHas('success');
 
         $this->assertSame('5', Setting::query()->where('name', 'sendprivatmailday')->value('value'));
         $this->assertSame('10', Setting::query()->where('name', 'sendmailpacket')->value('value'));
+        $this->assertSame('10', Setting::query()->where('name', 'birthday_active_years')->value('value'));
         $this->assertNotSame('чужой ключ', Setting::query()->where('name', 'logos')->value('value'));
     }
 
     public function testSettingsRejectOutOfRange(): void
     {
         $this->actingAs(User::factory()->create(['level' => User::BOSS]))
-            ->post('/admin/mail-notify-settings', ['sets' => ['sendprivatmailday' => 0, 'sendmailpacket' => 5000]])
-            ->assertSessionHasErrors(['sets.sendprivatmailday', 'sets.sendmailpacket']);
+            ->post('/admin/mail-notify-settings', ['sets' => ['sendprivatmailday' => 0, 'sendmailpacket' => 5000, 'birthday_active_years' => 0]])
+            ->assertSessionHasErrors(['sets.sendprivatmailday', 'sets.sendmailpacket', 'sets.birthday_active_years']);
     }
 
     /**
@@ -204,15 +221,16 @@ class MailNotifyTest extends ModuleTestCase
         return ['themes' => 'default', 'language' => 'ru', 'timezone' => 0] + $extra;
     }
 
-    private function makeBirthdayUser(int $index): void
+    private function makeBirthdayUser(int $index, ?CarbonInterface $visitedAt = null): void
     {
         User::factory()->create([
-            'login'     => 'birthday_' . $index,
-            'name'      => 'Birthday ' . $index,
-            'email'     => 'birthday' . $index . '@example.com',
-            'birthday'  => now()->format('d.m.Y'),
-            'point'     => 10,
-            'subscribe' => 'key-' . $index,
+            'updated_at' => $visitedAt ?? now(),
+            'login'      => 'birthday_' . $index,
+            'name'       => 'Birthday ' . $index,
+            'email'      => 'birthday' . $index . '@example.com',
+            'birthday'   => now()->format('d.m.Y'),
+            'point'      => 10,
+            'subscribe'  => 'key-' . $index,
         ]);
     }
 }

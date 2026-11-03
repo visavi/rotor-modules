@@ -11,6 +11,10 @@ return [
     'packet_help'     => 'Emails are spread over minutes so as not to hit the mail server limit',
     'packet_invalid'  => 'Emails per minute — from 1 to 999!',
 
+    'birthday_years'         => 'Skip birthday greetings for users who have not visited for more than, years',
+    'birthday_years_help'    => 'Long-gone users often have deleted mailboxes, and bounced emails hurt the site reputation with mail services',
+    'birthday_years_invalid' => 'Number of years — from 1 to 20!',
+
     'receive_newsletters'  => 'Receive newsletters',
     'newsletters_hint'     => 'Receive newsletters from the site by email',
     'token_missing'        => 'Token missing!',

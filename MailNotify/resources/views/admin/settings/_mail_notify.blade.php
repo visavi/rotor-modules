@@ -35,6 +35,13 @@
             <div class="form-text">{{ __('mail_notify::mail_notify.packet_help') }}</div>
         </div>
 
+        <div class="mb-3{{ hasError('sets.birthday_active_years') }}">
+            <label for="birthday_active_years" class="form-label">{{ __('mail_notify::mail_notify.birthday_years') }}:</label>
+            <input type="number" class="form-control" id="birthday_active_years" name="sets[birthday_active_years]" min="1" max="20" value="{{ old('sets.birthday_active_years', $settings['birthday_active_years'] ?? 5) }}" required>
+            <div class="invalid-feedback">{{ textError('sets.birthday_active_years') }}</div>
+            <div class="form-text">{{ __('mail_notify::mail_notify.birthday_years_help') }}</div>
+        </div>
+
         <button class="btn btn-primary">{{ __('main.save') }}</button>
     </form>
 @stop
