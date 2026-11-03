@@ -13,7 +13,10 @@
 @stop
 
 @section('content')
-    <div class="alert alert-info">{{ __('privacy::privacy.editor_hint') }}</div>
+    <div class="alert alert-info">
+        {{ __('privacy::privacy.editor_hint') }}<br>
+        {{ __('privacy::privacy.version_hint') }}
+    </div>
 
     <div class="section-form mb-3 shadow">
         <form action="{{ route('privacy.admin.index') }}" method="post">
@@ -27,7 +30,7 @@
                 <div class="invalid-feedback">{{ textError('text') }}</div>
             </div>
 
-            <button class="btn btn-primary">{{ __('privacy::privacy.publish') }}</button>
+            <button class="btn btn-primary">{{ __('main.save') }}</button>
             <a class="btn btn-link" href="{{ route('privacy.index') }}" target="_blank">{{ __('privacy::privacy.view_page') }}</a>
         </form>
     </div>

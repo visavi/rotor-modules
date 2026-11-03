@@ -205,6 +205,24 @@ class PrivacyTest extends ModuleTestCase
             ->assertSee('Первая версия');
     }
 
+    public function testVersionWithoutConsentsIsEditedInPlace(): void
+    {
+        $this->travelTo(now()->subDay());
+        $first = PrivacyText::factory()->create(['text' => '<p>Оператор: [название]</p>']);
+        $this->travelBack();
+
+        $this->actingAs($this->boss())
+            ->post('/admin/privacy', ['text' => '<p>Оператор: ИП Иванов</p>'])
+            ->assertRedirect(route('privacy.admin.index'))
+            ->assertSessionHas('success');
+
+        // Никто ещё не соглашался: доказывать нечего, заполнение шаблона не плодит версию 2
+        $this->assertSame(1, PrivacyText::query()->count());
+        $first->refresh();
+        $this->assertSame('<p>Оператор: ИП Иванов</p>', $first->rawText());
+        $this->assertTrue($first->created_at->isToday());
+    }
+
     public function testUnchangedTextDoesNotCreateVersion(): void
     {
         PrivacyText::factory()->create(['text' => '<p>Текст</p>']);

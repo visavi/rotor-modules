@@ -28,7 +28,10 @@ class PrivacyTextController extends AdminController
     }
 
     /**
-     * Сохранение текста: изменённый текст становится новой версией, старые остаются
+     * Сохранение текста
+     *
+     * Версию, на которую уже соглашались, менять нельзя: изменённый текст становится новой версией.
+     * Версия без согласий правится на месте, иначе заполнение шаблона всегда давало бы версию 2
      */
     public function store(PrivacyTextRequest $request): RedirectResponse
     {
@@ -41,10 +44,14 @@ class PrivacyTextController extends AdminController
                 ->with('info', __('privacy::privacy.text_unchanged'));
         }
 
+        if (! $current->consents()->exists()) {
+            $version = $current->fill(['text' => $request->validated('text'), 'created_at' => now()]);
+        }
+
         $version->save();
 
         return redirect()->route('privacy.admin.index')
-            ->with('success', __('privacy::privacy.version_published', ['id' => $version->id]));
+            ->with('success', __('privacy::privacy.version_saved', ['id' => $version->id]));
     }
 
     /**
