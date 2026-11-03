@@ -7,6 +7,7 @@ namespace Modules\SocialAuth\Tests\Feature;
 use App\Models\BlackList;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Hook;
 use App\Support\Registry;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
@@ -79,6 +80,8 @@ class RegistrationTest extends ModuleTestCase
         $user = User::query()->where('email', 'john@example.com')->first();
         $this->assertNotNull($user, 'Пользователь должен быть создан');
         $this->assertSame('john-doe', $user->login);
+        // Пол провайдер не сообщает — не указан, а не мужской по умолчанию
+        $this->assertNull($user->gender);
 
         $this->assertDatabaseHas('socials', [
             'user_id'     => $user->id,
@@ -576,6 +579,16 @@ class RegistrationTest extends ModuleTestCase
         $response->assertRedirect('login');
         $this->assertGuest();
         $this->assertSame(0, User::query()->count());
+    }
+
+    public function testButtonsShowModuleNotice(): void
+    {
+        // Под кнопками модули выводят свои пометки, например согласие на обработку данных
+        Hook::add('socialAuthNotice', static fn (): string => 'Пометка модуля');
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Пометка модуля');
     }
 
     public function testAccountPagesAreForUsersOnly(): void

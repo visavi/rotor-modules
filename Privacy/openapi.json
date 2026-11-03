@@ -1,0 +1,34 @@
+{
+    "x-request-fields": {
+        "/register": {
+            "post": {
+                "properties": {
+                    "privacy": {
+                        "type": "boolean",
+                        "description": "Согласие на обработку персональных данных. Требуется, если в /config есть раздел privacy: покажите галочку со ссылкой на privacy.url (текст согласия) и отправьте true только после того, как пользователь её отметит. Принимаются true, 1, \"on\""
+                    }
+                },
+                "required": [
+                    "privacy"
+                ]
+            }
+        }
+    },
+    "x-config-sections": {
+        "privacy": {
+            "type": "object",
+            "description": "Согласие на обработку персональных данных: раздел есть — при регистрации показать галочку и отправить privacy: true",
+            "properties": {
+                "required": {
+                    "type": "boolean",
+                    "description": "Согласие обязательно при регистрации"
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Страница с текстом согласия"
+                }
+            }
+        }
+    }
+}

@@ -148,5 +148,17 @@
                 }
             }
         }
+    },
+    "x-config-sections": {
+        "transfer": {
+            "type": "object",
+            "description": "Условия перевода денег",
+            "properties": {
+                "point": {
+                    "type": "integer",
+                    "description": "Баллов актива, нужных для перевода денег"
+                }
+            }
+        }
     }
 }

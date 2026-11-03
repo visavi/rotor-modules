@@ -877,5 +877,59 @@
                 }
             }
         }
+    },
+    "x-config-sections": {
+        "forum": {
+            "type": "object",
+            "description": "Лимиты форм форума",
+            "properties": {
+                "title_min": {
+                    "type": "integer",
+                    "description": "Минимальная длина названия темы"
+                },
+                "title_max": {
+                    "type": "integer",
+                    "description": "Максимальная длина названия темы"
+                },
+                "text_min": {
+                    "type": "integer",
+                    "description": "Минимальная длина текста поста"
+                },
+                "text_max": {
+                    "type": "integer",
+                    "description": "Максимальная длина текста поста"
+                }
+            }
+        },
+        "vote": {
+            "type": "object",
+            "description": "Лимиты голосований в темах",
+            "properties": {
+                "title_min": {
+                    "type": "integer",
+                    "description": "Минимальная длина вопроса голосования"
+                },
+                "title_max": {
+                    "type": "integer",
+                    "description": "Максимальная длина вопроса голосования"
+                },
+                "answer_min": {
+                    "type": "integer",
+                    "description": "Минимальная длина варианта ответа"
+                },
+                "answer_max": {
+                    "type": "integer",
+                    "description": "Максимальная длина варианта ответа"
+                },
+                "answers_min": {
+                    "type": "integer",
+                    "description": "Минимальное количество вариантов"
+                },
+                "answers_max": {
+                    "type": "integer",
+                    "description": "Максимальное количество вариантов"
+                }
+            }
+        }
     }
 }

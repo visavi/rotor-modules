@@ -271,5 +271,21 @@
                 }
             }
         }
+    },
+    "x-config-sections": {
+        "guestbook": {
+            "type": "object",
+            "description": "Лимиты гостевой книги",
+            "properties": {
+                "text_min": {
+                    "type": "integer",
+                    "description": "Минимальная длина сообщения"
+                },
+                "text_max": {
+                    "type": "integer",
+                    "description": "Максимальная длина сообщения"
+                }
+            }
+        }
     }
 }

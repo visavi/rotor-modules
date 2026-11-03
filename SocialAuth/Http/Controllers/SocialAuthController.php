@@ -356,7 +356,6 @@ class SocialAuthController extends Controller
             'password'      => Hash::make(Str::random(32)),
             'email'         => $email,
             'level'         => $needsConfirm ? User::PENDED : User::USER,
-            'gender'        => User::MALE,
             'themes'        => setting('themes'),
             'point'         => 0,
             'language'      => setting('language'),
