@@ -14,7 +14,8 @@
 @section('content')
     <div class="container">
         @if ($gifts->isNotEmpty())
-            <div class="row mb-3">
+            {{-- Колонок столько, чтобы 24 подарка на странице делились без остатка: ряды полные на любом экране --}}
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3 mb-3 text-center">
                 @foreach ($gifts as $gift)
                     <div class="col">
                         <a href="/gifts/send/{{ $gift->id }}?user={{ $user }}"><img src="{{ $gift->path }}" alt="{{ $gift->name }}"></a><br>

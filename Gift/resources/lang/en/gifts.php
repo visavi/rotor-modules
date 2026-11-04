@@ -19,10 +19,11 @@ return [
     'users_not_found' => 'Some users were not found!',
     'max_users'       => 'Maximum recipients at a time: :max',
 
-    'settings'          => 'Gift settings',
-    'setting_per_page'  => 'Gifts per page',
-    'setting_days'      => 'How long a gift stays in the profile (days)',
-    'setting_max_users' => 'Maximum recipients per sending',
+    'settings'              => 'Gift settings',
+    'setting_per_page'      => 'Gifts per page',
+    'setting_per_page_hint' => 'A multiple of 12 keeps rows of gifts full on any screen width',
+    'setting_days'          => 'How long a gift stays in the profile (days)',
+    'setting_max_users'     => 'Maximum recipients per sending',
 
     'notice_name' => 'Sending a gift',
     'notice_text' => '<p>User %login% has sent you a gift!</p><p>%gift%</p><p>%text%</p><p>%page%</p>',

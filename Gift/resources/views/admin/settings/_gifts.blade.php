@@ -25,6 +25,7 @@
         <label for="gift_per_page" class="form-label">{{ __('gift::gifts.setting_per_page') }}:</label>
         <input type="number" class="form-control" id="gift_per_page" name="sets[gift_per_page]" min="1" max="100" value="{{ old('sets.gift_per_page', $settings['gift_per_page']) }}" required>
         <div class="invalid-feedback">{{ textError('sets.gift_per_page') }}</div>
+        <div class="form-text">{{ __('gift::gifts.setting_per_page_hint') }}</div>
     </div>
 
     <div class="mb-3{{ hasError('sets.gift_days') }}">

@@ -53,6 +53,15 @@ class GiftTest extends ModuleTestCase
         $this->get('/gifts?user[]=' . $this->recipient->login)->assertOk();
     }
 
+    public function testCatalogHasFixedColumns(): void
+    {
+        // Число колонок задано под каждую ширину экрана: 24 подарка делятся на 2, 3, 4 и 6,
+        // поэтому ряды страницы полные. Колонки по ширине картинки обрывали последний ряд
+        $this->get('/gifts')
+            ->assertOk()
+            ->assertSee('row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6', false);
+    }
+
     public function testGuestCannotSend(): void
     {
         $this->get('/gifts/send/' . $this->gift->id)->assertForbidden();
@@ -128,6 +137,16 @@ class GiftTest extends ModuleTestCase
 
         $this->assertSame(50, $this->user->fresh()->money);
         $this->assertDatabaseCount('gifts_users', 0);
+    }
+
+    public function testAdminListFillsRows(): void
+    {
+        // Подарок занимает две ячейки: 3 подарка в ряду на широком экране, 2 на узком.
+        // 48 делится на оба, при 50 последний ряд обрывался
+        $this->actingAs(User::factory()->create(['level' => User::BOSS]))
+            ->get('/admin/gifts')
+            ->assertOk()
+            ->assertViewHas('gifts', static fn ($gifts) => $gifts->perPage() === 48);
     }
 
     public function testBossSavesPrices(): void

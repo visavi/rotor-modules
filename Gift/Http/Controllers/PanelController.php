@@ -20,7 +20,8 @@ class PanelController extends AdminController
     {
         $gifts = Gift::query()
             ->orderBy('price')
-            ->paginate(50);
+            // Подарок — две ячейки, в ряду 3 или 2 подарка: 48 делится на оба, ряды полные
+            ->paginate(48);
 
         return view('gift::panel_index', compact('gifts'));
     }
