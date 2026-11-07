@@ -5,7 +5,7 @@ use Illuminate\Console\Scheduling\Schedule;
 return [
     'name'        => 'Логи посещений',
     'description' => 'Журнал действий администраторов в админ-панели',
-    'version'     => '1.0.2',
+    'version'     => '1.0.3',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

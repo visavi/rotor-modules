@@ -7,7 +7,7 @@ use Modules\Photo\Observers\PhotoObserver;
 return [
     'name'        => 'Галерея',
     'description' => 'Галерея фотографий пользователей с альбомами и комментариями',
-    'version'     => '1.4.0',
+    'version'     => '1.5.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

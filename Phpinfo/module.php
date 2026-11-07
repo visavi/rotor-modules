@@ -3,7 +3,7 @@
 return [
     'name'        => 'PHP-информация',
     'description' => 'Просмотр информации о PHP, расширениях и окружении',
-    'version'     => '1.0.2',
+    'version'     => '1.0.3',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

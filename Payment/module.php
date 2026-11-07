@@ -32,7 +32,7 @@ return [
 
 <p>Ссылки будут созданы автоматически с помощью хуков</p>
 INFO,
-    'version'  => '1.0.5',
+    'version'  => '1.1.0',
     'requires' => '14.9.0',
     'author'   => 'Vantuz',
     'email'    => 'admin@visavi.net',

@@ -3,7 +3,7 @@
 return [
     'name'        => 'Конструктор главной',
     'description' => 'Своя главная страница из блоков: текст, записи разделов, HTML-код и шаблоны',
-    'version'     => '1.0.0',
+    'version'     => '1.1.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

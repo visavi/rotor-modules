@@ -8,7 +8,7 @@ use Modules\Board\Models\Item;
 return [
     'name'        => 'Объявления',
     'description' => 'Доска объявлений по категориям с ценой, телефоном, фотографиями и сроком размещения',
-    'version'     => '1.6.0',
+    'version'     => '1.7.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

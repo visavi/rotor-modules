@@ -3,7 +3,7 @@
 return [
     'name'        => 'Новогодний сюрприз',
     'description' => 'Раз в год выдаёт пользователям случайные монеты, баллы и репутацию',
-    'version'     => '1.0.3',
+    'version'     => '1.0.4',
     'requires'    => '14.3.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

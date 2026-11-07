@@ -3,7 +3,7 @@
 return [
     'name'        => 'Антимат',
     'description' => 'Фильтр нецензурных слов: слова из списка заменяются при выводе текста',
-    'version'     => '1.0.2',
+    'version'     => '1.0.3',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

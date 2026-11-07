@@ -7,7 +7,7 @@ use Modules\Offer\Observers\OfferObserver;
 return [
     'name'        => 'Предложения и проблемы',
     'description' => 'Предложения и сообщения о проблемах от пользователей с голосованием и официальным ответом',
-    'version'     => '1.2.4',
+    'version'     => '1.3.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

@@ -5,7 +5,7 @@ use Illuminate\Console\Scheduling\Schedule;
 return [
     'name'        => 'Почтовая рассылка',
     'description' => 'Письма пользователям: напоминание о непрочитанных сообщениях и поздравление с днём рождения. Нужна настроенная отправка почты',
-    'version'     => '1.0.0',
+    'version'     => '1.1.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

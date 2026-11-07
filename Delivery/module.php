@@ -3,7 +3,7 @@
 return [
     'name'        => 'Приватная рассылка',
     'description' => 'Приватная рассылка сообщений выбранным группам пользователей',
-    'version'     => '1.0.5',
+    'version'     => '1.1.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',

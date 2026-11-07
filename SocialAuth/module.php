@@ -3,7 +3,7 @@
 return [
     'name'        => 'Социальная авторизация',
     'description' => 'Авторизация через социальные сети (Google, GitHub, Yandex, VK)',
-    'version'     => '1.2.1',
+    'version'     => '1.3.0',
     'requires'    => '14.9.0',
     'author'      => 'Vantuz',
     'email'       => 'admin@visavi.net',
