@@ -202,6 +202,10 @@ body:not(:has(.app-header)) .app-content { margin-top: 0; }
 body:not(:has(.app-sidebar)) .app-content { margin-left: 0; }
 ```
 
+Если часть футера по разметке стоит вне контента прямо в макете, например копирайт,
+оберните её в `@hasSection('footer')`: на служебной странице она погаснет вместе с футером.
+Так сделано в теме motor.
+
 ## Хелперы в шаблонах
 
 ```blade

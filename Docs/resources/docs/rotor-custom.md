@@ -45,6 +45,23 @@ resources/custom/
 Переопределение части темы привязано к теме: файл в `custom/views/themes/default`
 действует, только пока активна тема `default`.
 
+### Пример: соцсети в футере
+
+Футер каждой темы подключает шаблон `app/_social` — в поставке в нём ссылки на группы
+visavi.net. Свои ссылки, кнопки или любую другую вёрстку положите в
+`resources/custom/views/app/_social.blade.php`: в Редакторе файлов откройте
+`app/_social.blade.php`, замените содержимое и сохраните кнопкой «Сохранить в Мои правки».
+Пустой файл уберёт соцсети из футера совсем.
+
+```blade
+<a class="social-telegram" href="https://t.me/channel" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram fa-2x"></i></a>
+<a class="social-vk" href="https://vk.com/group" target="_blank" rel="noopener" aria-label="VK"><i class="fab fa-vk fa-2x"></i></a>
+```
+
+Правка действует в любой теме, а футер темы продолжает получать обновления.
+Ссылке, у которой внутри одна иконка, нужен `aria-label`, иначе программа чтения с экрана
+не назовёт её.
+
 ### custom или тема
 
 Тема тоже умеет переопределять шаблоны модулей — через `themes/<тема>/views/<модуль>/`
