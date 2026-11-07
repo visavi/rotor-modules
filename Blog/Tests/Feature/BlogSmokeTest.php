@@ -63,6 +63,7 @@ class BlogSmokeTest extends ModuleTestCase
             'relate_type' => Article::$morphName,
             'relate_id'   => $article->id,
             'path'        => '/uploads/articles/a.jpg',
+            'extension'   => 'jpg',
             'user_id'     => $this->user->id,
         ]);
 

@@ -11,6 +11,7 @@ use App\Casts\PlaceCast;
 use App\Casts\TextCast;
 use App\Models\File;
 use App\Models\User;
+use App\Services\ThumbnailService;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
 use App\Traits\FileableTrait;
@@ -291,16 +292,14 @@ class Item extends Model
     }
 
     /**
-     * Возвращает путь к первому файлу
+     * Первая картинка объявления для списка: превью по ширине блока
      */
     public function getFirstImage(): HtmlString
     {
-        $image = $this->files->first();
+        $image = $this->files->first(static fn (File $file) => $file->isImage());
 
-        $path = $image->path ?? null;
-
-        if ($path) {
-            return new HtmlString('<img src="' . e($path) . '" alt="' . e($this->title) . '" class="img-fluid">');
+        if ($image) {
+            return new HtmlString('<img src="' . e($image->thumbnail(ThumbnailService::MEDIA)) . '" alt="' . e($this->title) . '" class="img-fluid">');
         }
 
         return new HtmlString('<div class="text-center text-secondary py-3"><i class="fa fa-image fa-5x"></i></div>');

@@ -169,14 +169,16 @@ resources/views/themes/my-theme/views/
 @yield('sidebar')            {{-- @includeIf('theme::sidebar'), если он есть --}}
 @yield('titlebar')
 @yield('flash')
+@section('advertTop') @hook('advertTop') @show
 @yield('content')
+@section('advertBottom') @hook('advertBottom') @show
 @yield('footer')             {{-- @includeIf('theme::footer') --}}
 @stack('styles')
 @stack('scripts')            {{-- сюда попадают модалки языка и правки комментариев --}}
 @hook('head') @hook('footer') @hook('contentStart') @hook('contentEnd')
 ```
 
-Шапка, меню и футер подключаются секциями, а не через `@include` напрямую:
+Шапка, меню, футер и реклама подключаются секциями, а не через `@include` и `@hook` напрямую:
 так страница может их погасить. На этом построен `layout_simple` — он наследует
 макет темы (значит, стили подключает сама тема) и отдаёт пустые секции:
 
@@ -187,6 +189,17 @@ resources/views/themes/my-theme/views/
 @section('sidebar')@stop
 @section('titlebar')@stop
 @section('footer')@stop
+@section('advertTop')@stop
+@section('advertBottom')@stop
+```
+
+Так выводятся бан по IP и закрытый сайт. Если тема сдвигает контент под шапку или боковое
+меню (`margin-top`, `margin-left`), отступ нужно снимать, когда их нет на странице —
+иначе служебная страница съедет:
+
+```scss
+body:not(:has(.app-header)) .app-content { margin-top: 0; }
+body:not(:has(.app-sidebar)) .app-content { margin-left: 0; }
 ```
 
 ## Хелперы в шаблонах

@@ -23,7 +23,7 @@
                 <h3>#{{ $order->id }} {{ $order->statusName() }}</h3>
             </div>
 
-            Техническая информация:
+            {{ __('payment::payments.technical_info') }}:
             <details class="spoiler">
                 <summary>{{ __('main.expand_view') }}</summary>
                 <pre class="code"><code>{{ var_export($order->data, true) }}</code></pre>

@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Покупка рекламы')
+@section('title', __('payment::payments.paid_adverts.create_advert'))
 
 @section('header')
     @if (auth()->check())

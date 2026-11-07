@@ -25,7 +25,15 @@ return [
     'yookassa_shop_id'           => 'YooKassa - идентификатор магазина (shopId)',
     'yookassa_secret_key'        => 'YooKassa - секретный ключ',
     'empty_orders'               => 'Заказов еще нет!',
-    'types'                      => [
+    'technical_info'             => 'Техническая информация',
+    'statuses'                   => [
+        'pending'             => 'Платеж создан',
+        'waiting_for_capture' => 'Платеж оплачен и ожидает списания',
+        'succeeded'           => 'Платеж успешно завершен',
+        'canceled'            => 'Платеж отменен',
+        'error'               => 'Ошибка платежа',
+    ],
+    'types' => [
         'advert'  => 'Реклама',
         'balance' => 'Пополнение баланса',
         'card'    => 'Рекламный баннер',

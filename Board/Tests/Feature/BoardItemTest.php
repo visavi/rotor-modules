@@ -5,6 +5,8 @@ namespace Modules\Board\Tests\Feature;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File as FileSystem;
 use Modules\Board\Models\Board;
 use Modules\Board\Models\Item;
 use Tests\ModuleTestCase;
@@ -214,6 +216,35 @@ class BoardItemTest extends ModuleTestCase
 
         $item->update(['expires_at' => now()->addDay()]);
         $this->actingAs($this->user)->get($item->getViewUrl())->assertDontSee($close, false);
+    }
+
+    public function testListShowsThumbnailOfFirstImage(): void
+    {
+        $publicPath = storage_path('framework/testing/public-' . uniqid());
+        $this->app->usePublicPath($publicPath);
+        $this->beforeApplicationDestroyed(static fn () => FileSystem::deleteDirectory($publicPath));
+
+        FileSystem::ensureDirectoryExists(public_path('uploads/boards'));
+        $image = UploadedFile::fake()->image('a.jpg', 1500, 1000);
+        FileSystem::copy($image->getPathname(), public_path('uploads/boards/a.jpg'));
+
+        $item = $this->createItem();
+
+        // Первый файл — не картинка: раньше в список попадал <img> на pdf
+        foreach (['doc.pdf' => 'pdf', 'a.jpg' => 'jpg'] as $name => $extension) {
+            File::factory()->create([
+                'relate_type' => Item::$morphName,
+                'relate_id'   => $item->id,
+                'path'        => '/uploads/boards/' . $name,
+                'extension'   => $extension,
+                'user_id'     => $this->user->id,
+            ]);
+        }
+
+        $this->get(route('boards.index', ['id' => $this->board->id]))
+            ->assertOk()
+            ->assertSee('<img src="/uploads/thumbnails/700/boards/a.jpg"', false)
+            ->assertDontSee('doc.pdf', false);
     }
 
     public function testExpiredItemIsOpenToEveryone(): void

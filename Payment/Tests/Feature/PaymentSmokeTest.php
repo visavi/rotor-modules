@@ -31,6 +31,15 @@ class PaymentSmokeTest extends ModuleTestCase
         $this->seedSettings();
     }
 
+    public function testStatusNameIsTranslated(): void
+    {
+        app()->setLocale('en');
+
+        $this->assertSame('Payment completed', (new Order(['status' => YooKassaService::SUCCEEDED]))->statusName());
+        // Новый статус YooKassa, которого нет в переводах, — как есть, а не ключ перевода
+        $this->assertSame('refunded', (new Order(['status' => 'refunded']))->statusName());
+    }
+
     public function testAdminListsSeveralOrders(): void
     {
         // Покупатель у списка заказов грузился по одному: ленивую загрузку ловит только список из нескольких

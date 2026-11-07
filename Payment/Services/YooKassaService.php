@@ -34,15 +34,6 @@ class YooKassaService
     /** Ошибка */
     public const string ERROR = 'error';
 
-    /** Статусы платежа */
-    public const array STATUSES = [
-        self::PENDING             => 'Платеж создан',
-        self::WAITING_FOR_CAPTURE => 'Платеж оплачен и ожидает списание',
-        self::SUCCEEDED           => 'Платеж успешно завершен',
-        self::CANCELED            => 'Платеж отменен',
-        self::ERROR               => 'Ошибка платежа',
-    ];
-
     /**
      * Конструктор
      */

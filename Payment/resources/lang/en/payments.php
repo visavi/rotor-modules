@@ -25,7 +25,15 @@ return [
     'yookassa_shop_id'           => 'YooKassa - shop identifier (shopId)',
     'yookassa_secret_key'        => 'YooKassa - secret key',
     'empty_orders'               => 'No orders yet!',
-    'types'                      => [
+    'technical_info'             => 'Technical information',
+    'statuses'                   => [
+        'pending'             => 'Payment created',
+        'waiting_for_capture' => 'Payment paid and awaiting capture',
+        'succeeded'           => 'Payment completed',
+        'canceled'            => 'Payment canceled',
+        'error'               => 'Payment error',
+    ],
+    'types' => [
         'advert'  => 'Advertising',
         'balance' => 'Balance top-up',
         'card'    => 'Advert banner',

@@ -1,6 +1,6 @@
 @extends('layout')
 
-@section('title', 'Покупка рекламы')
+@section('title', __('payment::payments.order_cost'))
 
 @section('breadcrumb')
     <nav>
@@ -77,7 +77,7 @@
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <div>
                         <i class="fa-solid fa-bold text-muted me-2"></i>
-                        {{ __('payment::payments.paid_adverts.bold') }}: {{ $advert['bold'] ? 'Да' : 'Нет' }}
+                        {{ __('payment::payments.paid_adverts.bold') }}: {{ $advert['bold'] ? __('main.yes') : __('main.no') }}
                     </div>
                     <span class="text-primary fw-bold">{{ $advert['prices']['bold'] }} {{ setting('currency') }}</span>
                 </div>

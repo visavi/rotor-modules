@@ -11,6 +11,7 @@ use App\Models\Comment;
 use App\Models\File;
 use App\Models\Poll;
 use App\Models\User;
+use App\Services\ThumbnailService;
 use App\Traits\CommentableTrait;
 use App\Traits\ConvertVideoTrait;
 use App\Traits\FeedableTrait;
@@ -192,17 +193,17 @@ class Article extends Model
     }
 
     /**
-     * Возвращает путь к первому файлу
+     * Первая картинка статьи: превью по ширине блока, оригинал открывается в статье
      */
     public function getFirstImage(): ?HtmlString
     {
-        $image = $this->files->first();
+        $image = $this->files->first(static fn (File $file) => $file->isImage());
 
         if (! $image) {
             return null;
         }
 
-        return new HtmlString('<img src="' . e($image->path) . '" alt="' . e($this->title) . '" class="card-img-top">');
+        return new HtmlString('<img src="' . e($image->thumbnail(ThumbnailService::MEDIA)) . '" alt="' . e($this->title) . '" class="card-img-top">');
     }
 
     /**

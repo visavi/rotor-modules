@@ -12,6 +12,8 @@ return [
     'miner'     => 'Miner',
     'roulette'  => 'Roulette',
     'baccarat'  => 'Baccarat',
+    'keno'      => 'Keno',
+    'highlow'   => 'Higher or lower',
 
     // Common
     'play'             => 'Play',
@@ -254,4 +256,32 @@ return [
         'banker' => 'Banker',
         'tie'    => 'Tie',
     ],
+
+    // Keno
+    'keno_intro'         => 'Mark :picks numbers out of :field. The machine draws :draw numbers — the payout depends on how many match.',
+    'keno_picks_invalid' => 'You need to mark exactly :picks numbers!',
+    'keno_picked'        => 'Numbers marked: :count of :picks',
+    'keno_matched'       => 'Numbers matched: :count',
+    'keno_play'          => 'Draw',
+    'keno_clear'         => 'Clear',
+    'keno_payouts'       => 'Payout table',
+    'keno_hits'          => 'Matched',
+    'keno_hits_of'       => ':hits of :picks',
+    'keno_prize'         => 'Payout',
+    'keno_rules_edge'    => 'Payouts include the returned bet: x1.5 on a bet of 100 coins returns 150.',
+
+    // Higher or lower
+    'hl_intro'       => 'Guess whether the next card is higher or lower than the open one. An ace beats a king, suits do not matter. The multiplier grows while you guess right; you can cash out after the first correct card.',
+    'hl_higher'      => 'Higher',
+    'hl_lower'       => 'Lower',
+    'hl_cash'        => 'Cash out',
+    'hl_draw'        => 'Equal cards are a draw: the bet and the multiplier stay the same.',
+    'hl_multiplier'  => 'Multiplier: x:multiplier',
+    'hl_pot'         => 'in hand: :money',
+    'hl_chances'     => 'Left in the deck — higher: :higher, lower: :lower, equal: :equal',
+    'hl_rules_order' => 'Usual ranking: a two is the lowest, an ace is the highest. Suits do not matter.',
+    'hl_rules_deck'  => 'There is one deck and it is not reshuffled: dealt cards leave it, so the odds towards the end of the game follow what is left.',
+    'hl_rules_draw'  => 'A card of the same rank is a draw: the bet and the multiplier are kept and the game goes on with the next card.',
+    'hl_rules_price' => 'The step multiplier is based on the remaining cards that decide the outcome. The lower the chance to guess, the more the step pays.',
+    'hl_rules_cash'  => 'A loss takes the whole bet. «Cash out» appears after the first correct card and pays the bet times the multiplier so far, which ends the game.',
 ];

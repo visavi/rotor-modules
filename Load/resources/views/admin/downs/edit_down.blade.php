@@ -34,26 +34,25 @@
     @endif
 
     @if (isAdmin('boss'))
-        @if ($down->active)
-            <i class="fa fa-pencil-alt"></i>
-            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" data-confirm="{{ __('load::loads.confirm_unpublish_down') }}">
-                @csrf
-                <button class="btn btn-link p-0 me-3">{{ __('main.unpublish') }}</button>
-            </form>
-        @else
-            <i class="fa fa-pencil-alt"></i>
-            <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" class="d-inline" data-confirm="{{ __('load::loads.confirm_publish_down') }}">
-                @csrf
-                <button class="btn btn-link p-0 me-3">{{ __('main.publish') }}</button>
-            </form>
-        @endif
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            @if ($down->active)
+                <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" data-confirm="{{ __('load::loads.confirm_unpublish_down') }}">
+                    @csrf
+                    <button class="btn btn-adaptive btn-sm">{{ __('main.unpublish') }}</button>
+                </form>
+            @else
+                <form action="{{ route('admin.downs.publish', ['id' => $down->id]) }}" method="post" data-confirm="{{ __('load::loads.confirm_publish_down') }}">
+                    @csrf
+                    <button class="btn btn-success btn-sm">{{ __('main.publish') }}</button>
+                </form>
+            @endif
 
-        <i class="fas fa-times"></i>
-        <form action="{{ route('admin.downs.delete', ['id' => $down->id]) }}" method="post" class="d-inline" data-confirm="{{ __('load::loads.confirm_delete_down') }}">
-            @csrf
-            @method('DELETE')
-            <button class="btn btn-link p-0 me-3">{{ __('main.delete') }}</button>
-        </form>
+            <form action="{{ route('admin.downs.delete', ['id' => $down->id]) }}" method="post" data-confirm="{{ __('load::loads.confirm_delete_down') }}">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-outline-danger btn-sm">{{ __('main.delete') }}</button>
+            </form>
+        </div>
         <hr>
     @endif
 

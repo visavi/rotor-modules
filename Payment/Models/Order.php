@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Lang;
 use Modules\Payment\Services\YooKassaService;
 
 /**
@@ -87,7 +88,10 @@ class Order extends Model
      */
     public function statusName(): string
     {
-        return YooKassaService::STATUSES[$this->status] ?? 'Unknown';
+        $key = 'payment::payments.statuses.' . $this->status;
+
+        // Статус приходит от YooKassa: новый, которого нет в переводах, показываем как есть
+        return Lang::has($key) ? __($key) : (string) $this->status;
     }
 
     /**
