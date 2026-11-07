@@ -20,6 +20,9 @@
 
         <?php $active = ($type === 'views') ? 'primary' : 'adaptive'; ?>
         <a class="btn btn-{{ $active }} btn-sm" href="{{ route('admin.caches.index', ['type' => 'views']) }}">{{ __('caches::caches.views') }}</a>
+
+        <?php $active = ($type === 'thumbnails') ? 'primary' : 'adaptive'; ?>
+        <a class="btn btn-{{ $active }} btn-sm" href="{{ route('admin.caches.index', ['type' => 'thumbnails']) }}">{{ __('caches::caches.thumbnails') }}</a>
     </div>
 
     <div class="mb-3">
@@ -28,7 +31,21 @@
     </div>
     <hr>
 
-    @if ($files->isNotEmpty())
+    @if ($type === 'thumbnails')
+        <div class="mb-3">
+            @forelse ($thumbnails as $size => $info)
+                <div class="mb-1">
+                    <i class="fa fa-image"></i> <b>{{ $size }}px</b> — {{ __('caches::caches.thumbnails_count', ['count' => $info['count']]) }} ({{ formatSize($info['size']) }})
+                </div>
+            @empty
+                {{ showError(__('caches::caches.empty_files')) }}
+            @endforelse
+        </div>
+
+        <div class="alert alert-info">
+            {{ __('caches::caches.thumbnails_hint') }}
+        </div>
+    @elseif ($files->isNotEmpty())
         <div class="mb-3">
             @foreach ($files as $file)
                 <div class="mb-1">

@@ -212,6 +212,25 @@ body:not(:has(.app-sidebar)) .app-content { margin-left: 0; }
 @hook('hookName')               {{-- точка вставки хука --}}
 ```
 
+## Превью картинок
+
+Картинку из вложений выводите превью, а не оригиналом: оригинал бывает до 1500px
+и весит в разы больше. Превью создаётся при первом показе и дальше отдаётся как статика.
+
+```blade
+@use('App\Services\ThumbnailService')
+
+{{-- По ширине блока медиа, 700px --}}
+<img src="{{ $file->thumbnail(ThumbnailService::MEDIA) }}" alt="{{ $file->name }}" class="img-fluid">
+
+{{-- Квадратная миниатюра 150px --}}
+<img src="{{ $file->thumbnail(ThumbnailService::SQUARE) }}" alt="{{ $file->name }}">
+```
+
+Для gif, svg и файлов, которые не картинки, `thumbnail()` вернёт исходный адрес,
+поэтому проверять тип перед вызовом не нужно. Ссылку на полный размер оставляйте
+на `$file->path`. Превью удаляются вместе с файлом через `$file->delete()`.
+
 ## Иконки
 
 Движок использует [Font Awesome 7](https://fontawesome.com/icons). Примеры:

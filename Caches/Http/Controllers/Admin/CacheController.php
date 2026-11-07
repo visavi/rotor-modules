@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Caches\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Services\ThumbnailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -18,6 +19,13 @@ class CacheController extends AdminController
     public function index(Request $request): View
     {
         $type = $request->input('type', 'files');
+
+        // Превью могут исчисляться тысячами: показываем сводку по каталогам, а не список
+        if ($type === 'thumbnails') {
+            $thumbnails = ThumbnailService::stats();
+
+            return view('caches::admin/index', compact('thumbnails', 'type'));
+        }
 
         $files = match ($type) {
             'views' => glob(storage_path('framework/views/*.php'), GLOB_BRACE),
@@ -36,13 +44,21 @@ class CacheController extends AdminController
     {
         $type = $request->input('type');
 
+        $cleared = true;
+
         if ($type === 'views') {
             Artisan::call('view:clear');
+        } elseif ($type === 'thumbnails') {
+            // На хостинге часть превью может принадлежать другому пользователю — их не удалить
+            $cleared = ThumbnailService::clear();
         } else {
             refreshCaches();
         }
 
-        return redirect()->route('admin.caches.index', ['type' => $type])
-            ->with('success', __('caches::caches.success_cleared'));
+        $redirect = redirect()->route('admin.caches.index', ['type' => $type]);
+
+        return $cleared
+            ? $redirect->with('success', __('caches::caches.success_cleared'))
+            : $redirect->with('danger', __('caches::caches.clear_failed'));
     }
 }

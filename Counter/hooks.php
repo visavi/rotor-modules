@@ -93,7 +93,7 @@ Hook::add('counter', static function (): ?string {
     foreach ($days as $day) {
         $bars[] = [
             'h' => $day['hosts'] ? max(1, (int) round($day['hosts'] / $maxHosts * 20)) : 0,
-            'c' => $barColors[$day['dow']] ?? '#0d6efd',
+            'c' => $barColors[$day['dow']],
             'l' => __('main.' . strtolower(substr($day['dow'], 0, 2))),
         ];
     }
