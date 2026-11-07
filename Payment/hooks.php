@@ -35,7 +35,8 @@ Hook::add('advertTop', static function () {
     $ad = PaidAdvert::renderAdvert(PaidAdvert::TOP_ALL)
         ?? '<i class="fas fa-ad"></i> <a class="small text-muted" href="/payments/advert" rel="nofollow">' . __('payment::payments.paid_adverts.your_advert_here') . '</a>';
 
-    return '<div class="text-center">' . $ad . '</div>';
+    // Небольшой зазор: ссылки рекламы модуля Advert идут следующей строкой и не стоят вплотную
+    return '<div class="text-center mb-1">' . $ad . '</div>';
 }, 10);
 Hook::add('advertBottom', static fn () => ($ad = PaidAdvert::renderAdvert(PaidAdvert::BOTTOM_ALL)) ? '<div class="text-center my-1">' . $ad . '</div>' : '');
 
