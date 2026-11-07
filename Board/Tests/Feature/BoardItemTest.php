@@ -243,7 +243,7 @@ class BoardItemTest extends ModuleTestCase
 
         $this->get(route('boards.index', ['id' => $this->board->id]))
             ->assertOk()
-            ->assertSee('<img src="/uploads/thumbnails/700/boards/a.jpg"', false)
+            ->assertSee('<img src="/uploads/thumbnails/700/boards/a.webp"', false)
             ->assertDontSee('doc.pdf', false);
     }
 

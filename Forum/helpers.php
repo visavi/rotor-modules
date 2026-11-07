@@ -31,6 +31,6 @@ if (! function_exists('progressBar')) {
             $title = $percent . '%';
         }
 
-        return new HtmlString(view('forum::_progressbar', compact('percent', 'title')));
+        return new HtmlString(view('forum::_progressbar', compact('percent', 'title'))->render());
     }
 }

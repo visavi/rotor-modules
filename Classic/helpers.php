@@ -14,7 +14,7 @@ if (! function_exists('onlineWidget')) {
     {
         $online = statsOnline();
 
-        return new HtmlString(view('classic::widgets/_online', compact('online')));
+        return new HtmlString(view('classic::widgets/_online', compact('online'))->render());
     }
 }
 
@@ -41,7 +41,7 @@ if (! function_exists('pinnedNews')) {
                 ->get();
         });
 
-        return new HtmlString(view('classic::widgets/_news', compact('news')));
+        return new HtmlString(view('classic::widgets/_news', compact('news'))->render());
     }
 }
 
@@ -55,7 +55,7 @@ if (! function_exists('recentTopics')) {
                 ->get();
         });
 
-        return new HtmlString(view('classic::widgets/_topics', compact('topics')));
+        return new HtmlString(view('classic::widgets/_topics', compact('topics'))->render());
     }
 }
 
@@ -71,7 +71,7 @@ if (! function_exists('recentDowns')) {
                 ->get();
         });
 
-        return new HtmlString(view('classic::widgets/_downs', compact('downs')));
+        return new HtmlString(view('classic::widgets/_downs', compact('downs'))->render());
     }
 }
 
@@ -85,7 +85,7 @@ if (! function_exists('recentArticles')) {
                 ->get();
         });
 
-        return new HtmlString(view('classic::widgets/_articles', compact('articles')));
+        return new HtmlString(view('classic::widgets/_articles', compact('articles'))->render());
     }
 }
 
@@ -100,7 +100,7 @@ if (! function_exists('recentPhotos')) {
                 ->get();
         });
 
-        return new HtmlString(view('classic::widgets/_photos', compact('photos')));
+        return new HtmlString(view('classic::widgets/_photos', compact('photos'))->render());
     }
 }
 

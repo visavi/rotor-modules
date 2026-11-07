@@ -30,6 +30,6 @@ if (! function_exists('getCurrencyRates')) {
     {
         $courses = getCurrencyCourses();
 
-        return new HtmlString(view('currency::_rates', compact('courses')));
+        return new HtmlString(view('currency::_rates', compact('courses'))->render());
     }
 }
