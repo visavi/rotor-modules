@@ -52,7 +52,16 @@
 
 @section('content')
     @if ($item->expires_at->lte(now()))
-        <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
+        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2">
+            {{ __('board::boards.item_not_active') }}
+
+            @if ($item->user_id === auth()->id())
+                <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post">
+                    @csrf
+                    <button class="btn btn-success btn-sm">{{ __('main.publish') }}</button>
+                </form>
+            @endif
+        </div>
     @endif
 
     <div class="mb-3">

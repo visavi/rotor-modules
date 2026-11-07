@@ -25,23 +25,25 @@
         <div class="alert alert-warning">{{ __('board::boards.item_not_active') }}</div>
     @endif
 
-    @if ($item->expires_at->gt(now()))
-        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline" data-confirm="{{ __('board::boards.confirm_unpublish_item') }}">
-            @csrf
-            <button class="btn btn-link p-0">{{ __('main.unpublish') }}</button>
-        </form> /
-    @else
-        <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" class="d-inline">
-            @csrf
-            <button class="btn btn-link p-0">{{ __('main.publish') }}</button>
-        </form> /
-    @endif
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @if ($item->expires_at->gt(now()))
+            <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" data-confirm="{{ __('board::boards.confirm_unpublish_item') }}">
+                @csrf
+                <button class="btn btn-adaptive btn-sm">{{ __('main.unpublish') }}</button>
+            </form>
+        @else
+            <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post">
+                @csrf
+                <button class="btn btn-success btn-sm">{{ __('main.publish') }}</button>
+            </form>
+        @endif
 
-    <form action="{{ route('items.delete', ['id' => $item->id]) }}" method="post" class="d-inline" data-confirm="{{ __('board::boards.confirm_delete_item') }}">
-        @csrf
-        @method('DELETE')
-        <button class="btn btn-link p-0">{{ __('main.delete') }}</button>
-    </form>
+        <form action="{{ route('items.delete', ['id' => $item->id]) }}" method="post" data-confirm="{{ __('board::boards.confirm_delete_item') }}">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-outline-danger btn-sm">{{ __('main.delete') }}</button>
+        </form>
+    </div>
 
     <div class="section-form mb-3 shadow">
         <form action="{{ route('items.edit', ['id' => $item->id]) }}" method="post">

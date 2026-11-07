@@ -238,7 +238,8 @@ class BoardController extends Controller
             $status = __('board::boards.item_success_published');
         }
 
-        return redirect()->route('items.edit', ['id' => $item->id])
+        // Кнопки есть в списке «Мои объявления», в объявлении и в правке — возвращаем, откуда нажали
+        return redirect()->back(fallback: route('items.edit', ['id' => $item->id]))
             ->with('success', $status);
     }
 

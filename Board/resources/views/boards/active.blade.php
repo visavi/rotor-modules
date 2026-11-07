@@ -81,6 +81,22 @@
                                     @if ($item->price)
                                         <div class="text-md-end fs-5 fw-bold text-info text-nowrap">{{ $item->getPrice() }}</div>
                                     @endif
+
+                                    <div class="d-flex flex-wrap justify-content-md-end gap-2 mt-2">
+                                        @if ($item->expires_at->gt(now()))
+                                            <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post" data-confirm="{{ __('board::boards.confirm_unpublish_item') }}">
+                                                @csrf
+                                                <button class="btn btn-adaptive btn-sm">{{ __('main.unpublish') }}</button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('items.close', ['id' => $item->id]) }}" method="post">
+                                                @csrf
+                                                <button class="btn btn-success btn-sm">{{ __('main.publish') }}</button>
+                                            </form>
+                                        @endif
+
+                                        <a class="btn btn-adaptive btn-sm" href="{{ route('items.edit', ['id' => $item->id]) }}">{{ __('main.change') }}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

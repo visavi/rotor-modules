@@ -170,6 +170,52 @@ class BoardItemTest extends ModuleTestCase
         $this->assertNull($item->fresh());
     }
 
+    public function testArchiveItemIsRepublishedFromList(): void
+    {
+        $item = $this->createItem(['expires_at' => now()->subDay()]);
+        $archive = route('boards.active', ['type' => 'archive']);
+        $close = route('items.close', ['id' => $item->id]);
+
+        // Кнопка прямо в списке: не нужно заходить в объявление и правку
+        $this->actingAs($this->user)
+            ->get($archive)
+            ->assertOk()
+            ->assertSee('action="' . $close . '"', false)
+            ->assertSee(__('main.publish'));
+
+        // Возврат туда, откуда нажали
+        $this->actingAs($this->user)
+            ->from($archive)
+            ->post($close)
+            ->assertRedirect($archive)
+            ->assertSessionHas('success');
+
+        $this->assertTrue($item->fresh()->expires_at->gt(now()));
+    }
+
+    public function testActiveListOffersUnpublish(): void
+    {
+        $item = $this->createItem();
+
+        $this->actingAs($this->user)
+            ->get(route('boards.active'))
+            ->assertOk()
+            ->assertSee('action="' . route('items.close', ['id' => $item->id]) . '"', false)
+            ->assertSee(__('main.unpublish'));
+    }
+
+    public function testAuthorRepublishesExpiredItemFromItsPage(): void
+    {
+        $item = $this->createItem(['expires_at' => now()->subDay()]);
+        $close = 'action="' . route('items.close', ['id' => $item->id]) . '"';
+
+        $this->actingAs($this->user)->get($item->getViewUrl())->assertSee($close, false);
+        $this->actingAs(User::factory()->create())->get($item->getViewUrl())->assertDontSee($close, false);
+
+        $item->update(['expires_at' => now()->addDay()]);
+        $this->actingAs($this->user)->get($item->getViewUrl())->assertDontSee($close, false);
+    }
+
     public function testExpiredItemIsOpenToEveryone(): void
     {
         $item = $this->createItem(['expires_at' => now()->subDay()]);
