@@ -42,10 +42,13 @@ jobs:
           TODAY=$(date -u +%F)
 
           if gh release view registry &>/dev/null; then
-            gh release download registry -p "registry.json" -D /tmp/ 2>/dev/null || true
-            if [ -f /tmp/registry.json ]; then
-              MODULES=$(jq '.modules // []' /tmp/registry.json)
+            # Без прошлого реестра сборка начнётся с пустого списка: потеряет старые
+            # версии, а чистка ниже удалит их архивы. Лучше упасть
+            if ! gh release download registry -p "registry.json" -D /tmp/; then
+              echo "::error::Не удалось скачать прошлый registry.json"
+              exit 1
             fi
+            MODULES=$(jq '.modules // []' /tmp/registry.json)
           else
             CHANGED=1
           fi
@@ -188,14 +191,18 @@ jobs:
             CHANGED=1
           fi
 
-          if [ "$CHANGED" = "0" ]; then
-            echo "No new module versions — skipping registry update"
+          # Сверка с прошлым реестром, а не только флаг «создан релиз»: прогон,
+          # упавший после создания релизов, при перезапуске соберёт реестр заново.
+          # Заодно в реестр попадают правки описаний и скриншотов
+          if [ "$CHANGED" = "0" ] && [ "$(jq -cS . <<< "$MODULES")" = "$(jq -cS '.modules // []' /tmp/registry.json)" ]; then
+            echo "Registry is up to date — skipping registry update"
             exit 0
           fi
 
           # -c: реестр качают клиенты, а GitHub отдаёт его без gzip — отступы
           # стоили бы трети веса файла. Читать глазами — через `jq .`
-          jq -c -n --arg name "$REGISTRY_NAME" --argjson m "$MODULES" '{name: $name, modules: $m}' > registry.json
+          # Реестр — через stdin: аргумент командной строки ограничен 128 КБ
+          jq -c --arg name "$REGISTRY_NAME" '{name: $name, modules: .}' <<< "$MODULES" > registry.json
           echo "Generated registry.json with $(jq length <<< "$MODULES") modules"
 
           gh release delete registry --yes 2>/dev/null || true
