@@ -74,7 +74,7 @@
             @endif
 
             @if (! $allowDownload)
-                {{ showError(__('load::loads.download_authorized')) }}
+                {{ showError(__('load::loads.download_login', ['url' => route('login')])) }}
             @endif
         @else
             {{ showError(__('main.not_uploaded')) }}

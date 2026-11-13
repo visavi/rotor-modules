@@ -10,6 +10,7 @@ use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Modules\Rating\Http\Requests\RatingRequest;
 use Modules\Rating\Models\Rating;
@@ -36,15 +37,27 @@ class RatingController extends Controller
         $vote = $request->input('vote');
         $text = $request->string('text')->value();
 
-        Rating::query()->create([
-            'user_id'      => $me->id,
-            'recipient_id' => $user->id,
-            'text'         => $text,
-            'vote'         => $vote === 'plus' ? '+' : '-',
-        ]);
+        // Блокировка строки получателя: голоса за него идут по очереди — двойная отправка формы
+        // упирается в повторную проверку, а счётчики считаются от свежих значений, а не от прочитанных до чужого голоса
+        $user = DB::transaction(function () use ($me, $user, $vote, $text): User {
+            $recipient = User::query()->lockForUpdate()->findOrFail($user->id);
 
-        $user->increment($vote === 'plus' ? 'posrating' : 'negrating');
-        $user->update(['rating' => $user->posrating - $user->negrating]);
+            if ($this->voted($me, $recipient)) {
+                abort(403, __('rating::ratings.reputation_already_changed'));
+            }
+
+            Rating::query()->create([
+                'user_id'      => $me->id,
+                'recipient_id' => $recipient->id,
+                'text'         => $text,
+                'vote'         => $vote === 'plus' ? '+' : '-',
+            ]);
+
+            $recipient->increment($vote === 'plus' ? 'posrating' : 'negrating');
+            $recipient->update(['rating' => $recipient->posrating - $recipient->negrating]);
+
+            return $recipient;
+        });
 
         $message = textNotice('rating', ['login' => $me->login, 'rating' => $user->rating, 'comment' => $text, 'vote' => __('main.' . $vote)]);
         $user->sendMessage(null, $message);
@@ -136,17 +149,22 @@ class RatingController extends Controller
             abort(403, __('rating::ratings.reputation_point', ['point' => plural(setting('editratingpoint'), setting('scorename'))]));
         }
 
-        // Голосовать за того же пользователя можно через 90 дней
-        $voted = Rating::query()
-            ->where('user_id', $me->id)
-            ->where('recipient_id', $user->id)
-            ->where('created_at', '>', now()->subMonths(3))
-            ->exists();
-
-        if ($voted) {
+        if ($this->voted($me, $user)) {
             abort(403, __('rating::ratings.reputation_already_changed'));
         }
 
         return $user;
+    }
+
+    /**
+     * Голосовать за того же пользователя можно раз в полгода
+     */
+    private function voted(User $me, User $user): bool
+    {
+        return Rating::query()
+            ->where('user_id', $me->id)
+            ->where('recipient_id', $user->id)
+            ->where('created_at', '>', now()->subMonths(6))
+            ->exists();
     }
 }

@@ -127,9 +127,9 @@ class RatingTest extends ModuleTestCase
         $this->assertDatabaseCount('rating', 0);
     }
 
-    public function testSecondVoteIsBlockedForThreeMonths(): void
+    public function testSecondVoteIsBlockedForHalfYear(): void
     {
-        $this->vote();
+        $this->vote(['created_at' => now()->subMonths(5)]);
 
         $this->actingAs($this->user)
             ->post('/users/' . $this->recipient->login . '/rating?vote=plus', ['text' => 'И ещё раз'])
@@ -138,9 +138,23 @@ class RatingTest extends ModuleTestCase
         $this->assertDatabaseCount('rating', 1);
     }
 
-    public function testVoteIsAllowedAgainAfterThreeMonths(): void
+    public function testRepeatVoteThroughFormIsBlocked(): void
     {
-        $this->vote(['created_at' => now()->subMonths(4)]);
+        $url = '/users/' . $this->recipient->login . '/rating?vote=plus';
+
+        $this->actingAs($this->user)->post($url, ['text' => 'Первый голос'])->assertRedirect();
+
+        $this->travel(10)->minutes();
+
+        $this->actingAs($this->user)->post($url, ['text' => 'Второй голос'])
+            ->assertSee(__('rating::ratings.reputation_already_changed'));
+
+        $this->assertDatabaseCount('rating', 1);
+    }
+
+    public function testVoteIsAllowedAgainAfterHalfYear(): void
+    {
+        $this->vote(['created_at' => now()->subMonths(7)]);
 
         $this->actingAs($this->user)
             ->post('/users/' . $this->recipient->login . '/rating?vote=plus', ['text' => 'Прошло много времени'])

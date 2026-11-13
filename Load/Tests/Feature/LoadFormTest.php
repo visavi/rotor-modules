@@ -204,6 +204,24 @@ class LoadFormTest extends ModuleTestCase
         $this->actingAs(User::factory()->create())->get($url)->assertForbidden();
     }
 
+    public function testGuestIsSentToLoginToDownload(): void
+    {
+        $this->overrideSetting('down_guest_download', 0);
+
+        $down = $this->createDown(['active' => 1, 'links' => ['https://example.com/wallpapers.zip']]);
+        $file = $this->file($down->id);
+
+        // Прямая ссылка на скачивание ведёт на вход, адрес запоминается для возврата
+        $this->get(route('downs.download', ['id' => $down->id, 'fid' => $file->id]))
+            ->assertRedirect(route('login'));
+        $this->get(route('downs.download-link', ['id' => $down->id, 'lid' => 0]))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('url.intended', route('downs.download-link', ['id' => $down->id, 'lid' => 0]));
+
+        $this->get('/downs/' . $down->id)
+            ->assertSee(__('load::loads.download_login', ['url' => route('login')]), false);
+    }
+
     public function testVerifiedDownIsNotEdited(): void
     {
         $down = $this->createDown(['active' => 1]);

@@ -52,7 +52,7 @@ return [
     'archive_only_zip'    => 'You can only view ZIP archives!',
     'archive_not_open'    => 'Failed to open the archive!',
     'file_not_read'       => 'Failed to read the file!',
-    'download_authorized' => 'To download files you need to log in!',
+    'download_login'      => 'To download files, please <a href=":url">log in</a>!',
 
     'load_success_created'     => 'New section successfully created!',
     'load_parent_invalid'      => 'Invalid parent category selection!',

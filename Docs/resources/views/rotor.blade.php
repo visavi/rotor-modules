@@ -1,5 +1,6 @@
 @extends('layout')
 
+@section('title', 'RotorCMS')
 @section('titlebar', '')
 
 @section('content')

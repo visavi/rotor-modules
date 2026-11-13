@@ -144,8 +144,9 @@ class DownController extends Controller
             abort(404, __('load::loads.down_not_exist'));
         }
 
+        // Гостя — на вход; адрес скачивания запоминается для возврата, если вход открыт не со страницы сайта
         if (! (auth()->check() || setting('down_guest_download'))) {
-            abort(403, __('load::loads.download_authorized'));
+            return redirect()->guest(route('login'));
         }
 
         $this->authorize('view', $down);
@@ -167,8 +168,9 @@ class DownController extends Controller
     {
         $down = Down::query()->findOrFail($id);
 
+        // Гостя — на вход; адрес скачивания запоминается для возврата, если вход открыт не со страницы сайта
         if (! (auth()->check() || setting('down_guest_download'))) {
-            abort(403, __('load::loads.download_authorized'));
+            return redirect()->guest(route('login'));
         }
 
         $this->authorize('view', $down);

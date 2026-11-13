@@ -212,4 +212,11 @@ class DocsTest extends ModuleTestCase
     {
         $this->get('/rotor')->assertOk();
     }
+
+    public function testRotorPageHasTitle(): void
+    {
+        $this->get('/rotor')
+            ->assertOk()
+            ->assertSee('<title>RotorCMS - ', false);
+    }
 }
