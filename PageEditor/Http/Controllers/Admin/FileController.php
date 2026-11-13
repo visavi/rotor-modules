@@ -9,6 +9,7 @@ use App\Models\Module;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\PageEditor\Http\Requests\FileCreateRequest;
 use Modules\PageEditor\Http\Requests\FileUploadRequest;
@@ -168,6 +169,9 @@ class FileController extends Controller
 
         $readOnly = PathResolver::isReadOnly($this->root);
 
+        // Путь от корня проекта; корень вне проекта (custom в другом месте) показывается целиком
+        $fullPath = Str::chopStart(PathResolver::resolve($this->root, $path . '/' . $file), base_path() . '/');
+
         // Грамматика подсветки: blade и php идут одной, остальное — по расширению
         $language = match (PathResolver::extension($this->file)) {
             'php', 'blade.php'   => 'php',
@@ -188,6 +192,7 @@ class FileController extends Controller
             'original',
             'readOnly',
             'language',
+            'fullPath',
         ));
     }
 

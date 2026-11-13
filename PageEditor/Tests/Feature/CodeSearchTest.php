@@ -25,6 +25,7 @@ class CodeSearchTest extends ModuleTestCase
         file_put_contents($this->dir . '/b.txt', "needle in txt\n");
         file_put_contents($this->dir . '/big.blade.php', str_repeat('x', 1048577));
         file_put_contents($this->dir . '/bin.blade.php', "needle\0binary");
+        file_put_contents($this->dir . '/cyr.blade.php', "Содержимое скрыто\n");
     }
 
     protected function tearDown(): void
@@ -64,6 +65,13 @@ class CodeSearchTest extends ModuleTestCase
     {
         $this->assertNotEmpty(CodeSearcher::search('views', 'NEEDLE', '*.blade.php')['results']);
         $this->assertEmpty(CodeSearcher::search('views', 'NEEDLE', '*.blade.php', true)['results']);
+    }
+
+    public function testCyrillicIgnoresCaseByDefault(): void
+    {
+        // stripos сравнивал регистр побайтово: «содержимое» не находило «Содержимое»
+        $this->assertNotEmpty(CodeSearcher::search('views', 'содержимое', 'cyr.blade.php')['results']);
+        $this->assertEmpty(CodeSearcher::search('views', 'содержимое', 'cyr.blade.php', true)['results']);
     }
 
     public function testRegexMode(): void
@@ -227,6 +235,8 @@ class CodeSearchTest extends ModuleTestCase
         $response->assertOk();
         $response->assertSee(__('page_editor::files.read_only'));
         $response->assertDontSee(__('main.save'));
+        // Путь от корня проекта над редактором, с копированием
+        $response->assertSee('data-copy="app/Models/User.php"', false);
     }
 
     public function testCoreCodeRootRejectsChanges(): void

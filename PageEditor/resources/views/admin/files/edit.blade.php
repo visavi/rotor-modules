@@ -53,6 +53,13 @@
     <div class="section-form mb-3 shadow">
         <form method="post" action="{{ route('admin.files.edit', ['root' => $root, 'path' => $path, 'file' => $file]) }}">
             @csrf
+            <div class="small text-muted font-monospace text-break mb-2">
+                <i class="far fa-file-code"></i> {{ $fullPath }}
+                <button class="btn btn-link btn-sm p-0 ms-1 text-muted align-baseline" type="button" data-copy="{{ $fullPath }}" data-bs-toggle="tooltip" title="{{ __('main.copy') }}" aria-label="{{ __('main.copy') }}">
+                    <i class="far fa-clipboard"></i>
+                </button>
+            </div>
+
             {{-- Панель редактора: отмена и поиск по открытому файлу --}}
             <div class="d-flex flex-wrap gap-2 align-items-center mb-2 js-editor-toolbar" hidden>
                 @unless ($readOnly)
@@ -159,6 +166,28 @@
             color: #dcdcaa;
         }
 
+        /* Номера строк: колонка поверх левого поля редактора, внутри его рамки */
+        .code-editor-wrap {
+            position: relative;
+        }
+
+        .code-editor-gutter {
+            position: absolute;
+            top: var(--bs-border-width);
+            left: var(--bs-border-width);
+            overflow: hidden;
+            padding-right: .75rem;
+            text-align: right;
+            white-space: pre;
+            font-family: var(--bs-font-monospace);
+            color: var(--bs-secondary-color);
+            background: var(--bs-tertiary-bg);
+            border-right: var(--bs-border-width) solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius);
+            user-select: none;
+            pointer-events: none;
+        }
+
         /* Bootstrap глушит disabled лишь до 0.65 — активную кнопку видно плохо */
         .js-editor-toolbar .btn:disabled {
             opacity: .3;
@@ -183,6 +212,7 @@
 
     <script type="module">
         import { CodeJar } from '{{ asset('assets/modules/pageeditors/editor/codejar.js') }}';
+        import { withLineNumbers } from '{{ asset('assets/modules/pageeditors/editor/linenumbers.js') }}';
 
         const textarea = document.getElementById('msg');
         const language = textarea?.dataset.language || 'none';
@@ -263,8 +293,21 @@
                 }
 
                 const line = editor.textContent.slice(0, matches[index]).split('\n').length;
-                const lineHeight = parseFloat(window.getComputedStyle(editor).lineHeight) || 18;
+                const style = window.getComputedStyle(editor);
+                const lineHeight = parseFloat(style.lineHeight) || 18;
                 editor.scrollTop = Math.max(0, (line - 5) * lineHeight);
+
+                // Строки не переносятся: совпадение правее края или под колонкой номеров докручиваем по горизонтали
+                const match = window.getSelection().getRangeAt(0).getBoundingClientRect();
+                const box = editor.getBoundingClientRect();
+                const left = box.left + (parseFloat(style.paddingLeft) || 0);
+                const right = box.left + editor.clientWidth - 16;
+
+                if (match.right > right) {
+                    editor.scrollLeft += match.right - right;
+                } else if (match.left < left) {
+                    editor.scrollLeft -= left - match.left;
+                }
             };
 
             const step = (direction) => {
@@ -329,7 +372,7 @@
             textarea.after(editor);
             textarea.hidden = true;
 
-            const highlight = (element) => window.Prism.highlightElement(element);
+            const highlight = withLineNumbers(editor, (element) => window.Prism.highlightElement(element));
 
             const toolbar = document.querySelector('.js-editor-toolbar');
 

@@ -104,7 +104,7 @@ class CodeSearcher
             foreach (explode("\n", $contents) as $number => $line) {
                 $matched = $pattern !== null
                     ? preg_match($pattern, $line) === 1
-                    : ($caseSensitive ? str_contains($line, $query) : stripos($line, $query) !== false);
+                    : ($caseSensitive ? str_contains($line, $query) : mb_stripos($line, $query) !== false);
 
                 if (! $matched) {
                     continue;

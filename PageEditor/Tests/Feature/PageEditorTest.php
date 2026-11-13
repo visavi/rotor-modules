@@ -164,6 +164,8 @@ class PageEditorTest extends ModuleTestCase
 
         $response->assertOk();
         $response->assertSee('Редактор', false);
+        // Модуль — символьная ссылка, но путь показывается от корня проекта, а не от реального каталога
+        $response->assertSee('data-copy="modules/PageEditor/module.php"', false);
     }
 
     public function testEditRejectsNonEditableExtension(): void
