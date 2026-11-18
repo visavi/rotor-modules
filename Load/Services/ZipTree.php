@@ -42,21 +42,28 @@ class ZipTree
             }
         }
 
-        $tree->computeStats();
+        $tree->sortAndCount();
 
         return $tree;
     }
 
     /**
-     * Рекурсивно вычисляет количество файлов и суммарный размер
+     * Рекурсивно сортирует узел и вычисляет количество файлов и суммарный размер
+     *
+     * Порядок записей в архиве задаёт архиватор, поэтому папки и файлы
+     * сортируются по имени: натурально и без учёта регистра.
+     * Имя папки из цифр PHP хранит ключом-числом — отсюда приведение к строке
      */
-    private function computeStats(): void
+    private function sortAndCount(): void
     {
+        uksort($this->dirs, static fn (int|string $a, int|string $b): int => strnatcasecmp((string) $a, (string) $b));
+        usort($this->files, static fn (array $a, array $b): int => strnatcasecmp($a['basename'], $b['basename']));
+
         $this->count = count($this->files);
         $this->size = (int) array_sum(array_column($this->files, 'size'));
 
         foreach ($this->dirs as $subtree) {
-            $subtree->computeStats();
+            $subtree->sortAndCount();
             $this->count += $subtree->count;
             $this->size += $subtree->size;
         }

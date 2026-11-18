@@ -87,6 +87,14 @@ class ZipViewTest extends ModuleTestCase
             ->assertSee('readme.txt');
     }
 
+    public function testArchiveIsSortedByName(): void
+    {
+        // В архиве порядок readme, logo, docs/, evil — на странице папки, затем файлы по имени
+        $this->get($this->zipUrl())
+            ->assertOk()
+            ->assertSeeInOrder(['<b>docs</b>', 'evil.svg', 'logo.gif', 'readme.txt'], false);
+    }
+
     public function testFoldersOpenWithoutScripts(): void
     {
         // Папка — <details>: содержимое внутри, раскрывает браузер
