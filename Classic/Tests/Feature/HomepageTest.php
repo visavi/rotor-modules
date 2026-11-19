@@ -34,6 +34,17 @@ class HomepageTest extends ModuleTestCase
             ->assertDontSee('feed-container', false);
     }
 
+    public function testCalendarWithEmptyCellsRendersWithoutDeprecations(): void
+    {
+        // Ноябрь 2026 начинается с воскресенья: пустые клетки до 1-го числа — null
+        $this->withoutDeprecationHandling();
+        $this->overrideSetting('homepage', 'classic');
+
+        $this->get('/?calendar=2026-11')
+            ->assertOk()
+            ->assertSee('calendar-grid', false);
+    }
+
     public function testEnabledModuleDoesNotReplaceFeed(): void
     {
         // Включённый модуль только предлагает главную, выбирает админ
